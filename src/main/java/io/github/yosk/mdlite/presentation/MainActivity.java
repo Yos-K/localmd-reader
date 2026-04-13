@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -45,15 +46,20 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final int MAX_RECENT_DOCUMENTS = 5;
     private static final String RECENT_PREFS = "recent_documents";
     private static final String RECENT_ITEMS = "items";
+    private static final int MENU_WIDTH_DP = 280;
+    private static final int EDGE_SWIPE_DP = 24;
+    private static final int MENU_SWIPE_MIN_DISTANCE_DP = 72;
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
 
     private WebView webView;
     private TextView messageView;
+    private Button menuButton;
     private Button openButton;
     private Button recentButton;
     private Button themeButton;
+    private SwipeMenuLayout menuPanel;
     private LinearLayout tabRow;
     private OpenDocumentTabs openTabs;
     private ViewerTheme currentTheme = ViewerTheme.light();
@@ -61,13 +67,30 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
     private ScaleGestureDetector fontScaleGestureDetector;
     private float accumulatedPinchScale = 1f;
+    private boolean trackingEdgeSwipe;
+    private float edgeSwipeStartX;
+    private float menuSwipeStartX;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        EdgeSwipeFrameLayout appRoot = new EdgeSwipeFrameLayout(this);
+
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
+
+        LinearLayout topBar = new LinearLayout(this);
+        topBar.setOrientation(LinearLayout.HORIZONTAL);
+
+        menuButton = new Button(this);
+        menuButton.setText("☰");
+        menuButton.setContentDescription("Open menu");
+        menuButton.setAllCaps(false);
+        menuButton.setOnClickListener(this);
+        topBar.addView(menuButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
 
         openButton = new Button(this);
         openButton.setText("Open Markdown file");
@@ -83,6 +106,30 @@ public final class MainActivity extends Activity implements View.OnClickListener
         themeButton.setText("Dark theme");
         themeButton.setAllCaps(false);
         themeButton.setOnClickListener(this);
+
+        menuPanel = new SwipeMenuLayout(this);
+        menuPanel.setOrientation(LinearLayout.VERTICAL);
+        menuPanel.setVisibility(View.GONE);
+        menuPanel.setBackgroundColor((int) 0xfff8fbfa);
+        menuPanel.setPadding(16, 24, 16, 16);
+
+        TextView menuTitle = new TextView(this);
+        menuTitle.setText("Menu");
+        menuTitle.setTextSize(18);
+        menuTitle.setGravity(Gravity.CENTER_VERTICAL);
+        menuTitle.setPadding(8, 0, 8, 16);
+        menuPanel.addView(menuTitle, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(openButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(recentButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(themeButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
 
         messageView = new TextView(this);
         messageView.setGravity(Gravity.CENTER_VERTICAL);
@@ -105,13 +152,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         renderTabs();
         renderCurrentDocument();
 
-        root.addView(openButton, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        root.addView(recentButton, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        root.addView(themeButton, new LinearLayout.LayoutParams(
+        root.addView(topBar, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(messageView, new LinearLayout.LayoutParams(
@@ -125,19 +166,33 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 0,
                 1));
 
-        setContentView(root);
+        appRoot.addView(root, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT));
+        FrameLayout.LayoutParams menuParams = new FrameLayout.LayoutParams(
+                dp(MENU_WIDTH_DP),
+                FrameLayout.LayoutParams.MATCH_PARENT);
+        menuParams.gravity = Gravity.START;
+        appRoot.addView(menuPanel, menuParams);
+
+        setContentView(appRoot);
         handleIncomingIntent(getIntent());
     }
 
     @Override
     public void onClick(View view) {
-        if (view == openButton) {
+        if (view == menuButton) {
+            toggleMenu();
+        } else if (view == openButton) {
+            closeMenu();
             openMarkdownPicker();
         } else if (view == recentButton) {
+            closeMenu();
             showRecentDocuments();
         } else if (view == themeButton) {
             currentTheme = currentTheme.toggled();
             themeButton.setText(currentTheme.isDark() ? "Light theme" : "Dark theme");
+            closeMenu();
             renderCurrentDocument();
         } else if (view instanceof TabButton) {
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
@@ -309,6 +364,74 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void showMessage(String message) {
         messageView.setText(message);
         messageView.setVisibility(message.length() == 0 ? View.GONE : View.VISIBLE);
+    }
+
+    private void toggleMenu() {
+        if (isMenuOpen()) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    }
+
+    private void openMenu() {
+        menuPanel.setVisibility(View.VISIBLE);
+        menuButton.setContentDescription("Close menu");
+    }
+
+    private void closeMenu() {
+        menuPanel.setVisibility(View.GONE);
+        menuButton.setContentDescription("Open menu");
+    }
+
+    private boolean isMenuOpen() {
+        return menuPanel.getVisibility() == View.VISIBLE;
+    }
+
+    private boolean handleEdgeSwipe(MotionEvent event) {
+        if (isMenuOpen()) {
+            trackingEdgeSwipe = false;
+            return false;
+        }
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            trackingEdgeSwipe = event.getX() <= dp(EDGE_SWIPE_DP);
+            edgeSwipeStartX = event.getX();
+            return trackingEdgeSwipe;
+        }
+        if (!trackingEdgeSwipe) {
+            return false;
+        }
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            float distance = event.getX() - edgeSwipeStartX;
+            trackingEdgeSwipe = false;
+            if (distance >= dp(MENU_SWIPE_MIN_DISTANCE_DP)) {
+                openMenu();
+                return true;
+            }
+        }
+        if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+            trackingEdgeSwipe = false;
+        }
+        return true;
+    }
+
+    private boolean handleMenuSwipe(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            menuSwipeStartX = event.getX();
+            return false;
+        }
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            float distance = event.getX() - menuSwipeStartX;
+            if (distance <= -dp(MENU_SWIPE_MIN_DISTANCE_DP)) {
+                closeMenu();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
     }
 
     private void recordRecentDocument(String displayName, Uri uri) {
@@ -506,6 +629,40 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         private int tabIndex() {
             return tabIndex;
+        }
+    }
+
+    private static final class EdgeSwipeFrameLayout extends FrameLayout {
+        private final MainActivity activity;
+
+        private EdgeSwipeFrameLayout(MainActivity activity) {
+            super(activity);
+            this.activity = activity;
+        }
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent event) {
+            if (activity.handleEdgeSwipe(event)) {
+                return true;
+            }
+            return super.dispatchTouchEvent(event);
+        }
+    }
+
+    private static final class SwipeMenuLayout extends LinearLayout {
+        private final MainActivity activity;
+
+        private SwipeMenuLayout(MainActivity activity) {
+            super(activity);
+            this.activity = activity;
+        }
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent event) {
+            if (activity.handleMenuSwipe(event)) {
+                return true;
+            }
+            return super.dispatchTouchEvent(event);
         }
     }
 
