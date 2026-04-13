@@ -19,6 +19,8 @@ public final class HtmlPageBuilder {
         String text = safeTheme.isDark() ? "#edf5f2" : "#172121";
         String codeBackground = safeTheme.isDark() ? "#25302f" : "#e6eeee";
         String border = safeTheme.isDark() ? "#3c4b49" : "#c9d8d5";
+        String tableScrollHint = safeTheme.isDark() ? "#80a8a1" : border;
+        String tableScrollbarTrack = safeTheme.isDark() ? "#1b2423" : "#eef5f3";
         int bodyFontSize = safeFontSize.sp();
         int h1FontSize = bodyFontSize + 8;
         int h2FontSize = bodyFontSize + 5;
@@ -41,7 +43,10 @@ public final class HtmlPageBuilder {
                 + "li{margin:4px 0;}"
                 + "ul.checklist{list-style:none;padding-left:0;}"
                 + "ul.checklist input{margin-right:8px;}"
-                + ".table-scroll{overflow-x:auto;margin:0 0 16px;border:1px solid " + border + ";border-radius:4px;box-shadow:inset -16px 0 12px -12px " + border + ";}"
+                + ".table-scroll{overflow-x:auto;margin:0 0 16px;border:1px solid " + border + ";border-radius:4px;box-shadow:inset -18px 0 14px -12px " + tableScrollHint + ";}"
+                + ".table-scroll::-webkit-scrollbar{height:8px;}"
+                + ".table-scroll::-webkit-scrollbar-track{background:" + tableScrollbarTrack + ";}"
+                + ".table-scroll::-webkit-scrollbar-thumb{background:" + tableScrollHint + ";border-radius:4px;}"
                 + "table{font-size:" + bodyFontSize + "px;border-collapse:collapse;min-width:max-content;}"
                 + "th,td{border:1px solid " + border + ";padding:6px 8px;text-align:left;}"
                 + "hr{border:0;border-top:1px solid " + border + ";margin:20px 0;}"

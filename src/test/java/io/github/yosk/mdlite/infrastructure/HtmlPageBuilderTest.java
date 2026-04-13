@@ -14,6 +14,7 @@ public final class HtmlPageBuilderTest {
         test.appliesFontSizeToHeadings();
         test.stylesChecklistForReadableMobileLayout();
         test.stylesTablesForReadableMobileLayout();
+        test.stylesTablesWithVisibleScrollHintInDarkTheme();
     }
 
     public void rendersLightThemeWithLightBackgroundAndDarkText() {
@@ -77,9 +78,20 @@ public final class HtmlPageBuilderTest {
                 ViewerTheme.light(),
                 FontSize.of(18));
 
-        assertContains(page, ".table-scroll{overflow-x:auto;margin:0 0 16px;border:1px solid #c9d8d5;border-radius:4px;box-shadow:inset -16px 0 12px -12px #c9d8d5;}", "table scroll container must provide a visible horizontal scroll hint");
+        assertContains(page, ".table-scroll{overflow-x:auto;margin:0 0 16px;border:1px solid #c9d8d5;border-radius:4px;box-shadow:inset -18px 0 14px -12px #c9d8d5;}", "table scroll container must provide a visible horizontal scroll hint");
+        assertContains(page, ".table-scroll::-webkit-scrollbar-thumb{background:#c9d8d5;border-radius:4px;}", "table scrollbar thumb must be visible");
         assertContains(page, "table{font-size:18px;border-collapse:collapse;min-width:max-content;}", "table CSS must use selected font size and preserve wide content");
         assertContains(page, "th,td{border:1px solid #c9d8d5;padding:6px 8px;text-align:left;}", "table cells must have readable borders and padding");
+    }
+
+    public void stylesTablesWithVisibleScrollHintInDarkTheme() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<div class=\"table-scroll\"><table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>Value</td></tr></tbody></table></div>"),
+                ViewerTheme.dark(),
+                FontSize.of(18));
+
+        assertContains(page, "box-shadow:inset -18px 0 14px -12px #80a8a1;", "dark table scroll hint must be brighter than the dark border");
+        assertContains(page, ".table-scroll::-webkit-scrollbar-thumb{background:#80a8a1;border-radius:4px;}", "dark table scrollbar thumb must be visible");
     }
 
     private static void assertContains(String actual, String expected, String message) {
