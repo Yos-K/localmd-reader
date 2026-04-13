@@ -61,13 +61,22 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
     private static final int MENU_SWIPE_MIN_DISTANCE_DP = 72;
-    private static final int COLOR_BACKGROUND = 0xfff8fbfa;
-    private static final int COLOR_SURFACE = 0xffffffff;
-    private static final int COLOR_TEXT = 0xff172121;
-    private static final int COLOR_MUTED = 0xff566664;
-    private static final int COLOR_PRIMARY = 0xff006d77;
-    private static final int COLOR_PRIMARY_DARK = 0xff0f3d3e;
-    private static final int COLOR_BORDER = 0xffc9d8d5;
+    private static final int LIGHT_BACKGROUND = 0xfff8fbfa;
+    private static final int LIGHT_SURFACE = 0xffffffff;
+    private static final int LIGHT_TEXT = 0xff172121;
+    private static final int LIGHT_MUTED = 0xff566664;
+    private static final int LIGHT_PRIMARY = 0xff006d77;
+    private static final int LIGHT_PRIMARY_DARK = 0xff0f3d3e;
+    private static final int LIGHT_BORDER = 0xffc9d8d5;
+    private static final int LIGHT_MESSAGE = 0xffe6eeee;
+    private static final int DARK_BACKGROUND = 0xff101414;
+    private static final int DARK_SURFACE = 0xff1b2423;
+    private static final int DARK_TEXT = 0xffedf5f2;
+    private static final int DARK_MUTED = 0xffa7bbb7;
+    private static final int DARK_PRIMARY = 0xff2a9d8f;
+    private static final int DARK_PRIMARY_DARK = 0xff7ccbe0;
+    private static final int DARK_BORDER = 0xff3c4b49;
+    private static final int DARK_MESSAGE = 0xff25302f;
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
@@ -81,9 +90,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button controlsPlacementButton;
     private SwipeMenuLayout menuPanel;
     private LinearLayout root;
+    private LinearLayout topBar;
     private LinearLayout controlsBar;
     private LinearLayout tabRow;
     private HorizontalScrollView tabScroller;
+    private TextView appTitle;
+    private TextView menuTitle;
+    private TextView menuSubtitle;
     private OpenDocumentTabs openTabs;
     private ControlsPlacement controlsPlacement;
     private ViewerTheme currentTheme = ViewerTheme.light();
@@ -106,11 +119,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
 
-        LinearLayout topBar = new LinearLayout(this);
+        topBar = new LinearLayout(this);
         topBar.setOrientation(LinearLayout.HORIZONTAL);
         topBar.setGravity(Gravity.CENTER_VERTICAL);
         topBar.setPadding(dp(8), dp(4), dp(8), dp(4));
-        topBar.setBackgroundColor(COLOR_BACKGROUND);
+        topBar.setBackgroundColor(backgroundColor());
 
         menuButton = new Button(this);
         menuButton.setText("☰ Menu");
@@ -122,9 +135,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        TextView appTitle = new TextView(this);
+        appTitle = new TextView(this);
         appTitle.setText("MdLite Reader");
-        appTitle.setTextColor(COLOR_TEXT);
+        appTitle.setTextColor(textColor());
         appTitle.setTextSize(18);
         appTitle.setTypeface(Typeface.DEFAULT_BOLD);
         appTitle.setGravity(Gravity.CENTER_VERTICAL);
@@ -162,13 +175,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuPanel = new SwipeMenuLayout(this);
         menuPanel.setOrientation(LinearLayout.VERTICAL);
         menuPanel.setVisibility(View.GONE);
-        menuPanel.setBackgroundColor(COLOR_BACKGROUND);
+        menuPanel.setBackgroundColor(backgroundColor());
         menuPanel.setPadding(dp(16), dp(24), dp(16), dp(16));
         menuPanel.setClickable(true);
 
-        TextView menuTitle = new TextView(this);
+        menuTitle = new TextView(this);
         menuTitle.setText("MdLite Reader");
-        menuTitle.setTextColor(COLOR_TEXT);
+        menuTitle.setTextColor(textColor());
         menuTitle.setTextSize(20);
         menuTitle.setTypeface(Typeface.DEFAULT_BOLD);
         menuTitle.setGravity(Gravity.CENTER_VERTICAL);
@@ -177,9 +190,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        TextView menuSubtitle = new TextView(this);
+        menuSubtitle = new TextView(this);
         menuSubtitle.setText("Local Markdown viewing. No ads. No network.");
-        menuSubtitle.setTextColor(COLOR_MUTED);
+        menuSubtitle.setTextColor(mutedColor());
         menuSubtitle.setTextSize(14);
         menuSubtitle.setPadding(dp(8), 0, dp(8), dp(16));
         menuPanel.addView(menuSubtitle, new LinearLayout.LayoutParams(
@@ -210,8 +223,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         messageView = new TextView(this);
         messageView.setGravity(Gravity.CENTER_VERTICAL);
-        messageView.setTextColor(COLOR_TEXT);
-        messageView.setBackgroundColor(0xffe6eeee);
+        messageView.setTextColor(textColor());
+        messageView.setBackgroundColor(messageColor());
         messageView.setPadding(dp(24), dp(12), dp(24), dp(12));
 
         tabRow = new LinearLayout(this);
@@ -220,7 +233,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         tabScroller = new HorizontalScrollView(this);
         tabScroller.setHorizontalScrollBarEnabled(true);
-        tabScroller.setBackgroundColor(COLOR_BACKGROUND);
+        tabScroller.setBackgroundColor(backgroundColor());
         tabScroller.addView(tabRow, new HorizontalScrollView.LayoutParams(
                 HorizontalScrollView.LayoutParams.WRAP_CONTENT,
                 HorizontalScrollView.LayoutParams.WRAP_CONTENT));
@@ -239,6 +252,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         fontScaleGestureDetector = new ScaleGestureDetector(this, new FontScaleGestureListener(this));
         webView.setOnTouchListener(new FontScaleTouchListener(this));
         openTabs = restoreOpenTabsOrInitial();
+        applyNativeTheme();
         renderTabs();
         renderCurrentDocument();
 
@@ -270,7 +284,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } else if (view == themeButton) {
             currentTheme = currentTheme.toggled();
             themeButton.setText(currentTheme.isDark() ? "Light theme" : "Dark theme");
+            applyNativeTheme();
             closeMenu();
+            renderTabs();
             renderCurrentDocument();
         } else if (view == controlsPlacementButton) {
             controlsPlacement = controlsPlacement.toggled();
@@ -603,7 +619,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private TextView menuSection(String label) {
         TextView section = new TextView(this);
         section.setText(label);
-        section.setTextColor(COLOR_PRIMARY_DARK);
+        section.setTextColor(primaryStrongColor());
         section.setTextSize(12);
         section.setTypeface(Typeface.DEFAULT_BOLD);
         section.setPadding(dp(8), dp(16), dp(8), dp(4));
@@ -611,26 +627,91 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void styleToolbarButton(TextView view) {
-        view.setTextColor(COLOR_PRIMARY_DARK);
+        view.setTextColor(primaryStrongColor());
         view.setTextSize(14);
         view.setPadding(dp(12), dp(6), dp(12), dp(6));
-        view.setBackground(makeRoundedBackground(COLOR_SURFACE, COLOR_BORDER, 8));
+        view.setBackground(makeRoundedBackground(surfaceColor(), borderColor(), 8));
     }
 
     private void styleMenuButton(TextView view) {
-        view.setTextColor(COLOR_TEXT);
+        view.setTextColor(textColor());
         view.setTextSize(16);
         view.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
         view.setPadding(dp(14), dp(10), dp(14), dp(10));
-        view.setBackground(makeRoundedBackground(COLOR_SURFACE, COLOR_BORDER, 8));
+        view.setBackground(makeRoundedBackground(surfaceColor(), borderColor(), 8));
     }
 
-    private static GradientDrawable makeRoundedBackground(int fillColor, int strokeColor, int radiusDp) {
+    private void applyNativeTheme() {
+        root.setBackgroundColor(backgroundColor());
+        topBar.setBackgroundColor(backgroundColor());
+        tabScroller.setBackgroundColor(backgroundColor());
+        menuPanel.setBackgroundColor(backgroundColor());
+        appTitle.setTextColor(textColor());
+        menuTitle.setTextColor(textColor());
+        menuSubtitle.setTextColor(mutedColor());
+        messageView.setTextColor(textColor());
+        messageView.setBackgroundColor(messageColor());
+        styleToolbarButton(menuButton);
+        styleMenuButton(openButton);
+        styleMenuButton(recentButton);
+        styleMenuButton(themeButton);
+        styleMenuButton(controlsPlacementButton);
+        applyMenuSectionTheme();
+    }
+
+    private void applyMenuSectionTheme() {
+        int sectionColor = primaryStrongColor();
+        for (int i = 0; i < menuPanel.getChildCount(); i++) {
+            View child = menuPanel.getChildAt(i);
+            if (child instanceof TextView && child != menuTitle && child != menuSubtitle) {
+                TextView textView = (TextView) child;
+                if ("Files".contentEquals(textView.getText())
+                        || "Reading".contentEquals(textView.getText())
+                        || "Layout".contentEquals(textView.getText())) {
+                    textView.setTextColor(sectionColor);
+                }
+            }
+        }
+    }
+
+    private GradientDrawable makeRoundedBackground(int fillColor, int strokeColor, int radiusDp) {
         GradientDrawable background = new GradientDrawable();
         background.setColor(fillColor);
-        background.setCornerRadius(radiusDp);
+        background.setCornerRadius(dp(radiusDp));
         background.setStroke(1, strokeColor);
         return background;
+    }
+
+    private int backgroundColor() {
+        return currentTheme.isDark() ? DARK_BACKGROUND : LIGHT_BACKGROUND;
+    }
+
+    private int surfaceColor() {
+        return currentTheme.isDark() ? DARK_SURFACE : LIGHT_SURFACE;
+    }
+
+    private int textColor() {
+        return currentTheme.isDark() ? DARK_TEXT : LIGHT_TEXT;
+    }
+
+    private int mutedColor() {
+        return currentTheme.isDark() ? DARK_MUTED : LIGHT_MUTED;
+    }
+
+    private int primaryColor() {
+        return currentTheme.isDark() ? DARK_PRIMARY : LIGHT_PRIMARY;
+    }
+
+    private int primaryStrongColor() {
+        return currentTheme.isDark() ? DARK_PRIMARY_DARK : LIGHT_PRIMARY_DARK;
+    }
+
+    private int borderColor() {
+        return currentTheme.isDark() ? DARK_BORDER : LIGHT_BORDER;
+    }
+
+    private int messageColor() {
+        return currentTheme.isDark() ? DARK_MESSAGE : LIGHT_MESSAGE;
     }
 
     private OpenDocumentTabs restoreOpenTabsOrInitial() {
@@ -879,11 +960,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
             button.setEllipsize(TextUtils.TruncateAt.END);
             button.setMaxWidth(dp(220));
             button.setTextSize(14);
-            button.setTextColor(i == openTabs.activeIndex() ? 0xffffffff : COLOR_TEXT);
+            button.setTextColor(i == openTabs.activeIndex() ? 0xffffffff : textColor());
             button.setPadding(dp(14), dp(8), dp(10), dp(8));
             button.setBackground(makeRoundedBackground(
-                    i == openTabs.activeIndex() ? COLOR_PRIMARY : COLOR_SURFACE,
-                    i == openTabs.activeIndex() ? COLOR_PRIMARY : COLOR_BORDER,
+                    i == openTabs.activeIndex() ? primaryColor() : surfaceColor(),
+                    i == openTabs.activeIndex() ? primaryColor() : borderColor(),
                     8));
             tabGroup.addView(button, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -893,7 +974,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 CloseTabText closeText = new CloseTabText(this, i);
                 closeText.setText("×");
                 closeText.setTextSize(20);
-                closeText.setTextColor(COLOR_MUTED);
+                closeText.setTextColor(mutedColor());
                 closeText.setGravity(Gravity.CENTER);
                 closeText.setPadding(dp(10), 0, dp(14), 0);
                 closeText.setContentDescription("Close tab: " + tab.title());

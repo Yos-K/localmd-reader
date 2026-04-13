@@ -12,6 +12,7 @@
 - [x] Menu button label includes the word `Menu`.
 - [x] Drawer includes short product context.
 - [x] Drawer actions are grouped by Files, Reading, and Layout.
+- [x] Native controls follow light and dark theme colors.
 
 ## Feedback
 
