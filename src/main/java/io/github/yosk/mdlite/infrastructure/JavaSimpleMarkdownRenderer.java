@@ -16,7 +16,8 @@ public final class JavaSimpleMarkdownRenderer {
         StringBuilder paragraph = new StringBuilder();
         int openList = LIST_NONE;
 
-        for (String line : lines) {
+        for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+            String line = lines[lineIndex];
             if (isFenceLine(line)) {
                 if (inCodeBlock) {
                     html.append("</code></pre>");
@@ -38,6 +39,25 @@ public final class JavaSimpleMarkdownRenderer {
             if (line.trim().isEmpty()) {
                 flushParagraph(html, paragraph);
                 openList = closeList(html, openList);
+                continue;
+            }
+
+            if (lineIndex + 1 < lines.length && isTableHeaderLine(line) && isTableSeparatorLine(lines[lineIndex + 1])) {
+                flushParagraph(html, paragraph);
+                openList = closeList(html, openList);
+                String[] headerCells = splitTableCells(line);
+                html.append("<table><thead><tr>");
+                appendTableCells(html, headerCells, "th");
+                html.append("</tr></thead><tbody>");
+                lineIndex += 2;
+                while (lineIndex < lines.length && isTableHeaderLine(lines[lineIndex])) {
+                    html.append("<tr>");
+                    appendTableCells(html, splitTableCells(lines[lineIndex]), "td");
+                    html.append("</tr>");
+                    lineIndex++;
+                }
+                lineIndex--;
+                html.append("</tbody></table>");
                 continue;
             }
 
@@ -146,6 +166,66 @@ public final class JavaSimpleMarkdownRenderer {
             return index + 2;
         }
         return 0;
+    }
+
+    private static boolean isTableHeaderLine(String line) {
+        String trimmed = line.trim();
+        return trimmed.indexOf('|') >= 0 && splitTableCells(trimmed).length > 1;
+    }
+
+    private static boolean isTableSeparatorLine(String line) {
+        String[] cells = splitTableCells(line);
+        if (cells.length < 2) {
+            return false;
+        }
+        for (int i = 0; i < cells.length; i++) {
+            if (!isTableSeparatorCell(cells[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isTableSeparatorCell(String cell) {
+        String trimmed = cell.trim();
+        if (trimmed.startsWith(":")) {
+            trimmed = trimmed.substring(1);
+        }
+        if (trimmed.endsWith(":")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        if (trimmed.length() < 3) {
+            return false;
+        }
+        for (int i = 0; i < trimmed.length(); i++) {
+            if (trimmed.charAt(i) != '-') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static String[] splitTableCells(String line) {
+        String trimmed = line.trim();
+        if (trimmed.startsWith("|")) {
+            trimmed = trimmed.substring(1);
+        }
+        if (trimmed.endsWith("|")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        String[] rawCells = trimmed.split("\\|", -1);
+        for (int i = 0; i < rawCells.length; i++) {
+            rawCells[i] = rawCells[i].trim();
+        }
+        return rawCells;
+    }
+
+    private static void appendTableCells(StringBuilder html, String[] cells, String tag) {
+        for (int i = 0; i < cells.length; i++) {
+            html.append('<').append(tag).append('>')
+                    .append(renderInline(cells[i]))
+                    .append("</").append(tag).append('>');
+        }
     }
 
     private static int closeList(StringBuilder html, int openList) {

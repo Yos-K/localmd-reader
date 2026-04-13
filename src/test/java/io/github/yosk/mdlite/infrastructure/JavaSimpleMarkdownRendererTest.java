@@ -18,6 +18,8 @@ public final class JavaSimpleMarkdownRendererTest {
         test.rendersUncheckedChecklistItemAsDisabledCheckboxInList();
         test.rendersCheckedChecklistItemAsDisabledCheckedCheckboxInList();
         test.rendersNumberedListItemsAsOrderedList();
+        test.rendersPipeTableWithHeaderAndBodyRows();
+        test.escapesPipeTableCellContentAndRendersInlineCode();
         test.rendersBlockquoteAsBlockquote();
         test.rendersHorizontalRule();
     }
@@ -108,6 +110,19 @@ public final class JavaSimpleMarkdownRendererTest {
         SafeHtml html = renderer.render("1. first\n2. second");
 
         assertContains(html.value(), "<ol><li>first</li><li>second</li></ol>", "numbered list items must render as ordered list");
+    }
+
+    public void rendersPipeTableWithHeaderAndBodyRows() {
+        SafeHtml html = renderer.render("| Name | Status |\n| --- | --- |\n| Tests | Passing |\n| APK | Built |");
+
+        assertContains(html.value(), "<table><thead><tr><th>Name</th><th>Status</th></tr></thead><tbody><tr><td>Tests</td><td>Passing</td></tr><tr><td>APK</td><td>Built</td></tr></tbody></table>", "pipe table must render header and body rows");
+    }
+
+    public void escapesPipeTableCellContentAndRendersInlineCode() {
+        SafeHtml html = renderer.render("| Name | Value |\n| --- | --- |\n| Tag | `<b>` & text |");
+
+        assertContains(html.value(), "<td><code>&lt;b&gt;</code> &amp; text</td>", "table cell content must be escaped and inline code must render safely");
+        assertNotContains(html.value(), "<b>", "raw HTML from table cell must not be emitted");
     }
 
     public void rendersBlockquoteAsBlockquote() {

@@ -41,6 +41,8 @@ public final class HtmlPageBuilder {
                 + "li{margin:4px 0;}"
                 + "ul.checklist{list-style:none;padding-left:0;}"
                 + "ul.checklist input{margin-right:8px;}"
+                + "table{font-size:" + bodyFontSize + "px;border-collapse:collapse;display:block;overflow-x:auto;margin:0 0 16px;}"
+                + "th,td{border:1px solid " + border + ";padding:6px 8px;text-align:left;}"
                 + "hr{border:0;border-top:1px solid " + border + ";margin:20px 0;}"
                 + "</style></head><body>"
                 + body.value()

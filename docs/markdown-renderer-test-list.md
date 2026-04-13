@@ -18,6 +18,8 @@
 - [x] renders unchecked checklist item as disabled checkbox in list
 - [x] renders checked checklist item as disabled checked checkbox in list
 - [x] renders numbered list items as ordered list
+- [x] renders pipe table with header and body rows
+- [x] escapes pipe table cell content and renders inline code
 - [x] renders blockquote as blockquote
 - [x] renders horizontal rule
 

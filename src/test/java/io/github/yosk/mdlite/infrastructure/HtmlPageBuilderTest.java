@@ -13,6 +13,7 @@ public final class HtmlPageBuilderTest {
         test.appliesFontSizeToParagraphText();
         test.appliesFontSizeToHeadings();
         test.stylesChecklistForReadableMobileLayout();
+        test.stylesTablesForReadableMobileLayout();
     }
 
     public void rendersLightThemeWithLightBackgroundAndDarkText() {
@@ -68,6 +69,16 @@ public final class HtmlPageBuilderTest {
 
         assertContains(page, "ul.checklist{list-style:none;padding-left:0;}", "checklist CSS must remove duplicate bullets and excess left padding");
         assertContains(page, "ul.checklist input{margin-right:8px;}", "checklist checkbox must keep readable spacing from text");
+    }
+
+    public void stylesTablesForReadableMobileLayout() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>Value</td></tr></tbody></table>"),
+                ViewerTheme.light(),
+                FontSize.of(18));
+
+        assertContains(page, "table{font-size:18px;border-collapse:collapse;display:block;overflow-x:auto;", "table CSS must use selected font size and allow horizontal scrolling");
+        assertContains(page, "th,td{border:1px solid #c9d8d5;padding:6px 8px;text-align:left;}", "table cells must have readable borders and padding");
     }
 
     private static void assertContains(String actual, String expected, String message) {
