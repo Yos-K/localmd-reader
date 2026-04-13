@@ -54,8 +54,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button openButton;
     private Button recentButton;
     private Button themeButton;
-    private Button smallerTextButton;
-    private Button largerTextButton;
     private LinearLayout tabRow;
     private OpenDocumentTabs openTabs;
     private ViewerTheme currentTheme = ViewerTheme.light();
@@ -85,32 +83,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         themeButton.setText("Dark theme");
         themeButton.setAllCaps(false);
         themeButton.setOnClickListener(this);
-
-        LinearLayout textSizeRow = new LinearLayout(this);
-        textSizeRow.setOrientation(LinearLayout.HORIZONTAL);
-
-        smallerTextButton = new Button(this);
-        smallerTextButton.setText("A");
-        smallerTextButton.setTextSize(14);
-        smallerTextButton.setContentDescription("Decrease font size");
-        smallerTextButton.setAllCaps(false);
-        smallerTextButton.setOnClickListener(this);
-
-        largerTextButton = new Button(this);
-        largerTextButton.setText("A");
-        largerTextButton.setTextSize(22);
-        largerTextButton.setContentDescription("Increase font size");
-        largerTextButton.setAllCaps(false);
-        largerTextButton.setOnClickListener(this);
-
-        textSizeRow.addView(smallerTextButton, new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1));
-        textSizeRow.addView(largerTextButton, new LinearLayout.LayoutParams(
-                0,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                1));
 
         messageView = new TextView(this);
         messageView.setGravity(Gravity.CENTER_VERTICAL);
@@ -142,9 +114,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         root.addView(themeButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
-        root.addView(textSizeRow, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(messageView, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -169,12 +138,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } else if (view == themeButton) {
             currentTheme = currentTheme.toggled();
             themeButton.setText(currentTheme.isDark() ? "Light theme" : "Dark theme");
-            renderCurrentDocument();
-        } else if (view == smallerTextButton) {
-            currentFontSize = currentFontSize.decreased();
-            renderCurrentDocument();
-        } else if (view == largerTextButton) {
-            currentFontSize = currentFontSize.increased();
             renderCurrentDocument();
         } else if (view instanceof TabButton) {
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
