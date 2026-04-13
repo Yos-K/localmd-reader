@@ -19,6 +19,7 @@
 - [x] Native buttons use consistent rounded surfaces and spacing.
 - [x] Menu can switch app UI copy between English and Japanese.
 - [x] Language switch button describes the action, not the current state.
+- [x] Language switch button is written in the target language.
 - [x] Selected app language is restored on app start.
 
 ## Feedback
