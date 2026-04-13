@@ -30,6 +30,8 @@ import io.github.yosk.mdlite.domain.OpenDocumentTab;
 import io.github.yosk.mdlite.domain.OpenDocumentTabs;
 import io.github.yosk.mdlite.domain.RecentDocument;
 import io.github.yosk.mdlite.domain.RecentDocuments;
+import io.github.yosk.mdlite.domain.RestorableOpenTab;
+import io.github.yosk.mdlite.domain.RestorableOpenTabs;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.ViewerTheme;
 import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
@@ -47,8 +49,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final int MAX_RECENT_DOCUMENTS = 5;
     private static final String RECENT_PREFS = "recent_documents";
     private static final String RECENT_ITEMS = "items";
+    private static final String OPEN_TABS_PREFS = "open_tabs";
+    private static final String OPEN_TABS_ITEMS = "items";
+    private static final String OPEN_TABS_ACTIVE_INDEX = "active_index";
     private static final String SETTINGS_PREFS = "viewer_settings";
     private static final String CONTROLS_PLACEMENT = "controls_placement";
+    private static final String WELCOME_URI = "app://welcome";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
     private static final int MENU_SWIPE_MIN_DISTANCE_DP = 72;
@@ -176,7 +182,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         configureWebView(webView);
         fontScaleGestureDetector = new ScaleGestureDetector(this, new FontScaleGestureListener(this));
         webView.setOnTouchListener(new FontScaleTouchListener(this));
-        openTabs = OpenDocumentTabs.withInitialTab(initialTab());
+        openTabs = restoreOpenTabsOrInitial();
         renderTabs();
         renderCurrentDocument();
 
@@ -220,10 +226,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
             renderTabs();
             renderCurrentDocument();
+            saveOpenTabs();
         } else if (view instanceof CloseTabText) {
             openTabs = openTabs.close(((CloseTabText) view).tabIndex());
             renderTabs();
             renderCurrentDocument();
+            saveOpenTabs();
         }
     }
 
@@ -293,6 +301,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             openTabs = openTabs.open(OpenDocumentTab.of(fileInfo.displayName, uri.toString(), rendered));
             renderTabs();
             renderCurrentDocument();
+            saveOpenTabs();
             if (remember) {
                 recordRecentDocument(fileInfo.displayName, uri);
             }
@@ -509,6 +518,133 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
     }
 
+    private OpenDocumentTabs restoreOpenTabsOrInitial() {
+        RestorableOpenTabs storedTabs = loadRestorableOpenTabs();
+        if (storedTabs.isEmpty()) {
+            return OpenDocumentTabs.withInitialTab(initialTab());
+        }
+
+        ArrayList<OpenDocumentTab> restoredTabs = new ArrayList<OpenDocumentTab>();
+        int restoredActiveIndex = -1;
+        List<RestorableOpenTab> items = storedTabs.tabs();
+        for (int i = 0; i < items.size(); i++) {
+            OpenDocumentTab tab = restoreOpenTab(items.get(i));
+            if (tab != null) {
+                if (i == storedTabs.activeIndex()) {
+                    restoredActiveIndex = restoredTabs.size();
+                }
+                restoredTabs.add(tab);
+            }
+        }
+
+        if (restoredTabs.isEmpty()) {
+            return OpenDocumentTabs.withInitialTab(initialTab());
+        }
+        if (restoredActiveIndex < 0) {
+            restoredActiveIndex = storedTabs.activeIndex();
+            if (restoredActiveIndex >= restoredTabs.size()) {
+                restoredActiveIndex = restoredTabs.size() - 1;
+            }
+        }
+        return openTabsFrom(restoredTabs, restoredActiveIndex);
+    }
+
+    private OpenDocumentTab restoreOpenTab(RestorableOpenTab storedTab) {
+        try {
+            Uri uri = Uri.parse(storedTab.uri());
+            FileInfo fileInfo = readFileInfo(uri);
+            String displayName = fileInfo.displayName.length() == 0 ? storedTab.title() : fileInfo.displayName;
+            if (!FileTypeDetector.isMarkdownDisplayName(displayName)) {
+                return null;
+            }
+            if (!fileSizePolicy.isReadableSize(fileInfo.sizeBytes)) {
+                return null;
+            }
+
+            String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
+            SafeHtml rendered = renderer.render(markdown);
+            return OpenDocumentTab.of(displayName, uri.toString(), rendered);
+        } catch (IllegalArgumentException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        } catch (SecurityException e) {
+            return null;
+        }
+    }
+
+    private static OpenDocumentTabs openTabsFrom(List<OpenDocumentTab> restoredTabs, int activeIndex) {
+        OpenDocumentTabs tabs = OpenDocumentTabs.withInitialTab(restoredTabs.get(0));
+        for (int i = 1; i < restoredTabs.size(); i++) {
+            tabs = tabs.open(restoredTabs.get(i));
+        }
+        return tabs.activate(activeIndex);
+    }
+
+    private RestorableOpenTabs loadRestorableOpenTabs() {
+        SharedPreferences prefs = getSharedPreferences(OPEN_TABS_PREFS, MODE_PRIVATE);
+        String raw = prefs.getString(OPEN_TABS_ITEMS, "");
+        ArrayList<RestorableOpenTab> items = new ArrayList<RestorableOpenTab>();
+        if (raw != null && raw.length() > 0) {
+            String[] lines = raw.split("\\n", -1);
+            for (int i = 0; i < lines.length; i++) {
+                RestorableOpenTab tab = decodeRestorableOpenTab(lines[i]);
+                if (tab != null) {
+                    items.add(tab);
+                }
+            }
+        }
+        return RestorableOpenTabs.from(items, prefs.getInt(OPEN_TABS_ACTIVE_INDEX, 0));
+    }
+
+    private void saveOpenTabs() {
+        StringBuilder raw = new StringBuilder();
+        int savedCount = 0;
+        int savedActiveIndex = 0;
+        for (int i = 0; i < openTabs.tabs().size(); i++) {
+            OpenDocumentTab tab = openTabs.tabs().get(i);
+            if (WELCOME_URI.equals(tab.uri())) {
+                continue;
+            }
+            if (i == openTabs.activeIndex()) {
+                savedActiveIndex = savedCount;
+            }
+            if (savedCount > 0) {
+                raw.append('\n');
+            }
+            raw.append(encode(tab.title()))
+                    .append('\t')
+                    .append(encode(tab.uri()));
+            savedCount++;
+        }
+
+        SharedPreferences.Editor editor = getSharedPreferences(OPEN_TABS_PREFS, MODE_PRIVATE).edit();
+        if (savedCount == 0) {
+            editor.clear().apply();
+            return;
+        }
+        editor.putString(OPEN_TABS_ITEMS, raw.toString())
+                .putInt(OPEN_TABS_ACTIVE_INDEX, savedActiveIndex)
+                .apply();
+    }
+
+    private static RestorableOpenTab decodeRestorableOpenTab(String line) {
+        if (line == null || line.length() == 0) {
+            return null;
+        }
+        int separator = line.indexOf('\t');
+        if (separator < 0) {
+            return null;
+        }
+        try {
+            return RestorableOpenTab.of(
+                    decode(line.substring(0, separator)),
+                    decode(line.substring(separator + 1)));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     private void recordRecentDocument(String displayName, Uri uri) {
         RecentDocuments documents = loadRecentDocuments()
                 .recordOpened(RecentDocument.of(displayName, uri.toString()));
@@ -590,7 +726,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 + "Use `<script>` as text, not as HTML.";
         return OpenDocumentTab.of(
                 "Welcome",
-                "app://welcome",
+                WELCOME_URI,
                 new JavaSimpleMarkdownRenderer().render(markdown));
     }
 
