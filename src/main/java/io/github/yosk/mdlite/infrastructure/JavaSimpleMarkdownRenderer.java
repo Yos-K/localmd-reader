@@ -46,7 +46,7 @@ public final class JavaSimpleMarkdownRenderer {
                 flushParagraph(html, paragraph);
                 openList = closeList(html, openList);
                 String[] headerCells = splitTableCells(line);
-                html.append("<table><thead><tr>");
+                html.append("<div class=\"table-scroll\"><table><thead><tr>");
                 appendTableCells(html, headerCells, "th");
                 html.append("</tr></thead><tbody>");
                 lineIndex += 2;
@@ -57,7 +57,7 @@ public final class JavaSimpleMarkdownRenderer {
                     lineIndex++;
                 }
                 lineIndex--;
-                html.append("</tbody></table>");
+                html.append("</tbody></table></div>");
                 continue;
             }
 

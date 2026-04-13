@@ -73,11 +73,12 @@ public final class HtmlPageBuilderTest {
 
     public void stylesTablesForReadableMobileLayout() {
         String page = HtmlPageBuilder.buildPage(
-                SafeHtml.fromTrustedRendererOutput("<table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>Value</td></tr></tbody></table>"),
+                SafeHtml.fromTrustedRendererOutput("<div class=\"table-scroll\"><table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>Value</td></tr></tbody></table></div>"),
                 ViewerTheme.light(),
                 FontSize.of(18));
 
-        assertContains(page, "table{font-size:18px;border-collapse:collapse;display:block;overflow-x:auto;", "table CSS must use selected font size and allow horizontal scrolling");
+        assertContains(page, ".table-scroll{overflow-x:auto;margin:0 0 16px;border:1px solid #c9d8d5;border-radius:4px;box-shadow:inset -16px 0 12px -12px #c9d8d5;}", "table scroll container must provide a visible horizontal scroll hint");
+        assertContains(page, "table{font-size:18px;border-collapse:collapse;min-width:max-content;}", "table CSS must use selected font size and preserve wide content");
         assertContains(page, "th,td{border:1px solid #c9d8d5;padding:6px 8px;text-align:left;}", "table cells must have readable borders and padding");
     }
 

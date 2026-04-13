@@ -115,7 +115,7 @@ public final class JavaSimpleMarkdownRendererTest {
     public void rendersPipeTableWithHeaderAndBodyRows() {
         SafeHtml html = renderer.render("| Name | Status |\n| --- | --- |\n| Tests | Passing |\n| APK | Built |");
 
-        assertContains(html.value(), "<table><thead><tr><th>Name</th><th>Status</th></tr></thead><tbody><tr><td>Tests</td><td>Passing</td></tr><tr><td>APK</td><td>Built</td></tr></tbody></table>", "pipe table must render header and body rows");
+        assertContains(html.value(), "<div class=\"table-scroll\"><table><thead><tr><th>Name</th><th>Status</th></tr></thead><tbody><tr><td>Tests</td><td>Passing</td></tr><tr><td>APK</td><td>Built</td></tr></tbody></table></div>", "pipe table must render inside a visible horizontal scroll container");
     }
 
     public void escapesPipeTableCellContentAndRendersInlineCode() {
