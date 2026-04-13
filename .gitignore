@@ -1,0 +1,12 @@
+build/
+*.apk
+*.aab
+*.idsig
+*.keystore
+*.jks
+key.properties
+local.properties
+secrets.properties
+.env
+play-console-*.json
+service-account*.json
