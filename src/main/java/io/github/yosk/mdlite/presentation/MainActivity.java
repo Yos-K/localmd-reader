@@ -174,6 +174,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
             renderTabs();
             renderCurrentDocument();
+        } else if (view instanceof CloseTabButton) {
+            openTabs = openTabs.close(((CloseTabButton) view).tabIndex());
+            renderTabs();
+            renderCurrentDocument();
         }
     }
 
@@ -431,12 +435,28 @@ public final class MainActivity extends Activity implements View.OnClickListener
         tabRow.removeAllViews();
         for (int i = 0; i < openTabs.tabs().size(); i++) {
             OpenDocumentTab tab = openTabs.tabs().get(i);
+            LinearLayout tabGroup = new LinearLayout(this);
+            tabGroup.setOrientation(LinearLayout.HORIZONTAL);
+
             TabButton button = new TabButton(this, i);
             button.setText(tab.title());
             button.setAllCaps(false);
             button.setOnClickListener(this);
             button.setEnabled(i != openTabs.activeIndex());
-            tabRow.addView(button, new LinearLayout.LayoutParams(
+            tabGroup.addView(button, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
+            CloseTabButton closeButton = new CloseTabButton(this, i);
+            closeButton.setText("x");
+            closeButton.setContentDescription("Close " + tab.title());
+            closeButton.setAllCaps(false);
+            closeButton.setOnClickListener(this);
+            tabGroup.addView(closeButton, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
+            tabRow.addView(tabGroup, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
         }
@@ -476,6 +496,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
         private final int tabIndex;
 
         private TabButton(Activity activity, int tabIndex) {
+            super(activity);
+            this.tabIndex = tabIndex;
+        }
+
+        private int tabIndex() {
+            return tabIndex;
+        }
+    }
+
+    private static final class CloseTabButton extends Button {
+        private final int tabIndex;
+
+        private CloseTabButton(Activity activity, int tabIndex) {
             super(activity);
             this.tabIndex = tabIndex;
         }

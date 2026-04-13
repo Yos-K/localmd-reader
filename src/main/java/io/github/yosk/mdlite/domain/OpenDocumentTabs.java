@@ -41,6 +41,26 @@ public final class OpenDocumentTabs {
         return new OpenDocumentTabs(tabs, index);
     }
 
+    public OpenDocumentTabs close(int index) {
+        if (tabs.size() == 1) {
+            return this;
+        }
+        if (index < 0 || index >= tabs.size()) {
+            return this;
+        }
+
+        ArrayList<OpenDocumentTab> next = new ArrayList<OpenDocumentTab>(tabs);
+        next.remove(index);
+
+        int nextActiveIndex = activeIndex;
+        if (index < activeIndex) {
+            nextActiveIndex = activeIndex - 1;
+        } else if (index == activeIndex && activeIndex >= next.size()) {
+            nextActiveIndex = next.size() - 1;
+        }
+        return new OpenDocumentTabs(next, nextActiveIndex);
+    }
+
     public OpenDocumentTab activeTab() {
         return tabs.get(activeIndex);
     }

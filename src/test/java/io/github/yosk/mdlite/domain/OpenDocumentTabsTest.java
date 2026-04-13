@@ -7,6 +7,10 @@ public final class OpenDocumentTabsTest {
         test.openAddsANewDocumentAsTheActiveTab();
         test.openExistingUriReplacesThatTabAndActivatesItWithoutDuplicate();
         test.activateSwitchesTheActiveTabByIndex();
+        test.closeInactiveTabKeepsCurrentActiveDocument();
+        test.closeActiveMiddleTabActivatesTheNextDocument();
+        test.closeActiveLastTabActivatesThePreviousDocument();
+        test.closeOnlyTabKeepsTheLastDocumentOpen();
     }
 
     public void initialTabsExposeTheInitialDocumentAsActiveTab() {
@@ -42,6 +46,40 @@ public final class OpenDocumentTabsTest {
                 .activate(0);
 
         assertEquals("Welcome", tabs.activeTab().title(), "activating a tab index must switch the active document");
+    }
+
+    public void closeInactiveTabKeepsCurrentActiveDocument() {
+        OpenDocumentTabs tabs = threeTabs().activate(2).close(1);
+
+        assertEquals(2, tabs.tabs().size(), "closing an inactive tab must remove one tab");
+        assertEquals("Second", tabs.activeTab().title(), "closing an inactive tab before the active tab must keep the same active document");
+    }
+
+    public void closeActiveMiddleTabActivatesTheNextDocument() {
+        OpenDocumentTabs tabs = threeTabs().activate(1).close(1);
+
+        assertEquals(2, tabs.tabs().size(), "closing the active middle tab must remove one tab");
+        assertEquals("Second", tabs.activeTab().title(), "closing the active middle tab must activate the next document");
+    }
+
+    public void closeActiveLastTabActivatesThePreviousDocument() {
+        OpenDocumentTabs tabs = threeTabs().activate(2).close(2);
+
+        assertEquals(2, tabs.tabs().size(), "closing the active last tab must remove one tab");
+        assertEquals("First", tabs.activeTab().title(), "closing the active last tab must activate the previous document");
+    }
+
+    public void closeOnlyTabKeepsTheLastDocumentOpen() {
+        OpenDocumentTabs tabs = OpenDocumentTabs.withInitialTab(tab("Welcome", "app://welcome", "welcome")).close(0);
+
+        assertEquals(1, tabs.tabs().size(), "closing the only tab must keep one document open");
+        assertEquals("Welcome", tabs.activeTab().title(), "closing the only tab must keep the same document active");
+    }
+
+    private static OpenDocumentTabs threeTabs() {
+        return OpenDocumentTabs.withInitialTab(tab("Welcome", "app://welcome", "welcome"))
+                .open(tab("First", "content://first", "first"))
+                .open(tab("Second", "content://second", "second"));
     }
 
     private static OpenDocumentTab tab(String title, String uri, String document) {
