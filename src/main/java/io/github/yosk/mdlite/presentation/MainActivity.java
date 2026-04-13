@@ -112,6 +112,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuPanel.setVisibility(View.GONE);
         menuPanel.setBackgroundColor((int) 0xfff8fbfa);
         menuPanel.setPadding(16, 24, 16, 16);
+        menuPanel.setClickable(true);
 
         TextView menuTitle = new TextView(this);
         menuTitle.setText("Menu");
@@ -390,6 +391,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private boolean handleEdgeSwipe(MotionEvent event) {
         if (isMenuOpen()) {
+            if (event.getX() > dp(MENU_WIDTH_DP)) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    closeMenu();
+                }
+                return true;
+            }
             trackingEdgeSwipe = false;
             return false;
         }

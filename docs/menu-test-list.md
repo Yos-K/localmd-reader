@@ -9,5 +9,6 @@
 - [x] close the menu from the hamburger button when it is already open
 - [x] open the menu with an inward swipe from the left edge
 - [x] close the menu with an outward swipe toward the left edge
+- [x] close the menu by swiping left from any blank area inside the menu
+- [x] close the menu by tapping outside the menu area
 - [x] keep the viewer and tab row visible behind the menu overlay
-
