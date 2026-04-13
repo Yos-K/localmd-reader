@@ -174,8 +174,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
             renderTabs();
             renderCurrentDocument();
-        } else if (view instanceof CloseTabButton) {
-            openTabs = openTabs.close(((CloseTabButton) view).tabIndex());
+        } else if (view instanceof CloseTabText) {
+            openTabs = openTabs.close(((CloseTabText) view).tabIndex());
             renderTabs();
             renderCurrentDocument();
         }
@@ -447,14 +447,16 @@ public final class MainActivity extends Activity implements View.OnClickListener
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
 
-            CloseTabButton closeButton = new CloseTabButton(this, i);
-            closeButton.setText("x");
-            closeButton.setContentDescription("Close " + tab.title());
-            closeButton.setAllCaps(false);
-            closeButton.setOnClickListener(this);
-            tabGroup.addView(closeButton, new LinearLayout.LayoutParams(
+            CloseTabText closeText = new CloseTabText(this, i);
+            closeText.setText("×");
+            closeText.setTextSize(20);
+            closeText.setGravity(Gravity.CENTER);
+            closeText.setPadding(12, 0, 16, 0);
+            closeText.setContentDescription("Close " + tab.title());
+            closeText.setOnClickListener(this);
+            tabGroup.addView(closeText, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT));
+                    LinearLayout.LayoutParams.MATCH_PARENT));
 
             tabRow.addView(tabGroup, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -505,10 +507,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
     }
 
-    private static final class CloseTabButton extends Button {
+    private static final class CloseTabText extends TextView {
         private final int tabIndex;
 
-        private CloseTabButton(Activity activity, int tabIndex) {
+        private CloseTabText(Activity activity, int tabIndex) {
             super(activity);
             this.tabIndex = tabIndex;
         }
@@ -517,4 +519,5 @@ public final class MainActivity extends Activity implements View.OnClickListener
             return tabIndex;
         }
     }
+
 }
