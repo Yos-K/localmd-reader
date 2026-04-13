@@ -292,11 +292,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void openUri(Uri uri, boolean remember) {
         FileInfo fileInfo = readFileInfo(uri);
         if (!FileTypeDetector.isMarkdownDisplayName(fileInfo.displayName)) {
-            showMessage("This file cannot be opened.");
+            showFileOpenError("This file cannot be opened.");
             return;
         }
         if (!fileSizePolicy.isReadableSize(fileInfo.sizeBytes)) {
-            showMessage("The file is too large.");
+            showFileOpenError("The file is too large.");
             return;
         }
 
@@ -312,7 +312,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             }
             showMessage("");
         } catch (IOException e) {
-            showMessage("The document could not be displayed.");
+            showFileOpenError("The document could not be displayed.");
         }
     }
 
@@ -405,6 +405,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void showMessage(String message) {
         messageView.setText(message);
         messageView.setVisibility(message.length() == 0 ? View.GONE : View.VISIBLE);
+    }
+
+    private void showFileOpenError(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Open Markdown file")
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     private ControlsPlacement loadControlsPlacement() {

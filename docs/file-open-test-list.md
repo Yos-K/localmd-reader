@@ -16,3 +16,9 @@
 - [x] rejects file above maximum size
 - [x] rejects negative size
 - [x] accepts unknown provider size before streaming limit check
+
+## Android Behavior
+
+- [x] show a dialog when the selected file type is unsupported
+- [x] show a dialog when the selected file is too large
+- [x] show a dialog when the selected document cannot be displayed
