@@ -200,7 +200,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         String action = intent.getAction();
         Uri uri = intent.getData();
         if (Intent.ACTION_VIEW.equals(action) && uri != null) {
-            openUri(uri, false);
+            persistReadPermission(intent, uri);
+            openUri(uri, true);
         }
     }
 

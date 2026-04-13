@@ -11,9 +11,9 @@
 ## Android Behavior
 
 - [x] request persistable read permission for files opened from the in-app picker
+- [x] remember files opened from external view intents after successful display
 - [x] store recent files locally in app private preferences
 - [x] do not require network permission for recent files
 - [ ] show an empty-state message when there are no recent files
 - [ ] reopen a recent file from the recent files dialog
 - [ ] keep a reopened recent file at the top of the list
-
