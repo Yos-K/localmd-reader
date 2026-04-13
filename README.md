@@ -2,22 +2,72 @@
 
 MdLite Reader is a lightweight Android Markdown viewer.
 
-It is designed to be fast, local-first, and privacy-respecting.
+It is built for reading local Markdown files quickly without ads, tracking,
+login, sync, or network access.
 
-## Principles
+## Features
 
-- No ads
-- No tracking
-- No login
-- No network permission
-- No personal information in logs
-- Local Markdown viewing
+- Open `.md` and `.markdown` files
+- Open Markdown files from Android file managers
+- Render Markdown locally in a locked-down WebView
+- Light and dark themes
+- Pinch-to-change font size
+- Recently opened files, limited to 5 entries
+- Clear recent file history
+- Multiple tabs
+- Restore previously opened tabs
+- Move controls to the top or bottom
+- No `INTERNET` permission
 
-## Status
+## Supported Markdown
 
-Early development. The repository should remain private until the first release readiness checklist is complete.
+MdLite Reader intentionally implements a small Markdown subset for v0.1.0.
+
+Supported:
+
+- Headings
+- Paragraphs
+- Bullet lists
+- Numbered lists
+- Checklists
+- Blockquotes
+- Fenced code blocks
+- Inline code
+- HTTP and HTTPS links
+- Tables
+- Horizontal rules
+- Raw HTML escaping
+
+Not supported in v0.1.0:
+
+- Markdown editing
+- Full CommonMark compatibility
+- Mermaid
+- Math
+- Footnotes
+- Remote image loading
+- Relative image rendering
+- Cloud sync
+
+## Privacy
+
+MdLite Reader does not collect personal information.
+
+The app reads only files selected by the user. Markdown content is rendered on
+the device and is not uploaded by the app.
+
+See [PRIVACY.md](PRIVACY.md).
+
+## Security
+
+The initial version requests no network permission and disables JavaScript in
+the WebView used for rendering.
+
+See [SECURITY.md](SECURITY.md).
 
 ## Build
+
+The project is currently built with a lightweight Android SDK setup in Termux.
 
 ```sh
 cd ~/AndroidDev
@@ -26,7 +76,7 @@ cd projects/mdlite-reader
 ./build.sh
 ```
 
-The generated APK is:
+The generated debug APK is:
 
 ```text
 app-debug.apk
@@ -38,7 +88,13 @@ app-debug.apk
 ./test.sh
 ```
 
-The current test script builds the APK, verifies signing, and checks that the APK does not request the `INTERNET` permission.
+The test script runs JVM unit tests, builds the debug APK, verifies signing,
+and checks that the APK does not request the `INTERNET` permission.
+
+## Repository Status
+
+The repository should remain private during early development and become public
+when the first release is ready.
 
 ## License
 
@@ -46,4 +102,4 @@ Apache License 2.0. See [LICENSE](LICENSE).
 
 ## Japanese
 
-日本語版: [README.ja.md](README.ja.md)
+Japanese documentation: [README.ja.md](README.ja.md)
