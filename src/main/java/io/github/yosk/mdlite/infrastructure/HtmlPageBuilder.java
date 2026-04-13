@@ -17,6 +17,7 @@ public final class HtmlPageBuilder {
         FontSize safeFontSize = fontSize == null ? FontSize.defaultSize() : fontSize;
         String background = safeTheme.isDark() ? "#101414" : "#f8fbfa";
         String text = safeTheme.isDark() ? "#edf5f2" : "#172121";
+        String muted = safeTheme.isDark() ? "#a7bbb7" : "#566664";
         String link = safeTheme.isDark() ? "#7ccbe0" : "#0b6f87";
         String codeBackground = safeTheme.isDark() ? "#25302f" : "#e6eeee";
         String border = safeTheme.isDark() ? "#3c4b49" : "#c9d8d5";
@@ -33,18 +34,19 @@ public final class HtmlPageBuilder {
                 + "<html><head><meta charset=\"utf-8\">"
                 + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
                 + "<style>"
-                + "body{font-family:sans-serif;margin:24px;line-height:1.55;color:" + text + ";background:" + background + ";}"
-                + "h1{font-size:" + h1FontSize + "px;margin:0 0 12px;}"
-                + "h2{font-size:" + h2FontSize + "px;margin:24px 0 10px;border-bottom:1px solid " + border + ";padding-bottom:4px;}"
-                + "p{font-size:" + bodyFontSize + "px;margin:0 0 12px;}"
-                + "ul,ol{font-size:" + bodyFontSize + "px;}"
-                + "blockquote{font-size:" + bodyFontSize + "px;}"
+                + "body{font-family:sans-serif;margin:0;padding:24px;line-height:1.6;color:" + text + ";background:" + background + ";}"
+                + "body{max-width:760px;box-sizing:border-box;}"
+                + "h1{font-size:" + h1FontSize + "px;margin:0 0 16px;line-height:1.2;}"
+                + "h2{font-size:" + h2FontSize + "px;margin:28px 0 12px;border-bottom:1px solid " + border + ";padding-bottom:6px;line-height:1.25;}"
+                + "p{font-size:" + bodyFontSize + "px;margin:0 0 14px;}"
+                + "ul,ol{font-size:" + bodyFontSize + "px;margin:0 0 16px;padding-left:24px;}"
+                + "blockquote{font-size:" + bodyFontSize + "px;color:" + muted + ";}"
                 + "pre{font-size:" + bodyFontSize + "px;}"
-                + "code{background:" + codeBackground + ";padding:2px 4px;border-radius:4px;}"
-                + "pre{background:" + codeBackground + ";padding:12px;overflow-x:auto;border-radius:4px;}"
+                + "code{background:" + codeBackground + ";padding:2px 5px;border-radius:4px;}"
+                + "pre{background:" + codeBackground + ";padding:14px;overflow-x:auto;border-radius:8px;border:1px solid " + border + ";}"
                 + "pre code{background:transparent;padding:0;}"
                 + "a{color:" + link + ";text-decoration:underline;}"
-                + "blockquote{border-left:4px solid " + border + ";margin:0 0 12px;padding:4px 0 4px 12px;}"
+                + "blockquote{border-left:4px solid " + border + ";margin:0 0 16px;padding:6px 0 6px 14px;}"
                 + "li{margin:4px 0;}"
                 + "ul.checklist{list-style:none;padding-left:0;}"
                 + "ul.checklist input{margin-right:8px;}"

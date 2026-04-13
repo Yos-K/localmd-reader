@@ -13,6 +13,7 @@
 - [x] Drawer includes short product context.
 - [x] Drawer actions are grouped by Files, Reading, and Layout.
 - [x] Native controls follow light and dark theme colors.
+- [x] Native buttons use consistent rounded surfaces and spacing.
 
 ## Feedback
 
@@ -26,3 +27,9 @@
 - [x] Long tab titles are constrained to avoid breaking the tab row.
 - [x] Close tab controls have accessibility labels.
 - [x] Close tab control is hidden when there is only one tab.
+
+## Reading Surface
+
+- [x] Markdown body uses comfortable reading padding and line height.
+- [x] Code blocks use rounded bordered surfaces.
+- [x] Blockquotes use muted text and a clear leading border.
