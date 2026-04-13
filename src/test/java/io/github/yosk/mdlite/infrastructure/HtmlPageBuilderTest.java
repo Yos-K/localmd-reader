@@ -2,6 +2,7 @@ package io.github.yosk.mdlite.infrastructure;
 
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.ViewerTheme;
+import io.github.yosk.mdlite.domain.FontSize;
 
 public final class HtmlPageBuilderTest {
     public static void main(String[] args) {
@@ -9,6 +10,7 @@ public final class HtmlPageBuilderTest {
         test.rendersLightThemeWithLightBackgroundAndDarkText();
         test.rendersDarkThemeWithDarkBackgroundAndLightText();
         test.includesRenderedMarkdownBodyUnchanged();
+        test.appliesFontSizeToParagraphText();
     }
 
     public void rendersLightThemeWithLightBackgroundAndDarkText() {
@@ -35,6 +37,15 @@ public final class HtmlPageBuilderTest {
                 ViewerTheme.light());
 
         assertContains(page, "<h1>Title</h1><p>Body</p>", "page must include rendered Markdown body unchanged");
+    }
+
+    public void appliesFontSizeToParagraphText() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<p>Body</p>"),
+                ViewerTheme.light(),
+                FontSize.of(18));
+
+        assertContains(page, "p{font-size:18px", "paragraph CSS must use selected font size");
     }
 
     private static void assertContains(String actual, String expected, String message) {

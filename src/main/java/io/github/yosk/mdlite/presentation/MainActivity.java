@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
 import io.github.yosk.mdlite.domain.FileTypeDetector;
+import io.github.yosk.mdlite.domain.FontSize;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.ViewerTheme;
 import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
@@ -35,8 +36,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private TextView messageView;
     private Button openButton;
     private Button themeButton;
+    private Button smallerTextButton;
+    private Button largerTextButton;
     private SafeHtml currentDocument;
     private ViewerTheme currentTheme = ViewerTheme.light();
+    private FontSize currentFontSize = FontSize.defaultSize();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +59,28 @@ public final class MainActivity extends Activity implements View.OnClickListener
         themeButton.setAllCaps(false);
         themeButton.setOnClickListener(this);
 
+        LinearLayout textSizeRow = new LinearLayout(this);
+        textSizeRow.setOrientation(LinearLayout.HORIZONTAL);
+
+        smallerTextButton = new Button(this);
+        smallerTextButton.setText("A-");
+        smallerTextButton.setAllCaps(false);
+        smallerTextButton.setOnClickListener(this);
+
+        largerTextButton = new Button(this);
+        largerTextButton.setText("A+");
+        largerTextButton.setAllCaps(false);
+        largerTextButton.setOnClickListener(this);
+
+        textSizeRow.addView(smallerTextButton, new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1));
+        textSizeRow.addView(largerTextButton, new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1));
+
         messageView = new TextView(this);
         messageView.setGravity(Gravity.CENTER_VERTICAL);
         messageView.setPadding(24, 12, 24, 12);
@@ -68,6 +94,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(themeButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        root.addView(textSizeRow, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(messageView, new LinearLayout.LayoutParams(
@@ -89,6 +118,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } else if (view == themeButton) {
             currentTheme = currentTheme.toggled();
             themeButton.setText(currentTheme.isDark() ? "Light theme" : "Dark theme");
+            renderCurrentDocument();
+        } else if (view == smallerTextButton) {
+            currentFontSize = currentFontSize.decreased();
+            renderCurrentDocument();
+        } else if (view == largerTextButton) {
+            currentFontSize = currentFontSize.increased();
             renderCurrentDocument();
         }
     }
@@ -224,7 +259,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void renderCurrentDocument() {
-        webView.loadDataWithBaseURL(null, HtmlPageBuilder.buildPage(currentDocument, currentTheme), "text/html", "UTF-8", null);
+        webView.loadDataWithBaseURL(null, HtmlPageBuilder.buildPage(currentDocument, currentTheme, currentFontSize), "text/html", "UTF-8", null);
     }
 
     private static final class FileInfo {
