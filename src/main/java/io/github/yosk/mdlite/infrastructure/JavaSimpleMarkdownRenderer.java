@@ -16,7 +16,7 @@ public final class JavaSimpleMarkdownRenderer {
         int openList = LIST_NONE;
 
         for (String line : lines) {
-            if (line.equals("```")) {
+            if (isFenceLine(line)) {
                 if (inCodeBlock) {
                     html.append("</code></pre>");
                     inCodeBlock = false;
@@ -40,10 +40,14 @@ public final class JavaSimpleMarkdownRenderer {
                 continue;
             }
 
-            if (line.startsWith("# ")) {
+            int headingLevel = headingLevel(line);
+            if (headingLevel > 0) {
                 flushParagraph(html, paragraph);
                 openList = closeList(html, openList);
-                html.append("<h1>").append(renderInline(line.substring(2).trim())).append("</h1>");
+                String headingText = line.substring(headingLevel + 1).trim();
+                html.append("<h").append(headingLevel).append(">")
+                        .append(renderInline(headingText))
+                        .append("</h").append(headingLevel).append(">");
                 continue;
             }
 
@@ -98,6 +102,24 @@ public final class JavaSimpleMarkdownRenderer {
         flushParagraph(html, paragraph);
 
         return SafeHtml.fromTrustedRendererOutput(html.toString());
+    }
+
+    private static boolean isFenceLine(String line) {
+        return line.equals("```") || (line.startsWith("```") && line.trim().length() > 3);
+    }
+
+    private static int headingLevel(String line) {
+        int level = 0;
+        while (level < line.length() && line.charAt(level) == '#') {
+            level++;
+        }
+        if (level < 1 || level > 6) {
+            return 0;
+        }
+        if (level >= line.length() || line.charAt(level) != ' ') {
+            return 0;
+        }
+        return level;
     }
 
     private static int orderedMarkerLength(String line) {

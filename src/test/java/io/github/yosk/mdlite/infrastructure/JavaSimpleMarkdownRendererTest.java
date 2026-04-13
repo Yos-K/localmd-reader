@@ -9,8 +9,10 @@ public final class JavaSimpleMarkdownRendererTest {
         test.doesNotEmitRawScriptTags();
         test.escapesAmpersandsBeforeAngleBrackets();
         test.rendersLevelOneHeadingAsH1();
+        test.rendersLevelTwoHeadingAsH2();
         test.rendersPlainTextAsParagraph();
         test.rendersFencedCodeBlockWithEscapedContent();
+        test.rendersFencedCodeBlockWithLanguageInfoAsCodeBlock();
         test.rendersInlineCodeWithEscapedContent();
         test.rendersBulletListItemsAsUnorderedList();
         test.rendersNumberedListItemsAsOrderedList();
@@ -48,6 +50,12 @@ public final class JavaSimpleMarkdownRendererTest {
         assertContains(html.value(), "<h1>Title</h1>", "level 1 heading must render as h1");
     }
 
+    public void rendersLevelTwoHeadingAsH2() {
+        SafeHtml html = renderer.render("## Implementation Domain Model");
+
+        assertContains(html.value(), "<h2>Implementation Domain Model</h2>", "level 2 heading must render as h2");
+    }
+
     public void rendersPlainTextAsParagraph() {
         SafeHtml html = renderer.render("Plain text");
 
@@ -60,6 +68,14 @@ public final class JavaSimpleMarkdownRendererTest {
         assertContains(html.value(), "<pre><code>", "fenced code block must render as pre/code");
         assertContains(html.value(), "if (a &lt; b) {", "code block content must be escaped");
         assertContains(html.value(), "</code></pre>", "fenced code block must close pre/code");
+    }
+
+    public void rendersFencedCodeBlockWithLanguageInfoAsCodeBlock() {
+        SafeHtml html = renderer.render("```text\ndata MarkdownFile = ReadableMarkdownFile OR UnsupportedFile\n```");
+
+        assertContains(html.value(), "<pre><code>", "fenced code block with language info must render as pre/code");
+        assertContains(html.value(), "data MarkdownFile = ReadableMarkdownFile OR UnsupportedFile", "fenced code block content must be preserved");
+        assertNotContains(html.value(), "<p>```text", "language fence marker must not render as paragraph");
     }
 
     public void rendersInlineCodeWithEscapedContent() {
