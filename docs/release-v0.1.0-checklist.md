@@ -118,7 +118,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] `LICENSE` exists and is Apache-2.0.
 - [x] `CONTRIBUTING.md` exists.
 - [x] `CONTRIBUTING.ja.md` exists.
-- [ ] Product spec matches the implemented v0.1.0 scope.
+- [x] Product spec matches the implemented v0.1.0 scope.
 
 ## Manual Device Checks
 
