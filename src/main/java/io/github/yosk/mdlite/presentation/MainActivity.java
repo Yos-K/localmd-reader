@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.webkit.WebSettings;
@@ -43,6 +44,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final int MAX_RECENT_DOCUMENTS = 5;
     private static final String RECENT_PREFS = "recent_documents";
     private static final String RECENT_ITEMS = "items";
+    private static final float TAB_SWIPE_MIN_DISTANCE = 80f;
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
@@ -59,6 +61,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private ViewerTheme currentTheme = ViewerTheme.light();
     private FontSize currentFontSize = FontSize.defaultSize();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
+    private float tabSwipeStartX;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +123,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         tabScroller.addView(tabRow, new HorizontalScrollView.LayoutParams(
                 HorizontalScrollView.LayoutParams.WRAP_CONTENT,
                 HorizontalScrollView.LayoutParams.WRAP_CONTENT));
+        tabScroller.setOnTouchListener(new TabSwipeListener(this));
 
         webView = new WebView(this);
         configureWebView(webView);
@@ -442,6 +446,29 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
     }
 
+    private boolean handleTabSwipe(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            tabSwipeStartX = event.getX();
+            return false;
+        }
+        if (event.getAction() != MotionEvent.ACTION_UP) {
+            return false;
+        }
+
+        float distance = event.getX() - tabSwipeStartX;
+        if (Math.abs(distance) < TAB_SWIPE_MIN_DISTANCE) {
+            return false;
+        }
+        if (distance < 0) {
+            openTabs = openTabs.activateNext();
+        } else {
+            openTabs = openTabs.activatePrevious();
+        }
+        renderTabs();
+        renderCurrentDocument();
+        return true;
+    }
+
     private static final class FileInfo {
         private final String displayName;
         private final long sizeBytes;
@@ -482,6 +509,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         private int tabIndex() {
             return tabIndex;
+        }
+    }
+
+    private static final class TabSwipeListener implements View.OnTouchListener {
+        private final MainActivity activity;
+
+        private TabSwipeListener(MainActivity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            return activity.handleTabSwipe(event);
         }
     }
 }
