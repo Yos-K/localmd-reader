@@ -12,6 +12,10 @@ public final class JavaSimpleMarkdownRendererTest {
         test.rendersPlainTextAsParagraph();
         test.rendersFencedCodeBlockWithEscapedContent();
         test.rendersInlineCodeWithEscapedContent();
+        test.rendersBulletListItemsAsUnorderedList();
+        test.rendersNumberedListItemsAsOrderedList();
+        test.rendersBlockquoteAsBlockquote();
+        test.rendersHorizontalRule();
     }
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
@@ -62,6 +66,30 @@ public final class JavaSimpleMarkdownRendererTest {
         SafeHtml html = renderer.render("Use `<tag>` here");
 
         assertContains(html.value(), "Use <code>&lt;tag&gt;</code> here", "inline code content must be escaped");
+    }
+
+    public void rendersBulletListItemsAsUnorderedList() {
+        SafeHtml html = renderer.render("- first\n- second");
+
+        assertContains(html.value(), "<ul><li>first</li><li>second</li></ul>", "bullet list items must render as unordered list");
+    }
+
+    public void rendersNumberedListItemsAsOrderedList() {
+        SafeHtml html = renderer.render("1. first\n2. second");
+
+        assertContains(html.value(), "<ol><li>first</li><li>second</li></ol>", "numbered list items must render as ordered list");
+    }
+
+    public void rendersBlockquoteAsBlockquote() {
+        SafeHtml html = renderer.render("> quoted <text>");
+
+        assertContains(html.value(), "<blockquote>quoted &lt;text&gt;</blockquote>", "blockquote content must render escaped inside blockquote");
+    }
+
+    public void rendersHorizontalRule() {
+        SafeHtml html = renderer.render("---");
+
+        assertContains(html.value(), "<hr>", "horizontal rule must render as hr");
     }
 
     private static void assertContains(String actual, String expected, String message) {

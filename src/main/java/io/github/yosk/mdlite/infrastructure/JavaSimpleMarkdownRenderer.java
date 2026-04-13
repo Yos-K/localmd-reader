@@ -3,12 +3,17 @@ package io.github.yosk.mdlite.infrastructure;
 import io.github.yosk.mdlite.domain.SafeHtml;
 
 public final class JavaSimpleMarkdownRenderer {
+    private static final int LIST_NONE = 0;
+    private static final int LIST_UNORDERED = 1;
+    private static final int LIST_ORDERED = 2;
+
     public SafeHtml render(String markdown) {
         String source = markdown == null ? "" : markdown;
         StringBuilder html = new StringBuilder();
         String[] lines = source.split("\\r?\\n", -1);
         boolean inCodeBlock = false;
         StringBuilder paragraph = new StringBuilder();
+        int openList = LIST_NONE;
 
         for (String line : lines) {
             if (line.equals("```")) {
@@ -17,6 +22,7 @@ public final class JavaSimpleMarkdownRenderer {
                     inCodeBlock = false;
                 } else {
                     flushParagraph(html, paragraph);
+                    openList = closeList(html, openList);
                     html.append("<pre><code>");
                     inCodeBlock = true;
                 }
@@ -30,15 +36,55 @@ public final class JavaSimpleMarkdownRenderer {
 
             if (line.trim().isEmpty()) {
                 flushParagraph(html, paragraph);
+                openList = closeList(html, openList);
                 continue;
             }
 
             if (line.startsWith("# ")) {
                 flushParagraph(html, paragraph);
+                openList = closeList(html, openList);
                 html.append("<h1>").append(renderInline(line.substring(2).trim())).append("</h1>");
                 continue;
             }
 
+            if (line.equals("---")) {
+                flushParagraph(html, paragraph);
+                openList = closeList(html, openList);
+                html.append("<hr>");
+                continue;
+            }
+
+            if (line.startsWith("> ")) {
+                flushParagraph(html, paragraph);
+                openList = closeList(html, openList);
+                html.append("<blockquote>").append(renderInline(line.substring(2).trim())).append("</blockquote>");
+                continue;
+            }
+
+            if (line.startsWith("- ")) {
+                flushParagraph(html, paragraph);
+                if (openList != LIST_UNORDERED) {
+                    openList = closeList(html, openList);
+                    html.append("<ul>");
+                    openList = LIST_UNORDERED;
+                }
+                html.append("<li>").append(renderInline(line.substring(2).trim())).append("</li>");
+                continue;
+            }
+
+            int orderedMarkerLength = orderedMarkerLength(line);
+            if (orderedMarkerLength > 0) {
+                flushParagraph(html, paragraph);
+                if (openList != LIST_ORDERED) {
+                    openList = closeList(html, openList);
+                    html.append("<ol>");
+                    openList = LIST_ORDERED;
+                }
+                html.append("<li>").append(renderInline(line.substring(orderedMarkerLength).trim())).append("</li>");
+                continue;
+            }
+
+            openList = closeList(html, openList);
             if (paragraph.length() > 0) {
                 paragraph.append(' ');
             }
@@ -48,9 +94,33 @@ public final class JavaSimpleMarkdownRenderer {
         if (inCodeBlock) {
             html.append("</code></pre>");
         }
+        closeList(html, openList);
         flushParagraph(html, paragraph);
 
         return SafeHtml.fromTrustedRendererOutput(html.toString());
+    }
+
+    private static int orderedMarkerLength(String line) {
+        int index = 0;
+        while (index < line.length() && Character.isDigit(line.charAt(index))) {
+            index++;
+        }
+        if (index == 0 || index + 1 >= line.length()) {
+            return 0;
+        }
+        if (line.charAt(index) == '.' && line.charAt(index + 1) == ' ') {
+            return index + 2;
+        }
+        return 0;
+    }
+
+    private static int closeList(StringBuilder html, int openList) {
+        if (openList == LIST_UNORDERED) {
+            html.append("</ul>");
+        } else if (openList == LIST_ORDERED) {
+            html.append("</ol>");
+        }
+        return LIST_NONE;
     }
 
     private static void flushParagraph(StringBuilder html, StringBuilder paragraph) {
@@ -115,4 +185,5 @@ public final class JavaSimpleMarkdownRenderer {
                 return String.valueOf(value);
         }
     }
+
 }

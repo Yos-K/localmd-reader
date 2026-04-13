@@ -12,6 +12,10 @@
 - [x] renders plain text as paragraph
 - [x] renders fenced code block with escaped content
 - [x] renders inline code with escaped content
+- [x] renders bullet list items as unordered list
+- [x] renders numbered list items as ordered list
+- [x] renders blockquote as blockquote
+- [x] renders horizontal rule
 
 ## Safety
 
