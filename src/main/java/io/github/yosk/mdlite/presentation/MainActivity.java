@@ -755,6 +755,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         styleMenuButton(openButton);
         styleMenuButton(recentButton);
         styleMenuButton(themeButton);
+        styleMenuButton(languageButton);
         styleMenuButton(controlsPlacementButton);
         applyMenuSectionTheme();
     }

@@ -12,3 +12,4 @@
 - [x] switching theme updates the top or bottom controls bar
 - [x] switching theme updates the hamburger menu
 - [x] switching theme updates tab backgrounds and text
+- [x] switching theme updates the language switch button
