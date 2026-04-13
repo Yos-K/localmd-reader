@@ -11,6 +11,7 @@ public final class OpenDocumentTabsTest {
         test.closeActiveMiddleTabActivatesTheNextDocument();
         test.closeActiveLastTabActivatesThePreviousDocument();
         test.closeOnlyTabKeepsTheLastDocumentOpen();
+        test.closeOrFallbackReplacesTheOnlyOpenDocumentWithTheFallbackTab();
     }
 
     public void initialTabsExposeTheInitialDocumentAsActiveTab() {
@@ -74,6 +75,16 @@ public final class OpenDocumentTabsTest {
 
         assertEquals(1, tabs.tabs().size(), "closing the only tab must keep one document open");
         assertEquals("Welcome", tabs.activeTab().title(), "closing the only tab must keep the same document active");
+    }
+
+    public void closeOrFallbackReplacesTheOnlyOpenDocumentWithTheFallbackTab() {
+        OpenDocumentTabs tabs = OpenDocumentTabs
+                .withInitialTab(tab("First", "content://first", "first"))
+                .closeOrFallback(0, tab("Welcome", "app://welcome", "welcome"));
+
+        assertEquals(1, tabs.tabs().size(), "closing the only document with fallback must keep one tab open");
+        assertEquals("Welcome", tabs.activeTab().title(), "closing the only document with fallback must show the fallback tab");
+        assertEquals("app://welcome", tabs.activeTab().uri(), "fallback tab must become the only active tab");
     }
 
     private static OpenDocumentTabs threeTabs() {

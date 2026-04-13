@@ -10,6 +10,7 @@
 - [x] closing the active middle tab activates the next document
 - [x] closing the active last tab activates the previous document
 - [x] closing the only tab keeps the last document open
+- [x] closing the only document tab with fallback returns to Welcome
 - [x] restorable tabs keep stored tab order and active index
 - [x] restorable tabs drop duplicate URIs
 - [x] restorable tabs clamp invalid active index values
@@ -24,7 +25,8 @@
 - [x] open files from the picker, recent list, or external view intent as tabs
 - [x] keep the tab row swipe gesture dedicated to horizontal tab scrolling
 - [x] close an open tab from the tab row
-- [x] hide the close control when only one tab is open
+- [x] allow closing the last document tab to return to Welcome
+- [x] hide the close control when only the Welcome tab is open
 - [x] restore tabs after app restart
 - [x] restore the previously active tab when the stored index is still valid
 - [x] skip unreadable restored tabs and fall back to a valid tab

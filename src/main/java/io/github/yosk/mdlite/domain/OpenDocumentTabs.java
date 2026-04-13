@@ -61,6 +61,13 @@ public final class OpenDocumentTabs {
         return new OpenDocumentTabs(next, nextActiveIndex);
     }
 
+    public OpenDocumentTabs closeOrFallback(int index, OpenDocumentTab fallbackTab) {
+        if (tabs.size() == 1 && index == 0) {
+            return withInitialTab(fallbackTab);
+        }
+        return close(index);
+    }
+
     public OpenDocumentTab activeTab() {
         return tabs.get(activeIndex);
     }

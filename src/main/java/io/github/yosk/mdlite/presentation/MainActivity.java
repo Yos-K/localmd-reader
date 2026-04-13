@@ -302,7 +302,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             renderCurrentDocument();
             saveOpenTabs();
         } else if (view instanceof CloseTabText) {
-            openTabs = openTabs.close(((CloseTabText) view).tabIndex());
+            openTabs = openTabs.closeOrFallback(((CloseTabText) view).tabIndex(), initialTab());
             renderTabs();
             renderCurrentDocument();
             saveOpenTabs();
@@ -985,7 +985,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
 
-            if (openTabs.tabs().size() > 1) {
+            if (canCloseTab(tab)) {
                 CloseTabText closeText = new CloseTabText(this, i);
                 closeText.setText("×");
                 closeText.setTextSize(20);
@@ -1003,6 +1003,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
         }
+    }
+
+    private static boolean canCloseTab(OpenDocumentTab tab) {
+        return !WELCOME_URI.equals(tab.uri());
     }
 
     private boolean handleFontScaleTouch(MotionEvent event) {

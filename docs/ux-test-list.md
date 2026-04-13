@@ -28,7 +28,8 @@
 - [x] Active tab uses stronger visual emphasis than inactive tabs.
 - [x] Long tab titles are constrained to avoid breaking the tab row.
 - [x] Close tab controls have accessibility labels.
-- [x] Close tab control is hidden when there is only one tab.
+- [x] Last document tab can be closed to return to Welcome.
+- [x] Close tab control is hidden when only the Welcome tab is open.
 
 ## Reading Surface
 
