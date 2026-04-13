@@ -12,6 +12,7 @@ public final class HtmlPageBuilderTest {
         test.includesRenderedMarkdownBodyUnchanged();
         test.appliesFontSizeToParagraphText();
         test.appliesFontSizeToHeadings();
+        test.stylesLinksWithThemeReadableColor();
         test.stylesChecklistForReadableMobileLayout();
         test.stylesTablesForReadableMobileLayout();
         test.stylesTablesWithVisibleScrollHintInDarkTheme();
@@ -60,6 +61,20 @@ public final class HtmlPageBuilderTest {
 
         assertContains(page, "h1{font-size:26px", "h1 CSS must scale from selected font size");
         assertContains(page, "h2{font-size:23px", "h2 CSS must scale from selected font size");
+    }
+
+    public void stylesLinksWithThemeReadableColor() {
+        String lightPage = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<p><a href=\"https://example.com\">Link</a></p>"),
+                ViewerTheme.light(),
+                FontSize.of(18));
+        String darkPage = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<p><a href=\"https://example.com\">Link</a></p>"),
+                ViewerTheme.dark(),
+                FontSize.of(18));
+
+        assertContains(lightPage, "a{color:#0b6f87;text-decoration:underline;}", "light theme links must be visibly styled");
+        assertContains(darkPage, "a{color:#7ccbe0;text-decoration:underline;}", "dark theme links must be visibly styled");
     }
 
     public void stylesChecklistForReadableMobileLayout() {

@@ -281,6 +281,11 @@ public final class JavaSimpleMarkdownRenderer {
             }
 
             if (code == null) {
+                int linkEnd = appendMarkdownLinkIfPresent(out, text, i);
+                if (linkEnd >= i) {
+                    i = linkEnd;
+                    continue;
+                }
                 out.append(escapeHtmlChar(current));
             } else {
                 code.append(current);
@@ -292,6 +297,36 @@ public final class JavaSimpleMarkdownRenderer {
         }
 
         return out.toString();
+    }
+
+    private static int appendMarkdownLinkIfPresent(StringBuilder out, String text, int index) {
+        if (text.charAt(index) != '[') {
+            return -1;
+        }
+        int labelEnd = text.indexOf(']', index + 1);
+        if (labelEnd < 0 || labelEnd + 1 >= text.length() || text.charAt(labelEnd + 1) != '(') {
+            return -1;
+        }
+        int urlEnd = text.indexOf(')', labelEnd + 2);
+        if (urlEnd < 0) {
+            return -1;
+        }
+
+        String label = text.substring(index + 1, labelEnd);
+        String url = text.substring(labelEnd + 2, urlEnd).trim();
+        if (isSafeLinkUrl(url)) {
+            out.append("<a href=\"").append(escapeHtml(url)).append("\">")
+                    .append(renderInline(label))
+                    .append("</a>");
+        } else {
+            out.append(renderInline(label));
+        }
+        return urlEnd;
+    }
+
+    private static boolean isSafeLinkUrl(String url) {
+        String lower = url.toLowerCase();
+        return lower.startsWith("https://") || lower.startsWith("http://");
     }
 
     private static String escapeHtml(String text) {

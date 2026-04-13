@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -252,6 +253,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         settings.setDatabaseEnabled(false);
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
+        webView.setWebViewClient(new ExternalHttpLinkClient());
     }
 
     private static SafeHtml initialDocument() {
@@ -273,6 +275,26 @@ public final class MainActivity extends Activity implements View.OnClickListener
         private FileInfo(String displayName, long sizeBytes) {
             this.displayName = displayName;
             this.sizeBytes = sizeBytes;
+        }
+    }
+
+    private static final class ExternalHttpLinkClient extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if (!isExternalHttpUrl(url)) {
+                return true;
+            }
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            view.getContext().startActivity(intent);
+            return true;
+        }
+
+        private static boolean isExternalHttpUrl(String url) {
+            if (url == null) {
+                return false;
+            }
+            String lower = url.toLowerCase();
+            return lower.startsWith("https://") || lower.startsWith("http://");
         }
     }
 }

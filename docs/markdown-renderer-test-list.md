@@ -14,6 +14,9 @@
 - [x] renders fenced code block with escaped content
 - [x] renders fenced code block with language info as code block
 - [x] renders inline code with escaped content
+- [x] renders HTTPS Markdown link as safe anchor
+- [x] renders HTTP Markdown link as safe anchor
+- [x] does not render JavaScript Markdown link as anchor
 - [x] renders bullet list items as unordered list
 - [x] renders unchecked checklist item as disabled checkbox in list
 - [x] renders checked checklist item as disabled checked checkbox in list

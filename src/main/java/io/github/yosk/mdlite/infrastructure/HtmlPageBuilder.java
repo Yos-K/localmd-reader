@@ -17,6 +17,7 @@ public final class HtmlPageBuilder {
         FontSize safeFontSize = fontSize == null ? FontSize.defaultSize() : fontSize;
         String background = safeTheme.isDark() ? "#101414" : "#f8fbfa";
         String text = safeTheme.isDark() ? "#edf5f2" : "#172121";
+        String link = safeTheme.isDark() ? "#7ccbe0" : "#0b6f87";
         String codeBackground = safeTheme.isDark() ? "#25302f" : "#e6eeee";
         String border = safeTheme.isDark() ? "#3c4b49" : "#c9d8d5";
         String tableScrollHint = safeTheme.isDark() ? "#80a8a1" : border;
@@ -39,6 +40,7 @@ public final class HtmlPageBuilder {
                 + "code{background:" + codeBackground + ";padding:2px 4px;border-radius:4px;}"
                 + "pre{background:" + codeBackground + ";padding:12px;overflow-x:auto;border-radius:4px;}"
                 + "pre code{background:transparent;padding:0;}"
+                + "a{color:" + link + ";text-decoration:underline;}"
                 + "blockquote{border-left:4px solid " + border + ";margin:0 0 12px;padding:4px 0 4px 12px;}"
                 + "li{margin:4px 0;}"
                 + "ul.checklist{list-style:none;padding-left:0;}"

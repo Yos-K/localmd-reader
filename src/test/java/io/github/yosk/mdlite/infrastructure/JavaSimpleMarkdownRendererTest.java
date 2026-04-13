@@ -14,6 +14,9 @@ public final class JavaSimpleMarkdownRendererTest {
         test.rendersFencedCodeBlockWithEscapedContent();
         test.rendersFencedCodeBlockWithLanguageInfoAsCodeBlock();
         test.rendersInlineCodeWithEscapedContent();
+        test.rendersHttpsMarkdownLinkAsSafeAnchor();
+        test.rendersHttpMarkdownLinkAsSafeAnchor();
+        test.doesNotRenderJavascriptMarkdownLinkAsAnchor();
         test.rendersBulletListItemsAsUnorderedList();
         test.rendersUncheckedChecklistItemAsDisabledCheckboxInList();
         test.rendersCheckedChecklistItemAsDisabledCheckedCheckboxInList();
@@ -86,6 +89,25 @@ public final class JavaSimpleMarkdownRendererTest {
         SafeHtml html = renderer.render("Use `<tag>` here");
 
         assertContains(html.value(), "Use <code>&lt;tag&gt;</code> here", "inline code content must be escaped");
+    }
+
+    public void rendersHttpsMarkdownLinkAsSafeAnchor() {
+        SafeHtml html = renderer.render("Read [docs](https://example.com/docs?a=1&b=2)");
+
+        assertContains(html.value(), "Read <a href=\"https://example.com/docs?a=1&amp;b=2\">docs</a>", "HTTPS Markdown link must render as safe anchor with escaped URL");
+    }
+
+    public void rendersHttpMarkdownLinkAsSafeAnchor() {
+        SafeHtml html = renderer.render("Open [site](http://example.com)");
+
+        assertContains(html.value(), "Open <a href=\"http://example.com\">site</a>", "HTTP Markdown link must render as safe anchor");
+    }
+
+    public void doesNotRenderJavascriptMarkdownLinkAsAnchor() {
+        SafeHtml html = renderer.render("Bad [link](javascript:alert(1))");
+
+        assertContains(html.value(), "Bad link", "unsafe Markdown link must keep readable text");
+        assertNotContains(html.value(), "<a href=\"javascript:", "unsafe Markdown link must not render as anchor");
     }
 
     public void rendersBulletListItemsAsUnorderedList() {
