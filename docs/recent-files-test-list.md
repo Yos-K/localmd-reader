@@ -16,6 +16,6 @@
 - [x] store recent files locally in app private preferences
 - [x] do not require network permission for recent files
 - [x] clear recent files from the recent files dialog
-- [x] show an empty-state message when there are no recent files
+- [x] show an empty-state dialog when there are no recent files
 - [x] reopen a recent file from the recent files dialog
 - [x] keep a reopened recent file at the top of the list

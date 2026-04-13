@@ -319,7 +319,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void showRecentDocuments() {
         displayedRecentDocuments = loadRecentDocuments();
         if (displayedRecentDocuments.items().isEmpty()) {
-            showMessage("No recent files yet.");
+            new AlertDialog.Builder(this)
+                    .setTitle("Recent files")
+                    .setMessage("No recent files yet.")
+                    .setPositiveButton("OK", null)
+                    .show();
             return;
         }
 
