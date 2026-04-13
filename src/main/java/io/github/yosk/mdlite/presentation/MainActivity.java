@@ -237,6 +237,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
+        if (which == DialogInterface.BUTTON_NEGATIVE) {
+            clearRecentDocuments();
+            showMessage("Recent files cleared.");
+            return;
+        }
         if (which < 0 || which >= displayedRecentDocuments.items().size()) {
             return;
         }
@@ -326,6 +331,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         new AlertDialog.Builder(this)
                 .setTitle("Recent files")
                 .setItems(labels, this)
+                .setNegativeButton("Clear history", this)
                 .show();
     }
 
@@ -681,6 +687,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
         getSharedPreferences(RECENT_PREFS, MODE_PRIVATE)
                 .edit()
                 .putString(RECENT_ITEMS, raw.toString())
+                .apply();
+    }
+
+    private void clearRecentDocuments() {
+        displayedRecentDocuments = displayedRecentDocuments.clear();
+        getSharedPreferences(RECENT_PREFS, MODE_PRIVATE)
+                .edit()
+                .clear()
                 .apply();
     }
 

@@ -10,6 +10,7 @@ public final class RecentDocumentsTest {
         test.recordOpenedKeepsOnlyTheConfiguredMaximumNumberOfDocuments();
         test.fromRestoresStoredDocumentsWithoutDuplicateUris();
         test.documentUsesFallbackDisplayNameWhenNameIsBlank();
+        test.clearRemovesEveryRecentDocument();
     }
 
     public void recordOpenedAddsNewestDocumentToTop() {
@@ -59,6 +60,15 @@ public final class RecentDocumentsTest {
         RecentDocument document = RecentDocument.of("  ", "content://blank-name");
 
         assertEquals("Untitled Markdown", document.displayName(), "blank display name must not leak an empty recent item label");
+    }
+
+    public void clearRemovesEveryRecentDocument() {
+        RecentDocuments documents = RecentDocuments.empty(5)
+                .recordOpened(doc("first.md", "content://first"))
+                .recordOpened(doc("second.md", "content://second"))
+                .clear();
+
+        assertEquals(0, documents.items().size(), "clearing recent documents must remove every stored document");
     }
 
     private static RecentDocument doc(String displayName, String uri) {

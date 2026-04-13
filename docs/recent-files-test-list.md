@@ -7,6 +7,7 @@
 - [x] keep only the configured maximum number of recent documents
 - [x] restore stored documents without duplicate URIs
 - [x] use a fallback display name when the provider returns a blank name
+- [x] clear removes every recent document
 
 ## Android Behavior
 
@@ -14,6 +15,7 @@
 - [x] remember files opened from external view intents after successful display
 - [x] store recent files locally in app private preferences
 - [x] do not require network permission for recent files
+- [x] clear recent files from the recent files dialog
 - [ ] show an empty-state message when there are no recent files
 - [ ] reopen a recent file from the recent files dialog
 - [ ] keep a reopened recent file at the top of the list

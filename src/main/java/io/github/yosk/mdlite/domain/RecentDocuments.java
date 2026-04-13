@@ -46,6 +46,10 @@ public final class RecentDocuments {
         return new RecentDocuments(maxItems, next);
     }
 
+    public RecentDocuments clear() {
+        return empty(maxItems);
+    }
+
     public List<RecentDocument> items() {
         return items;
     }
