@@ -41,20 +41,6 @@ public final class OpenDocumentTabs {
         return new OpenDocumentTabs(tabs, index);
     }
 
-    public OpenDocumentTabs activatePrevious() {
-        if (activeIndex == 0) {
-            return this;
-        }
-        return activate(activeIndex - 1);
-    }
-
-    public OpenDocumentTabs activateNext() {
-        if (activeIndex == tabs.size() - 1) {
-            return this;
-        }
-        return activate(activeIndex + 1);
-    }
-
     public OpenDocumentTab activeTab() {
         return tabs.get(activeIndex);
     }

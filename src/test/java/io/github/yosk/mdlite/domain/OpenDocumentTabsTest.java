@@ -7,10 +7,6 @@ public final class OpenDocumentTabsTest {
         test.openAddsANewDocumentAsTheActiveTab();
         test.openExistingUriReplacesThatTabAndActivatesItWithoutDuplicate();
         test.activateSwitchesTheActiveTabByIndex();
-        test.activatePreviousSwitchesToThePreviousTab();
-        test.activatePreviousKeepsTheFirstTabActiveAtTheStartBoundary();
-        test.activateNextSwitchesToTheNextTab();
-        test.activateNextKeepsTheLastTabActiveAtTheEndBoundary();
     }
 
     public void initialTabsExposeTheInitialDocumentAsActiveTab() {
@@ -46,38 +42,6 @@ public final class OpenDocumentTabsTest {
                 .activate(0);
 
         assertEquals("Welcome", tabs.activeTab().title(), "activating a tab index must switch the active document");
-    }
-
-    public void activatePreviousSwitchesToThePreviousTab() {
-        OpenDocumentTabs tabs = threeTabs().activate(2).activatePrevious();
-
-        assertEquals(1, tabs.activeIndex(), "previous tab gesture must move one tab left");
-        assertEquals("First", tabs.activeTab().title(), "previous tab gesture must activate the previous document");
-    }
-
-    public void activatePreviousKeepsTheFirstTabActiveAtTheStartBoundary() {
-        OpenDocumentTabs tabs = threeTabs().activate(0).activatePrevious();
-
-        assertEquals(0, tabs.activeIndex(), "previous tab gesture at the first tab must keep the first tab active");
-    }
-
-    public void activateNextSwitchesToTheNextTab() {
-        OpenDocumentTabs tabs = threeTabs().activate(0).activateNext();
-
-        assertEquals(1, tabs.activeIndex(), "next tab gesture must move one tab right");
-        assertEquals("First", tabs.activeTab().title(), "next tab gesture must activate the next document");
-    }
-
-    public void activateNextKeepsTheLastTabActiveAtTheEndBoundary() {
-        OpenDocumentTabs tabs = threeTabs().activate(2).activateNext();
-
-        assertEquals(2, tabs.activeIndex(), "next tab gesture at the last tab must keep the last tab active");
-    }
-
-    private static OpenDocumentTabs threeTabs() {
-        return OpenDocumentTabs.withInitialTab(tab("Welcome", "app://welcome", "welcome"))
-                .open(tab("First", "content://first", "first"))
-                .open(tab("Second", "content://second", "second"));
     }
 
     private static OpenDocumentTab tab(String title, String uri, String document) {
