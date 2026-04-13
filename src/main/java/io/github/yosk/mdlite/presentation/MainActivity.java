@@ -12,6 +12,7 @@ import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.HorizontalScrollView;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -21,6 +22,8 @@ import android.widget.TextView;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
 import io.github.yosk.mdlite.domain.FileTypeDetector;
 import io.github.yosk.mdlite.domain.FontSize;
+import io.github.yosk.mdlite.domain.OpenDocumentTab;
+import io.github.yosk.mdlite.domain.OpenDocumentTabs;
 import io.github.yosk.mdlite.domain.RecentDocument;
 import io.github.yosk.mdlite.domain.RecentDocuments;
 import io.github.yosk.mdlite.domain.SafeHtml;
@@ -51,7 +54,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button themeButton;
     private Button smallerTextButton;
     private Button largerTextButton;
-    private SafeHtml currentDocument;
+    private LinearLayout tabRow;
+    private OpenDocumentTabs openTabs;
     private ViewerTheme currentTheme = ViewerTheme.light();
     private FontSize currentFontSize = FontSize.defaultSize();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
@@ -108,9 +112,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
         messageView.setGravity(Gravity.CENTER_VERTICAL);
         messageView.setPadding(24, 12, 24, 12);
 
+        tabRow = new LinearLayout(this);
+        tabRow.setOrientation(LinearLayout.HORIZONTAL);
+
+        HorizontalScrollView tabScroller = new HorizontalScrollView(this);
+        tabScroller.setHorizontalScrollBarEnabled(true);
+        tabScroller.addView(tabRow, new HorizontalScrollView.LayoutParams(
+                HorizontalScrollView.LayoutParams.WRAP_CONTENT,
+                HorizontalScrollView.LayoutParams.WRAP_CONTENT));
+
         webView = new WebView(this);
         configureWebView(webView);
-        currentDocument = initialDocument();
+        openTabs = OpenDocumentTabs.withInitialTab(initialTab());
+        renderTabs();
         renderCurrentDocument();
 
         root.addView(openButton, new LinearLayout.LayoutParams(
@@ -126,6 +140,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(messageView, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        root.addView(tabScroller, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(webView, new LinearLayout.LayoutParams(
@@ -152,6 +169,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
             renderCurrentDocument();
         } else if (view == largerTextButton) {
             currentFontSize = currentFontSize.increased();
+            renderCurrentDocument();
+        } else if (view instanceof TabButton) {
+            openTabs = openTabs.activate(((TabButton) view).tabIndex());
+            renderTabs();
             renderCurrentDocument();
         }
     }
@@ -218,7 +239,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         try {
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
-            currentDocument = renderer.render(markdown);
+            SafeHtml rendered = renderer.render(markdown);
+            openTabs = openTabs.open(OpenDocumentTab.of(fileInfo.displayName, uri.toString(), rendered));
+            renderTabs();
             renderCurrentDocument();
             if (remember) {
                 recordRecentDocument(fileInfo.displayName, uri);
@@ -389,16 +412,34 @@ public final class MainActivity extends Activity implements View.OnClickListener
         webView.setWebViewClient(new ExternalHttpLinkClient());
     }
 
-    private static SafeHtml initialDocument() {
+    private static OpenDocumentTab initialTab() {
         String markdown = "# MdLite Reader\n\n"
                 + "Lightweight Markdown viewing starts here.\n\n"
                 + "No ads. No tracking. No network permission.\n\n"
                 + "Use `<script>` as text, not as HTML.";
-        return new JavaSimpleMarkdownRenderer().render(markdown);
+        return OpenDocumentTab.of(
+                "Welcome",
+                "app://welcome",
+                new JavaSimpleMarkdownRenderer().render(markdown));
     }
 
     private void renderCurrentDocument() {
-        webView.loadDataWithBaseURL(null, HtmlPageBuilder.buildPage(currentDocument, currentTheme, currentFontSize), "text/html", "UTF-8", null);
+        webView.loadDataWithBaseURL(null, HtmlPageBuilder.buildPage(openTabs.activeTab().document(), currentTheme, currentFontSize), "text/html", "UTF-8", null);
+    }
+
+    private void renderTabs() {
+        tabRow.removeAllViews();
+        for (int i = 0; i < openTabs.tabs().size(); i++) {
+            OpenDocumentTab tab = openTabs.tabs().get(i);
+            TabButton button = new TabButton(this, i);
+            button.setText(tab.title());
+            button.setAllCaps(false);
+            button.setOnClickListener(this);
+            button.setEnabled(i != openTabs.activeIndex());
+            tabRow.addView(button, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+        }
     }
 
     private static final class FileInfo {
@@ -428,6 +469,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
             }
             String lower = url.toLowerCase();
             return lower.startsWith("https://") || lower.startsWith("http://");
+        }
+    }
+
+    private static final class TabButton extends Button {
+        private final int tabIndex;
+
+        private TabButton(Activity activity, int tabIndex) {
+            super(activity);
+            this.tabIndex = tabIndex;
+        }
+
+        private int tabIndex() {
+            return tabIndex;
         }
     }
 }
