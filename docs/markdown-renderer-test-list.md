@@ -28,5 +28,7 @@
 
 ## Safety
 
-- [ ] renderer does not crash on empty input
-- [ ] renderer does not crash on arbitrary text
+- [x] renderer does not crash on empty input
+- [x] renderer does not crash on null input
+- [x] renderer closes unterminated code fence instead of crashing
+- [x] renderer does not crash on generated mixed Markdown text

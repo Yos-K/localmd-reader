@@ -25,6 +25,10 @@ public final class JavaSimpleMarkdownRendererTest {
         test.escapesPipeTableCellContentAndRendersInlineCode();
         test.rendersBlockquoteAsBlockquote();
         test.rendersHorizontalRule();
+        test.rendererDoesNotCrashOnEmptyInput();
+        test.rendererDoesNotCrashOnNullInput();
+        test.rendererClosesUnterminatedCodeFenceInsteadOfCrashing();
+        test.rendererDoesNotCrashOnGeneratedMixedMarkdownText();
     }
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
@@ -159,6 +163,49 @@ public final class JavaSimpleMarkdownRendererTest {
         assertContains(html.value(), "<hr>", "horizontal rule must render as hr");
     }
 
+    public void rendererDoesNotCrashOnEmptyInput() {
+        SafeHtml html = renderer.render("");
+
+        assertEquals("", html.value(), "empty Markdown input must render as an empty safe HTML fragment");
+    }
+
+    public void rendererDoesNotCrashOnNullInput() {
+        SafeHtml html = renderer.render(null);
+
+        assertEquals("", html.value(), "null Markdown input must be handled as empty input");
+    }
+
+    public void rendererClosesUnterminatedCodeFenceInsteadOfCrashing() {
+        SafeHtml html = renderer.render("```text\nvalue < 3");
+
+        assertContains(html.value(), "<pre><code>", "unterminated fenced code block must still open a code block");
+        assertContains(html.value(), "value &lt; 3", "unterminated fenced code block content must be escaped");
+        assertContains(html.value(), "</code></pre>", "unterminated fenced code block must be closed at end of document");
+    }
+
+    public void rendererDoesNotCrashOnGeneratedMixedMarkdownText() {
+        String[] fragments = new String[] {
+                "#", "## heading", "- item", "- [x] done", "1. ordered",
+                "| a | b |", "| --- | --- |", "`code", "[label](https://example.com)",
+                "[bad](javascript:alert(1))", "<script>", "&", "```", "> quote", "---", "\n"
+        };
+
+        StringBuilder markdown = new StringBuilder();
+        for (int i = 0; i < 128; i++) {
+            markdown.append(fragments[(i * 37 + 11) % fragments.length]);
+            if (i % 3 == 0) {
+                markdown.append(' ');
+            } else {
+                markdown.append('\n');
+            }
+        }
+
+        SafeHtml html = renderer.render(markdown.toString());
+
+        assertNotNull(html.value(), "generated mixed Markdown must always produce a safe HTML fragment");
+        assertNotContains(html.value(), "<script>", "generated mixed Markdown must not emit raw script tags");
+    }
+
     private static void assertContains(String actual, String expected, String message) {
         if (!actual.contains(expected)) {
             throw new AssertionError(message + "\nExpected to contain: " + expected + "\nActual: " + actual);
@@ -168,6 +215,18 @@ public final class JavaSimpleMarkdownRendererTest {
     private static void assertNotContains(String actual, String forbidden, String message) {
         if (actual.contains(forbidden)) {
             throw new AssertionError(message + "\nForbidden content: " + forbidden + "\nActual: " + actual);
+        }
+    }
+
+    private static void assertEquals(String expected, String actual, String message) {
+        if (!expected.equals(actual)) {
+            throw new AssertionError(message + "\nExpected: " + expected + "\nActual: " + actual);
+        }
+    }
+
+    private static void assertNotNull(String actual, String message) {
+        if (actual == null) {
+            throw new AssertionError(message);
         }
     }
 }
