@@ -11,6 +11,7 @@ public final class HtmlPageBuilderTest {
         test.rendersDarkThemeWithDarkBackgroundAndLightText();
         test.includesRenderedMarkdownBodyUnchanged();
         test.appliesFontSizeToParagraphText();
+        test.appliesFontSizeToHeadings();
     }
 
     public void rendersLightThemeWithLightBackgroundAndDarkText() {
@@ -46,6 +47,16 @@ public final class HtmlPageBuilderTest {
                 FontSize.of(18));
 
         assertContains(page, "p{font-size:18px", "paragraph CSS must use selected font size");
+    }
+
+    public void appliesFontSizeToHeadings() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<h1>Title</h1><h2>Section</h2>"),
+                ViewerTheme.light(),
+                FontSize.of(18));
+
+        assertContains(page, "h1{font-size:26px", "h1 CSS must scale from selected font size");
+        assertContains(page, "h2{font-size:23px", "h2 CSS must scale from selected font size");
     }
 
     private static void assertContains(String actual, String expected, String message) {

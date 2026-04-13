@@ -14,3 +14,4 @@
 ## HtmlPageBuilder
 
 - [x] applies font size to paragraph text
+- [x] applies font size to headings

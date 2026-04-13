@@ -19,18 +19,21 @@ public final class HtmlPageBuilder {
         String text = safeTheme.isDark() ? "#edf5f2" : "#172121";
         String codeBackground = safeTheme.isDark() ? "#25302f" : "#e6eeee";
         String border = safeTheme.isDark() ? "#3c4b49" : "#c9d8d5";
+        int bodyFontSize = safeFontSize.sp();
+        int h1FontSize = bodyFontSize + 8;
+        int h2FontSize = bodyFontSize + 5;
 
         return "<!doctype html>"
                 + "<html><head><meta charset=\"utf-8\">"
                 + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
                 + "<style>"
                 + "body{font-family:sans-serif;margin:24px;line-height:1.55;color:" + text + ";background:" + background + ";}"
-                + "h1{font-size:24px;margin:0 0 12px;}"
-                + "h2{font-size:21px;margin:24px 0 10px;border-bottom:1px solid " + border + ";padding-bottom:4px;}"
-                + "p{font-size:" + safeFontSize.sp() + "px;margin:0 0 12px;}"
-                + "ul,ol{font-size:" + safeFontSize.sp() + "px;}"
-                + "blockquote{font-size:" + safeFontSize.sp() + "px;}"
-                + "pre{font-size:" + safeFontSize.sp() + "px;}"
+                + "h1{font-size:" + h1FontSize + "px;margin:0 0 12px;}"
+                + "h2{font-size:" + h2FontSize + "px;margin:24px 0 10px;border-bottom:1px solid " + border + ";padding-bottom:4px;}"
+                + "p{font-size:" + bodyFontSize + "px;margin:0 0 12px;}"
+                + "ul,ol{font-size:" + bodyFontSize + "px;}"
+                + "blockquote{font-size:" + bodyFontSize + "px;}"
+                + "pre{font-size:" + bodyFontSize + "px;}"
                 + "code{background:" + codeBackground + ";padding:2px 4px;border-radius:4px;}"
                 + "pre{background:" + codeBackground + ";padding:12px;overflow-x:auto;border-radius:4px;}"
                 + "pre code{background:transparent;padding:0;}"
