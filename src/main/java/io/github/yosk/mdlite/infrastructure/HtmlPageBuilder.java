@@ -21,6 +21,9 @@ public final class HtmlPageBuilder {
         String codeBackground = safeTheme.isDark() ? "#25302f" : "#e6eeee";
         String border = safeTheme.isDark() ? "#3c4b49" : "#c9d8d5";
         String tableScrollHint = safeTheme.isDark() ? "#80a8a1" : border;
+        String tableScrollHintRgb = safeTheme.isDark() ? "128,168,161" : "201,216,213";
+        String tableScrollHintOpacity = safeTheme.isDark() ? "0.55" : "0.45";
+        String tableBackgroundRgb = safeTheme.isDark() ? "16,20,20" : "248,251,250";
         String tableScrollbarTrack = safeTheme.isDark() ? "#1b2423" : "#eef5f3";
         int bodyFontSize = safeFontSize.sp();
         int h1FontSize = bodyFontSize + 8;
@@ -45,7 +48,7 @@ public final class HtmlPageBuilder {
                 + "li{margin:4px 0;}"
                 + "ul.checklist{list-style:none;padding-left:0;}"
                 + "ul.checklist input{margin-right:8px;}"
-                + ".table-scroll{overflow-x:auto;margin:0 0 16px;border:1px solid " + border + ";border-radius:4px;box-shadow:inset -18px 0 14px -12px " + tableScrollHint + ";}"
+                + ".table-scroll{overflow-x:auto;margin:0 0 16px;background:linear-gradient(to right," + background + " 30%,rgba(" + tableBackgroundRgb + ",0)),linear-gradient(to right,rgba(" + tableBackgroundRgb + ",0)," + background + " 70%) 100% 0,linear-gradient(to right,rgba(" + tableScrollHintRgb + "," + tableScrollHintOpacity + "),rgba(" + tableScrollHintRgb + ",0)),linear-gradient(to left,rgba(" + tableScrollHintRgb + "," + tableScrollHintOpacity + "),rgba(" + tableScrollHintRgb + ",0)) 100% 0;background-repeat:no-repeat;background-size:32px 100%,32px 100%,16px 100%,16px 100%;background-attachment:local,local,scroll,scroll;}"
                 + ".table-scroll::-webkit-scrollbar{height:8px;}"
                 + ".table-scroll::-webkit-scrollbar-track{background:" + tableScrollbarTrack + ";}"
                 + ".table-scroll::-webkit-scrollbar-thumb{background:" + tableScrollHint + ";border-radius:4px;}"
