@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.webkit.WebSettings;
@@ -59,6 +61,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private ViewerTheme currentTheme = ViewerTheme.light();
     private FontSize currentFontSize = FontSize.defaultSize();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
+    private ScaleGestureDetector fontScaleGestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +126,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         webView = new WebView(this);
         configureWebView(webView);
+        fontScaleGestureDetector = new ScaleGestureDetector(this, new FontScaleGestureListener(this));
+        webView.setOnTouchListener(new FontScaleTouchListener(this));
         openTabs = OpenDocumentTabs.withInitialTab(initialTab());
         renderTabs();
         renderCurrentDocument();
@@ -464,6 +469,20 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
     }
 
+    private boolean handleFontScaleTouch(MotionEvent event) {
+        fontScaleGestureDetector.onTouchEvent(event);
+        return false;
+    }
+
+    private void changeFontSizeByPinch(float scaleFactor) {
+        FontSize changed = currentFontSize.changedByPinchScale(scaleFactor);
+        if (changed.sp() == currentFontSize.sp()) {
+            return;
+        }
+        currentFontSize = changed;
+        renderCurrentDocument();
+    }
+
     private static final class FileInfo {
         private final String displayName;
         private final long sizeBytes;
@@ -517,6 +536,33 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         private int tabIndex() {
             return tabIndex;
+        }
+    }
+
+    private static final class FontScaleTouchListener implements View.OnTouchListener {
+        private final MainActivity activity;
+
+        private FontScaleTouchListener(MainActivity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            return activity.handleFontScaleTouch(event);
+        }
+    }
+
+    private static final class FontScaleGestureListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        private final MainActivity activity;
+
+        private FontScaleGestureListener(MainActivity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            activity.changeFontSizeByPinch(detector.getScaleFactor());
+            return true;
         }
     }
 

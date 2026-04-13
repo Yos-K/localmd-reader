@@ -39,4 +39,14 @@ public final class FontSize {
         }
         return new FontSize(sp - 1);
     }
+
+    public FontSize changedByPinchScale(float scaleFactor) {
+        if (scaleFactor >= 1.10f) {
+            return increased();
+        }
+        if (scaleFactor <= 0.90f) {
+            return decreased();
+        }
+        return this;
+    }
 }

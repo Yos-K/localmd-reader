@@ -11,6 +11,9 @@ public final class FontSizeTest {
         test.doesNotIncreaseBeyondMaximum();
         test.decreasesByOneStep();
         test.doesNotDecreaseBelowMinimum();
+        test.pinchingOutBeyondThresholdIncreasesByOneStep();
+        test.pinchingInBeyondThresholdDecreasesByOneStep();
+        test.pinchingWithinThresholdKeepsCurrentSize();
     }
 
     public void acceptsMinimumValue() {
@@ -65,6 +68,24 @@ public final class FontSizeTest {
         FontSize fontSize = FontSize.of(FontSize.MIN_SP).decreased();
 
         assertEquals(FontSize.MIN_SP, fontSize.sp(), "decreasing minimum font size must stay at minimum");
+    }
+
+    public void pinchingOutBeyondThresholdIncreasesByOneStep() {
+        FontSize fontSize = FontSize.of(16).changedByPinchScale(1.12f);
+
+        assertEquals(17, fontSize.sp(), "pinching out beyond the threshold must increase font size by one step");
+    }
+
+    public void pinchingInBeyondThresholdDecreasesByOneStep() {
+        FontSize fontSize = FontSize.of(16).changedByPinchScale(0.88f);
+
+        assertEquals(15, fontSize.sp(), "pinching in beyond the threshold must decrease font size by one step");
+    }
+
+    public void pinchingWithinThresholdKeepsCurrentSize() {
+        FontSize fontSize = FontSize.of(16).changedByPinchScale(1.04f);
+
+        assertEquals(16, fontSize.sp(), "small pinch changes must not change font size");
     }
 
     private static void assertEquals(int expected, int actual, String message) {
