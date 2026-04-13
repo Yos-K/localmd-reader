@@ -22,3 +22,6 @@
 - [x] show a dialog when the selected file type is unsupported
 - [x] show a dialog when the selected file is too large
 - [x] show a dialog when the selected document cannot be displayed
+- [x] explain unsupported files by supported extensions
+- [x] explain oversized files by the configured size limit
+- [x] explain unreadable documents by likely access or file state causes

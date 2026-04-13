@@ -292,11 +292,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void openUri(Uri uri, boolean remember) {
         FileInfo fileInfo = readFileInfo(uri);
         if (!FileTypeDetector.isMarkdownDisplayName(fileInfo.displayName)) {
-            showFileOpenError("This file cannot be opened.");
+            showFileOpenError("Only .md and .markdown files are supported.");
             return;
         }
         if (!fileSizePolicy.isReadableSize(fileInfo.sizeBytes)) {
-            showFileOpenError("The file is too large.");
+            showFileOpenError("Files larger than 2 MB cannot be opened.");
             return;
         }
 
@@ -312,7 +312,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             }
             showMessage("");
         } catch (IOException e) {
-            showFileOpenError("The document could not be displayed.");
+            showFileOpenError("The document could not be read. It may have been moved, deleted, or opened without lasting permission.");
         }
     }
 
