@@ -57,6 +57,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 
 ## Viewer Experience
 
+- [x] First-run welcome screen explains the primary actions.
 - [x] Light theme works.
 - [x] Dark theme works.
 - [x] Pinch gesture changes font size.
@@ -72,6 +73,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Restore open tabs after app restart.
 - [x] Skip unreadable restored tabs.
 - [x] Use the hamburger menu for secondary actions.
+- [x] Drawer actions are grouped by purpose.
 - [x] Open the menu from the hamburger button.
 - [x] Open the menu with left-edge swipe.
 - [x] Close the menu by tapping outside it.

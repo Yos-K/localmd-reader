@@ -24,6 +24,7 @@
 - [x] open files from the picker, recent list, or external view intent as tabs
 - [x] keep the tab row swipe gesture dedicated to horizontal tab scrolling
 - [x] close an open tab from the tab row
+- [x] hide the close control when only one tab is open
 - [x] restore tabs after app restart
 - [x] restore the previously active tab when the stored index is still valid
 - [x] skip unreadable restored tabs and fall back to a valid tab
