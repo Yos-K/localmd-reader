@@ -1,11 +1,15 @@
 package io.github.yosk.mdlite.presentation;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -17,6 +21,8 @@ import android.widget.TextView;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
 import io.github.yosk.mdlite.domain.FileTypeDetector;
 import io.github.yosk.mdlite.domain.FontSize;
+import io.github.yosk.mdlite.domain.RecentDocument;
+import io.github.yosk.mdlite.domain.RecentDocuments;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.ViewerTheme;
 import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
@@ -25,10 +31,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
-public final class MainActivity extends Activity implements View.OnClickListener {
+public final class MainActivity extends Activity implements View.OnClickListener, DialogInterface.OnClickListener {
     private static final int REQUEST_OPEN_DOCUMENT = 1001;
     private static final long MAX_FILE_SIZE_BYTES = 2L * 1024L * 1024L;
+    private static final int MAX_RECENT_DOCUMENTS = 5;
+    private static final String RECENT_PREFS = "recent_documents";
+    private static final String RECENT_ITEMS = "items";
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
@@ -36,12 +47,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private WebView webView;
     private TextView messageView;
     private Button openButton;
+    private Button recentButton;
     private Button themeButton;
     private Button smallerTextButton;
     private Button largerTextButton;
     private SafeHtml currentDocument;
     private ViewerTheme currentTheme = ViewerTheme.light();
     private FontSize currentFontSize = FontSize.defaultSize();
+    private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +67,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         openButton.setText("Open Markdown file");
         openButton.setAllCaps(false);
         openButton.setOnClickListener(this);
+
+        recentButton = new Button(this);
+        recentButton.setText("Recent files");
+        recentButton.setAllCaps(false);
+        recentButton.setOnClickListener(this);
 
         themeButton = new Button(this);
         themeButton.setText("Dark theme");
@@ -98,6 +116,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         root.addView(openButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
+        root.addView(recentButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(themeButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -120,6 +141,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
     public void onClick(View view) {
         if (view == openButton) {
             openMarkdownPicker();
+        } else if (view == recentButton) {
+            showRecentDocuments();
         } else if (view == themeButton) {
             currentTheme = currentTheme.toggled();
             themeButton.setText(currentTheme.isDark() ? "Light theme" : "Dark theme");
@@ -131,6 +154,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
             currentFontSize = currentFontSize.increased();
             renderCurrentDocument();
         }
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        if (which < 0 || which >= displayedRecentDocuments.items().size()) {
+            return;
+        }
+        RecentDocument selected = displayedRecentDocuments.items().get(which);
+        openUri(Uri.parse(selected.uri()), true);
     }
 
     @Override
@@ -146,7 +178,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (requestCode == REQUEST_OPEN_DOCUMENT && resultCode == RESULT_OK && data != null) {
             Uri uri = data.getData();
             if (uri != null) {
-                openUri(uri);
+                persistReadPermission(data, uri);
+                openUri(uri, true);
             }
         }
     }
@@ -154,6 +187,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void openMarkdownPicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         intent.setType("*/*");
         startActivityForResult(intent, REQUEST_OPEN_DOCUMENT);
     }
@@ -165,11 +200,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         String action = intent.getAction();
         Uri uri = intent.getData();
         if (Intent.ACTION_VIEW.equals(action) && uri != null) {
-            openUri(uri);
+            openUri(uri, false);
         }
     }
 
-    private void openUri(Uri uri) {
+    private void openUri(Uri uri, boolean remember) {
         FileInfo fileInfo = readFileInfo(uri);
         if (!FileTypeDetector.isMarkdownDisplayName(fileInfo.displayName)) {
             showMessage("This file cannot be opened.");
@@ -184,9 +219,42 @@ public final class MainActivity extends Activity implements View.OnClickListener
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
             currentDocument = renderer.render(markdown);
             renderCurrentDocument();
+            if (remember) {
+                recordRecentDocument(fileInfo.displayName, uri);
+            }
             showMessage("");
         } catch (IOException e) {
             showMessage("The document could not be displayed.");
+        }
+    }
+
+    private void showRecentDocuments() {
+        displayedRecentDocuments = loadRecentDocuments();
+        if (displayedRecentDocuments.items().isEmpty()) {
+            showMessage("No recent files yet.");
+            return;
+        }
+
+        String[] labels = new String[displayedRecentDocuments.items().size()];
+        for (int i = 0; i < displayedRecentDocuments.items().size(); i++) {
+            labels[i] = displayedRecentDocuments.items().get(i).displayName();
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Recent files")
+                .setItems(labels, this)
+                .show();
+    }
+
+    private void persistReadPermission(Intent data, Uri uri) {
+        int flags = data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION;
+        if (flags == 0) {
+            return;
+        }
+        try {
+            getContentResolver().takePersistableUriPermission(uri, flags);
+        } catch (SecurityException e) {
+            // Some providers grant temporary access only. The file can still be opened now.
         }
     }
 
@@ -244,6 +312,70 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void showMessage(String message) {
         messageView.setText(message);
         messageView.setVisibility(message.length() == 0 ? View.GONE : View.VISIBLE);
+    }
+
+    private void recordRecentDocument(String displayName, Uri uri) {
+        RecentDocuments documents = loadRecentDocuments()
+                .recordOpened(RecentDocument.of(displayName, uri.toString()));
+        saveRecentDocuments(documents);
+    }
+
+    private RecentDocuments loadRecentDocuments() {
+        SharedPreferences prefs = getSharedPreferences(RECENT_PREFS, MODE_PRIVATE);
+        String raw = prefs.getString(RECENT_ITEMS, "");
+        ArrayList<RecentDocument> items = new ArrayList<RecentDocument>();
+        if (raw != null && raw.length() > 0) {
+            String[] lines = raw.split("\\n", -1);
+            for (int i = 0; i < lines.length; i++) {
+                RecentDocument document = decodeRecentDocument(lines[i]);
+                if (document != null) {
+                    items.add(document);
+                }
+            }
+        }
+        return RecentDocuments.from(MAX_RECENT_DOCUMENTS, items);
+    }
+
+    private void saveRecentDocuments(RecentDocuments documents) {
+        StringBuilder raw = new StringBuilder();
+        List<RecentDocument> items = documents.items();
+        for (int i = 0; i < items.size(); i++) {
+            if (i > 0) {
+                raw.append('\n');
+            }
+            raw.append(encode(items.get(i).displayName()))
+                    .append('\t')
+                    .append(encode(items.get(i).uri()));
+        }
+        getSharedPreferences(RECENT_PREFS, MODE_PRIVATE)
+                .edit()
+                .putString(RECENT_ITEMS, raw.toString())
+                .apply();
+    }
+
+    private static RecentDocument decodeRecentDocument(String line) {
+        if (line == null || line.length() == 0) {
+            return null;
+        }
+        int separator = line.indexOf('\t');
+        if (separator < 0) {
+            return null;
+        }
+        try {
+            return RecentDocument.of(
+                    decode(line.substring(0, separator)),
+                    decode(line.substring(separator + 1)));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private static String encode(String value) {
+        return Base64.encodeToString(value.getBytes(StandardCharsets.UTF_8), Base64.NO_WRAP | Base64.URL_SAFE);
+    }
+
+    private static String decode(String value) {
+        return new String(Base64.decode(value, Base64.NO_WRAP | Base64.URL_SAFE), StandardCharsets.UTF_8);
     }
 
     private static void configureWebView(WebView webView) {

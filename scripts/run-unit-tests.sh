@@ -22,4 +22,5 @@ java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.infrastructure.Html
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.FileTypeDetectorTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.FileSizePolicyTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.FontSizeTest
+java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.RecentDocumentsTest
 echo "Unit tests passed"

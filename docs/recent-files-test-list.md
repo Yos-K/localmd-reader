@@ -1,0 +1,19 @@
+# Recent Files Test List
+
+## Domain Rules
+
+- [x] record opened document as the newest item
+- [x] move an existing document to the newest position without creating a duplicate
+- [x] keep only the configured maximum number of recent documents
+- [x] restore stored documents without duplicate URIs
+- [x] use a fallback display name when the provider returns a blank name
+
+## Android Behavior
+
+- [x] request persistable read permission for files opened from the in-app picker
+- [x] store recent files locally in app private preferences
+- [x] do not require network permission for recent files
+- [ ] show an empty-state message when there are no recent files
+- [ ] reopen a recent file from the recent files dialog
+- [ ] keep a reopened recent file at the top of the list
+
