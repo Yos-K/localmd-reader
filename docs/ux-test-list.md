@@ -18,6 +18,7 @@
 - [x] Native controls follow light and dark theme colors.
 - [x] Native buttons use consistent rounded surfaces and spacing.
 - [x] Menu can switch app UI copy between English and Japanese.
+- [x] Language switch button describes the action, not the current state.
 - [x] Selected app language is restored on app start.
 
 ## Feedback

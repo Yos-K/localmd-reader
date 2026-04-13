@@ -552,7 +552,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         openButton.setText(currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
         recentButton.setText(recentFilesTitle());
         themeButton.setText(currentTheme.isDark() ? lightThemeLabel() : darkThemeLabel());
-        languageButton.setText(currentLanguage.isJapanese() ? "Language: English" : "言語: 日本語");
+        languageButton.setText(currentLanguage.isJapanese() ? "英語に切り替え" : "Switch to Japanese");
         menuTitle.setText("MdLite Reader");
         menuSubtitle.setText(currentLanguage.isJapanese()
                 ? "ローカルMarkdownビューア。広告なし。ネットワークなし。"
