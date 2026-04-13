@@ -16,6 +16,8 @@ import android.widget.TextView;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
 import io.github.yosk.mdlite.domain.FileTypeDetector;
 import io.github.yosk.mdlite.domain.SafeHtml;
+import io.github.yosk.mdlite.domain.ViewerTheme;
+import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
 import io.github.yosk.mdlite.infrastructure.JavaSimpleMarkdownRenderer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,6 +33,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private WebView webView;
     private TextView messageView;
+    private Button openButton;
+    private Button themeButton;
+    private SafeHtml currentDocument;
+    private ViewerTheme currentTheme = ViewerTheme.light();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +45,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
 
-        Button openButton = new Button(this);
+        openButton = new Button(this);
         openButton.setText("Open Markdown file");
         openButton.setAllCaps(false);
         openButton.setOnClickListener(this);
+
+        themeButton = new Button(this);
+        themeButton.setText("Dark theme");
+        themeButton.setAllCaps(false);
+        themeButton.setOnClickListener(this);
 
         messageView = new TextView(this);
         messageView.setGravity(Gravity.CENTER_VERTICAL);
@@ -50,9 +61,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         webView = new WebView(this);
         configureWebView(webView);
-        webView.loadDataWithBaseURL(null, pageHtml(initialDocument()), "text/html", "UTF-8", null);
+        currentDocument = initialDocument();
+        renderCurrentDocument();
 
         root.addView(openButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        root.addView(themeButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         root.addView(messageView, new LinearLayout.LayoutParams(
@@ -69,7 +84,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     @Override
     public void onClick(View view) {
-        openMarkdownPicker();
+        if (view == openButton) {
+            openMarkdownPicker();
+        } else if (view == themeButton) {
+            currentTheme = currentTheme.toggled();
+            themeButton.setText(currentTheme.isDark() ? "Light theme" : "Dark theme");
+            renderCurrentDocument();
+        }
     }
 
     @Override
@@ -121,8 +142,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         try {
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
-            SafeHtml rendered = renderer.render(markdown);
-            webView.loadDataWithBaseURL(null, pageHtml(rendered), "text/html", "UTF-8", null);
+            currentDocument = renderer.render(markdown);
+            renderCurrentDocument();
             showMessage("");
         } catch (IOException e) {
             showMessage("The document could not be displayed.");
@@ -202,18 +223,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return new JavaSimpleMarkdownRenderer().render(markdown);
     }
 
-    private static String pageHtml(SafeHtml body) {
-        return "<!doctype html>"
-                + "<html><head><meta charset=\"utf-8\">"
-                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-                + "<style>"
-                + "body{font-family:sans-serif;margin:24px;line-height:1.55;color:#172121;background:#f8fbfa;}"
-                + "h1{font-size:24px;margin:0 0 12px;}"
-                + "p{font-size:16px;margin:0 0 12px;}"
-                + "code{background:#e6eeee;padding:2px 4px;border-radius:4px;}"
-                + "</style></head><body>"
-                + body.value()
-                + "</body></html>";
+    private void renderCurrentDocument() {
+        webView.loadDataWithBaseURL(null, HtmlPageBuilder.buildPage(currentDocument, currentTheme), "text/html", "UTF-8", null);
     }
 
     private static final class FileInfo {

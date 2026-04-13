@@ -18,6 +18,7 @@ fi
 javac -source 8 -target 8 -cp "$MAIN_CLASSES" -d "$TEST_CLASSES" @"$BUILD/test-sources.txt"
 
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.infrastructure.JavaSimpleMarkdownRendererTest
+java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.infrastructure.HtmlPageBuilderTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.FileTypeDetectorTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.FileSizePolicyTest
 echo "Unit tests passed"
