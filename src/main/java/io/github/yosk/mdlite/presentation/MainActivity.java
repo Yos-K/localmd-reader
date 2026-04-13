@@ -62,6 +62,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private FontSize currentFontSize = FontSize.defaultSize();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
     private ScaleGestureDetector fontScaleGestureDetector;
+    private float accumulatedPinchScale = 1f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -471,16 +472,22 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private boolean handleFontScaleTouch(MotionEvent event) {
         fontScaleGestureDetector.onTouchEvent(event);
-        return false;
+        return event.getPointerCount() > 1 || fontScaleGestureDetector.isInProgress();
     }
 
     private void changeFontSizeByPinch(float scaleFactor) {
-        FontSize changed = currentFontSize.changedByPinchScale(scaleFactor);
+        accumulatedPinchScale *= scaleFactor;
+        FontSize changed = currentFontSize.changedByPinchScale(accumulatedPinchScale);
         if (changed.sp() == currentFontSize.sp()) {
             return;
         }
         currentFontSize = changed;
+        accumulatedPinchScale = 1f;
         renderCurrentDocument();
+    }
+
+    private void resetAccumulatedPinchScale() {
+        accumulatedPinchScale = 1f;
     }
 
     private static final class FileInfo {
@@ -560,9 +567,20 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
 
         @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            activity.resetAccumulatedPinchScale();
+            return true;
+        }
+
+        @Override
         public boolean onScale(ScaleGestureDetector detector) {
             activity.changeFontSizeByPinch(detector.getScaleFactor());
             return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            activity.resetAccumulatedPinchScale();
         }
     }
 
