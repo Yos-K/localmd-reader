@@ -22,6 +22,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import io.github.yosk.mdlite.domain.ControlsPlacement;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
 import io.github.yosk.mdlite.domain.FileTypeDetector;
 import io.github.yosk.mdlite.domain.FontSize;
@@ -46,6 +47,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final int MAX_RECENT_DOCUMENTS = 5;
     private static final String RECENT_PREFS = "recent_documents";
     private static final String RECENT_ITEMS = "items";
+    private static final String SETTINGS_PREFS = "viewer_settings";
+    private static final String CONTROLS_PLACEMENT = "controls_placement";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
     private static final int MENU_SWIPE_MIN_DISTANCE_DP = 72;
@@ -59,9 +62,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button openButton;
     private Button recentButton;
     private Button themeButton;
+    private Button controlsPlacementButton;
     private SwipeMenuLayout menuPanel;
+    private LinearLayout root;
+    private LinearLayout controlsBar;
     private LinearLayout tabRow;
+    private HorizontalScrollView tabScroller;
     private OpenDocumentTabs openTabs;
+    private ControlsPlacement controlsPlacement;
     private ViewerTheme currentTheme = ViewerTheme.light();
     private FontSize currentFontSize = FontSize.defaultSize();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
@@ -77,7 +85,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         EdgeSwipeFrameLayout appRoot = new EdgeSwipeFrameLayout(this);
 
-        LinearLayout root = new LinearLayout(this);
+        controlsPlacement = loadControlsPlacement();
+
+        root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
 
         LinearLayout topBar = new LinearLayout(this);
@@ -107,6 +117,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         themeButton.setAllCaps(false);
         themeButton.setOnClickListener(this);
 
+        controlsPlacementButton = new Button(this);
+        controlsPlacementButton.setAllCaps(false);
+        controlsPlacementButton.setOnClickListener(this);
+        updateControlsPlacementButton();
+
         menuPanel = new SwipeMenuLayout(this);
         menuPanel.setOrientation(LinearLayout.VERTICAL);
         menuPanel.setVisibility(View.GONE);
@@ -131,6 +146,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuPanel.addView(themeButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(controlsPlacementButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
 
         messageView = new TextView(this);
         messageView.setGravity(Gravity.CENTER_VERTICAL);
@@ -139,11 +157,20 @@ public final class MainActivity extends Activity implements View.OnClickListener
         tabRow = new LinearLayout(this);
         tabRow.setOrientation(LinearLayout.HORIZONTAL);
 
-        HorizontalScrollView tabScroller = new HorizontalScrollView(this);
+        tabScroller = new HorizontalScrollView(this);
         tabScroller.setHorizontalScrollBarEnabled(true);
         tabScroller.addView(tabRow, new HorizontalScrollView.LayoutParams(
                 HorizontalScrollView.LayoutParams.WRAP_CONTENT,
                 HorizontalScrollView.LayoutParams.WRAP_CONTENT));
+
+        controlsBar = new LinearLayout(this);
+        controlsBar.setOrientation(LinearLayout.VERTICAL);
+        controlsBar.addView(topBar, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        controlsBar.addView(tabScroller, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
 
         webView = new WebView(this);
         configureWebView(webView);
@@ -153,19 +180,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         renderTabs();
         renderCurrentDocument();
 
-        root.addView(topBar, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        root.addView(messageView, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        root.addView(tabScroller, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        root.addView(webView, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                0,
-                1));
+        applyControlsPlacement();
 
         appRoot.addView(root, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -195,6 +210,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
             themeButton.setText(currentTheme.isDark() ? "Light theme" : "Dark theme");
             closeMenu();
             renderCurrentDocument();
+        } else if (view == controlsPlacementButton) {
+            controlsPlacement = controlsPlacement.toggled();
+            saveControlsPlacement(controlsPlacement);
+            updateControlsPlacementButton();
+            applyControlsPlacement();
+            closeMenu();
         } else if (view instanceof TabButton) {
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
             renderTabs();
@@ -365,6 +386,53 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void showMessage(String message) {
         messageView.setText(message);
         messageView.setVisibility(message.length() == 0 ? View.GONE : View.VISIBLE);
+    }
+
+    private ControlsPlacement loadControlsPlacement() {
+        SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
+        return ControlsPlacement.fromStoredValue(prefs.getString(CONTROLS_PLACEMENT, ControlsPlacement.TOP_VALUE));
+    }
+
+    private void saveControlsPlacement(ControlsPlacement placement) {
+        getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE)
+                .edit()
+                .putString(CONTROLS_PLACEMENT, placement.storedValue())
+                .apply();
+    }
+
+    private void updateControlsPlacementButton() {
+        if (controlsPlacement.isBottom()) {
+            controlsPlacementButton.setText("Move controls to top");
+        } else {
+            controlsPlacementButton.setText("Move controls to bottom");
+        }
+    }
+
+    private void applyControlsPlacement() {
+        root.removeAllViews();
+        if (controlsPlacement.isBottom()) {
+            root.addView(messageView, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            root.addView(webView, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    0,
+                    1));
+            root.addView(controlsBar, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+        } else {
+            root.addView(controlsBar, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            root.addView(messageView, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            root.addView(webView, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    0,
+                    1));
+        }
     }
 
     private void toggleMenu() {
