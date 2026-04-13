@@ -2,9 +2,11 @@
 
 ## First Run
 
+- [x] Welcome screen is rendered as a dedicated home surface.
 - [x] Welcome screen explains how to open a Markdown file.
 - [x] Welcome screen mentions Recent files, tabs, and pinch font sizing.
 - [x] Welcome screen repeats the no ads, no tracking, no network promise.
+- [x] Welcome screen uses stable guidance cards and an accent note.
 
 ## Navigation
 

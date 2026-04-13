@@ -16,8 +16,11 @@ public final class HtmlPageBuilder {
         ViewerTheme safeTheme = theme == null ? ViewerTheme.light() : theme;
         FontSize safeFontSize = fontSize == null ? FontSize.defaultSize() : fontSize;
         String background = safeTheme.isDark() ? "#101414" : "#f8fbfa";
+        String surface = safeTheme.isDark() ? "#1b2423" : "#ffffff";
+        String surfaceAlt = safeTheme.isDark() ? "#25302f" : "#eef5f3";
         String text = safeTheme.isDark() ? "#edf5f2" : "#172121";
         String muted = safeTheme.isDark() ? "#a7bbb7" : "#566664";
+        String primary = safeTheme.isDark() ? "#2a9d8f" : "#006d77";
         String link = safeTheme.isDark() ? "#7ccbe0" : "#0b6f87";
         String codeBackground = safeTheme.isDark() ? "#25302f" : "#e6eeee";
         String border = safeTheme.isDark() ? "#3c4b49" : "#c9d8d5";
@@ -57,6 +60,14 @@ public final class HtmlPageBuilder {
                 + "table{font-size:" + bodyFontSize + "px;border-collapse:collapse;min-width:max-content;}"
                 + "th,td{border:1px solid " + border + ";padding:6px 8px;text-align:left;}"
                 + "hr{border:0;border-top:1px solid " + border + ";margin:20px 0;}"
+                + ".welcome{padding:4px 0 0;}"
+                + ".welcome-kicker{font-size:" + (bodyFontSize - 2) + "px;color:" + primary + ";font-weight:700;margin:0 0 8px;}"
+                + ".welcome-lead{font-size:" + (bodyFontSize + 2) + "px;line-height:1.55;margin:0 0 20px;}"
+                + ".welcome-grid{display:grid;gap:10px;margin:0 0 18px;}"
+                + ".welcome-card{background:" + surface + ";border:1px solid " + border + ";border-radius:8px;padding:14px;}"
+                + ".welcome-card strong{display:block;font-size:" + bodyFontSize + "px;margin:0 0 4px;color:" + text + ";}"
+                + ".welcome-card span{display:block;font-size:" + (bodyFontSize - 1) + "px;color:" + muted + ";line-height:1.45;}"
+                + ".welcome-note{background:" + surfaceAlt + ";border-left:4px solid " + primary + ";padding:10px 12px;margin:0;color:" + muted + ";}"
                 + "</style></head><body>"
                 + body.value()
                 + "</body></html>";

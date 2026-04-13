@@ -932,18 +932,24 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private static OpenDocumentTab initialTab() {
-        String markdown = "# MdLite Reader\n\n"
-                + "Open a local Markdown file from the menu.\n\n"
-                + "- Tap **Menu** to open a `.md` or `.markdown` file.\n"
-                + "- Use **Recent files** to reopen documents.\n"
-                + "- Pinch the page to change text size.\n"
-                + "- Open multiple files and switch between tabs.\n\n"
-                + "No ads. No tracking. No network permission.\n\n"
-                + "Raw HTML such as `<script>` is shown as text.";
         return OpenDocumentTab.of(
                 "Welcome",
                 WELCOME_URI,
-                new JavaSimpleMarkdownRenderer().render(markdown));
+                SafeHtml.fromTrustedRendererOutput(welcomeHtml()));
+    }
+
+    private static String welcomeHtml() {
+        return "<section class=\"welcome\">"
+                + "<p class=\"welcome-kicker\">Local Markdown reader</p>"
+                + "<h1>MdLite Reader</h1>"
+                + "<p class=\"welcome-lead\">Open a Markdown file and read it without ads, tracking, login, or network access.</p>"
+                + "<div class=\"welcome-grid\">"
+                + "<div class=\"welcome-card\"><strong>Open</strong><span>Use Menu to choose a .md or .markdown file.</span></div>"
+                + "<div class=\"welcome-card\"><strong>Return</strong><span>Recent files keeps the last 5 documents on this device.</span></div>"
+                + "<div class=\"welcome-card\"><strong>Read</strong><span>Pinch to adjust text size. Open more files to create tabs.</span></div>"
+                + "</div>"
+                + "<p class=\"welcome-note\">Raw HTML is shown as text. HTTP and HTTPS links open outside the app.</p>"
+                + "</section>";
     }
 
     private void renderCurrentDocument() {

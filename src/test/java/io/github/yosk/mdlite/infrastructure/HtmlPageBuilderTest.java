@@ -16,6 +16,7 @@ public final class HtmlPageBuilderTest {
         test.stylesChecklistForReadableMobileLayout();
         test.stylesTablesForReadableMobileLayout();
         test.stylesTablesWithVisibleScrollHintInDarkTheme();
+        test.stylesWelcomeHomeForFirstRun();
     }
 
     public void rendersLightThemeWithLightBackgroundAndDarkText() {
@@ -107,6 +108,17 @@ public final class HtmlPageBuilderTest {
 
         assertContains(page, "linear-gradient(to right,rgba(128,168,161,0.55),rgba(128,168,161,0))", "dark table scroll hint must be brighter than the dark border");
         assertContains(page, ".table-scroll::-webkit-scrollbar-thumb{background:#80a8a1;border-radius:4px;}", "dark table scrollbar thumb must be visible");
+    }
+
+    public void stylesWelcomeHomeForFirstRun() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<section class=\"welcome\"><p class=\"welcome-kicker\">Local Markdown reader</p></section>"),
+                ViewerTheme.light(),
+                FontSize.of(18));
+
+        assertContains(page, ".welcome-grid{display:grid;gap:10px;margin:0 0 18px;}", "welcome home must lay out guidance as a stable grid");
+        assertContains(page, ".welcome-card{background:#ffffff;border:1px solid #c9d8d5;border-radius:8px;padding:14px;}", "welcome cards must use the theme surface");
+        assertContains(page, ".welcome-note{background:#eef5f3;border-left:4px solid #006d77;padding:10px 12px;margin:0;color:#566664;}", "welcome note must use a readable accent treatment");
     }
 
     private static void assertContains(String actual, String expected, String message) {
