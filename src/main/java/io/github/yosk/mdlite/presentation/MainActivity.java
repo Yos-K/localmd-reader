@@ -63,12 +63,16 @@ public final class MainActivity extends Activity implements View.OnClickListener
         textSizeRow.setOrientation(LinearLayout.HORIZONTAL);
 
         smallerTextButton = new Button(this);
-        smallerTextButton.setText("A-");
+        smallerTextButton.setText("A");
+        smallerTextButton.setTextSize(14);
+        smallerTextButton.setContentDescription("Decrease font size");
         smallerTextButton.setAllCaps(false);
         smallerTextButton.setOnClickListener(this);
 
         largerTextButton = new Button(this);
-        largerTextButton.setText("A+");
+        largerTextButton.setText("A");
+        largerTextButton.setTextSize(22);
+        largerTextButton.setContentDescription("Increase font size");
         largerTextButton.setAllCaps(false);
         largerTextButton.setOnClickListener(this);
 
