@@ -7,6 +7,7 @@
 - [x] Welcome screen mentions Recent files, tabs, and pinch font sizing.
 - [x] Welcome screen repeats the no ads, no tracking, no network promise.
 - [x] Welcome screen uses stable guidance cards and an accent note.
+- [x] Welcome screen follows the selected English or Japanese language.
 
 ## Navigation
 
@@ -16,6 +17,8 @@
 - [x] Drawer actions are grouped by Files, Reading, and Layout.
 - [x] Native controls follow light and dark theme colors.
 - [x] Native buttons use consistent rounded surfaces and spacing.
+- [x] Menu can switch app UI copy between English and Japanese.
+- [x] Selected app language is restored on app start.
 
 ## Feedback
 

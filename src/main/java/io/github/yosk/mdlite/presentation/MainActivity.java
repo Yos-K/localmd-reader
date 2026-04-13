@@ -36,6 +36,7 @@ import io.github.yosk.mdlite.domain.RecentDocuments;
 import io.github.yosk.mdlite.domain.RestorableOpenTab;
 import io.github.yosk.mdlite.domain.RestorableOpenTabs;
 import io.github.yosk.mdlite.domain.SafeHtml;
+import io.github.yosk.mdlite.domain.ViewerLanguage;
 import io.github.yosk.mdlite.domain.ViewerTheme;
 import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
 import io.github.yosk.mdlite.infrastructure.JavaSimpleMarkdownRenderer;
@@ -57,6 +58,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final String OPEN_TABS_ACTIVE_INDEX = "active_index";
     private static final String SETTINGS_PREFS = "viewer_settings";
     private static final String CONTROLS_PLACEMENT = "controls_placement";
+    private static final String VIEWER_LANGUAGE = "viewer_language";
     private static final String WELCOME_URI = "app://welcome";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
@@ -89,6 +91,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button openButton;
     private Button recentButton;
     private Button themeButton;
+    private Button languageButton;
     private Button controlsPlacementButton;
     private SwipeMenuLayout menuPanel;
     private LinearLayout root;
@@ -99,8 +102,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private TextView appTitle;
     private TextView menuTitle;
     private TextView menuSubtitle;
+    private TextView filesSection;
+    private TextView readingSection;
+    private TextView layoutSection;
     private OpenDocumentTabs openTabs;
     private ControlsPlacement controlsPlacement;
+    private ViewerLanguage currentLanguage = ViewerLanguage.english();
     private ViewerTheme currentTheme = ViewerTheme.light();
     private FontSize currentFontSize = FontSize.defaultSize();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
@@ -117,6 +124,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         EdgeSwipeFrameLayout appRoot = new EdgeSwipeFrameLayout(this);
 
         controlsPlacement = loadControlsPlacement();
+        currentLanguage = loadViewerLanguage();
 
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -151,28 +159,29 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 1));
 
         openButton = new Button(this);
-        openButton.setText("Open file");
         openButton.setAllCaps(false);
         openButton.setOnClickListener(this);
         styleMenuButton(openButton);
 
         recentButton = new Button(this);
-        recentButton.setText("Recent files");
         recentButton.setAllCaps(false);
         recentButton.setOnClickListener(this);
         styleMenuButton(recentButton);
 
         themeButton = new Button(this);
-        themeButton.setText("Dark theme");
         themeButton.setAllCaps(false);
         themeButton.setOnClickListener(this);
         styleMenuButton(themeButton);
+
+        languageButton = new Button(this);
+        languageButton.setAllCaps(false);
+        languageButton.setOnClickListener(this);
+        styleMenuButton(languageButton);
 
         controlsPlacementButton = new Button(this);
         controlsPlacementButton.setAllCaps(false);
         controlsPlacementButton.setOnClickListener(this);
         styleMenuButton(controlsPlacementButton);
-        updateControlsPlacementButton();
 
         menuPanel = new SwipeMenuLayout(this);
         menuPanel.setOrientation(LinearLayout.VERTICAL);
@@ -182,7 +191,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuPanel.setClickable(true);
 
         menuTitle = new TextView(this);
-        menuTitle.setText("MdLite Reader");
         menuTitle.setTextColor(textColor());
         menuTitle.setTextSize(22);
         menuTitle.setTypeface(Typeface.DEFAULT_BOLD);
@@ -193,7 +201,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.WRAP_CONTENT));
 
         menuSubtitle = new TextView(this);
-        menuSubtitle.setText("Local Markdown viewing. No ads. No network.");
         menuSubtitle.setTextColor(mutedColor());
         menuSubtitle.setTextSize(14);
         menuSubtitle.setPadding(dp(8), 0, dp(8), dp(18));
@@ -201,7 +208,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        menuPanel.addView(menuSection("Files"), new LinearLayout.LayoutParams(
+        filesSection = menuSection("");
+        menuPanel.addView(filesSection, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(openButton, new LinearLayout.LayoutParams(
@@ -210,13 +218,18 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuPanel.addView(recentButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
-        menuPanel.addView(menuSection("Reading"), new LinearLayout.LayoutParams(
+        readingSection = menuSection("");
+        menuPanel.addView(readingSection, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(themeButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
-        menuPanel.addView(menuSection("Layout"), new LinearLayout.LayoutParams(
+        menuPanel.addView(languageButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        layoutSection = menuSection("");
+        menuPanel.addView(layoutSection, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(controlsPlacementButton, new LinearLayout.LayoutParams(
@@ -253,6 +266,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         configureWebView(webView);
         fontScaleGestureDetector = new ScaleGestureDetector(this, new FontScaleGestureListener(this));
         webView.setOnTouchListener(new FontScaleTouchListener(this));
+        updateLocalizedText();
         openTabs = restoreOpenTabsOrInitial();
         applyNativeTheme();
         renderTabs();
@@ -285,15 +299,25 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showRecentDocuments();
         } else if (view == themeButton) {
             currentTheme = currentTheme.toggled();
-            themeButton.setText(currentTheme.isDark() ? "Light theme" : "Dark theme");
+            updateLocalizedText();
             applyNativeTheme();
             closeMenu();
             renderTabs();
             renderCurrentDocument();
+        } else if (view == languageButton) {
+            currentLanguage = currentLanguage.toggled();
+            saveViewerLanguage(currentLanguage);
+            updateLocalizedText();
+            if (WELCOME_URI.equals(openTabs.activeTab().uri())) {
+                openTabs = OpenDocumentTabs.withInitialTab(initialTab());
+                renderTabs();
+                renderCurrentDocument();
+            }
+            closeMenu();
         } else if (view == controlsPlacementButton) {
             controlsPlacement = controlsPlacement.toggled();
             saveControlsPlacement(controlsPlacement);
-            updateControlsPlacementButton();
+            updateLocalizedText();
             applyControlsPlacement();
             closeMenu();
         } else if (view instanceof TabButton) {
@@ -313,7 +337,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     public void onClick(DialogInterface dialog, int which) {
         if (which == DialogInterface.BUTTON_NEGATIVE) {
             clearRecentDocuments();
-            showInfoDialog("Recent files", "Recent files cleared.");
+            showInfoDialog(recentFilesTitle(), recentFilesClearedMessage());
             return;
         }
         if (which < 0 || which >= displayedRecentDocuments.items().size()) {
@@ -366,11 +390,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void openUri(Uri uri, boolean remember) {
         FileInfo fileInfo = readFileInfo(uri);
         if (!FileTypeDetector.isMarkdownDisplayName(fileInfo.displayName)) {
-            showFileOpenError("Only .md and .markdown files are supported.");
+            showFileOpenError(unsupportedFileMessage());
             return;
         }
         if (!fileSizePolicy.isReadableSize(fileInfo.sizeBytes)) {
-            showFileOpenError("Files larger than 2 MB cannot be opened.");
+            showFileOpenError(fileTooLargeMessage());
             return;
         }
 
@@ -386,7 +410,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             }
             showMessage("");
         } catch (IOException e) {
-            showFileOpenError("The document could not be read. It may have been moved, deleted, or opened without lasting permission.");
+            showFileOpenError(unreadableFileMessage());
         }
     }
 
@@ -394,8 +418,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         displayedRecentDocuments = loadRecentDocuments();
         if (displayedRecentDocuments.items().isEmpty()) {
             new AlertDialog.Builder(this)
-                    .setTitle("Recent files")
-                    .setMessage("No recent files yet.")
+                    .setTitle(recentFilesTitle())
+                    .setMessage(noRecentFilesMessage())
                     .setPositiveButton("OK", null)
                     .show();
             return;
@@ -407,9 +431,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
 
         new AlertDialog.Builder(this)
-                .setTitle("Recent files")
+                .setTitle(recentFilesTitle())
                 .setItems(labels, this)
-                .setNegativeButton("Clear history", this)
+                .setNegativeButton(clearHistoryLabel(), this)
                 .show();
     }
 
@@ -483,7 +507,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void showFileOpenError(String message) {
         new AlertDialog.Builder(this)
-                .setTitle("Open Markdown file")
+                .setTitle(openMarkdownTitle())
                 .setMessage(message)
                 .setPositiveButton("OK", null)
                 .show();
@@ -509,12 +533,84 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 .apply();
     }
 
-    private void updateControlsPlacementButton() {
+    private ViewerLanguage loadViewerLanguage() {
+        SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
+        return ViewerLanguage.fromStoredValue(prefs.getString(VIEWER_LANGUAGE, ViewerLanguage.ENGLISH_VALUE));
+    }
+
+    private void saveViewerLanguage(ViewerLanguage language) {
+        getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE)
+                .edit()
+                .putString(VIEWER_LANGUAGE, language.storedValue())
+                .apply();
+    }
+
+    private void updateLocalizedText() {
+        menuButton.setText(currentLanguage.isJapanese() ? "☰ メニュー" : "☰ Menu");
+        menuButton.setContentDescription(currentLanguage.isJapanese() ? "メニューを開く" : "Open menu");
+        appTitle.setText("MdLite Reader");
+        openButton.setText(currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
+        recentButton.setText(recentFilesTitle());
+        themeButton.setText(currentTheme.isDark() ? lightThemeLabel() : darkThemeLabel());
+        languageButton.setText(currentLanguage.isJapanese() ? "Language: English" : "言語: 日本語");
+        menuTitle.setText("MdLite Reader");
+        menuSubtitle.setText(currentLanguage.isJapanese()
+                ? "ローカルMarkdownビューア。広告なし。ネットワークなし。"
+                : "Local Markdown viewing. No ads. No network.");
+        filesSection.setText(currentLanguage.isJapanese() ? "ファイル" : "Files");
+        readingSection.setText(currentLanguage.isJapanese() ? "表示" : "Reading");
+        layoutSection.setText(currentLanguage.isJapanese() ? "レイアウト" : "Layout");
         if (controlsPlacement.isBottom()) {
-            controlsPlacementButton.setText("Move controls to top");
+            controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを上に移動" : "Move controls to top");
         } else {
-            controlsPlacementButton.setText("Move controls to bottom");
+            controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを下に移動" : "Move controls to bottom");
         }
+    }
+
+    private String recentFilesTitle() {
+        return currentLanguage.isJapanese() ? "最近開いたファイル" : "Recent files";
+    }
+
+    private String openMarkdownTitle() {
+        return currentLanguage.isJapanese() ? "Markdownファイルを開く" : "Open Markdown file";
+    }
+
+    private String noRecentFilesMessage() {
+        return currentLanguage.isJapanese() ? "最近開いたファイルはまだありません。" : "No recent files yet.";
+    }
+
+    private String clearHistoryLabel() {
+        return currentLanguage.isJapanese() ? "履歴をクリア" : "Clear history";
+    }
+
+    private String recentFilesClearedMessage() {
+        return currentLanguage.isJapanese() ? "最近開いたファイルをクリアしました。" : "Recent files cleared.";
+    }
+
+    private String unsupportedFileMessage() {
+        return currentLanguage.isJapanese()
+                ? ".md と .markdown ファイルのみ対応しています。"
+                : "Only .md and .markdown files are supported.";
+    }
+
+    private String fileTooLargeMessage() {
+        return currentLanguage.isJapanese()
+                ? "2 MB を超えるファイルは開けません。"
+                : "Files larger than 2 MB cannot be opened.";
+    }
+
+    private String unreadableFileMessage() {
+        return currentLanguage.isJapanese()
+                ? "文書を読み取れませんでした。ファイルが移動または削除されたか、継続的な読み取り権限がない可能性があります。"
+                : "The document could not be read. It may have been moved, deleted, or opened without lasting permission.";
+    }
+
+    private String darkThemeLabel() {
+        return currentLanguage.isJapanese() ? "ダークテーマ" : "Dark theme";
+    }
+
+    private String lightThemeLabel() {
+        return currentLanguage.isJapanese() ? "ライトテーマ" : "Light theme";
     }
 
     private void applyControlsPlacement() {
@@ -665,17 +761,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void applyMenuSectionTheme() {
         int sectionColor = primaryStrongColor();
-        for (int i = 0; i < menuPanel.getChildCount(); i++) {
-            View child = menuPanel.getChildAt(i);
-            if (child instanceof TextView && child != menuTitle && child != menuSubtitle) {
-                TextView textView = (TextView) child;
-                if ("Files".contentEquals(textView.getText())
-                        || "Reading".contentEquals(textView.getText())
-                        || "Layout".contentEquals(textView.getText())) {
-                    textView.setTextColor(sectionColor);
-                }
-            }
-        }
+        filesSection.setTextColor(sectionColor);
+        readingSection.setTextColor(sectionColor);
+        layoutSection.setTextColor(sectionColor);
     }
 
     private GradientDrawable makeRoundedBackground(int fillColor, int strokeColor, int radiusDp) {
@@ -931,14 +1019,27 @@ public final class MainActivity extends Activity implements View.OnClickListener
         webView.setWebViewClient(new ExternalHttpLinkClient());
     }
 
-    private static OpenDocumentTab initialTab() {
+    private OpenDocumentTab initialTab() {
         return OpenDocumentTab.of(
-                "Welcome",
+                currentLanguage.isJapanese() ? "ホーム" : "Welcome",
                 WELCOME_URI,
                 SafeHtml.fromTrustedRendererOutput(welcomeHtml()));
     }
 
-    private static String welcomeHtml() {
+    private String welcomeHtml() {
+        if (currentLanguage.isJapanese()) {
+            return "<section class=\"welcome\">"
+                    + "<p class=\"welcome-kicker\">ローカルMarkdownビューア</p>"
+                    + "<h1>MdLite Reader</h1>"
+                    + "<p class=\"welcome-lead\">広告、トラッキング、ログイン、ネットワークアクセスなしでMarkdownファイルを読みます。</p>"
+                    + "<div class=\"welcome-grid\">"
+                    + "<div class=\"welcome-card\"><strong>開く</strong><span>メニューから .md または .markdown ファイルを選びます。</span></div>"
+                    + "<div class=\"welcome-card\"><strong>戻る</strong><span>最近開いたファイルには、この端末で開いた直近5件が残ります。</span></div>"
+                    + "<div class=\"welcome-card\"><strong>読む</strong><span>ピンチで文字サイズを変えられます。複数ファイルはタブで開きます。</span></div>"
+                    + "</div>"
+                    + "<p class=\"welcome-note\">生HTMLはテキストとして表示します。HTTP / HTTPSリンクはアプリ外で開きます。</p>"
+                    + "</section>";
+        }
         return "<section class=\"welcome\">"
                 + "<p class=\"welcome-kicker\">Local Markdown reader</p>"
                 + "<h1>MdLite Reader</h1>"
@@ -992,7 +1093,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 closeText.setTextColor(mutedColor());
                 closeText.setGravity(Gravity.CENTER);
                 closeText.setPadding(dp(6), 0, dp(14), 0);
-                closeText.setContentDescription("Close tab: " + tab.title());
+                closeText.setContentDescription(currentLanguage.isJapanese()
+                        ? "タブを閉じる: " + tab.title()
+                        : "Close tab: " + tab.title());
                 closeText.setOnClickListener(this);
                 tabGroup.addView(closeText, new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,

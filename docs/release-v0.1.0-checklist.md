@@ -74,6 +74,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Skip unreadable restored tabs.
 - [x] Use the hamburger menu for secondary actions.
 - [x] Drawer actions are grouped by purpose.
+- [x] App UI language can switch between English and Japanese.
 - [x] Open the menu from the hamburger button.
 - [x] Open the menu with left-edge swipe.
 - [x] Close the menu by tapping outside it.
