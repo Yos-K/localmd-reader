@@ -12,6 +12,7 @@ public final class HtmlPageBuilderTest {
         test.includesRenderedMarkdownBodyUnchanged();
         test.appliesFontSizeToParagraphText();
         test.appliesFontSizeToHeadings();
+        test.stylesChecklistForReadableMobileLayout();
     }
 
     public void rendersLightThemeWithLightBackgroundAndDarkText() {
@@ -57,6 +58,16 @@ public final class HtmlPageBuilderTest {
 
         assertContains(page, "h1{font-size:26px", "h1 CSS must scale from selected font size");
         assertContains(page, "h2{font-size:23px", "h2 CSS must scale from selected font size");
+    }
+
+    public void stylesChecklistForReadableMobileLayout() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<ul class=\"checklist\"><li><input type=\"checkbox\" disabled> Done</li></ul>"),
+                ViewerTheme.light(),
+                FontSize.of(18));
+
+        assertContains(page, "ul.checklist{list-style:none;padding-left:0;}", "checklist CSS must remove duplicate bullets and excess left padding");
+        assertContains(page, "ul.checklist input{margin-right:8px;}", "checklist checkbox must keep readable spacing from text");
     }
 
     private static void assertContains(String actual, String expected, String message) {

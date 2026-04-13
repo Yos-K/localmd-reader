@@ -39,6 +39,8 @@ public final class HtmlPageBuilder {
                 + "pre code{background:transparent;padding:0;}"
                 + "blockquote{border-left:4px solid " + border + ";margin:0 0 12px;padding:4px 0 4px 12px;}"
                 + "li{margin:4px 0;}"
+                + "ul.checklist{list-style:none;padding-left:0;}"
+                + "ul.checklist input{margin-right:8px;}"
                 + "hr{border:0;border-top:1px solid " + border + ";margin:20px 0;}"
                 + "</style></head><body>"
                 + body.value()

@@ -15,6 +15,8 @@
 - [x] renders fenced code block with language info as code block
 - [x] renders inline code with escaped content
 - [x] renders bullet list items as unordered list
+- [x] renders unchecked checklist item as disabled checkbox in list
+- [x] renders checked checklist item as disabled checked checkbox in list
 - [x] renders numbered list items as ordered list
 - [x] renders blockquote as blockquote
 - [x] renders horizontal rule

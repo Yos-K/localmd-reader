@@ -15,6 +15,8 @@ public final class JavaSimpleMarkdownRendererTest {
         test.rendersFencedCodeBlockWithLanguageInfoAsCodeBlock();
         test.rendersInlineCodeWithEscapedContent();
         test.rendersBulletListItemsAsUnorderedList();
+        test.rendersUncheckedChecklistItemAsDisabledCheckboxInList();
+        test.rendersCheckedChecklistItemAsDisabledCheckedCheckboxInList();
         test.rendersNumberedListItemsAsOrderedList();
         test.rendersBlockquoteAsBlockquote();
         test.rendersHorizontalRule();
@@ -88,6 +90,18 @@ public final class JavaSimpleMarkdownRendererTest {
         SafeHtml html = renderer.render("- first\n- second");
 
         assertContains(html.value(), "<ul><li>first</li><li>second</li></ul>", "bullet list items must render as unordered list");
+    }
+
+    public void rendersUncheckedChecklistItemAsDisabledCheckboxInList() {
+        SafeHtml html = renderer.render("- [ ] Write tests");
+
+        assertContains(html.value(), "<ul class=\"checklist\"><li><input type=\"checkbox\" disabled> Write tests</li></ul>", "unchecked checklist item must render as disabled unchecked checkbox");
+    }
+
+    public void rendersCheckedChecklistItemAsDisabledCheckedCheckboxInList() {
+        SafeHtml html = renderer.render("- [x] Build APK");
+
+        assertContains(html.value(), "<ul class=\"checklist\"><li><input type=\"checkbox\" checked disabled> Build APK</li></ul>", "checked checklist item must render as disabled checked checkbox");
     }
 
     public void rendersNumberedListItemsAsOrderedList() {

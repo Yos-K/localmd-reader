@@ -6,6 +6,7 @@ public final class JavaSimpleMarkdownRenderer {
     private static final int LIST_NONE = 0;
     private static final int LIST_UNORDERED = 1;
     private static final int LIST_ORDERED = 2;
+    private static final int LIST_CHECKLIST = 3;
 
     public SafeHtml render(String markdown) {
         String source = markdown == null ? "" : markdown;
@@ -67,6 +68,17 @@ public final class JavaSimpleMarkdownRenderer {
 
             if (line.startsWith("- ")) {
                 flushParagraph(html, paragraph);
+                String checkbox = checklistCheckboxHtml(line);
+                if (checkbox != null) {
+                    if (openList != LIST_CHECKLIST) {
+                        openList = closeList(html, openList);
+                        html.append("<ul class=\"checklist\">");
+                        openList = LIST_CHECKLIST;
+                    }
+                    html.append("<li>").append(checkbox).append(' ')
+                            .append(renderInline(line.substring(6).trim())).append("</li>");
+                    continue;
+                }
                 if (openList != LIST_UNORDERED) {
                     openList = closeList(html, openList);
                     html.append("<ul>");
@@ -141,8 +153,27 @@ public final class JavaSimpleMarkdownRenderer {
             html.append("</ul>");
         } else if (openList == LIST_ORDERED) {
             html.append("</ol>");
+        } else if (openList == LIST_CHECKLIST) {
+            html.append("</ul>");
         }
         return LIST_NONE;
+    }
+
+    private static String checklistCheckboxHtml(String line) {
+        if (line.length() < 6) {
+            return null;
+        }
+        if (!line.startsWith("- [") || line.charAt(4) != ']' || line.charAt(5) != ' ') {
+            return null;
+        }
+        char marker = line.charAt(3);
+        if (marker == ' ') {
+            return "<input type=\"checkbox\" disabled>";
+        }
+        if (marker == 'x' || marker == 'X') {
+            return "<input type=\"checkbox\" checked disabled>";
+        }
+        return null;
     }
 
     private static void flushParagraph(StringBuilder html, StringBuilder paragraph) {
