@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import io.github.yosk.mdlite.domain.SafeHtml;
+import io.github.yosk.mdlite.infrastructure.JavaSimpleMarkdownRenderer;
 
 public final class MainActivity extends Activity {
     @Override
@@ -12,7 +14,7 @@ public final class MainActivity extends Activity {
 
         WebView webView = new WebView(this);
         configureWebView(webView);
-        webView.loadDataWithBaseURL(null, initialHtml(), "text/html", "UTF-8", null);
+        webView.loadDataWithBaseURL(null, pageHtml(initialDocument()), "text/html", "UTF-8", null);
         setContentView(webView);
     }
 
@@ -25,7 +27,15 @@ public final class MainActivity extends Activity {
         settings.setAllowContentAccess(false);
     }
 
-    private static String initialHtml() {
+    private static SafeHtml initialDocument() {
+        String markdown = "# MdLite Reader\n\n"
+                + "Lightweight Markdown viewing starts here.\n\n"
+                + "No ads. No tracking. No network permission.\n\n"
+                + "Use `<script>` as text, not as HTML.";
+        return new JavaSimpleMarkdownRenderer().render(markdown);
+    }
+
+    private static String pageHtml(SafeHtml body) {
         return "<!doctype html>"
                 + "<html><head><meta charset=\"utf-8\">"
                 + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
@@ -35,10 +45,7 @@ public final class MainActivity extends Activity {
                 + "p{font-size:16px;margin:0 0 12px;}"
                 + "code{background:#e6eeee;padding:2px 4px;border-radius:4px;}"
                 + "</style></head><body>"
-                + "<h1>MdLite Reader</h1>"
-                + "<p>Lightweight Markdown viewing starts here.</p>"
-                + "<p>No ads. No tracking. No network permission.</p>"
-                + "<p><code>v0.1.0</code> foundation build</p>"
+                + body.value()
                 + "</body></html>";
     }
 }

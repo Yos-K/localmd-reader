@@ -21,6 +21,7 @@ KEYSTORE="$ROOT/debug.keystore"
 
 rm -rf "$BUILD"
 mkdir -p "$BUILD/compiled" "$BUILD/generated" "$BUILD/classes" "$BUILD/dex"
+find "$ROOT/src/main/java" -name "*.java" > "$BUILD/main-sources.txt"
 
 "$AAPT2" compile --dir "$ROOT/src/main/res" -o "$BUILD/compiled/resources.zip"
 "$AAPT2" link \
@@ -35,12 +36,12 @@ javac \
   -target 8 \
   -bootclasspath "$ANDROID_JAR" \
   -d "$BUILD/classes" \
-  "$ROOT/src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java"
+  @"$BUILD/main-sources.txt"
 
 "$D8" \
   --lib "$ANDROID_JAR" \
   --output "$BUILD/dex" \
-  "$BUILD/classes/io/github/yosk/mdlite/presentation/MainActivity.class"
+  $(find "$BUILD/classes" -name "*.class")
 
 (cd "$BUILD/dex" && zip -q -D "$OUT_UNSIGNED" classes.dex)
 "$ZIPALIGN" -f 4 "$OUT_UNSIGNED" "$OUT_ALIGNED"
