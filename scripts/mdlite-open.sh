@@ -27,5 +27,14 @@ $absolute_path"
 done
 
 printf '%s\n' "$paths" | while IFS= read -r markdown_path; do
-  termux-open --view --content-type text/markdown "$markdown_path"
+  title=$(basename "$markdown_path")
+  markdown=$(cat "$markdown_path")
+  am start \
+    -n io.github.yosk.mdlite/.presentation.MainActivity \
+    -a io.github.yosk.mdlite.action.OPEN_TEXT \
+    --activity-single-top \
+    --es io.github.yosk.mdlite.extra.MARKDOWN_TITLE "$title" \
+    --es io.github.yosk.mdlite.extra.MARKDOWN_SOURCE "$markdown_path" \
+    --es io.github.yosk.mdlite.extra.MARKDOWN_TEXT "$markdown" \
+    > /dev/null
 done

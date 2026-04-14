@@ -51,6 +51,10 @@ import java.util.List;
 
 public final class MainActivity extends Activity implements View.OnClickListener, DialogInterface.OnClickListener {
     private static final int REQUEST_OPEN_DOCUMENT = 1001;
+    private static final String ACTION_OPEN_TEXT = "io.github.yosk.mdlite.action.OPEN_TEXT";
+    private static final String EXTRA_MARKDOWN_TITLE = "io.github.yosk.mdlite.extra.MARKDOWN_TITLE";
+    private static final String EXTRA_MARKDOWN_SOURCE = "io.github.yosk.mdlite.extra.MARKDOWN_SOURCE";
+    private static final String EXTRA_MARKDOWN_TEXT = "io.github.yosk.mdlite.extra.MARKDOWN_TEXT";
     private static final long MAX_FILE_SIZE_BYTES = 2L * 1024L * 1024L;
     private static final int MAX_RECENT_DOCUMENTS = 5;
     private static final String RECENT_PREFS = "recent_documents";
@@ -409,6 +413,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
             if (sharedUris != null) {
                 openUris(sharedUris, true, intent);
             }
+            return;
+        }
+        if (ACTION_OPEN_TEXT.equals(action)) {
+            openMarkdownText(
+                    intent.getStringExtra(EXTRA_MARKDOWN_TITLE),
+                    intent.getStringExtra(EXTRA_MARKDOWN_SOURCE),
+                    intent.getStringExtra(EXTRA_MARKDOWN_TEXT));
         }
     }
 
@@ -448,6 +459,31 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } catch (IOException e) {
             showFileOpenError(unreadableFileMessage());
         }
+    }
+
+    private void openMarkdownText(String title, String source, String markdown) {
+        String displayName = title == null || title.length() == 0 ? "Termux.md" : title;
+        String sourceId = source == null || source.length() == 0 ? displayName : source;
+        String text = markdown == null ? "" : markdown;
+        long sizeBytes = text.getBytes(StandardCharsets.UTF_8).length;
+        MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(displayName, sizeBytes, fileSizePolicy);
+        if (openResult instanceof MarkdownFileOpenResult.UnsupportedMarkdownFile) {
+            showFileOpenError(unsupportedFileMessage());
+            return;
+        }
+        if (openResult instanceof MarkdownFileOpenResult.OversizedMarkdownFile) {
+            showFileOpenError(fileTooLargeMessage());
+            return;
+        }
+
+        MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
+        SafeHtml rendered = renderer.render(text);
+        String uri = "termux://open/" + Uri.encode(sourceId);
+        openTabs = openTabs.open(OpenDocumentTab.of(readableFile.displayName(), uri, rendered));
+        renderTabs();
+        renderCurrentDocument();
+        saveOpenTabs();
+        showMessage("");
     }
 
     private void showRecentDocuments() {

@@ -17,9 +17,8 @@ scripts/mdlite-open.sh README.md docs/termux-command.md
 Each readable Markdown file is opened as a tab. If a file is already open, its
 tab is refreshed and activated instead of duplicated.
 
-The command uses `termux-open`, so Android may ask which app should open the
-file the first time. Choose MdLite Reader. After MdLite Reader is the default
-Markdown viewer, multiple files open one after another as tabs.
+The command starts MdLite Reader directly. Multiple files open one after another
+as tabs.
 
 ## Global Command
 
@@ -41,9 +40,9 @@ mdlite-reader FILE.md [FILE2.md ...]
 
 ## Access Model
 
-The command uses Termux's file sharing bridge instead of passing raw file paths
-to the Android app. This allows files in Termux directories to be opened without
-requesting broad storage permission.
+The command reads Markdown text in Termux and passes it directly to MdLite
+Reader. This allows files in Termux directories to be opened without requesting
+broad storage permission.
 
-If Android does not offer MdLite Reader for a file, open the file through the
-in-app picker or an Android file manager so the system grants a document URI.
+Android Intent extras have practical size limits. Use the in-app picker or an
+Android file manager for large files near the app's 2 MB file size limit.
