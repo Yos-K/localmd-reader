@@ -83,6 +83,12 @@ Design note:
 docs/icon-design-note.md
 ```
 
+Export command:
+
+```sh
+scripts/export-play-store-icon.sh
+```
+
 Requirements:
 
 - 512 x 512 px.
@@ -97,6 +103,12 @@ Required asset:
 
 ```text
 play-store/feature-graphic-1024x500.png
+```
+
+Export command:
+
+```sh
+scripts/export-play-store-feature-graphic.sh
 ```
 
 Requirements:

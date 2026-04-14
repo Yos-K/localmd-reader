@@ -83,6 +83,12 @@ play-store/icon-512.png
 docs/icon-design-note.ja.md
 ```
 
+書き出しコマンド:
+
+```sh
+scripts/export-play-store-icon.sh
+```
+
 要件:
 
 - 512 x 512 px。
@@ -97,6 +103,12 @@ docs/icon-design-note.ja.md
 
 ```text
 play-store/feature-graphic-1024x500.png
+```
+
+書き出しコマンド:
+
+```sh
+scripts/export-play-store-feature-graphic.sh
 ```
 
 要件:
