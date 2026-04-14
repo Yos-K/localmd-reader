@@ -8,7 +8,8 @@
 - 本番署名鍵はプロジェクトディレクトリ外に置きます。
 - 署名パスワードは tracked file、シェル履歴、ログ、ドキュメントに残しません。
 - リリース署名前に `./test.sh` を成功させます。
-- リリース成果物は `scripts/check-release-basics.sh` を通します。
+- リリース APK 成果物は `scripts/check-release-basics.sh` を通します。
+- リリース AAB 成果物は `bundletool validate` を通します。
 - 初回公開リリース前にリリース鍵をバックアップします。
 
 ## リリース keystore の作成
@@ -74,8 +75,39 @@ unset MDLITE_RELEASE_KEY_PASS
 build/release/mdlite-reader-0.1.0-release.apk
 ```
 
+## 署名済みリリース AAB の作成
+
+Google Play 向けのリリースビルドでは Android App Bundle を使います。
+
+MdLite Reader では `bundletool` をリポジトリ外に置きます。ローカルの tools
+ディレクトリに配置し、`BUNDLETOOL_JAR` でそのファイルを指定します。
+
+先に自動チェックを実行します。
+
+```sh
+./test.sh
+```
+
+その後、署名済み AAB を作成します。
+
+```sh
+export BUNDLETOOL_JAR="$HOME/AndroidDev/tools/bundletool.jar"
+export MDLITE_RELEASE_KEYSTORE="$HOME/AndroidDev/keys/mdlite-reader-release.jks"
+export MDLITE_RELEASE_KEY_ALIAS="mdlite-release"
+scripts/build-release-aab.sh
+```
+
+必要な場合、`jarsigner` が keystore password と key password を入力要求します。
+これらのパスワードをコマンド引数として渡さないでください。
+
+デフォルトの出力先:
+
+```text
+build/release/mdlite-reader-0.1.0-release.aab
+```
+
 ## Play Store について
 
-現在の軽量ビルドは APK を生成します。Google Play では新規アプリに Android App
-Bundle が必要になる場合があるため、Play Console が要求する場合は本番申請前に
-AAB 出力を追加します。
+APK スクリプトはローカルでのリリース相当のインストール確認に使います。
+Play Console が Android App Bundle を要求する場合は、AAB スクリプトで生成した
+成果物をアップロードします。

@@ -93,6 +93,7 @@ app-debug.apk
 ## リリース署名
 
 本番署名にはリポジトリ外の keystore を使います。
+Play Store アップロード用ビルドでは署名済み Android App Bundle を使います。
 
 詳しくは [docs/release-signing.ja.md](docs/release-signing.ja.md) を参照してください。
 

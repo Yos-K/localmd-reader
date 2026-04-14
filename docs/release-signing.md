@@ -8,7 +8,8 @@ This document defines the production signing policy for MdLite Reader.
 - Production signing keys must live outside the project directory.
 - Signing passwords must not be written to tracked files, shell history, logs, or documentation.
 - Release builds must pass `./test.sh` before signing.
-- Release artifacts must pass `scripts/check-release-basics.sh`.
+- Release APK artifacts must pass `scripts/check-release-basics.sh`.
+- Release AAB artifacts must pass `bundletool validate`.
 - The release key must be backed up before the first public release.
 
 ## Create The Release Keystore
@@ -74,8 +75,39 @@ The default output is:
 build/release/mdlite-reader-0.1.0-release.apk
 ```
 
+## Build A Signed Release AAB
+
+Google Play release builds should use Android App Bundle output.
+
+MdLite Reader keeps `bundletool` outside the repository. Download it to a local
+tool directory and point `BUNDLETOOL_JAR` to that file.
+
+Run the automated checks first:
+
+```sh
+./test.sh
+```
+
+Then build the signed AAB:
+
+```sh
+export BUNDLETOOL_JAR="$HOME/AndroidDev/tools/bundletool.jar"
+export MDLITE_RELEASE_KEYSTORE="$HOME/AndroidDev/keys/mdlite-reader-release.jks"
+export MDLITE_RELEASE_KEY_ALIAS="mdlite-release"
+scripts/build-release-aab.sh
+```
+
+`jarsigner` prompts for the keystore password and key password when needed.
+Do not pass those passwords as command arguments.
+
+The default output is:
+
+```text
+build/release/mdlite-reader-0.1.0-release.aab
+```
+
 ## Play Store Note
 
-The current lightweight build creates APK files. Google Play may require an
-Android App Bundle for new apps, so AAB output must be added before Play Store
-production submission if the Play Console requires it.
+The APK script remains useful for local release-style installation checks.
+Use the AAB script for Play Store upload builds when the Play Console requires
+Android App Bundle output.

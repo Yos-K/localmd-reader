@@ -94,6 +94,7 @@ and checks that the APK does not request the `INTERNET` permission.
 ## Release Signing
 
 Production signing uses a keystore outside the repository.
+Play Store upload builds use signed Android App Bundle output.
 
 See [docs/release-signing.md](docs/release-signing.md).
 

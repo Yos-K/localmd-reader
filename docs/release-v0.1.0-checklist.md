@@ -124,6 +124,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] `CONTRIBUTING.ja.md` exists.
 - [x] `docs/release-signing.md` exists.
 - [x] `docs/release-signing.ja.md` exists.
+- [x] AAB build script exists for Play Store upload builds.
 - [x] Product spec matches the implemented v0.1.0 scope.
 
 ## Manual Device Checks
@@ -146,6 +147,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [ ] Create or confirm the production keystore outside the repository.
 - [ ] Create a signed release build with the production key outside the repository.
 - [ ] Run `scripts/check-release-basics.sh` against the signed release APK.
+- [ ] Create a signed release AAB with `scripts/build-release-aab.sh` for Play Store upload.
+- [ ] Validate the signed release AAB with `bundletool validate`.
 - [ ] Copy the signed release APK to the release staging location.
 - [ ] Tag the release as `v0.1.0`.
 - [ ] Keep the repository private until the public release decision is made.
