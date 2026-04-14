@@ -52,9 +52,13 @@ import java.util.List;
 public final class MainActivity extends Activity implements View.OnClickListener, DialogInterface.OnClickListener {
     private static final int REQUEST_OPEN_DOCUMENT = 1001;
     private static final String ACTION_OPEN_TEXT = "io.github.yosk.mdlite.action.OPEN_TEXT";
+    private static final String ACTION_OPEN_TEXTS = "io.github.yosk.mdlite.action.OPEN_TEXTS";
     private static final String EXTRA_MARKDOWN_TITLE = "io.github.yosk.mdlite.extra.MARKDOWN_TITLE";
+    private static final String EXTRA_MARKDOWN_TITLES = "io.github.yosk.mdlite.extra.MARKDOWN_TITLES";
     private static final String EXTRA_MARKDOWN_SOURCE = "io.github.yosk.mdlite.extra.MARKDOWN_SOURCE";
+    private static final String EXTRA_MARKDOWN_SOURCES = "io.github.yosk.mdlite.extra.MARKDOWN_SOURCES";
     private static final String EXTRA_MARKDOWN_TEXT = "io.github.yosk.mdlite.extra.MARKDOWN_TEXT";
+    private static final String EXTRA_MARKDOWN_TEXTS_BASE64 = "io.github.yosk.mdlite.extra.MARKDOWN_TEXTS_BASE64";
     private static final long MAX_FILE_SIZE_BYTES = 2L * 1024L * 1024L;
     private static final int MAX_RECENT_DOCUMENTS = 5;
     private static final String RECENT_PREFS = "recent_documents";
@@ -420,6 +424,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
                     intent.getStringExtra(EXTRA_MARKDOWN_TITLE),
                     intent.getStringExtra(EXTRA_MARKDOWN_SOURCE),
                     intent.getStringExtra(EXTRA_MARKDOWN_TEXT));
+            return;
+        }
+        if (ACTION_OPEN_TEXTS.equals(action)) {
+            openMarkdownTexts(
+                    intent.getStringArrayExtra(EXTRA_MARKDOWN_TITLES),
+                    intent.getStringArrayExtra(EXTRA_MARKDOWN_SOURCES),
+                    intent.getStringArrayExtra(EXTRA_MARKDOWN_TEXTS_BASE64));
         }
     }
 
@@ -484,6 +495,24 @@ public final class MainActivity extends Activity implements View.OnClickListener
         renderCurrentDocument();
         saveOpenTabs();
         showMessage("");
+    }
+
+    private void openMarkdownTexts(String[] titles, String[] sources, String[] textsBase64) {
+        if (titles == null || sources == null || textsBase64 == null) {
+            return;
+        }
+        int count = Math.min(titles.length, Math.min(sources.length, textsBase64.length));
+        for (int i = 0; i < count; i++) {
+            openMarkdownText(titles[i], sources[i], decodeBase64Text(textsBase64[i]));
+        }
+    }
+
+    private String decodeBase64Text(String encoded) {
+        if (encoded == null) {
+            return "";
+        }
+        byte[] bytes = Base64.decode(encoded, Base64.DEFAULT);
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     private void showRecentDocuments() {

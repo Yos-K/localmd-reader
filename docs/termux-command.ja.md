@@ -17,9 +17,8 @@ scripts/mdlite-open.sh README.md docs/termux-command.md
 読み取り可能な Markdown ファイルは、それぞれタブとして開きます。すでに開いている
 ファイルは重複せず、そのタブを更新してアクティブにします。
 
-このコマンドは MdLite Reader を直接起動します。複数ファイルは順にタブとして
-開きます。実行中の Activity が各文書を受け取れるように、ラッパーはファイル間で
-短く待ちます。
+このコマンドは MdLite Reader を直接起動します。複数ファイルは 1 つの Android
+Intent にまとめて渡され、タブとして開きます。
 
 ## グローバルコマンド
 
@@ -41,8 +40,9 @@ mdlite-reader FILE.md [FILE2.md ...]
 
 ## アクセス方式
 
-このコマンドは Termux 側で Markdown 本文を読み取り、MdLite Reader に直接渡します。
-これにより、広いストレージ権限を要求せずに Termux 配下のファイルを開けます。
+このコマンドは Termux 側で Markdown 本文を読み取り、Base64 化して MdLite Reader
+に直接渡します。これにより、広いストレージ権限を要求せずに Termux 配下の
+ファイルを開けます。
 
 Android の Intent extra には実用上のサイズ制限があります。アプリの 2 MB 制限に
 近い大きなファイルは、アプリ内のファイル選択または Android のファイルマネージャ
