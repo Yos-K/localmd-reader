@@ -21,7 +21,11 @@
         android:pathData="M13,11h6v30h-6c-2,0 -3,-1 -3,-3V14c0,-2 1,-3 3,-3z" />
     <path
         android:fillColor="#34453F"
-        android:pathData="M24,17h3v11h-3zM29,17h3v11h-3zM22,20h12v3H22zM22,25h12v3H22zM23,34h11v2H23z" />
+        android:pathData="M24,17h3v11h-3zM29,17h3v11h-3zM22,20h12v3H22zM22,25h12v3H22z" />
+    <path
+        android:fillAlpha="0.45"
+        android:fillColor="#6F847C"
+        android:pathData="M23,34h11v2H23z" />
     <path
         android:fillColor="#D6B85A"
         android:pathData="M14,18h5v3H14zM14,33h5v5H14z" />
