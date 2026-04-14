@@ -100,6 +100,10 @@ scripts/build-release-aab.sh
 必要な場合、`jarsigner` が keystore password と key password を入力要求します。
 これらのパスワードをコマンド引数として渡さないでください。
 
+`jarsigner` が自己署名証明書やタイムスタンプなしの警告を出すことがあります。
+Android のリリース署名では許容し、bundle 構造の確認は `bundletool validate` の
+成功で判断します。
+
 デフォルトの出力先:
 
 ```text

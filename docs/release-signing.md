@@ -100,6 +100,10 @@ scripts/build-release-aab.sh
 `jarsigner` prompts for the keystore password and key password when needed.
 Do not pass those passwords as command arguments.
 
+`jarsigner` may warn that the certificate is self-signed or has no timestamp.
+That is acceptable for Android release signing. Treat `bundletool validate`
+success as the bundle structure check.
+
 The default output is:
 
 ```text

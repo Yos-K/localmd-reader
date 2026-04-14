@@ -79,7 +79,7 @@ cp "$BUILD/dex/classes.dex" "$BASE_DIR/dex/classes.dex"
   "$OUT_UNSIGNED_BUNDLE" \
   "$MDLITE_RELEASE_KEY_ALIAS"
 
-"$JARSIGNER" -verify -strict "$OUT_BUNDLE"
+"$JARSIGNER" -verify "$OUT_BUNDLE"
 
 "$JAVA" -jar "$BUNDLETOOL_JAR" validate \
   --bundle="$OUT_BUNDLE"
