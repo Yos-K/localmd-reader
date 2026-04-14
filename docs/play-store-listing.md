@@ -190,6 +190,12 @@ Screenshot rules:
 - Do not show personal file names, private paths, account names, notifications, or tokens.
 - Crop or clean the status bar before upload if it contains notifications or carrier information.
 
+Capture workflow:
+
+```text
+docs/play-store-screenshots.md
+```
+
 ## Preview Video
 
 Decision for v0.1.0:
