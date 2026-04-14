@@ -143,6 +143,9 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Japanese app name draft is prepared.
 - [x] Japanese short description draft is prepared.
 - [x] Japanese full description draft is prepared.
+- [x] English Play Console copy files are prepared.
+- [x] Japanese Play Console copy files are prepared.
+- [x] Listing text is within Google Play character limits.
 - [x] Phone screenshot plan is prepared.
 - [x] Screenshot capture workflow is prepared.
 - [x] Feature graphic direction is prepared.

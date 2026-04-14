@@ -1,6 +1,6 @@
 # Play Store Listing
 
-This document defines the draft Google Play listing for MdLite Reader v0.1.0.
+This document defines the Google Play listing text for MdLite Reader v0.1.0.
 
 Source requirements checked on 2026-04-14:
 
@@ -25,10 +25,22 @@ App name:
 MdLite Reader
 ```
 
+Copy source:
+
+```text
+play-store/listing/en-US/title.txt
+```
+
 Short description:
 
 ```text
 Local Markdown reader with tabs, dark mode, and offline rendering
+```
+
+Copy source:
+
+```text
+play-store/listing/en-US/short-description.txt
 ```
 
 Full description:
@@ -56,6 +68,32 @@ Privacy-oriented by design:
 
 MdLite Reader v0.1.0 focuses on viewing, not editing. Full CommonMark compatibility, Mermaid, math, footnotes, remote image loading, relative image rendering, and cloud sync are not included in this version.
 ```
+
+Copy source:
+
+```text
+play-store/listing/en-US/full-description.txt
+```
+
+Character count check:
+
+```text
+scripts/listing text is under current Google Play limits:
+- title: 30 characters or fewer
+- short description: 80 characters or fewer
+- full description: 4,000 characters or fewer
+```
+
+Editorial rules:
+
+- Do not mention price, discounts, rankings, awards, or store badges.
+- Do not imply editing, sync, cloud storage, or full CommonMark compatibility for
+  v0.1.0.
+- Keep the privacy claims aligned with `PRIVACY.md` and
+  `docs/play-store-data-safety.md`.
+- Update the app text, screenshot set, and data safety document together if a
+  future version adds network access, sync, ads, analytics, crash reporting, or
+  remote image loading.
 
 ## Store Category
 
@@ -130,6 +168,12 @@ Alt text:
 Markdown document preview with tabs and reading controls in MdLite Reader.
 ```
 
+Copy source:
+
+```text
+play-store/listing/en-US/feature-graphic-alt.txt
+```
+
 ## Phone Screenshots
 
 Recommended set: 4 portrait screenshots at 1080 x 1920 px.
@@ -146,6 +190,12 @@ Alt text:
 MdLite Reader welcome screen with open file and recent file actions.
 ```
 
+Copy source:
+
+```text
+play-store/listing/en-US/phone-screenshot-01-alt.txt
+```
+
 Screenshot 2:
 
 ```text
@@ -156,6 +206,12 @@ Alt text:
 
 ```text
 Markdown document rendered with headings, lists, code blocks, and links.
+```
+
+Copy source:
+
+```text
+play-store/listing/en-US/phone-screenshot-02-alt.txt
 ```
 
 Screenshot 3:
@@ -170,6 +226,12 @@ Alt text:
 Dark theme Markdown view showing a table with horizontal scrolling.
 ```
 
+Copy source:
+
+```text
+play-store/listing/en-US/phone-screenshot-03-alt.txt
+```
+
 Screenshot 4:
 
 ```text
@@ -180,6 +242,12 @@ Alt text:
 
 ```text
 Tabs and menu controls for theme, language, placement, and recent files.
+```
+
+Copy source:
+
+```text
+play-store/listing/en-US/phone-screenshot-04-alt.txt
 ```
 
 Screenshot rules:
