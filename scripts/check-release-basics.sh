@@ -2,7 +2,7 @@
 set -eu
 
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-APK="$ROOT/app-debug.apk"
+APK="${1:-$ROOT/app-debug.apk}"
 
 if [ ! -f "$APK" ]; then
   echo "Missing APK: $APK" >&2

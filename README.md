@@ -91,6 +91,12 @@ app-debug.apk
 The test script runs JVM unit tests, builds the debug APK, verifies signing,
 and checks that the APK does not request the `INTERNET` permission.
 
+## Release Signing
+
+Production signing uses a keystore outside the repository.
+
+See [docs/release-signing.md](docs/release-signing.md).
+
 ## Repository Status
 
 The repository should remain private during early development and become public

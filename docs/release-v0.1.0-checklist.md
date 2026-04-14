@@ -9,6 +9,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [ ] All release changes are committed with Conventional Commits style.
 - [ ] No production signing keys are committed.
 - [ ] No secrets, tokens, account data, or private file paths are committed.
+- [x] Production signing procedure is documented.
 
 ## Version And Identity
 
@@ -121,6 +122,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] `LICENSE` exists and is Apache-2.0.
 - [x] `CONTRIBUTING.md` exists.
 - [x] `CONTRIBUTING.ja.md` exists.
+- [x] `docs/release-signing.md` exists.
+- [x] `docs/release-signing.ja.md` exists.
 - [x] Product spec matches the implemented v0.1.0 scope.
 
 ## Manual Device Checks
@@ -140,7 +143,9 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 ## Release Actions
 
 - [ ] Run `./test.sh` immediately before release.
-- [ ] Copy the built APK to the release staging location.
+- [ ] Create or confirm the production keystore outside the repository.
 - [ ] Create a signed release build with the production key outside the repository.
+- [ ] Run `scripts/check-release-basics.sh` against the signed release APK.
+- [ ] Copy the signed release APK to the release staging location.
 - [ ] Tag the release as `v0.1.0`.
 - [ ] Keep the repository private until the public release decision is made.

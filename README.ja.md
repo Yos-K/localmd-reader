@@ -90,6 +90,12 @@ app-debug.apk
 テストスクリプトは JVM ユニットテスト、debug APK ビルド、署名検証、
 `INTERNET` 権限が含まれていないことの確認を行います。
 
+## リリース署名
+
+本番署名にはリポジトリ外の keystore を使います。
+
+詳しくは [docs/release-signing.ja.md](docs/release-signing.ja.md) を参照してください。
+
 ## リポジトリ状態
 
 初期開発中は private のままにし、初回リリース準備が整った時点で public にします。

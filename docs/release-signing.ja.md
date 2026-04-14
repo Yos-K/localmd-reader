@@ -1,0 +1,81 @@
+# リリース署名
+
+この文書は MdLite Reader の本番署名方針を定義します。
+
+## 方針
+
+- 本番署名鍵はリポジトリにコミットしません。
+- 本番署名鍵はプロジェクトディレクトリ外に置きます。
+- 署名パスワードは tracked file、シェル履歴、ログ、ドキュメントに残しません。
+- リリース署名前に `./test.sh` を成功させます。
+- リリース成果物は `scripts/check-release-basics.sh` を通します。
+- 初回公開リリース前にリリース鍵をバックアップします。
+
+## リリース keystore の作成
+
+keystore はリポジトリ外に作成します。
+
+```sh
+scripts/create-release-keystore.sh
+```
+
+デフォルトの作成先:
+
+```text
+~/AndroidDev/keys/mdlite-reader-release.jks
+```
+
+デフォルトの key alias:
+
+```text
+mdlite-release
+```
+
+別のパスや alias を使う場合:
+
+```sh
+export MDLITE_RELEASE_KEYSTORE="$HOME/AndroidDev/keys/mdlite-reader-release.jks"
+export MDLITE_RELEASE_KEY_ALIAS="mdlite-release"
+scripts/create-release-keystore.sh
+```
+
+## 署名済みリリース APK の作成
+
+先に自動チェックを実行します。
+
+```sh
+./test.sh
+```
+
+その後、本番鍵で署名します。
+
+```sh
+export MDLITE_RELEASE_KEYSTORE="$HOME/AndroidDev/keys/mdlite-reader-release.jks"
+export MDLITE_RELEASE_KEY_ALIAS="mdlite-release"
+printf "Keystore password: "
+stty -echo
+read -r MDLITE_RELEASE_STORE_PASS
+stty echo
+printf "\nKey password: "
+stty -echo
+read -r MDLITE_RELEASE_KEY_PASS
+stty echo
+printf "\n"
+export MDLITE_RELEASE_STORE_PASS
+export MDLITE_RELEASE_KEY_PASS
+scripts/build-release-apk.sh
+unset MDLITE_RELEASE_STORE_PASS
+unset MDLITE_RELEASE_KEY_PASS
+```
+
+デフォルトの出力先:
+
+```text
+build/release/mdlite-reader-0.1.0-release.apk
+```
+
+## Play Store について
+
+現在の軽量ビルドは APK を生成します。Google Play では新規アプリに Android App
+Bundle が必要になる場合があるため、Play Console が要求する場合は本番申請前に
+AAB 出力を追加します。
