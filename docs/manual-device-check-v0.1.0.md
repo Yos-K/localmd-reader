@@ -22,6 +22,9 @@ Test build:
 - [ ] Open a `.md` file from the in-app picker.
 - [ ] Open a `.markdown` file from the in-app picker.
 - [ ] Open a Markdown file from an Android file manager.
+- [ ] Open one Markdown file from Termux with `mdlite-reader FILE.md`.
+- [ ] Open multiple Markdown files from Termux with `mdlite-reader FILE1.md FILE2.md`
+  and confirm they open as tabs.
 - [ ] Open an unsupported file and confirm a dialog explains why it cannot be opened.
 - [ ] Open a file above 2 MB and confirm a dialog explains the size limit.
 

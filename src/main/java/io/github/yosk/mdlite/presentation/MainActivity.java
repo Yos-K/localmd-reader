@@ -41,6 +41,8 @@ import io.github.yosk.mdlite.domain.ViewerTheme;
 import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
 import io.github.yosk.mdlite.infrastructure.JavaSimpleMarkdownRenderer;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -392,6 +394,30 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (Intent.ACTION_VIEW.equals(action) && uri != null) {
             persistReadPermission(intent, uri);
             openUri(uri, true);
+            return;
+        }
+        if (Intent.ACTION_SEND.equals(action)) {
+            Uri sharedUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            if (sharedUri != null) {
+                persistReadPermission(intent, sharedUri);
+                openUri(sharedUri, true);
+            }
+            return;
+        }
+        if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+            ArrayList<Uri> sharedUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            if (sharedUris != null) {
+                openUris(sharedUris, true, intent);
+            }
+        }
+    }
+
+    private void openUris(List<Uri> uris, boolean remember, Intent permissionIntent) {
+        for (Uri uri : uris) {
+            if (uri != null) {
+                persistReadPermission(permissionIntent, uri);
+                openUri(uri, remember);
+            }
         }
     }
 
@@ -460,6 +486,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private FileInfo readFileInfo(Uri uri) {
+        if ("file".equals(uri.getScheme())) {
+            File file = new File(uri.getPath() == null ? "" : uri.getPath());
+            return new FileInfo(file.getName(), file.length());
+        }
+
         String displayName = "";
         long size = -1;
 
@@ -488,7 +519,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private String readText(Uri uri, long maxBytes) throws IOException {
-        InputStream input = getContentResolver().openInputStream(uri);
+        InputStream input = openInputStream(uri);
         if (input == null) {
             throw new IOException("document input stream unavailable");
         }
@@ -508,6 +539,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } finally {
             input.close();
         }
+    }
+
+    private InputStream openInputStream(Uri uri) throws IOException {
+        if ("file".equals(uri.getScheme())) {
+            return new FileInputStream(new File(uri.getPath() == null ? "" : uri.getPath()));
+        }
+        return getContentResolver().openInputStream(uri);
     }
 
     private void showMessage(String message) {

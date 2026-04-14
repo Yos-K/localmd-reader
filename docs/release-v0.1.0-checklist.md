@@ -132,6 +132,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] `docs/play-store-data-safety.ja.md` exists.
 - [x] `docs/icon-design-note.md` exists.
 - [x] `docs/icon-design-note.ja.md` exists.
+- [x] `docs/termux-command.md` exists.
+- [x] `docs/termux-command.ja.md` exists.
 - [x] AAB build script exists for Play Store upload builds.
 - [x] Product spec matches the implemented v0.1.0 scope.
 
@@ -177,6 +179,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [ ] Pinch to change font size.
 - [ ] Move controls to bottom, restart, and confirm placement is restored.
 - [ ] Open a table wider than the screen and confirm horizontal scrolling.
+- [ ] Open one Markdown file from Termux with `mdlite-reader FILE.md`.
+- [ ] Open multiple Markdown files from Termux with `mdlite-reader FILE1.md FILE2.md`.
 
 ## Release Actions
 
