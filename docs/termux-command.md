@@ -18,7 +18,8 @@ Each readable Markdown file is opened as a tab. If a file is already open, its
 tab is refreshed and activated instead of duplicated.
 
 The command starts MdLite Reader directly. Multiple files open one after another
-as tabs.
+as tabs. The wrapper waits briefly between files so the running Activity can
+receive each document.
 
 ## Global Command
 

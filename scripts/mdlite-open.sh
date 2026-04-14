@@ -37,4 +37,5 @@ printf '%s\n' "$paths" | while IFS= read -r markdown_path; do
     --es io.github.yosk.mdlite.extra.MARKDOWN_SOURCE "$markdown_path" \
     --es io.github.yosk.mdlite.extra.MARKDOWN_TEXT "$markdown" \
     > /dev/null
+  sleep 0.4
 done

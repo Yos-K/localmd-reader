@@ -18,7 +18,8 @@ scripts/mdlite-open.sh README.md docs/termux-command.md
 ファイルは重複せず、そのタブを更新してアクティブにします。
 
 このコマンドは MdLite Reader を直接起動します。複数ファイルは順にタブとして
-開きます。
+開きます。実行中の Activity が各文書を受け取れるように、ラッパーはファイル間で
+短く待ちます。
 
 ## グローバルコマンド
 
