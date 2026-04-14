@@ -27,8 +27,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import io.github.yosk.mdlite.domain.ControlsPlacement;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
-import io.github.yosk.mdlite.domain.FileTypeDetector;
 import io.github.yosk.mdlite.domain.FontSize;
+import io.github.yosk.mdlite.domain.MarkdownFileOpenResult;
 import io.github.yosk.mdlite.domain.OpenDocumentTab;
 import io.github.yosk.mdlite.domain.OpenDocumentTabs;
 import io.github.yosk.mdlite.domain.RecentDocument;
@@ -389,24 +389,26 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void openUri(Uri uri, boolean remember) {
         FileInfo fileInfo = readFileInfo(uri);
-        if (!FileTypeDetector.isMarkdownDisplayName(fileInfo.displayName)) {
+        MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(fileInfo.displayName, fileInfo.sizeBytes, fileSizePolicy);
+        if (openResult instanceof MarkdownFileOpenResult.UnsupportedMarkdownFile) {
             showFileOpenError(unsupportedFileMessage());
             return;
         }
-        if (!fileSizePolicy.isReadableSize(fileInfo.sizeBytes)) {
+        if (openResult instanceof MarkdownFileOpenResult.OversizedMarkdownFile) {
             showFileOpenError(fileTooLargeMessage());
             return;
         }
 
+        MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
         try {
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
             SafeHtml rendered = renderer.render(markdown);
-            openTabs = openTabs.open(OpenDocumentTab.of(fileInfo.displayName, uri.toString(), rendered));
+            openTabs = openTabs.open(OpenDocumentTab.of(readableFile.displayName(), uri.toString(), rendered));
             renderTabs();
             renderCurrentDocument();
             saveOpenTabs();
             if (remember) {
-                recordRecentDocument(fileInfo.displayName, uri);
+                recordRecentDocument(readableFile.displayName(), uri);
             }
             showMessage("");
         } catch (IOException e) {
@@ -847,16 +849,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
             Uri uri = Uri.parse(storedTab.uri());
             FileInfo fileInfo = readFileInfo(uri);
             String displayName = fileInfo.displayName.length() == 0 ? storedTab.title() : fileInfo.displayName;
-            if (!FileTypeDetector.isMarkdownDisplayName(displayName)) {
-                return null;
-            }
-            if (!fileSizePolicy.isReadableSize(fileInfo.sizeBytes)) {
+            MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(displayName, fileInfo.sizeBytes, fileSizePolicy);
+            if (!(openResult instanceof MarkdownFileOpenResult.ReadableMarkdownFile)) {
                 return null;
             }
 
+            MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
             SafeHtml rendered = renderer.render(markdown);
-            return OpenDocumentTab.of(displayName, uri.toString(), rendered);
+            return OpenDocumentTab.of(readableFile.displayName(), uri.toString(), rendered);
         } catch (IllegalArgumentException e) {
             return null;
         } catch (IOException e) {

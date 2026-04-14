@@ -17,6 +17,14 @@
 - [x] rejects negative size
 - [x] accepts unknown provider size before streaming limit check
 
+## MarkdownFileOpenResult
+
+- [x] returns a readable Markdown file when display name and size are accepted
+- [x] returns an unsupported file result when display name is not Markdown
+- [x] returns an oversized file result when Markdown file exceeds policy
+- [x] prevents readable Markdown file creation with unsupported display name
+- [x] prevents readable Markdown file creation with invalid size
+
 ## Android Behavior
 
 - [x] show a dialog when the selected file type is unsupported
