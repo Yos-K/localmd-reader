@@ -19,14 +19,11 @@
     <path
         android:fillAlpha="0.45"
         android:fillColor="#6F847C"
-        android:pathData="M48,43h24v3H48zM48,55h20v3H48zM53,76h22v3H53zM53,83h18v3H53z" />
+        android:pathData="M48,41h24v4H48zM48,55c8,-4 15,4 23,0v4c-8,4 -15,-4 -23,0zM48,66c7,-3 13,3 20,0v4c-7,3 -13,-3 -20,0zM53,80c8,-3 14,3 22,0v4c-8,3 -14,-3 -22,0z" />
     <path
         android:fillColor="#53675F"
-        android:pathData="M43,76a3,3 0,1 0,0.1 0z" />
+        android:pathData="M43,79a3,3 0,1 0,0.1 0z" />
     <path
         android:fillColor="#DCE7E2"
-        android:pathData="M28,51h5v5h-5zM28,60h5v5h-5z" />
-    <path
-        android:fillColor="#53675F"
-        android:pathData="M43,35l4,6 -4,6h-4l4,-6 -4,-6z" />
+        android:pathData="M28,50h5v5h-5zM28,61h5v5h-5z" />
 </vector>
