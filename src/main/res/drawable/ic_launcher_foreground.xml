@@ -19,10 +19,10 @@
     <path
         android:fillAlpha="0.45"
         android:fillColor="#6F847C"
-        android:pathData="M48,43h24v3H48zM48,55h20v3H48zM48,72h27v3H48zM48,82h18v3H48z" />
+        android:pathData="M48,43h24v3H48zM48,55h20v3H48zM53,76h22v3H53zM53,83h18v3H53z" />
     <path
         android:fillColor="#53675F"
-        android:pathData="M44,77l2,2 6,-7 2,2 -8,9 -4,-4z" />
+        android:pathData="M43,76a3,3 0,1 0,0.1 0z" />
     <path
         android:fillColor="#DCE7E2"
         android:pathData="M28,51h5v5h-5zM28,60h5v5h-5z" />
