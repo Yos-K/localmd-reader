@@ -8,19 +8,19 @@
         android:fillColor="#17212B"
         android:pathData="M35,24h40c4,0 7,3 7,7v55c0,4 -3,7 -7,7H35c-4,0 -7,-3 -7,-7V31c0,-4 3,-7 7,-7z" />
     <path
-        android:fillColor="#B7A970"
+        android:fillColor="#6D6550"
         android:pathData="M40,20h35c3,0 5,2 5,5v47c0,3 -2,5 -5,5H40c-3,0 -5,-2 -5,-5V25c0,-3 2,-5 5,-5z" />
     <path
-        android:fillColor="#EDF3EF"
+        android:fillColor="#2F4540"
         android:pathData="M27,25h50c4,0 7,3 7,7v52c0,4 -3,7 -7,7H27c-4,0 -7,-3 -7,-7V32c0,-4 3,-7 7,-7z" />
     <path
-        android:fillColor="#667D75"
+        android:fillColor="#516A62"
         android:pathData="M27,25h7v66H27c-4,0 -7,-3 -7,-7V32c0,-4 3,-7 7,-7z" />
     <path
-        android:fillColor="#53675F"
+        android:fillColor="#D7E4DC"
         android:pathData="M44,42l22,15 -22,15v-8l11,-7 -11,-7z" />
     <path
         android:fillAlpha="0.5"
-        android:fillColor="#6F847C"
+        android:fillColor="#8DA199"
         android:pathData="M43,75h28v5H43z" />
 </vector>
