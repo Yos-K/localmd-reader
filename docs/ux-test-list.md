@@ -13,14 +13,15 @@
 
 - [x] Top bar shows the app name.
 - [x] Menu button label includes the word `Menu`.
-- [x] Drawer includes short product context.
-- [x] Drawer actions are grouped by Files, Reading, and Layout.
+- [x] Drawer avoids redundant product description below the app name.
+- [x] Drawer actions are grouped by Files, Reading, Layout, and Info.
 - [x] Native controls follow light and dark theme colors.
 - [x] Native buttons use consistent rounded surfaces and spacing.
 - [x] Menu can switch app UI copy between English and Japanese.
 - [x] Language switch button describes the action, not the current state.
 - [x] Language switch button is written in the target language.
 - [x] Selected app language is restored on app start.
+- [x] Privacy text is available from the drawer.
 
 ## Feedback
 

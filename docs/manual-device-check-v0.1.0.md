@@ -1,0 +1,80 @@
+# Manual Device Check v0.1.0
+
+Use this checklist for the final human pass before publishing MdLite Reader
+v0.1.0.
+
+Test build:
+
+```text
+/sdcard/Download/mdlite-reader-debug.apk
+```
+
+## Install And Launch
+
+- [ ] Install the debug APK from Downloads.
+- [ ] Launch the app from the Android launcher.
+- [ ] Confirm the launcher name is `MdLite Reader`.
+- [ ] Confirm the launcher icon matches the finalized dark Markdown icon.
+- [ ] Confirm the first screen is readable and has no clipped text.
+
+## File Opening
+
+- [ ] Open a `.md` file from the in-app picker.
+- [ ] Open a `.markdown` file from the in-app picker.
+- [ ] Open a Markdown file from an Android file manager.
+- [ ] Open an unsupported file and confirm a dialog explains why it cannot be opened.
+- [ ] Open a file above 2 MB and confirm a dialog explains the size limit.
+
+## Reading
+
+- [ ] Confirm headings, paragraphs, lists, checklists, blockquotes, code blocks,
+  inline code, links, tables, and horizontal rules render correctly.
+- [ ] Open a table wider than the screen and confirm horizontal scrolling is
+  discoverable and usable.
+- [ ] Open a table narrower than the screen and confirm it does not look
+  scrollable.
+- [ ] Tap an HTTP or HTTPS link and confirm it opens through an external app.
+
+## Navigation
+
+- [ ] Open two or more Markdown files as tabs.
+- [ ] Switch tabs by tapping.
+- [ ] Close a tab.
+- [ ] Close the final document tab and confirm the app returns to Welcome.
+- [ ] Restart the app and confirm restorable tabs come back.
+- [ ] Confirm unreadable restored tabs are skipped without crashing.
+
+## Menu And Settings
+
+- [ ] Open the menu from the hamburger button.
+- [ ] Open the menu with a left-edge swipe.
+- [ ] Close the menu by tapping outside it.
+- [ ] Close the menu by swiping outward from the drawer area.
+- [ ] Switch light and dark theme.
+- [ ] Switch UI language between English and Japanese.
+- [ ] Move controls to the bottom, restart, and confirm placement is restored.
+- [ ] Open the Privacy dialog and confirm it says the app does not collect
+  personal information.
+
+## Recent Files
+
+- [ ] Open Recent files when empty and confirm the empty-state dialog.
+- [ ] Open a file and confirm it appears in Recent files.
+- [ ] Reopen a file from Recent files and confirm it moves to the top.
+- [ ] Clear recent file history and confirm a completion dialog appears.
+
+## Gesture And Layout
+
+- [ ] Pinch to increase and decrease font size.
+- [ ] Confirm heading sizes change with the body font size.
+- [ ] Rotate the device if enabled and confirm text remains readable.
+- [ ] Confirm dark mode colors are applied to the toolbar, tabs, drawer, and
+  dialogs.
+
+## Privacy And Safety
+
+- [ ] Confirm no Android network permission prompt appears.
+- [ ] Confirm no login, account, ad, analytics, sync, or remote upload flow
+  appears.
+- [ ] Confirm screenshots used for Play Store do not contain personal file names,
+  paths, account data, notifications, or tokens.
