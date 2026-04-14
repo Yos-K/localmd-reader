@@ -18,11 +18,11 @@
         android:pathData="M27,25h12v66H27c-4,0 -7,-3 -7,-7V32c0,-4 3,-7 7,-7z" />
     <path
         android:fillColor="#34453F"
-        android:pathData="M48,43h24v5H48zM48,55h20v5H48z" />
+        android:pathData="M48,43h24v5H48z" />
     <path
         android:fillAlpha="0.45"
         android:fillColor="#6F847C"
-        android:pathData="M48,72h27v3H48zM48,82h18v3H48z" />
+        android:pathData="M48,55h20v3H48zM48,72h27v3H48zM48,82h18v3H48z" />
     <path
         android:fillColor="#D6B85A"
         android:pathData="M29,37h11v6H29zM29,72h11v11H29z" />
