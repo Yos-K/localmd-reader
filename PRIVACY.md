@@ -18,6 +18,11 @@ MdLite Reader does not collect personal information.
 The app does not collect names, email addresses, account identifiers, device
 identifiers, location data, contacts, usage analytics, or advertising IDs.
 
+## Privacy Contact
+
+Use the developer contact email configured in Google Play Console for privacy
+questions about MdLite Reader.
+
 ## Files
 
 MdLite Reader reads files that the user explicitly opens through Android file

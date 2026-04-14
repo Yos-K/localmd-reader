@@ -128,6 +128,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] `docs/play-store-listing.ja.md` exists.
 - [x] `docs/play-store-screenshots.md` exists.
 - [x] `docs/play-store-screenshots.ja.md` exists.
+- [x] `docs/play-store-data-safety.md` exists.
+- [x] `docs/play-store-data-safety.ja.md` exists.
 - [x] `docs/icon-design-note.md` exists.
 - [x] `docs/icon-design-note.ja.md` exists.
 - [x] AAB build script exists for Play Store upload builds.
@@ -150,6 +152,14 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] At least 4 phone screenshots are captured.
 - [ ] Screenshot alt text is entered in Play Console.
 - [ ] Feature graphic alt text is entered in Play Console.
+
+## Play Store Privacy
+
+- [x] Data safety answer plan is prepared.
+- [x] Privacy policy URL plan is prepared.
+- [x] In-app privacy text is available from the menu.
+- [ ] Privacy policy URL is publicly accessible.
+- [ ] Data safety form is entered in Play Console.
 
 ## Manual Device Checks
 

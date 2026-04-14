@@ -93,6 +93,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button themeButton;
     private Button languageButton;
     private Button controlsPlacementButton;
+    private Button privacyButton;
     private SwipeMenuLayout menuPanel;
     private LinearLayout root;
     private LinearLayout topBar;
@@ -104,6 +105,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private TextView filesSection;
     private TextView readingSection;
     private TextView layoutSection;
+    private TextView infoSection;
     private OpenDocumentTabs openTabs;
     private ControlsPlacement controlsPlacement;
     private ViewerLanguage currentLanguage = ViewerLanguage.english();
@@ -182,6 +184,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         controlsPlacementButton.setOnClickListener(this);
         styleMenuButton(controlsPlacementButton);
 
+        privacyButton = new Button(this);
+        privacyButton.setAllCaps(false);
+        privacyButton.setOnClickListener(this);
+        styleMenuButton(privacyButton);
+
         menuPanel = new SwipeMenuLayout(this);
         menuPanel.setOrientation(LinearLayout.VERTICAL);
         menuPanel.setVisibility(View.GONE);
@@ -224,6 +231,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(controlsPlacementButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        infoSection = menuSection("");
+        menuPanel.addView(infoSection, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(privacyButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
 
@@ -311,6 +325,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
             updateLocalizedText();
             applyControlsPlacement();
             closeMenu();
+        } else if (view == privacyButton) {
+            closeMenu();
+            showPrivacyPolicyDialog();
         } else if (view instanceof TabButton) {
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
             renderTabs();
@@ -514,6 +531,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 .show();
     }
 
+    private void showPrivacyPolicyDialog() {
+        showInfoDialog(privacyTitle(), privacyMessage());
+    }
+
     private ControlsPlacement loadControlsPlacement() {
         SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
         return ControlsPlacement.fromStoredValue(prefs.getString(CONTROLS_PLACEMENT, ControlsPlacement.TOP_VALUE));
@@ -550,6 +571,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         filesSection.setText(currentLanguage.isJapanese() ? "ファイル" : "Files");
         readingSection.setText(currentLanguage.isJapanese() ? "表示" : "Reading");
         layoutSection.setText(currentLanguage.isJapanese() ? "レイアウト" : "Layout");
+        infoSection.setText(currentLanguage.isJapanese() ? "情報" : "Info");
+        privacyButton.setText(currentLanguage.isJapanese() ? "プライバシー" : "Privacy");
         if (controlsPlacement.isBottom()) {
             controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを上に移動" : "Move controls to top");
         } else {
@@ -575,6 +598,23 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String recentFilesClearedMessage() {
         return currentLanguage.isJapanese() ? "最近開いたファイルをクリアしました。" : "Recent files cleared.";
+    }
+
+    private String privacyTitle() {
+        return currentLanguage.isJapanese() ? "プライバシー" : "Privacy";
+    }
+
+    private String privacyMessage() {
+        if (currentLanguage.isJapanese()) {
+            return "MdLite Reader は個人情報を収集しません。\n\n"
+                    + "広告、解析SDK、ログイン、自動クラッシュ送信、ネットワーク権限はありません。\n\n"
+                    + "選択したMarkdownは端末上で表示され、アプリによってアップロードされません。\n\n"
+                    + "最近開いたファイルとタブ復元の情報は端末内のアプリ専用領域に保存され、履歴クリアまたはアプリデータ削除で消去できます。";
+        }
+        return "MdLite Reader does not collect personal information.\n\n"
+                + "There are no ads, analytics SDKs, login, automatic crash reporting, or network permission.\n\n"
+                + "Selected Markdown files are rendered on your device and are not uploaded by the app.\n\n"
+                + "Recent file and tab restoration metadata stays in app-private storage and can be removed by clearing history or app data.";
     }
 
     private String unsupportedFileMessage() {
@@ -746,6 +786,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         styleMenuButton(themeButton);
         styleMenuButton(languageButton);
         styleMenuButton(controlsPlacementButton);
+        styleMenuButton(privacyButton);
         applyMenuSectionTheme();
     }
 
@@ -754,6 +795,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         filesSection.setTextColor(sectionColor);
         readingSection.setTextColor(sectionColor);
         layoutSection.setTextColor(sectionColor);
+        infoSection.setTextColor(sectionColor);
     }
 
     private GradientDrawable makeRoundedBackground(int fillColor, int strokeColor, int radiusDp) {
