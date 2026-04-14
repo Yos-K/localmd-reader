@@ -172,7 +172,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 
 ## Manual Device Checks
 
-- [ ] Install `/sdcard/Download/mdlite-reader-debug.apk`.
+- [x] Install `/sdcard/Download/mdlite-reader-debug.apk`.
 - [ ] Launch the app from the Android launcher and confirm the icon/name.
 - [ ] Open a Markdown file from the in-app picker.
 - [ ] Open a Markdown file from a file manager.
@@ -180,11 +180,11 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [ ] Open Recent files when empty and confirm the empty-state dialog.
 - [ ] Open two or more tabs, close one, restart the app, and confirm tab restoration.
 - [ ] Switch light/dark theme.
-- [ ] Pinch to change font size.
+- [x] Pinch to change font size.
 - [ ] Move controls to bottom, restart, and confirm placement is restored.
 - [ ] Open a table wider than the screen and confirm horizontal scrolling.
-- [ ] Open one Markdown file from Termux with `mdlite-reader FILE.md`.
-- [ ] Open multiple Markdown files from Termux with `mdlite-reader FILE1.md FILE2.md`.
+- [x] Open one Markdown file from Termux with `mdlite-reader FILE.md`.
+- [x] Open multiple Markdown files from Termux with `mdlite-reader FILE1.md FILE2.md`.
 
 ## Release Actions
 

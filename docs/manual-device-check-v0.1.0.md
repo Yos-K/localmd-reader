@@ -11,7 +11,7 @@ Test build:
 
 ## Install And Launch
 
-- [ ] Install the debug APK from Downloads.
+- [x] Install the debug APK from Downloads.
 - [ ] Launch the app from the Android launcher.
 - [ ] Confirm the launcher name is `MdLite Reader`.
 - [ ] Confirm the launcher icon matches the finalized dark Markdown icon.
@@ -22,8 +22,8 @@ Test build:
 - [ ] Open a `.md` file from the in-app picker.
 - [ ] Open a `.markdown` file from the in-app picker.
 - [ ] Open a Markdown file from an Android file manager.
-- [ ] Open one Markdown file from Termux with `mdlite-reader FILE.md`.
-- [ ] Open multiple Markdown files from Termux with `mdlite-reader FILE1.md FILE2.md`
+- [x] Open one Markdown file from Termux with `mdlite-reader FILE.md`.
+- [x] Open multiple Markdown files from Termux with `mdlite-reader FILE1.md FILE2.md`
   and confirm they open as tabs.
 - [ ] Open an unsupported file and confirm a dialog explains why it cannot be opened.
 - [ ] Open a file above 2 MB and confirm a dialog explains the size limit.
@@ -40,7 +40,7 @@ Test build:
 
 ## Navigation
 
-- [ ] Open two or more Markdown files as tabs.
+- [x] Open two or more Markdown files as tabs.
 - [ ] Switch tabs by tapping.
 - [ ] Close a tab.
 - [ ] Close the final document tab and confirm the app returns to Welcome.
@@ -68,7 +68,7 @@ Test build:
 
 ## Gesture And Layout
 
-- [ ] Pinch to increase and decrease font size.
+- [x] Pinch to increase and decrease font size.
 - [ ] Confirm heading sizes change with the body font size.
 - [ ] Rotate the device if enabled and confirm text remains readable.
 - [ ] Confirm dark mode colors are applied to the toolbar, tabs, drawer, and
