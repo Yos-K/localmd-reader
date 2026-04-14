@@ -1191,6 +1191,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
         webView.loadDataWithBaseURL(null, HtmlPageBuilder.buildPage(openTabs.activeTab().document(), currentTheme, currentFontSize), "text/html", "UTF-8", null);
     }
 
+    private void renderCurrentDocumentPreservingScroll() {
+        final int scrollX = webView.getScrollX();
+        final int scrollY = webView.getScrollY();
+        renderCurrentDocument();
+        webView.postDelayed(new RestoreScrollPosition(webView, scrollX, scrollY), 120);
+        webView.postDelayed(new RestoreScrollPosition(webView, scrollX, scrollY), 300);
+    }
+
     private void renderTabs() {
         tabRow.removeAllViews();
         for (int i = 0; i < openTabs.tabs().size(); i++) {
@@ -1259,7 +1267,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         currentFontSize = changed;
         accumulatedPinchScale = 1f;
-        renderCurrentDocument();
+        renderCurrentDocumentPreservingScroll();
     }
 
     private void resetAccumulatedPinchScale() {
@@ -1273,6 +1281,23 @@ public final class MainActivity extends Activity implements View.OnClickListener
         private FileInfo(String displayName, long sizeBytes) {
             this.displayName = displayName;
             this.sizeBytes = sizeBytes;
+        }
+    }
+
+    private static final class RestoreScrollPosition implements Runnable {
+        private final WebView webView;
+        private final int scrollX;
+        private final int scrollY;
+
+        private RestoreScrollPosition(WebView webView, int scrollX, int scrollY) {
+            this.webView = webView;
+            this.scrollX = scrollX;
+            this.scrollY = scrollY;
+        }
+
+        @Override
+        public void run() {
+            webView.scrollTo(scrollX, scrollY);
         }
     }
 
