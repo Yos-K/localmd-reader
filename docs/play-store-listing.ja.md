@@ -77,6 +77,12 @@ MdLite Reader は、メモ、ドキュメント、ローカルテキスト作業
 play-store/icon-512.png
 ```
 
+デザインメモ:
+
+```text
+docs/icon-design-note.ja.md
+```
+
 要件:
 
 - 512 x 512 px。

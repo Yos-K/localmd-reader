@@ -126,6 +126,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] `docs/release-signing.ja.md` exists.
 - [x] `docs/play-store-listing.md` exists.
 - [x] `docs/play-store-listing.ja.md` exists.
+- [x] `docs/icon-design-note.md` exists.
+- [x] `docs/icon-design-note.ja.md` exists.
 - [x] AAB build script exists for Play Store upload builds.
 - [x] Product spec matches the implemented v0.1.0 scope.
 
@@ -139,6 +141,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Japanese full description draft is prepared.
 - [x] Phone screenshot plan is prepared.
 - [x] Feature graphic direction is prepared.
+- [x] App icon redesign direction is prepared.
 - [ ] 512 x 512 Play Store icon is exported.
 - [ ] 1024 x 500 feature graphic is exported.
 - [ ] At least 4 phone screenshots are captured.

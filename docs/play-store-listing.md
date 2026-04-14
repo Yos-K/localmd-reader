@@ -77,6 +77,12 @@ Required asset:
 play-store/icon-512.png
 ```
 
+Design note:
+
+```text
+docs/icon-design-note.md
+```
+
 Requirements:
 
 - 512 x 512 px.
