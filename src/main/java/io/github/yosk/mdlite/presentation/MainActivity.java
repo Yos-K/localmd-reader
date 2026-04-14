@@ -101,7 +101,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private HorizontalScrollView tabScroller;
     private TextView appTitle;
     private TextView menuTitle;
-    private TextView menuSubtitle;
     private TextView filesSection;
     private TextView readingSection;
     private TextView layoutSection;
@@ -195,16 +194,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuTitle.setTextSize(22);
         menuTitle.setTypeface(Typeface.DEFAULT_BOLD);
         menuTitle.setGravity(Gravity.CENTER_VERTICAL);
-        menuTitle.setPadding(dp(8), 0, dp(8), dp(4));
+        menuTitle.setPadding(dp(8), 0, dp(8), dp(18));
         menuPanel.addView(menuTitle, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-
-        menuSubtitle = new TextView(this);
-        menuSubtitle.setTextColor(mutedColor());
-        menuSubtitle.setTextSize(14);
-        menuSubtitle.setPadding(dp(8), 0, dp(8), dp(18));
-        menuPanel.addView(menuSubtitle, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
 
@@ -556,9 +547,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         themeButton.setText(currentTheme.isDark() ? lightThemeLabel() : darkThemeLabel());
         languageButton.setText(currentLanguage.isJapanese() ? "Switch to English" : "日本語に切り替え");
         menuTitle.setText("MdLite Reader");
-        menuSubtitle.setText(currentLanguage.isJapanese()
-                ? "ローカルMarkdownビューア。広告なし。ネットワークなし。"
-                : "Local Markdown viewing. No ads. No network.");
         filesSection.setText(currentLanguage.isJapanese() ? "ファイル" : "Files");
         readingSection.setText(currentLanguage.isJapanese() ? "表示" : "Reading");
         layoutSection.setText(currentLanguage.isJapanese() ? "レイアウト" : "Layout");
@@ -750,7 +738,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuPanel.setBackgroundColor(backgroundColor());
         appTitle.setTextColor(textColor());
         menuTitle.setTextColor(textColor());
-        menuSubtitle.setTextColor(mutedColor());
         messageView.setTextColor(textColor());
         messageView.setBackgroundColor(messageColor());
         styleToolbarButton(menuButton);
