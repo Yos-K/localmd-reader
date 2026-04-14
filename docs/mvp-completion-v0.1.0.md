@@ -87,7 +87,6 @@ Detailed manual steps are in `docs/manual-device-check-v0.1.0.md`.
 - Folder browsing.
 - Git integration.
 - In-app purchase or Pro unlock.
-- Rust implementation.
 
 ## Image Rendering Decision
 
