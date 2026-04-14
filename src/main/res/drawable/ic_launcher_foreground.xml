@@ -18,7 +18,7 @@
         android:pathData="M27,25h12v66H27c-4,0 -7,-3 -7,-7V32c0,-4 3,-7 7,-7z" />
     <path
         android:fillColor="#34453F"
-        android:pathData="M51,38h5v22h-5zM61,38h5v22h-5zM46,45h24v5H46zM45,55h24v5H45z" />
+        android:pathData="M48,43h24v5H48zM48,55h20v5H48z" />
     <path
         android:fillAlpha="0.45"
         android:fillColor="#6F847C"
