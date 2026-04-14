@@ -9,6 +9,7 @@ login, sync, or network access.
 
 - Open `.md` and `.markdown` files
 - Open Markdown files from Android file managers
+- Open Markdown files from Termux with `mdlite-reader`
 - Render Markdown locally in a locked-down WebView
 - Light and dark themes
 - Pinch-to-change font size
@@ -48,6 +49,12 @@ Not supported in v0.1.0:
 - Remote image loading
 - Relative image rendering
 - Cloud sync
+
+## Usage
+
+See [docs/usage.md](docs/usage.md).
+
+Termux command details are in [docs/termux-command.md](docs/termux-command.md).
 
 ## Privacy
 

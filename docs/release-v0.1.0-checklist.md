@@ -119,6 +119,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 
 - [x] `README.md` exists and is the primary English document.
 - [x] `README.ja.md` exists.
+- [x] `docs/usage.md` exists.
+- [x] `docs/usage.ja.md` exists.
 - [x] `LICENSE` exists and is Apache-2.0.
 - [x] `CONTRIBUTING.md` exists.
 - [x] `CONTRIBUTING.ja.md` exists.

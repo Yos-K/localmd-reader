@@ -9,6 +9,7 @@ MdLite Reader は、軽量な Android 向け Markdown ビューアです。
 
 - `.md` と `.markdown` ファイルを開く
 - Android のファイルマネージャから Markdown ファイルを開く
+- Termux から `mdlite-reader` で Markdown ファイルを開く
 - ローカルで Markdown をレンダリングし、制限した WebView で表示する
 - ライトテーマとダークテーマ
 - ピンチ操作によるフォントサイズ変更
@@ -48,6 +49,12 @@ v0.1.0 では非対応:
 - リモート画像読み込み
 - 相対画像表示
 - クラウド同期
+
+## 使い方
+
+詳しくは [docs/usage.ja.md](docs/usage.ja.md) を参照してください。
+
+Termux コマンドの詳細は [docs/termux-command.ja.md](docs/termux-command.ja.md) にあります。
 
 ## プライバシー
 
