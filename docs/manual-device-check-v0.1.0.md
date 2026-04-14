@@ -12,9 +12,9 @@ Test build:
 ## Install And Launch
 
 - [x] Install the debug APK from Downloads.
-- [ ] Launch the app from the Android launcher.
-- [ ] Confirm the launcher name is `MdLite Reader`.
-- [ ] Confirm the launcher icon matches the finalized dark Markdown icon.
+- [x] Launch the app from the Android launcher.
+- [x] Confirm the launcher name is `MdLite Reader`.
+- [x] Confirm the launcher icon matches the finalized dark Markdown icon.
 - [ ] Confirm the first screen is readable and has no clipped text.
 
 ## File Opening

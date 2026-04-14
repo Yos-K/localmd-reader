@@ -173,7 +173,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 ## Manual Device Checks
 
 - [x] Install `/sdcard/Download/mdlite-reader-debug.apk`.
-- [ ] Launch the app from the Android launcher and confirm the icon/name.
+- [x] Launch the app from the Android launcher and confirm the icon/name.
 - [ ] Open a Markdown file from the in-app picker.
 - [ ] Open a Markdown file from a file manager.
 - [ ] Open an unsupported file and confirm the reason dialog.
