@@ -121,6 +121,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private ViewerLanguage currentLanguage = ViewerLanguage.english();
     private ViewerTheme currentTheme = ViewerTheme.light();
     private FontSize currentFontSize = FontSize.defaultSize();
+    private FontSize renderedFontSize = FontSize.defaultSize();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
     private ScaleGestureDetector fontScaleGestureDetector;
     private float accumulatedPinchScale = 1f;
@@ -1189,14 +1190,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void renderCurrentDocument() {
         webView.loadDataWithBaseURL(null, HtmlPageBuilder.buildPage(openTabs.activeTab().document(), currentTheme, currentFontSize), "text/html", "UTF-8", null);
-    }
-
-    private void renderCurrentDocumentPreservingScroll() {
-        final int scrollX = webView.getScrollX();
-        final int scrollY = webView.getScrollY();
-        renderCurrentDocument();
-        webView.postDelayed(new RestoreScrollPosition(webView, scrollX, scrollY), 120);
-        webView.postDelayed(new RestoreScrollPosition(webView, scrollX, scrollY), 300);
+        renderedFontSize = currentFontSize;
+        webView.getSettings().setTextZoom(100);
     }
 
     private void renderTabs() {
@@ -1267,7 +1262,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         currentFontSize = changed;
         accumulatedPinchScale = 1f;
-        renderCurrentDocumentPreservingScroll();
+        applyTextZoomWithoutReload();
+    }
+
+    private void applyTextZoomWithoutReload() {
+        int zoomPercent = Math.round((currentFontSize.sp() * 100f) / renderedFontSize.sp());
+        webView.getSettings().setTextZoom(zoomPercent);
     }
 
     private void resetAccumulatedPinchScale() {
@@ -1281,23 +1281,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         private FileInfo(String displayName, long sizeBytes) {
             this.displayName = displayName;
             this.sizeBytes = sizeBytes;
-        }
-    }
-
-    private static final class RestoreScrollPosition implements Runnable {
-        private final WebView webView;
-        private final int scrollX;
-        private final int scrollY;
-
-        private RestoreScrollPosition(WebView webView, int scrollX, int scrollY) {
-            this.webView = webView;
-            this.scrollX = scrollX;
-            this.scrollY = scrollY;
-        }
-
-        @Override
-        public void run() {
-            webView.scrollTo(scrollX, scrollY);
         }
     }
 
