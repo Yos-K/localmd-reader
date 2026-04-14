@@ -34,6 +34,12 @@ scripts/capture-play-store-screenshot.sh phone-01-welcome
 play-store/screenshots/
 ```
 
+手動撮影した画像は、コミット前にメタデータを除去し、1080 x 1920 に書き出して配置します。
+
+```sh
+scripts/prepare-play-store-screenshot.sh /sdcard/Download/phone-01-welcome.jpg play-store/screenshots/phone-01-welcome.jpg
+```
+
 ## 必要なセット
 
 スマホスクリーンショット 1:
@@ -94,4 +100,4 @@ phone-04-tabs-menu.png
 6. ダークテーマへ切り替え、横長テーブル画面を撮影する。
 7. 2つのタブを開き、メニューを表示して撮影する。
 8. スクリーンショットに個人情報が含まれていないか確認する。
-9. 承認したスクリーンショットを `play-store/screenshots/` に置く。
+9. 承認したスクリーンショットを `scripts/prepare-play-store-screenshot.sh` で `play-store/screenshots/` に置く。

@@ -147,7 +147,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] App icon redesign direction is prepared.
 - [x] 512 x 512 Play Store icon is exported.
 - [x] 1024 x 500 feature graphic is exported.
-- [ ] At least 4 phone screenshots are captured.
+- [x] At least 4 phone screenshots are captured.
 - [ ] Screenshot alt text is entered in Play Console.
 - [ ] Feature graphic alt text is entered in Play Console.
 

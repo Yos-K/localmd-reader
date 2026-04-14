@@ -34,6 +34,13 @@ The output directory is:
 play-store/screenshots/
 ```
 
+Prepare a manually captured image before committing.
+This strips metadata and exports a 1080 x 1920 screenshot:
+
+```sh
+scripts/prepare-play-store-screenshot.sh /sdcard/Download/phone-01-welcome.jpg play-store/screenshots/phone-01-welcome.jpg
+```
+
 ## Required Set
 
 Phone screenshot 1:
@@ -94,4 +101,4 @@ phone-04-tabs-menu.png
 6. Switch to dark theme and capture the wide table screen.
 7. Open two tabs, open the menu, and capture the tabs/menu screen.
 8. Review the screenshots for personal information.
-9. Copy approved screenshots to `play-store/screenshots/`.
+9. Copy approved screenshots to `play-store/screenshots/` with `scripts/prepare-play-store-screenshot.sh`.
