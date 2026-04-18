@@ -61,7 +61,7 @@ Test build:
 
 ## Recent Files
 
-- [ ] Open Recent files when empty and confirm the empty-state dialog.
+- [x] Open Recent files when empty and confirm the empty-state dialog.
 - [ ] Open a file and confirm it appears in Recent files.
 - [ ] Reopen a file from Recent files and confirm it moves to the top.
 - [ ] Clear recent file history and confirm a completion dialog appears.
