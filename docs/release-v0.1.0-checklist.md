@@ -174,9 +174,9 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 
 - [x] Install `/sdcard/Download/mdlite-reader-debug.apk`.
 - [x] Launch the app from the Android launcher and confirm the icon/name.
-- [ ] Open a Markdown file from the in-app picker.
-- [ ] Open a Markdown file from a file manager.
-- [ ] Open an unsupported file and confirm the reason dialog.
+- [x] Open a Markdown file from the in-app picker.
+- [x] Open a Markdown file from a file manager.
+- [x] Open an unsupported file and confirm the reason dialog.
 - [ ] Open Recent files when empty and confirm the empty-state dialog.
 - [ ] Open two or more tabs, close one, restart the app, and confirm tab restoration.
 - [ ] Switch light/dark theme.
