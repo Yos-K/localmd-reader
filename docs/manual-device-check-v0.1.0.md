@@ -42,6 +42,7 @@ Test build:
 
 - [x] Open two or more Markdown files as tabs.
 - [x] Switch tabs by tapping.
+- [x] Confirm the tab row scrolls to the active tab.
 - [x] Close a tab.
 - [x] Close the final document tab and confirm the app returns to Welcome.
 - [x] Restart the app and confirm restorable tabs come back.
