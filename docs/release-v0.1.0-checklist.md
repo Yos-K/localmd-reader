@@ -181,7 +181,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Open two or more tabs, close one, restart the app, and confirm tab restoration.
 - [x] Switch light/dark theme.
 - [x] Pinch to change font size.
-- [ ] Move controls to bottom, restart, and confirm placement is restored.
+- [x] Move controls to bottom, restart, and confirm placement is restored.
 - [ ] Open a table wider than the screen and confirm horizontal scrolling.
 - [x] Open one Markdown file from Termux with `mdlite-reader FILE.md`.
 - [x] Open multiple Markdown files from Termux with `mdlite-reader FILE1.md FILE2.md`.

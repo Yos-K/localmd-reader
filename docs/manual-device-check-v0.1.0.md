@@ -55,7 +55,7 @@ Test build:
 - [ ] Close the menu by swiping outward from the drawer area.
 - [x] Switch light and dark theme.
 - [ ] Switch UI language between English and Japanese.
-- [ ] Move controls to the bottom, restart, and confirm placement is restored.
+- [x] Move controls to the bottom, restart, and confirm placement is restored.
 - [ ] Open the Privacy dialog and confirm it says the app does not collect
   personal information.
 
