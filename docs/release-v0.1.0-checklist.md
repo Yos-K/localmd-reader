@@ -4,11 +4,11 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 
 ## Repository
 
-- [ ] The repository is private before the first release is ready.
-- [ ] `main` is clean.
-- [ ] All release changes are committed with Conventional Commits style.
-- [ ] No production signing keys are committed.
-- [ ] No secrets, tokens, account data, or private file paths are committed.
+- [x] The repository is private before the first release is ready.
+- [x] `main` is clean.
+- [x] All release changes are committed with Conventional Commits style.
+- [x] No production signing keys are committed.
+- [x] No secrets, tokens, account data, or private file paths are committed.
 - [x] Production signing procedure is documented.
 
 ## Version And Identity
