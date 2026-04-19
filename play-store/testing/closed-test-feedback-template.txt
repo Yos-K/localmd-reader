@@ -1,0 +1,25 @@
+MdLite Reader Closed Test Feedback
+
+Device:
+Android version:
+App version:
+
+Checks:
+- Installed from Google Play:
+- App launched:
+- Opened a .md or .markdown file:
+- Used tabs:
+- Switched light/dark theme:
+- Changed font size with pinch:
+- Opened the privacy dialog:
+
+Concern:
+
+Steps to reproduce:
+
+Expected behavior:
+
+Actual behavior:
+
+Screenshot:
+Attach only if it does not include personal information or private file content.

@@ -106,6 +106,28 @@ reporting, or `android.permission.INTERNET` permission. It does not transmit
 Markdown content, file names, file paths, Android document URIs, or recent file
 metadata off device.
 
+## Closed Testing
+
+Use `docs/closed-testing-guide.md` for the closed testing workflow.
+
+Recommended tester invitation:
+
+```text
+play-store/testing/closed-test-invitation.txt
+```
+
+Recommended feedback template:
+
+```text
+play-store/testing/closed-test-feedback-template.txt
+```
+
+Closed testing should use the signed release AAB:
+
+```text
+~/AndroidDev/releases/mdlite-reader/v0.1.0/mdlite-reader-0.1.0-release.aab
+```
+
 ## Before Submission
 
 - Confirm the privacy policy URL opens in a private browser session.

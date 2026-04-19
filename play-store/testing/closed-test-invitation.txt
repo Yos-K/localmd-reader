@@ -1,0 +1,27 @@
+I am looking for closed testers for MdLite Reader, an Android Markdown viewer.
+
+Purpose:
+Confirm the first Google Play build and collect feedback before public release.
+
+Request:
+- Opt in from the Google Play testing link.
+- Stay opted in for 14 days.
+- Open a Markdown file if possible.
+- Send brief feedback if you notice anything.
+
+App details:
+- Local Markdown viewer.
+- No ads.
+- No login.
+- No network permission.
+- Files are rendered on your device.
+
+Please check:
+- The app installs.
+- The app launches.
+- .md and .markdown files open.
+- The document is readable.
+- Tabs, theme switching, and pinch font sizing work.
+
+You do not need to send private Markdown files. If you report an issue, avoid
+including personal information.
