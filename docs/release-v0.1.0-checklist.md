@@ -138,6 +138,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] `docs/mvp-completion-v0.1.0.ja.md` exists.
 - [x] `docs/termux-command.md` exists.
 - [x] `docs/termux-command.ja.md` exists.
+- [x] `docs/release-notes-v0.1.0.md` exists.
+- [x] `docs/release-notes-v0.1.0.ja.md` exists.
 - [x] AAB build script exists for Play Store upload builds.
 - [x] Product spec matches the implemented v0.1.0 scope.
 
@@ -188,7 +190,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 
 ## Release Actions
 
-- [ ] Run `./test.sh` immediately before release.
+- [x] Run `./test.sh` immediately before release.
 - [x] Create or confirm the production keystore outside the repository.
 - [ ] Create a signed release build with the production key outside the repository.
 - [ ] Run `scripts/check-release-basics.sh` against the signed release APK.
