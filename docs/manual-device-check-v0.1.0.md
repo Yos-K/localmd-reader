@@ -53,7 +53,7 @@ Test build:
 - [ ] Open the menu with a left-edge swipe.
 - [ ] Close the menu by tapping outside it.
 - [ ] Close the menu by swiping outward from the drawer area.
-- [ ] Switch light and dark theme.
+- [x] Switch light and dark theme.
 - [ ] Switch UI language between English and Japanese.
 - [ ] Move controls to the bottom, restart, and confirm placement is restored.
 - [ ] Open the Privacy dialog and confirm it says the app does not collect
@@ -71,7 +71,7 @@ Test build:
 - [x] Pinch to increase and decrease font size.
 - [ ] Confirm heading sizes change with the body font size.
 - [ ] Rotate the device if enabled and confirm text remains readable.
-- [ ] Confirm dark mode colors are applied to the toolbar, tabs, drawer, and
+- [x] Confirm dark mode colors are applied to the toolbar, tabs, drawer, and
   dialogs.
 
 ## Privacy And Safety

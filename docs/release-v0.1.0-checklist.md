@@ -179,7 +179,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Open an unsupported file and confirm the reason dialog.
 - [x] Open Recent files when empty and confirm the empty-state dialog.
 - [x] Open two or more tabs, close one, restart the app, and confirm tab restoration.
-- [ ] Switch light/dark theme.
+- [x] Switch light/dark theme.
 - [x] Pinch to change font size.
 - [ ] Move controls to bottom, restart, and confirm placement is restored.
 - [ ] Open a table wider than the screen and confirm horizontal scrolling.
