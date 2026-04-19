@@ -45,7 +45,7 @@ Test build:
 - [x] Close a tab.
 - [x] Close the final document tab and confirm the app returns to Welcome.
 - [x] Restart the app and confirm restorable tabs come back.
-- [ ] Confirm unreadable restored tabs are skipped without crashing.
+- [x] Confirm unreadable restored tabs are skipped without crashing.
 
 ## Menu And Settings
 
