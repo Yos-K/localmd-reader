@@ -32,7 +32,7 @@ Test build:
 
 - [ ] Confirm headings, paragraphs, lists, checklists, blockquotes, code blocks,
   inline code, links, tables, and horizontal rules render correctly.
-- [ ] Open a table wider than the screen and confirm horizontal scrolling is
+- [x] Open a table wider than the screen and confirm horizontal scrolling is
   discoverable and usable.
 - [ ] Open a table narrower than the screen and confirm it does not look
   scrollable.
