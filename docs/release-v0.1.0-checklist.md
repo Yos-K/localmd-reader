@@ -140,6 +140,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] `docs/termux-command.ja.md` exists.
 - [x] `docs/release-notes-v0.1.0.md` exists.
 - [x] `docs/release-notes-v0.1.0.ja.md` exists.
+- [x] `docs/free-pro-feature-policy.md` exists.
+- [x] `docs/free-pro-feature-policy.ja.md` exists.
 - [x] AAB build script exists for Play Store upload builds.
 - [x] Product spec matches the implemented v0.1.0 scope.
 
