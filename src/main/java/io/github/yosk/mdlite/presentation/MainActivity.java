@@ -300,7 +300,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         appRoot.addView(menuPanel, menuParams);
 
         setContentView(appRoot);
-        handleIncomingIntent(getIntent());
+        if (savedInstanceState == null) {
+            handleIncomingIntent(getIntent());
+        }
     }
 
     @Override
@@ -398,6 +400,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (intent == null) {
             return;
         }
+        setIntent(new Intent());
         String action = intent.getAction();
         Uri uri = intent.getData();
         if (Intent.ACTION_VIEW.equals(action) && uri != null) {
