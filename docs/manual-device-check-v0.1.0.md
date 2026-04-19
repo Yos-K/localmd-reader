@@ -30,7 +30,7 @@ Test build:
 
 ## Reading
 
-- [ ] Confirm headings, paragraphs, lists, checklists, blockquotes, code blocks,
+- [x] Confirm headings, paragraphs, lists, checklists, blockquotes, code blocks,
   inline code, links, tables, and horizontal rules render correctly.
 - [x] Open a table wider than the screen and confirm horizontal scrolling is
   discoverable and usable.
