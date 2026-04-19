@@ -132,6 +132,18 @@ Android のリリース署名では許容し、bundle 構造の確認は `bundle
 build/release/mdlite-reader-0.1.0-release.aab
 ```
 
+リリース staging 先:
+
+```text
+~/AndroidDev/releases/mdlite-reader/v0.1.0/mdlite-reader-0.1.0-release.aab
+```
+
+checksum ファイル:
+
+```text
+~/AndroidDev/releases/mdlite-reader/v0.1.0/SHA256SUMS
+```
+
 ## Play Store について
 
 APK スクリプトはローカルでのリリース相当のインストール確認に使います。

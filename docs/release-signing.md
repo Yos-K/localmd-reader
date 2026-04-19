@@ -132,6 +132,18 @@ The default output is:
 build/release/mdlite-reader-0.1.0-release.aab
 ```
 
+Release staging location:
+
+```text
+~/AndroidDev/releases/mdlite-reader/v0.1.0/mdlite-reader-0.1.0-release.aab
+```
+
+Checksum file:
+
+```text
+~/AndroidDev/releases/mdlite-reader/v0.1.0/SHA256SUMS
+```
+
 ## Play Store Note
 
 The APK script remains useful for local release-style installation checks.
