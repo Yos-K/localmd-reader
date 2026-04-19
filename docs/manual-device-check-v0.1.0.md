@@ -69,7 +69,7 @@ Test build:
 ## Gesture And Layout
 
 - [x] Pinch to increase and decrease font size.
-- [ ] Confirm heading sizes change with the body font size.
+- [x] Confirm heading sizes change with the body font size.
 - [x] Rotate the device if enabled and confirm text remains readable.
 - [x] Confirm dark mode colors are applied to the toolbar, tabs, drawer, and
   dialogs.
