@@ -76,7 +76,7 @@ Test build:
 
 ## Privacy And Safety
 
-- [ ] Confirm no Android network permission prompt appears.
+- [x] Confirm no Android network permission prompt appears.
 - [x] Confirm no login, account, ad, analytics, sync, or remote upload flow
   appears.
 - [x] Confirm screenshots used for Play Store do not contain personal file names,
