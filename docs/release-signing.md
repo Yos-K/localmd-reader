@@ -51,22 +51,7 @@ Run the automated checks first:
 Then sign with the production key:
 
 ```sh
-export MDLITE_RELEASE_KEYSTORE="$HOME/AndroidDev/keys/mdlite-reader-release.jks"
-export MDLITE_RELEASE_KEY_ALIAS="mdlite-release"
-printf "Keystore password: "
-stty -echo
-read -r MDLITE_RELEASE_STORE_PASS
-stty echo
-printf "\nKey password: "
-stty -echo
-read -r MDLITE_RELEASE_KEY_PASS
-stty echo
-printf "\n"
-export MDLITE_RELEASE_STORE_PASS
-export MDLITE_RELEASE_KEY_PASS
-scripts/build-release-apk.sh
-unset MDLITE_RELEASE_STORE_PASS
-unset MDLITE_RELEASE_KEY_PASS
+scripts/build-signed-release.sh apk
 ```
 
 The default output is:
@@ -91,36 +76,17 @@ Run the automated checks first:
 Then build the signed AAB:
 
 ```sh
-export BUNDLETOOL_JAR="$HOME/AndroidDev/tools/bundletool.jar"
-export MDLITE_RELEASE_KEYSTORE="$HOME/AndroidDev/keys/mdlite-reader-release.jks"
-export MDLITE_RELEASE_KEY_ALIAS="mdlite-release"
-scripts/build-release-aab.sh
+scripts/build-signed-release.sh aab
 ```
 
-`jarsigner` prompts for the keystore password and key password when needed.
-Do not pass those passwords as command arguments.
-
-For non-interactive execution, provide passwords through environment variables:
+Build both signed artifacts:
 
 ```sh
-export BUNDLETOOL_JAR="$HOME/AndroidDev/tools/bundletool.jar"
-export MDLITE_RELEASE_KEYSTORE="$HOME/AndroidDev/keys/mdlite-reader-release.jks"
-export MDLITE_RELEASE_KEY_ALIAS="mdlite-release"
-printf "Keystore password: "
-stty -echo
-read -r MDLITE_RELEASE_STORE_PASS
-stty echo
-printf "\nKey password: "
-stty -echo
-read -r MDLITE_RELEASE_KEY_PASS
-stty echo
-printf "\n"
-export MDLITE_RELEASE_STORE_PASS
-export MDLITE_RELEASE_KEY_PASS
-scripts/build-release-aab.sh
-unset MDLITE_RELEASE_STORE_PASS
-unset MDLITE_RELEASE_KEY_PASS
+scripts/build-signed-release.sh all
 ```
+
+The wrapper reads the keystore password and key password without echoing them,
+exports them only for the child build process, and unsets them on exit.
 
 `jarsigner` may warn that the certificate is self-signed or has no timestamp.
 That is acceptable for Android release signing. Treat `bundletool validate`
