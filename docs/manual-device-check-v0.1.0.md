@@ -49,10 +49,10 @@ Test build:
 
 ## Menu And Settings
 
-- [ ] Open the menu from the hamburger button.
-- [ ] Open the menu with a left-edge swipe.
-- [ ] Close the menu by tapping outside it.
-- [ ] Close the menu by swiping outward from the drawer area.
+- [x] Open the menu from the hamburger button.
+- [x] Open the menu with a left-edge swipe.
+- [x] Close the menu by tapping outside it.
+- [x] Close the menu by swiping outward from the drawer area.
 - [x] Switch light and dark theme.
 - [ ] Switch UI language between English and Japanese.
 - [x] Move controls to the bottom, restart, and confirm placement is restored.
