@@ -20,7 +20,7 @@ Test build:
 ## File Opening
 
 - [x] Open a `.md` file from the in-app picker.
-- [ ] Open a `.markdown` file from the in-app picker.
+- [x] Open a `.markdown` file from the in-app picker.
 - [x] Open a Markdown file from an Android file manager.
 - [x] Open one Markdown file from Termux with `mdlite-reader FILE.md`.
 - [x] Open multiple Markdown files from Termux with `mdlite-reader FILE1.md FILE2.md`
