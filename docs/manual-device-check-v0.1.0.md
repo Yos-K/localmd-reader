@@ -70,7 +70,7 @@ Test build:
 
 - [x] Pinch to increase and decrease font size.
 - [ ] Confirm heading sizes change with the body font size.
-- [ ] Rotate the device if enabled and confirm text remains readable.
+- [x] Rotate the device if enabled and confirm text remains readable.
 - [x] Confirm dark mode colors are applied to the toolbar, tabs, drawer, and
   dialogs.
 
