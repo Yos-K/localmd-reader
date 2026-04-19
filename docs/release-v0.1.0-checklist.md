@@ -132,6 +132,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] `docs/play-store-screenshots.ja.md` exists.
 - [x] `docs/play-store-data-safety.md` exists.
 - [x] `docs/play-store-data-safety.ja.md` exists.
+- [x] `docs/play-console-submission.md` exists.
+- [x] `docs/play-console-submission.ja.md` exists.
 - [x] `docs/icon-design-note.md` exists.
 - [x] `docs/icon-design-note.ja.md` exists.
 - [x] `docs/mvp-completion-v0.1.0.md` exists.

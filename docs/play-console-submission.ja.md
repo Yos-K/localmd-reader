@@ -1,0 +1,123 @@
+# Play Console 提出ガイド
+
+この文書は MdLite Reader v0.1.0 について、Google Play Console に手動入力する
+項目をまとめます。
+
+## アプリ掲載情報
+
+英語の掲載情報は次のファイルから入力します。
+
+- `play-store/listing/en-US/title.txt`
+- `play-store/listing/en-US/short-description.txt`
+- `play-store/listing/en-US/full-description.txt`
+
+日本語の掲載情報は次のファイルから入力します。
+
+- `play-store/listing/ja-JP/title.txt`
+- `play-store/listing/ja-JP/short-description.txt`
+- `play-store/listing/ja-JP/full-description.txt`
+
+主カテゴリ:
+
+```text
+Productivity
+```
+
+## 画像アセット
+
+次のアセットをアップロードします。
+
+- `play-store/icon-512.png`
+- `play-store/feature-graphic-1024x500.png`
+- `play-store/screenshots/phone-01-welcome.jpg`
+- `play-store/screenshots/phone-02-document.jpg`
+- `play-store/screenshots/phone-03-dark-table.jpg`
+- `play-store/screenshots/phone-04-tabs-menu.jpg`
+
+## 代替テキスト
+
+英語の feature graphic 代替テキストは次のファイルから入力します。
+
+```text
+play-store/listing/en-US/feature-graphic-alt.txt
+```
+
+英語のスクリーンショット代替テキストは次のファイルから入力します。
+
+```text
+play-store/listing/en-US/phone-screenshot-01-alt.txt
+play-store/listing/en-US/phone-screenshot-02-alt.txt
+play-store/listing/en-US/phone-screenshot-03-alt.txt
+play-store/listing/en-US/phone-screenshot-04-alt.txt
+```
+
+日本語の feature graphic 代替テキストは次のファイルから入力します。
+
+```text
+play-store/listing/ja-JP/feature-graphic-alt.txt
+```
+
+日本語のスクリーンショット代替テキストは次のファイルから入力します。
+
+```text
+play-store/listing/ja-JP/phone-screenshot-01-alt.txt
+play-store/listing/ja-JP/phone-screenshot-02-alt.txt
+play-store/listing/ja-JP/phone-screenshot-03-alt.txt
+play-store/listing/ja-JP/phone-screenshot-04-alt.txt
+```
+
+## Privacy Policy URL
+
+公開状態になった後、英語版プライバシーポリシーを primary privacy policy URL として
+使います。
+
+```text
+https://github.com/Yos-K/mdlite-reader/blob/main/PRIVACY.md
+```
+
+日本語版:
+
+```text
+https://github.com/Yos-K/mdlite-reader/blob/main/PRIVACY.ja.md
+```
+
+Play Store 申請時点でもリポジトリを private にする場合は、`PRIVACY.md` を別の
+public、非 PDF、地域制限なしの URL に公開し、その URL を Play Console に入力します。
+
+## Data Safety
+
+`docs/play-store-data-safety.md` を正とします。
+
+回答:
+
+```text
+Does your app collect or share any of the required user data types?
+No
+
+Does your app share user data with other companies or organizations?
+No
+
+Data types:
+No data types selected
+
+Data encryption in transit:
+Not applicable
+
+Data deletion request mechanism:
+Not applicable for collected data
+```
+
+理由:
+
+MdLite Reader v0.1.0 には広告、解析 SDK、ログイン、自動クラッシュ送信、
+`android.permission.INTERNET` 権限がありません。Markdown 本文、ファイル名、
+ファイルパス、Android document URI、最近開いたファイルのメタデータを端末外へ
+送信しません。
+
+## 申請前確認
+
+- privacy policy URL をプライベートブラウザで開けることを確認する。
+- アップロードするスクリーンショットに個人情報が写っていないことを確認する。
+- アップロードする AAB が最新の署名済みリリースビルドであることを確認する。
+- Data safety の回答が APK/AAB の権限と一致していることを確認する。
+- 公開判断まではリポジトリを private のままにする。
