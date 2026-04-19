@@ -201,5 +201,5 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Create a signed release AAB with `scripts/build-release-aab.sh` for Play Store upload.
 - [x] Validate the signed release AAB with `bundletool validate`.
 - [x] Copy the signed release AAB to the release staging location.
-- [ ] Tag the release as `v0.1.0`.
+- [x] Tag the release as `v0.1.0`.
 - [x] Keep the repository private until the public release decision is made.
