@@ -1,7 +1,7 @@
 package io.github.yosk.mdlite.domain;
 
 public final class MarkdownFileOpenResultTest {
-    private static final long MAX_SIZE_BYTES = 2L * 1024L * 1024L;
+    private static final long MAX_SIZE_BYTES = 10L * 1024L * 1024L;
 
     public static void main(String[] args) {
         MarkdownFileOpenResultTest test = new MarkdownFileOpenResultTest();

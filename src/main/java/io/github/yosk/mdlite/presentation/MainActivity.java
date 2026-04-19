@@ -59,7 +59,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final String EXTRA_MARKDOWN_SOURCES = "io.github.yosk.mdlite.extra.MARKDOWN_SOURCES";
     private static final String EXTRA_MARKDOWN_TEXT = "io.github.yosk.mdlite.extra.MARKDOWN_TEXT";
     private static final String EXTRA_MARKDOWN_TEXTS_BASE64 = "io.github.yosk.mdlite.extra.MARKDOWN_TEXTS_BASE64";
-    private static final long MAX_FILE_SIZE_BYTES = 2L * 1024L * 1024L;
+    private static final long MAX_FILE_SIZE_BYTES = 10L * 1024L * 1024L;
     private static final int MAX_RECENT_DOCUMENTS = 5;
     private static final String RECENT_PREFS = "recent_documents";
     private static final String RECENT_ITEMS = "items";
@@ -729,8 +729,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String fileTooLargeMessage() {
         return currentLanguage.isJapanese()
-                ? "2 MB を超えるファイルは開けません。"
-                : "Files larger than 2 MB cannot be opened.";
+                ? "10 MB を超えるファイルは開けません。"
+                : "Files larger than 10 MB cannot be opened.";
     }
 
     private String unreadableFileMessage() {

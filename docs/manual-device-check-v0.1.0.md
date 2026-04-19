@@ -26,7 +26,7 @@ Test build:
 - [x] Open multiple Markdown files from Termux with `mdlite-reader FILE1.md FILE2.md`
   and confirm they open as tabs.
 - [x] Open an unsupported file and confirm a dialog explains why it cannot be opened.
-- [ ] Open a file above 2 MB and confirm a dialog explains the size limit.
+- [ ] Open a file above 10 MB and confirm a dialog explains the size limit.
 
 ## Reading
 

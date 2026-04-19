@@ -34,7 +34,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Open `.markdown` files from the in-app picker.
 - [x] Open Markdown files from Android file managers.
 - [x] Reject unsupported file types with a clear dialog.
-- [x] Reject files above 2 MB with a clear dialog.
+- [x] Reject files above 10 MB with a clear dialog.
 - [x] Explain unreadable documents with likely causes.
 - [x] Do not request broad storage permission.
 

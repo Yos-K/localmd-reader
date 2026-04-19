@@ -45,4 +45,4 @@ directly to MdLite Reader. This allows files in Termux directories to be opened
 without requesting broad storage permission.
 
 Android Intent extras have practical size limits. Use the in-app picker or an
-Android file manager for large files near the app's 2 MB file size limit.
+Android file manager for large files near the app's 10 MB file size limit.

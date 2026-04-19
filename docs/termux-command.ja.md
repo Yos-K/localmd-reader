@@ -44,6 +44,6 @@ mdlite-reader FILE.md [FILE2.md ...]
 に直接渡します。これにより、広いストレージ権限を要求せずに Termux 配下の
 ファイルを開けます。
 
-Android の Intent extra には実用上のサイズ制限があります。アプリの 2 MB 制限に
+Android の Intent extra には実用上のサイズ制限があります。アプリの 10 MB 制限に
 近い大きなファイルは、アプリ内のファイル選択または Android のファイルマネージャ
 から開いてください。
