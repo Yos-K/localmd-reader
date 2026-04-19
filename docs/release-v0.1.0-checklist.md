@@ -173,7 +173,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Data safety answer plan is prepared.
 - [x] Privacy policy URL plan is prepared.
 - [x] In-app privacy text is available from the menu.
-- [ ] Privacy policy URL is publicly accessible.
+- [x] Privacy policy URL is publicly accessible.
 - [ ] Data safety form is entered in Play Console.
 
 ## Manual Device Checks

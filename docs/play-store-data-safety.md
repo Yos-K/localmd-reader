@@ -97,26 +97,17 @@ URI. This stays on the device and is not transmitted by the app.
 
 ## Privacy Policy URL
 
-Use the English privacy policy as the primary Play Console privacy policy URL
-after the repository becomes public:
+Use this public privacy policy URL:
 
 ```text
-https://github.com/Yos-K/mdlite-reader/blob/main/PRIVACY.md
-```
-
-Japanese privacy policy:
-
-```text
-https://github.com/Yos-K/mdlite-reader/blob/main/PRIVACY.ja.md
+https://gist.github.com/Yos-K/23b876101848591692bc94a5f92dd024
 ```
 
 Release requirement:
 
 - The repository must remain private during development.
-- The privacy policy URL must be publicly accessible before Play Store
-  submission.
-- If the repository is not made public before submission, publish the privacy
-  policy on another public, non-PDF, non-geo-fenced URL.
+- The privacy policy URL must remain publicly accessible during Play Store
+  submission and after release.
 
 ## In-App Privacy Text
 

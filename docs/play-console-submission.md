@@ -68,22 +68,13 @@ play-store/listing/ja-JP/phone-screenshot-04-alt.txt
 
 ## Privacy Policy URL
 
-Use the English privacy policy as the primary privacy policy URL after it is
-publicly accessible:
+Use this public privacy policy URL:
 
 ```text
-https://github.com/Yos-K/mdlite-reader/blob/main/PRIVACY.md
+https://gist.github.com/Yos-K/23b876101848591692bc94a5f92dd024
 ```
 
-Japanese privacy policy:
-
-```text
-https://github.com/Yos-K/mdlite-reader/blob/main/PRIVACY.ja.md
-```
-
-If the repository remains private during Play Store submission, publish
-`PRIVACY.md` on another public, non-PDF, non-geo-fenced URL and use that URL in
-Play Console.
+The page includes both English and Japanese text.
 
 ## Data Safety
 

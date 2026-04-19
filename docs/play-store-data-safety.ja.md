@@ -96,24 +96,16 @@ Not applicable for collected data
 
 ## Privacy Policy URL
 
-リポジトリを public にした後、Play Console の primary privacy policy URL には
-英語版を使います。
+次の公開URLを privacy policy URL として使います。
 
 ```text
-https://github.com/Yos-K/mdlite-reader/blob/main/PRIVACY.md
-```
-
-日本語版:
-
-```text
-https://github.com/Yos-K/mdlite-reader/blob/main/PRIVACY.ja.md
+https://gist.github.com/Yos-K/23b876101848591692bc94a5f92dd024
 ```
 
 リリース要件:
 
 - 開発中はリポジトリを private のままにする。
-- Play Store 申請前に privacy policy URL を公開状態にする。
-- 申請前にリポジトリを public にしない場合は、別の public、非 PDF、非地域制限 URL に privacy policy を公開する。
+- Play Store 申請中とリリース後も privacy policy URL を公開状態に保つ。
 
 ## アプリ内プライバシーテキスト
 
