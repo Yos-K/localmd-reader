@@ -100,6 +100,28 @@ scripts/build-release-aab.sh
 `jarsigner` prompts for the keystore password and key password when needed.
 Do not pass those passwords as command arguments.
 
+For non-interactive execution, provide passwords through environment variables:
+
+```sh
+export BUNDLETOOL_JAR="$HOME/AndroidDev/tools/bundletool.jar"
+export MDLITE_RELEASE_KEYSTORE="$HOME/AndroidDev/keys/mdlite-reader-release.jks"
+export MDLITE_RELEASE_KEY_ALIAS="mdlite-release"
+printf "Keystore password: "
+stty -echo
+read -r MDLITE_RELEASE_STORE_PASS
+stty echo
+printf "\nKey password: "
+stty -echo
+read -r MDLITE_RELEASE_KEY_PASS
+stty echo
+printf "\n"
+export MDLITE_RELEASE_STORE_PASS
+export MDLITE_RELEASE_KEY_PASS
+scripts/build-release-aab.sh
+unset MDLITE_RELEASE_STORE_PASS
+unset MDLITE_RELEASE_KEY_PASS
+```
+
 `jarsigner` may warn that the certificate is self-signed or has no timestamp.
 That is acceptable for Android release signing. Treat `bundletool validate`
 success as the bundle structure check.

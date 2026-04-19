@@ -100,6 +100,28 @@ scripts/build-release-aab.sh
 必要な場合、`jarsigner` が keystore password と key password を入力要求します。
 これらのパスワードをコマンド引数として渡さないでください。
 
+非対話で実行する場合は、環境変数経由でパスワードを渡します。
+
+```sh
+export BUNDLETOOL_JAR="$HOME/AndroidDev/tools/bundletool.jar"
+export MDLITE_RELEASE_KEYSTORE="$HOME/AndroidDev/keys/mdlite-reader-release.jks"
+export MDLITE_RELEASE_KEY_ALIAS="mdlite-release"
+printf "Keystore password: "
+stty -echo
+read -r MDLITE_RELEASE_STORE_PASS
+stty echo
+printf "\nKey password: "
+stty -echo
+read -r MDLITE_RELEASE_KEY_PASS
+stty echo
+printf "\n"
+export MDLITE_RELEASE_STORE_PASS
+export MDLITE_RELEASE_KEY_PASS
+scripts/build-release-aab.sh
+unset MDLITE_RELEASE_STORE_PASS
+unset MDLITE_RELEASE_KEY_PASS
+```
+
 `jarsigner` が自己署名証明書やタイムスタンプなしの警告を出すことがあります。
 Android のリリース署名では許容し、bundle 構造の確認は `bundletool validate` の
 成功で判断します。
