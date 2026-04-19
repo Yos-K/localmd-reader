@@ -1246,6 +1246,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
         }
+        scrollActiveTabIntoView();
+    }
+
+    private void scrollActiveTabIntoView() {
+        tabScroller.post(new ScrollToActiveTab(tabScroller, tabRow, openTabs.activeIndex()));
     }
 
     private static boolean canCloseTab(OpenDocumentTab tab) {
@@ -1317,6 +1322,33 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         private int tabIndex() {
             return tabIndex;
+        }
+    }
+
+    private static final class ScrollToActiveTab implements Runnable {
+        private final HorizontalScrollView tabScroller;
+        private final LinearLayout tabRow;
+        private final int activeIndex;
+
+        private ScrollToActiveTab(HorizontalScrollView tabScroller, LinearLayout tabRow, int activeIndex) {
+            this.tabScroller = tabScroller;
+            this.tabRow = tabRow;
+            this.activeIndex = activeIndex;
+        }
+
+        @Override
+        public void run() {
+            if (activeIndex < 0 || activeIndex >= tabRow.getChildCount()) {
+                return;
+            }
+            View activeTab = tabRow.getChildAt(activeIndex);
+            int targetLeft = activeTab.getLeft() - tabScroller.getPaddingLeft();
+            int targetRight = activeTab.getRight() - tabScroller.getWidth() + tabScroller.getPaddingRight();
+            if (targetLeft < tabScroller.getScrollX()) {
+                tabScroller.smoothScrollTo(targetLeft, 0);
+            } else if (targetRight > tabScroller.getScrollX()) {
+                tabScroller.smoothScrollTo(targetRight, 0);
+            }
         }
     }
 
