@@ -12,6 +12,11 @@ AAPT2="${AAPT2:-$BUILD_TOOLS/aapt2}"
 D8="${D8:-$BUILD_TOOLS/d8}"
 ZIPALIGN="${ZIPALIGN:-$BUILD_TOOLS/zipalign}"
 APKSIGNER="${APKSIGNER:-$BUILD_TOOLS/apksigner}"
+ASSETS_DIR="$ROOT/src/main/assets"
+AAPT_ASSETS_ARGS=""
+if [ -d "$ASSETS_DIR" ]; then
+  AAPT_ASSETS_ARGS="-A $ASSETS_DIR"
+fi
 
 BUILD="$ROOT/build"
 OUT_UNSIGNED="$BUILD/app-unsigned.apk"
@@ -28,6 +33,7 @@ find "$ROOT/src/main/java" -name "*.java" > "$BUILD/main-sources.txt"
   -I "$ANDROID_JAR" \
   --manifest "$ROOT/src/main/AndroidManifest.xml" \
   --java "$BUILD/generated" \
+  $AAPT_ASSETS_ARGS \
   -o "$OUT_UNSIGNED" \
   "$BUILD/compiled/resources.zip"
 

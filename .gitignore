@@ -10,3 +10,4 @@ secrets.properties
 .env
 play-console-*.json
 service-account*.json
+src/main/assets/adi-registration.properties

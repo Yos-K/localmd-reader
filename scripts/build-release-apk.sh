@@ -12,6 +12,11 @@ AAPT2="${AAPT2:-$BUILD_TOOLS/aapt2}"
 D8="${D8:-$BUILD_TOOLS/d8}"
 ZIPALIGN="${ZIPALIGN:-$BUILD_TOOLS/zipalign}"
 APKSIGNER="${APKSIGNER:-$BUILD_TOOLS/apksigner}"
+ASSETS_DIR="$ROOT/src/main/assets"
+AAPT_ASSETS_ARGS=""
+if [ -d "$ASSETS_DIR" ]; then
+  AAPT_ASSETS_ARGS="-A $ASSETS_DIR"
+fi
 
 : "${MDLITE_RELEASE_KEYSTORE:?Set MDLITE_RELEASE_KEYSTORE to the production keystore path.}"
 : "${MDLITE_RELEASE_KEY_ALIAS:?Set MDLITE_RELEASE_KEY_ALIAS to the production key alias.}"
@@ -39,6 +44,7 @@ find "$ROOT/src/main/java" -name "*.java" > "$BUILD/main-sources.txt"
   -I "$ANDROID_JAR" \
   --manifest "$ROOT/src/main/AndroidManifest.xml" \
   --java "$BUILD/generated" \
+  $AAPT_ASSETS_ARGS \
   -o "$OUT_UNSIGNED" \
   "$BUILD/compiled/resources.zip"
 

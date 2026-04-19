@@ -12,6 +12,11 @@ AAPT2="${AAPT2:-$BUILD_TOOLS/aapt2}"
 D8="${D8:-$BUILD_TOOLS/d8}"
 JAVA="${JAVA:-java}"
 JARSIGNER="${JARSIGNER:-jarsigner}"
+ASSETS_DIR="$ROOT/src/main/assets"
+AAPT_ASSETS_ARGS=""
+if [ -d "$ASSETS_DIR" ]; then
+  AAPT_ASSETS_ARGS="-A $ASSETS_DIR"
+fi
 
 : "${BUNDLETOOL_JAR:?Set BUNDLETOOL_JAR to the bundletool .jar path.}"
 : "${MDLITE_RELEASE_KEYSTORE:?Set MDLITE_RELEASE_KEYSTORE to the production keystore path.}"
@@ -46,6 +51,7 @@ find "$ROOT/src/main/java" -name "*.java" > "$BUILD/main-sources.txt"
   -I "$ANDROID_JAR" \
   --manifest "$ROOT/src/main/AndroidManifest.xml" \
   --java "$BUILD/generated" \
+  $AAPT_ASSETS_ARGS \
   -o "$PROTO_APK" \
   "$BUILD/compiled/resources.zip"
 

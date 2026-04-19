@@ -123,3 +123,20 @@ metadata off device.
 - Confirm Data safety answers still match the APK/AAB permissions.
 - Confirm the app remains private in the repository until the public release
   decision is made.
+
+## Package Name Verification Token
+
+If Play Console says that the uploaded APK or AAB is missing the required token
+file, copy the snippet shown by Play Console into this local file:
+
+```text
+src/main/assets/adi-registration.properties
+```
+
+Then rebuild and upload the release AAB again:
+
+```sh
+scripts/build-release-aab.sh
+```
+
+The token file is intentionally ignored by Git. Do not commit it.
