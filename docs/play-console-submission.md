@@ -109,6 +109,8 @@ metadata off device.
 ## Closed Testing
 
 Use `docs/closed-testing-guide.md` for the closed testing workflow.
+Use `docs/play-developer-api.md` when uploading the AAB through the Google Play
+Developer API.
 
 Recommended tester invitation:
 
