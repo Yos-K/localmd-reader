@@ -92,7 +92,7 @@ phone-04-tabs-menu.png
 
 ## 手動手順
 
-1. `/sdcard/Download/mdlite-reader-debug.apk` から最新 debug APK をインストールする。
+1. `/sdcard/Download/localmd-reader-debug.apk` から最新 debug APK をインストールする。
 2. アプリを開き、ウェルカム画面を撮影する。
 3. `/sdcard/Download/mdlite-screenshot-document.md` を開く。
 4. Markdown 表示画面を撮影する。

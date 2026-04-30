@@ -6,7 +6,7 @@ v0.1.0.
 Test build:
 
 ```text
-/sdcard/Download/mdlite-reader-debug.apk
+/sdcard/Download/localmd-reader-debug.apk
 ```
 
 ## Install And Launch

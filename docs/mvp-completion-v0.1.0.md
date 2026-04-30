@@ -54,7 +54,7 @@ full Markdown platform.
 
 ## Manual Confirmation Required Before Release
 
-- Install `/sdcard/Download/mdlite-reader-debug.apk`.
+- Install `/sdcard/Download/localmd-reader-debug.apk`.
 - Confirm launcher name and icon.
 - Confirm file opening from the picker.
 - Confirm file opening from an Android file manager.

@@ -182,7 +182,7 @@ This checklist defines the minimum checks before publishing LocalMD Reader v0.1.
 
 ## Manual Device Checks
 
-- [x] Install `/sdcard/Download/mdlite-reader-debug.apk`.
+- [x] Install `/sdcard/Download/localmd-reader-debug.apk`.
 - [x] Launch the app from the Android launcher and confirm the icon/name.
 - [x] Open a Markdown file from the in-app picker.
 - [x] Open a Markdown file from a file manager.

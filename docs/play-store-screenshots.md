@@ -93,7 +93,7 @@ phone-04-tabs-menu.png
 
 ## Manual Steps
 
-1. Install the latest debug APK from `/sdcard/Download/mdlite-reader-debug.apk`.
+1. Install the latest debug APK from `/sdcard/Download/localmd-reader-debug.apk`.
 2. Open the app and capture the welcome screen.
 3. Open `/sdcard/Download/mdlite-screenshot-document.md`.
 4. Capture the rendered document screen.
