@@ -25,21 +25,32 @@ not take effect until the edit is committed.
 
 ## Service Account Setup
 
-1. Open Google Cloud Console.
-2. Create or choose a project for Play Console automation.
-3. Enable `Google Play Android Developer API`.
-4. Create a service account.
-5. Create a JSON key for that service account.
-6. Save the JSON key outside the repository:
+If `gcloud` is available, create the service account and JSON key with:
+
+```sh
+scripts/create-google-play-service-account-key.sh PROJECT_ID
+```
+
+Google Cloud Shell is the easiest place to run this command.
+
+Generated file:
+
+```text
+google-play-service-account.json
+```
+
+Copy that file to Termux:
 
 ```text
 ~/AndroidDev/secrets/google-play-service-account.json
 ```
 
-7. Open Play Console.
-8. Go to `Users and permissions`.
-9. Invite the service account email as a user.
-10. Grant only the permissions needed for release management on MdLite Reader.
+Then add the service account in Play Console:
+
+1. Open Play Console.
+2. Go to `Users and permissions`.
+3. Invite the service account email printed by the script.
+4. Grant only the permissions needed for release management on MdLite Reader.
 
 Do not commit the JSON key. The repository ignores `service-account*.json`, but
 the preferred location is outside the repository.
