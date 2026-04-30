@@ -3,7 +3,7 @@ set -eu
 
 PROJECT_ID="${1:-}"
 SERVICE_ACCOUNT_NAME="${2:-mdlite-play-release}"
-OUTPUT_FILE="${3:-google-play-service-account.json}"
+OUTPUT_FILE="${3:-$HOME/AndroidDev/secrets/google-play-service-account.json}"
 
 if [ -z "$PROJECT_ID" ]; then
   echo "Usage: scripts/create-google-play-service-account-key.sh PROJECT_ID [SERVICE_ACCOUNT_NAME] [OUTPUT_FILE]" >&2
@@ -16,6 +16,7 @@ if ! command -v gcloud >/dev/null 2>&1; then
 fi
 
 SERVICE_ACCOUNT_EMAIL="$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+mkdir -p "$(dirname -- "$OUTPUT_FILE")"
 
 gcloud services enable \
   iam.googleapis.com \
