@@ -52,6 +52,12 @@ Install API dependencies:
 python3 -m pip install --user -r requirements-play-api.txt
 ```
 
+Check local setup:
+
+```sh
+scripts/play-check-api-setup.py
+```
+
 ## Upload AAB To Closed Testing
 
 The testing track identifier depends on the track configured in Play Console.

@@ -52,6 +52,12 @@ API 依存関係をインストールします。
 python3 -m pip install --user -r requirements-play-api.txt
 ```
 
+ローカルのセットアップ状態を確認します。
+
+```sh
+scripts/play-check-api-setup.py
+```
+
 ## AAB を Closed Testing へアップロード
 
 テストトラックIDは Play Console 側の設定に依存します。`alpha`、`beta`、
