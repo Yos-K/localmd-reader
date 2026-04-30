@@ -126,3 +126,35 @@ io.github.yosk.mdlite
 - API が「初回 APK/AAB が Play Console からアップロードされていない」として拒否する場合は、
   初回アップロードだけ Play Console で行い、その後のリリースから API を使います。
 - API 権限確認だけ行う場合は `--validate-only` を使います。
+
+## ストア掲載情報を更新
+
+英語/日本語の掲載文、アプリアイコン、フィーチャーグラフィックを更新します。
+
+```sh
+scripts/play-update-listing.py
+```
+
+入力元:
+
+```text
+play-store/listing/en-US/*.txt
+play-store/listing/ja-JP/*.txt
+play-store/icon-512.png
+play-store/feature-graphic-1024x500.png
+```
+
+commit せずに検証だけ行う場合:
+
+```sh
+scripts/play-update-listing.py --validate-only
+```
+
+現在の v0.1.0 掲載情報 API 更新:
+
+```text
+Status: committed
+Edit: 00044233089121248600
+Locales: en-US, ja-JP
+Images: icon, featureGraphic
+```

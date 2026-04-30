@@ -130,3 +130,35 @@ io.github.yosk.mdlite
   for subsequent releases.
 - Use `--validate-only` when checking API permissions without committing a
   release.
+
+## Update Store Listing
+
+Update English and Japanese listing text, app icon, and feature graphic:
+
+```sh
+scripts/play-update-listing.py
+```
+
+Source files:
+
+```text
+play-store/listing/en-US/*.txt
+play-store/listing/ja-JP/*.txt
+play-store/icon-512.png
+play-store/feature-graphic-1024x500.png
+```
+
+Validate without committing:
+
+```sh
+scripts/play-update-listing.py --validate-only
+```
+
+Current v0.1.0 listing API update:
+
+```text
+Status: committed
+Edit: 00044233089121248600
+Locales: en-US, ja-JP
+Images: icon, featureGraphic
+```

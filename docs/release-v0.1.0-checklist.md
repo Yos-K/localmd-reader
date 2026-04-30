@@ -168,7 +168,8 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] 1024 x 500 feature graphic is exported.
 - [x] At least 4 phone screenshots are captured.
 - [ ] Screenshot alt text is entered in Play Console.
-- [ ] Feature graphic alt text is entered in Play Console.
+- [x] Feature graphic alt text is prepared in Play Console source files.
+- [x] Short description, full description, app icon, and feature graphic are uploaded through Google Play Developer API.
 
 ## Play Store Privacy
 
