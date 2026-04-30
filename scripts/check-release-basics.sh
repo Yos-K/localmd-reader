@@ -19,7 +19,7 @@ if ! grep -q 'android:versionName="0.1.0"' "$ROOT/src/main/AndroidManifest.xml";
   exit 1
 fi
 
-if ! grep -q 'android:versionCode="2"' "$ROOT/src/main/AndroidManifest.xml"; then
+if ! grep -q 'android:versionCode="3"' "$ROOT/src/main/AndroidManifest.xml"; then
   echo "Unexpected or missing versionCode" >&2
   exit 1
 fi

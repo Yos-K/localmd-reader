@@ -110,12 +110,12 @@ scripts/play-upload-closed-test.py \
 ```text
 Track: alpha
 Status: draft
-Bundle versionCode: 2
+Bundle versionCode: 3
 Edit: 01079045793414669908
 ```
 
 versionCode 1 は Google Play にアップロード済みです。target SDK 35 のビルドでは
-versionCode 2 以降を使います。
+versionCode 3 以降を使います。
 
 パッケージ名:
 

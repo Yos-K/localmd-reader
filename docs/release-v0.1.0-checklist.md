@@ -16,7 +16,7 @@ This checklist defines the minimum checks before publishing LocalMD Reader v0.1.
 - [x] App name is `LocalMD Reader`.
 - [x] Package name is `io.github.yosk.mdlite`.
 - [x] `versionName` is `0.1.0`.
-- [x] `versionCode` is `2`.
+- [x] `versionCode` is `3`.
 - [x] Launcher icon is configured.
 - [x] Round launcher icon is configured.
 
