@@ -9,6 +9,9 @@ Request:
 - Open a Markdown file if possible.
 - Send brief feedback if you notice anything.
 
+Feedback:
+https://github.com/Yos-K/localmd-reader/issues
+
 App details:
 - Local Markdown viewer.
 - No ads.

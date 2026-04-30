@@ -124,6 +124,12 @@ play-store/testing/closed-test-invitation.ja.txt
 play-store/testing/closed-test-feedback-template.ja.txt
 ```
 
+フィードバック URL:
+
+```text
+https://github.com/Yos-K/localmd-reader/issues
+```
+
 クローズドテストには署名済みリリース AAB を使います。
 
 ```text

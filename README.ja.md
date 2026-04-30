@@ -86,7 +86,7 @@ LocalMD Reader は個人情報を収集しません。
 ```sh
 cd ~/AndroidDev
 . ./env.sh
-cd projects/mdlite-reader
+cd projects/localmd-reader
 ./build.sh
 ```
 

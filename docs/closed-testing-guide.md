@@ -47,9 +47,11 @@ Recommended tester list:
 
 Use one simple feedback channel:
 
-- Google Form.
-- Email address.
-- GitHub Discussion or issue, if the repository is public at that point.
+Use GitHub Issues:
+
+```text
+https://github.com/Yos-K/localmd-reader/issues
+```
 
 Do not ask testers to send private Markdown files. Ask for short descriptions
 or screenshots that do not include personal information.

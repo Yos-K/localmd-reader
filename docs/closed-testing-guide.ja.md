@@ -48,9 +48,11 @@ sha256sum ~/AndroidDev/releases/mdlite-reader/v0.1.0/mdlite-reader-0.1.0-release
 
 窓口は一つに絞ります。
 
-- Google Form。
-- メールアドレス。
-- リポジトリを公開している場合は GitHub Discussion または issue。
+GitHub Issues を使います。
+
+```text
+https://github.com/Yos-K/localmd-reader/issues
+```
 
 テスターに個人的な Markdown ファイルの送付は求めません。個人情報を含まない短い
 説明やスクリーンショットで報告してもらいます。

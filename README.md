@@ -87,7 +87,7 @@ The project is currently built with a lightweight Android SDK setup in Termux.
 ```sh
 cd ~/AndroidDev
 . ./env.sh
-cd projects/mdlite-reader
+cd projects/localmd-reader
 ./build.sh
 ```
 

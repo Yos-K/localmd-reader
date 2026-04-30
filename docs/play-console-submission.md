@@ -124,6 +124,12 @@ Recommended feedback template:
 play-store/testing/closed-test-feedback-template.txt
 ```
 
+Feedback URL:
+
+```text
+https://github.com/Yos-K/localmd-reader/issues
+```
+
 Closed testing should use the signed release AAB:
 
 ```text
