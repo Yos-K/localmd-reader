@@ -1,4 +1,4 @@
-I am looking for closed testers for MdLite Reader, an Android Markdown viewer.
+I am looking for closed testers for LocalMD Reader, an Android Markdown viewer.
 
 Purpose:
 Confirm the first Google Play build and collect feedback before public release.

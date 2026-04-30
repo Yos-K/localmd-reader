@@ -1,6 +1,6 @@
 # Google Play Developer API
 
-This document defines the API-based release workflow for MdLite Reader.
+This document defines the API-based release workflow for LocalMD Reader.
 
 ## Scope
 
@@ -50,7 +50,7 @@ Then add the service account in Play Console:
 1. Open Play Console.
 2. Go to `Users and permissions`.
 3. Invite the service account email printed by the script.
-4. Grant only the permissions needed for release management on MdLite Reader.
+4. Grant only the permissions needed for release management on LocalMD Reader.
 
 Do not commit the JSON key. The repository ignores `service-account*.json`, but
 the preferred location is outside the repository.

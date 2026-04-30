@@ -1,10 +1,10 @@
 # v0.1.0 MVP 完成判定
 
-この文書は MdLite Reader v0.1.0 の完成条件を定義します。
+この文書は LocalMD Reader v0.1.0 の完成条件を定義します。
 
 ## MVP の目的
 
-MdLite Reader v0.1.0 は、Android でローカル Markdown ファイルを確実に開き、
+LocalMD Reader v0.1.0 は、Android でローカル Markdown ファイルを確実に開き、
 広告、トラッキング、ログイン、同期、ネットワークアクセスなしで読める状態を
 完成とします。
 

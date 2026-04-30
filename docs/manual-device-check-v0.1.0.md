@@ -1,6 +1,6 @@
 # Manual Device Check v0.1.0
 
-Use this checklist for the final human pass before publishing MdLite Reader
+Use this checklist for the final human pass before publishing LocalMD Reader
 v0.1.0.
 
 Test build:
@@ -13,7 +13,7 @@ Test build:
 
 - [x] Install the debug APK from Downloads.
 - [x] Launch the app from the Android launcher.
-- [x] Confirm the launcher name is `MdLite Reader`.
+- [x] Confirm the launcher name is `LocalMD Reader`.
 - [x] Confirm the launcher icon matches the finalized dark Markdown icon.
 - [ ] Confirm the first screen is readable and has no clipped text.
 

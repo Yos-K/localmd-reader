@@ -1,6 +1,6 @@
 # リリースノート v0.1.0
 
-MdLite Reader v0.1.0 は、最初の公開リリース候補です。
+LocalMD Reader v0.1.0 は、最初の公開リリース候補です。
 
 ## ハイライト
 
@@ -15,7 +15,7 @@ MdLite Reader v0.1.0 は、最初の公開リリース候補です。
 
 ## 注意
 
-- MdLite Reader v0.1.0 はビューアであり、エディタではありません。
+- LocalMD Reader v0.1.0 はビューアであり、エディタではありません。
 - 10 MB を超えるファイルは、理由を示して開かずに止めます。
 - リモート画像読み込み、相対画像表示、Mermaid、数式、脚注、クラウド同期、
   PDF エクスポート、HTML エクスポートはこのバージョンには含まれません。
@@ -23,7 +23,7 @@ MdLite Reader v0.1.0 は、最初の公開リリース候補です。
 ## Play Console リリースノート
 
 ```text
-MdLite Reader の初回リリースです。ローカル Markdown を読むための軽量ビューアです。
+LocalMD Reader の初回リリースです。ローカル Markdown を読むための軽量ビューアです。
 
 - .md / .markdown ファイルを開けます
 - Android ファイルマネージャまたは Termux から開けます

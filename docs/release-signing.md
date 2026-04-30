@@ -1,6 +1,6 @@
 # Release Signing
 
-This document defines the production signing policy for MdLite Reader.
+This document defines the production signing policy for LocalMD Reader.
 
 ## Policy
 
@@ -64,7 +64,7 @@ build/release/mdlite-reader-0.1.0-release.apk
 
 Google Play release builds should use Android App Bundle output.
 
-MdLite Reader keeps `bundletool` outside the repository. Download it to a local
+LocalMD Reader keeps `bundletool` outside the repository. Download it to a local
 tool directory and point `BUNDLETOOL_JAR` to that file.
 
 Run the automated checks first:

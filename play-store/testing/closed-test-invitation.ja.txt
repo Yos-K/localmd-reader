@@ -1,4 +1,4 @@
-Android向けMarkdownビューア MdLite Reader のクローズドテストに参加してくれる方を募集しています。
+Android向けMarkdownビューア LocalMD Reader のクローズドテストに参加してくれる方を募集しています。
 
 目的:
 Google Play公開前の動作確認とフィードバック収集

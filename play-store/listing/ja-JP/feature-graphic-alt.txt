@@ -1,1 +1,1 @@
-Markdown文書プレビュー、タブ、読書用コントロールを表示したMdLite Reader。
+Markdown文書プレビュー、タブ、読書用コントロールを表示したLocalMD Reader。

@@ -1,6 +1,6 @@
 # Markdown Extension Check
 
-This file is used to confirm that MdLite Reader opens `.markdown` files from
+This file is used to confirm that LocalMD Reader opens `.markdown` files from
 the in-app picker.
 
 ## Expected Result

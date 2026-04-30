@@ -1,6 +1,6 @@
 # Closed Testing Guide
 
-This guide defines the closed testing workflow for MdLite Reader v0.1.0.
+This guide defines the closed testing workflow for LocalMD Reader v0.1.0.
 
 ## Goal
 
@@ -38,7 +38,7 @@ sha256sum ~/AndroidDev/releases/mdlite-reader/v0.1.0/mdlite-reader-0.1.0-release
 
 Recommended tester list:
 
-- Use a Google Group or email list dedicated to MdLite Reader testing.
+- Use a Google Group or email list dedicated to LocalMD Reader testing.
 - Add at least 12 testers before starting the 14-day period.
 - Ask testers to opt in from the Play testing link.
 - Ask testers not to opt out until the 14-day period is complete.

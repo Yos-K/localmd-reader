@@ -1,4 +1,4 @@
-MdLite Reader is a lightweight Android Markdown viewer for local files.
+LocalMD Reader is a lightweight Android Markdown viewer for local files.
 
 Open .md and .markdown documents from the app or from Android file managers, then read them on your device with a simple viewer focused on speed and clarity.
 
@@ -18,4 +18,4 @@ Privacy-oriented by design:
 - No network permission
 - Selected Markdown content stays on your device
 
-MdLite Reader v0.1.0 focuses on viewing, not editing. Full CommonMark compatibility, Mermaid, math, footnotes, remote image loading, relative image rendering, and cloud sync are not included in this version.
+LocalMD Reader v0.1.0 focuses on viewing, not editing. Full CommonMark compatibility, Mermaid, math, footnotes, remote image loading, relative image rendering, and cloud sync are not included in this version.

@@ -22,7 +22,7 @@ def load_google_api():
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="List Google Play tracks for MdLite Reader."
+        description="List Google Play tracks for LocalMD Reader."
     )
     parser.add_argument(
         "--service-account",

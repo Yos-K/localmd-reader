@@ -1,4 +1,4 @@
-MdLite Reader は、ローカルファイル向けの軽量な Android Markdown ビューアです。
+LocalMD Reader は、ローカルファイル向けの軽量な Android Markdown ビューアです。
 
 アプリ内または Android のファイルマネージャから .md / .markdown ファイルを開き、端末上でシンプルに読むことができます。
 
@@ -18,4 +18,4 @@ MdLite Reader は、ローカルファイル向けの軽量な Android Markdown 
 - ネットワーク権限なし
 - 選択した Markdown の内容は端末上に留まります
 
-MdLite Reader v0.1.0 は編集ではなく閲覧に集中しています。完全な CommonMark 互換、Mermaid、数式、脚注、リモート画像読み込み、相対画像表示、クラウド同期はこのバージョンでは含まれません。
+LocalMD Reader v0.1.0 は編集ではなく閲覧に集中しています。完全な CommonMark 互換、Mermaid、数式、脚注、リモート画像読み込み、相対画像表示、クラウド同期はこのバージョンでは含まれません。

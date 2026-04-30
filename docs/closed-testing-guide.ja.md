@@ -1,6 +1,6 @@
 # クローズドテストガイド
 
-この文書は MdLite Reader v0.1.0 のクローズドテスト運用を定義します。
+この文書は LocalMD Reader v0.1.0 のクローズドテスト運用を定義します。
 
 ## 目的
 
@@ -39,7 +39,7 @@ sha256sum ~/AndroidDev/releases/mdlite-reader/v0.1.0/mdlite-reader-0.1.0-release
 
 推奨するテスターリスト:
 
-- MdLite Reader テスト専用の Google Group またはメールリストを使う。
+- LocalMD Reader テスト専用の Google Group またはメールリストを使う。
 - 14日間の開始前に12人以上を追加する。
 - テスターには Play のテストリンクから opt-in してもらう。
 - 14日間が終わるまで opt-out しないよう依頼する。

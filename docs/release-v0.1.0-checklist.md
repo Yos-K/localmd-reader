@@ -1,6 +1,6 @@
 # v0.1.0 Release Checklist
 
-This checklist defines the minimum checks before publishing MdLite Reader v0.1.0.
+This checklist defines the minimum checks before publishing LocalMD Reader v0.1.0.
 
 ## Repository
 
@@ -13,7 +13,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 
 ## Version And Identity
 
-- [x] App name is `MdLite Reader`.
+- [x] App name is `LocalMD Reader`.
 - [x] Package name is `io.github.yosk.mdlite`.
 - [x] `versionName` is `0.1.0`.
 - [x] `versionCode` is `2`.

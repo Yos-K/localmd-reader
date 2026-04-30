@@ -1,4 +1,4 @@
-MdLite Reader Closed Test Feedback
+LocalMD Reader Closed Test Feedback
 
 Device:
 Android version:

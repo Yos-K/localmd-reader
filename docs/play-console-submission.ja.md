@@ -1,6 +1,6 @@
 # Play Console 提出ガイド
 
-この文書は MdLite Reader v0.1.0 について、Google Play Console に手動入力する
+この文書は LocalMD Reader v0.1.0 について、Google Play Console に手動入力する
 項目をまとめます。
 
 ## アプリ掲載情報
@@ -101,7 +101,7 @@ Not applicable for collected data
 
 理由:
 
-MdLite Reader v0.1.0 には広告、解析 SDK、ログイン、自動クラッシュ送信、
+LocalMD Reader v0.1.0 には広告、解析 SDK、ログイン、自動クラッシュ送信、
 `android.permission.INTERNET` 権限がありません。Markdown 本文、ファイル名、
 ファイルパス、Android document URI、最近開いたファイルのメタデータを端末外へ
 送信しません。

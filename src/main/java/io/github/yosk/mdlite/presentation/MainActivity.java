@@ -158,7 +158,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.WRAP_CONTENT));
 
         appTitle = new TextView(this);
-        appTitle.setText("MdLite Reader");
+        appTitle.setText("LocalMD Reader");
         appTitle.setTextColor(textColor());
         appTitle.setTextSize(17);
         appTitle.setTypeface(Typeface.DEFAULT_BOLD);
@@ -669,12 +669,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void updateLocalizedText() {
         menuButton.setText(currentLanguage.isJapanese() ? "☰ メニュー" : "☰ Menu");
         menuButton.setContentDescription(currentLanguage.isJapanese() ? "メニューを開く" : "Open menu");
-        appTitle.setText("MdLite Reader");
+        appTitle.setText("LocalMD Reader");
         openButton.setText(currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
         recentButton.setText(recentFilesTitle());
         themeButton.setText(currentTheme.isDark() ? lightThemeLabel() : darkThemeLabel());
         languageButton.setText(currentLanguage.isJapanese() ? "Switch to English" : "日本語に切り替え");
-        menuTitle.setText("MdLite Reader");
+        menuTitle.setText("LocalMD Reader");
         filesSection.setText(currentLanguage.isJapanese() ? "ファイル" : "Files");
         readingSection.setText(currentLanguage.isJapanese() ? "表示" : "Reading");
         layoutSection.setText(currentLanguage.isJapanese() ? "レイアウト" : "Layout");
@@ -713,12 +713,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String privacyMessage() {
         if (currentLanguage.isJapanese()) {
-            return "MdLite Reader は個人情報を収集しません。\n\n"
+            return "LocalMD Reader は個人情報を収集しません。\n\n"
                     + "広告、解析SDK、ログイン、自動クラッシュ送信、ネットワーク権限はありません。\n\n"
                     + "選択したMarkdownは端末上で表示され、アプリによってアップロードされません。\n\n"
                     + "最近開いたファイルとタブ復元の情報は端末内のアプリ専用領域に保存され、履歴クリアまたはアプリデータ削除で消去できます。";
         }
-        return "MdLite Reader does not collect personal information.\n\n"
+        return "LocalMD Reader does not collect personal information.\n\n"
                 + "There are no ads, analytics SDKs, login, automatic crash reporting, or network permission.\n\n"
                 + "Selected Markdown files are rendered on your device and are not uploaded by the app.\n\n"
                 + "Recent file and tab restoration metadata stays in app-private storage and can be removed by clearing history or app data.";
@@ -1168,7 +1168,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (currentLanguage.isJapanese()) {
             return "<section class=\"welcome\">"
                     + "<p class=\"welcome-kicker\">ローカルMarkdownビューア</p>"
-                    + "<h1>MdLite Reader</h1>"
+                    + "<h1>LocalMD Reader</h1>"
                     + "<p class=\"welcome-lead\">広告、トラッキング、ログイン、ネットワークアクセスなしでMarkdownファイルを読みます。</p>"
                     + "<div class=\"welcome-grid\">"
                     + "<div class=\"welcome-card\"><strong>開く</strong><span>メニューから .md または .markdown ファイルを選びます。</span></div>"
@@ -1180,7 +1180,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         return "<section class=\"welcome\">"
                 + "<p class=\"welcome-kicker\">Local Markdown reader</p>"
-                + "<h1>MdLite Reader</h1>"
+                + "<h1>LocalMD Reader</h1>"
                 + "<p class=\"welcome-lead\">Open a Markdown file and read it without ads, tracking, login, or network access.</p>"
                 + "<div class=\"welcome-grid\">"
                 + "<div class=\"welcome-card\"><strong>Open</strong><span>Use Menu to choose a .md or .markdown file.</span></div>"

@@ -27,7 +27,7 @@ if gcloud iam service-accounts describe "$SERVICE_ACCOUNT_EMAIL" --project "$PRO
 else
   gcloud iam service-accounts create "$SERVICE_ACCOUNT_NAME" \
     --project "$PROJECT_ID" \
-    --display-name "MdLite Reader Play Release"
+    --display-name "LocalMD Reader Play Release"
 fi
 
 gcloud iam service-accounts keys create "$OUTPUT_FILE" \

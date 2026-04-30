@@ -1,4 +1,4 @@
-# MdLite Reader
+# LocalMD Reader
 
 Read local Markdown files with a calm, fast viewer.
 

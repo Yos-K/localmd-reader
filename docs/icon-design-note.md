@@ -1,6 +1,6 @@
 # Icon Design Note
 
-This note defines the design direction for the MdLite Reader app icon before
+This note defines the design direction for the LocalMD Reader app icon before
 exporting the Play Store icon.
 
 ## Goal
@@ -16,7 +16,7 @@ The icon should work in three places:
 
 ## Brand Impression
 
-MdLite Reader should feel:
+LocalMD Reader should feel:
 
 - Fast.
 - Quiet.

@@ -1,6 +1,6 @@
 # アイコンデザインメモ
 
-このメモは、Play Store アイコンを書き出す前に MdLite Reader のアプリアイコンの
+このメモは、Play Store アイコンを書き出す前に LocalMD Reader のアプリアイコンの
 方向性を定義します。
 
 ## 目的
@@ -16,7 +16,7 @@
 
 ## ブランド印象
 
-MdLite Reader の印象:
+LocalMD Reader の印象:
 
 - 速い。
 - 静か。

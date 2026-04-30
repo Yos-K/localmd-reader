@@ -1,6 +1,6 @@
 # Termux コマンド
 
-MdLite Reader は Termux から 1 つ以上の Markdown ファイルを指定して開けます。
+LocalMD Reader は Termux から 1 つ以上の Markdown ファイルを指定して開けます。
 
 リポジトリ内から実行するコマンド:
 
@@ -17,7 +17,7 @@ scripts/mdlite-open.sh README.md docs/termux-command.md
 読み取り可能な Markdown ファイルは、それぞれタブとして開きます。すでに開いている
 ファイルは重複せず、そのタブを更新してアクティブにします。
 
-このコマンドは MdLite Reader を直接起動します。複数ファイルは 1 つの Android
+このコマンドは LocalMD Reader を直接起動します。複数ファイルは 1 つの Android
 Intent にまとめて渡され、タブとして開きます。
 
 ## グローバルコマンド
@@ -40,7 +40,7 @@ mdlite-reader FILE.md [FILE2.md ...]
 
 ## アクセス方式
 
-このコマンドは Termux 側で Markdown 本文を読み取り、Base64 化して MdLite Reader
+このコマンドは Termux 側で Markdown 本文を読み取り、Base64 化して LocalMD Reader
 に直接渡します。これにより、広いストレージ権限を要求せずに Termux 配下の
 ファイルを開けます。
 

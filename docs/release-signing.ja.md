@@ -1,6 +1,6 @@
 # リリース署名
 
-この文書は MdLite Reader の本番署名方針を定義します。
+この文書は LocalMD Reader の本番署名方針を定義します。
 
 ## 方針
 
@@ -64,7 +64,7 @@ build/release/mdlite-reader-0.1.0-release.apk
 
 Google Play 向けのリリースビルドでは Android App Bundle を使います。
 
-MdLite Reader では `bundletool` をリポジトリ外に置きます。ローカルの tools
+LocalMD Reader では `bundletool` をリポジトリ外に置きます。ローカルの tools
 ディレクトリに配置し、`BUNDLETOOL_JAR` でそのファイルを指定します。
 
 先に自動チェックを実行します。

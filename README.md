@@ -1,14 +1,14 @@
-# MdLite Reader
+# LocalMD Reader
 
 <p align="center">
-  <img src="play-store/icon-512.png" alt="MdLite Reader logo" width="128" height="128">
+  <img src="play-store/icon-512.png" alt="LocalMD Reader logo" width="128" height="128">
 </p>
 
 <p align="center">
   Lightweight Android Markdown reading without ads, tracking, or network access.
 </p>
 
-MdLite Reader is a lightweight Android Markdown viewer.
+LocalMD Reader is a lightweight Android Markdown viewer.
 
 It is built for reading local Markdown files quickly without ads, tracking,
 login, sync, or network access.
@@ -30,7 +30,7 @@ login, sync, or network access.
 
 ## Supported Markdown
 
-MdLite Reader intentionally implements a small Markdown subset for v0.1.0.
+LocalMD Reader intentionally implements a small Markdown subset for v0.1.0.
 
 Supported:
 
@@ -66,7 +66,7 @@ Termux command details are in [docs/termux-command.md](docs/termux-command.md).
 
 ## Privacy
 
-MdLite Reader does not collect personal information.
+LocalMD Reader does not collect personal information.
 
 The app reads only files selected by the user. Markdown content is rendered on
 the device and is not uploaded by the app.

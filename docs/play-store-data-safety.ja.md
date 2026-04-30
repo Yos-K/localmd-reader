@@ -1,6 +1,6 @@
 # Play Store Data Safety
 
-この文書は MdLite Reader v0.1.0 の Google Play Data safety 申告方針を定義します。
+この文書は LocalMD Reader v0.1.0 の Google Play Data safety 申告方針を定義します。
 
 2026-04-15 に確認した公式要件:
 
@@ -11,7 +11,7 @@
 
 ## アプリ概要
 
-MdLite Reader v0.1.0 はローカルファーストの Android Markdown ビューアです。
+LocalMD Reader v0.1.0 はローカルファーストの Android Markdown ビューアです。
 
 このアプリは次の方針です。
 
@@ -35,7 +35,7 @@ No
 理由:
 
 Google Play では、collection はユーザーデータをアプリから端末外へ送信することを
-指します。MdLite Reader v0.1.0 はネットワーク権限を要求せず、ユーザーデータを
+指します。LocalMD Reader v0.1.0 はネットワーク権限を要求せず、ユーザーデータを
 送信しません。
 
 Data sharing:
@@ -47,7 +47,7 @@ No
 
 理由:
 
-MdLite Reader v0.1.0 は、ユーザーデータを開発者、第三者サービス、SDK、その他の
+LocalMD Reader v0.1.0 は、ユーザーデータを開発者、第三者サービス、SDK、その他の
 組織へ送信しません。
 
 Data types:

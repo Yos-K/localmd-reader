@@ -1,6 +1,6 @@
 # Google Play Developer API
 
-この文書は MdLite Reader の API ベースのリリース運用を定義します。
+この文書は LocalMD Reader の API ベースのリリース運用を定義します。
 
 ## 対象範囲
 
@@ -49,7 +49,7 @@ google-play-service-account.json
 1. Play Console を開く。
 2. `Users and permissions` を開く。
 3. スクリプトが出力したサービスアカウントのメールアドレスを招待する。
-4. MdLite Reader のリリース管理に必要な最小権限だけを付与する。
+4. LocalMD Reader のリリース管理に必要な最小権限だけを付与する。
 
 JSON key はコミットしません。リポジトリでは `service-account*.json` を ignore
 していますが、推奨保存先はリポジトリ外です。

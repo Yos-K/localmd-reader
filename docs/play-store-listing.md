@@ -1,6 +1,6 @@
 # Play Store Listing
 
-This document defines the Google Play listing text for MdLite Reader v0.1.0.
+This document defines the Google Play listing text for LocalMD Reader v0.1.0.
 
 Source requirements checked on 2026-04-14:
 
@@ -22,7 +22,7 @@ Official references:
 App name:
 
 ```text
-MdLite Reader
+LocalMD Reader
 ```
 
 Copy source:
@@ -46,7 +46,7 @@ play-store/listing/en-US/short-description.txt
 Full description:
 
 ```text
-MdLite Reader is a lightweight Android Markdown viewer for local files.
+LocalMD Reader is a lightweight Android Markdown viewer for local files.
 
 Open .md and .markdown documents from the app or from Android file managers, then read them on your device with a simple viewer focused on speed and clarity.
 
@@ -66,7 +66,7 @@ Privacy-oriented by design:
 - No network permission
 - Selected Markdown content stays on your device
 
-MdLite Reader v0.1.0 focuses on viewing, not editing. Full CommonMark compatibility, Mermaid, math, footnotes, remote image loading, relative image rendering, and cloud sync are not included in this version.
+LocalMD Reader v0.1.0 focuses on viewing, not editing. Full CommonMark compatibility, Mermaid, math, footnotes, remote image loading, relative image rendering, and cloud sync are not included in this version.
 ```
 
 Copy source:
@@ -105,7 +105,7 @@ Productivity
 
 Rationale:
 
-MdLite Reader is a file-reading utility for notes, documentation, and local text workflows.
+LocalMD Reader is a file-reading utility for notes, documentation, and local text workflows.
 
 ## App Icon
 
@@ -160,12 +160,12 @@ Requirements:
 
 Draft visual direction:
 
-Use a clean reading scene: a Markdown document surface, subtle code/list/table details, and the MdLite Reader mark. Keep text minimal or omit text entirely so the asset works across locales.
+Use a clean reading scene: a Markdown document surface, subtle code/list/table details, and the LocalMD Reader mark. Keep text minimal or omit text entirely so the asset works across locales.
 
 Alt text:
 
 ```text
-Markdown document preview with tabs and reading controls in MdLite Reader.
+Markdown document preview with tabs and reading controls in LocalMD Reader.
 ```
 
 Copy source:
@@ -187,7 +187,7 @@ Welcome screen with actions to open a Markdown file or view recent files.
 Alt text:
 
 ```text
-MdLite Reader welcome screen with open file and recent file actions.
+LocalMD Reader welcome screen with open file and recent file actions.
 ```
 
 Copy source:

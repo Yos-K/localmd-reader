@@ -12,7 +12,7 @@ Official requirements checked on 2026-04-15:
 
 ## App Summary
 
-MdLite Reader v0.1.0 is a local-first Android Markdown viewer.
+LocalMD Reader v0.1.0 is a local-first Android Markdown viewer.
 
 The app:
 
@@ -36,7 +36,7 @@ No
 Rationale:
 
 Google Play defines collection as transmitting user data from the app off the
-user's device. MdLite Reader v0.1.0 does not request network access and does not
+user's device. LocalMD Reader v0.1.0 does not request network access and does not
 transmit user data.
 
 Data sharing:
@@ -48,7 +48,7 @@ No
 
 Rationale:
 
-MdLite Reader v0.1.0 does not transmit user data to the developer, third-party
+LocalMD Reader v0.1.0 does not transmit user data to the developer, third-party
 services, SDKs, or other organizations.
 
 Data types:

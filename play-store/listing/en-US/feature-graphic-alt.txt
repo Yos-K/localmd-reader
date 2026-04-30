@@ -1,1 +1,1 @@
-Markdown document preview with tabs and reading controls in MdLite Reader.
+Markdown document preview with tabs and reading controls in LocalMD Reader.

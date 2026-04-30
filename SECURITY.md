@@ -1,10 +1,10 @@
 # Security Policy
 
-MdLite Reader minimizes permissions and keeps Markdown rendering local.
+LocalMD Reader minimizes permissions and keeps Markdown rendering local.
 
 ## Supported Versions
 
-MdLite Reader is in early private development. Security fixes are applied to the
+LocalMD Reader is in early private development. Security fixes are applied to the
 current `main` branch until the first public release is prepared.
 
 ## Reporting A Vulnerability
@@ -25,7 +25,7 @@ dedicated reporting contact or GitHub Security Advisory instructions.
 
 ## File Access
 
-MdLite Reader uses Android file access flows for user-selected documents.
+LocalMD Reader uses Android file access flows for user-selected documents.
 
 The app must not request broad storage permissions such as
 `MANAGE_EXTERNAL_STORAGE`.

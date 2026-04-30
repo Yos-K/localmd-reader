@@ -29,7 +29,7 @@ if ! grep -q 'android:icon="@mipmap/ic_launcher"' "$ROOT/src/main/AndroidManifes
   exit 1
 fi
 
-if ! grep -q '<string name="app_name">MdLite Reader</string>' "$ROOT/src/main/res/values/strings.xml"; then
+if ! grep -q '<string name="app_name">LocalMD Reader</string>' "$ROOT/src/main/res/values/strings.xml"; then
   echo "Unexpected or missing app name" >&2
   exit 1
 fi

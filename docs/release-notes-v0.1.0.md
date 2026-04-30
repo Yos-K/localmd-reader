@@ -1,6 +1,6 @@
 # Release Notes v0.1.0
 
-MdLite Reader v0.1.0 is the first public release candidate.
+LocalMD Reader v0.1.0 is the first public release candidate.
 
 ## Highlights
 
@@ -16,7 +16,7 @@ MdLite Reader v0.1.0 is the first public release candidate.
 
 ## Notes
 
-- MdLite Reader v0.1.0 is a viewer, not an editor.
+- LocalMD Reader v0.1.0 is a viewer, not an editor.
 - Files larger than 10 MB are rejected with a clear message.
 - Remote image loading, relative image rendering, Mermaid, math, footnotes,
   cloud sync, PDF export, and HTML export are not included in this version.
@@ -24,7 +24,7 @@ MdLite Reader v0.1.0 is the first public release candidate.
 ## Play Console Release Notes
 
 ```text
-Initial release of MdLite Reader, a lightweight local Markdown viewer.
+Initial release of LocalMD Reader, a lightweight local Markdown viewer.
 
 - Open .md and .markdown files
 - Open files from Android file managers or Termux

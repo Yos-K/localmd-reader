@@ -1,6 +1,6 @@
 # Free And Pro Feature Policy
 
-This document defines the Free and Pro feature split for MdLite Reader.
+This document defines the Free and Pro feature split for LocalMD Reader.
 
 ## Principles
 

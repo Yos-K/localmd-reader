@@ -30,7 +30,7 @@ def release_notes():
         {
             "language": "en-US",
             "text": (
-                "Initial closed test release of MdLite Reader v0.1.0. "
+                "Initial closed test release of LocalMD Reader v0.1.0. "
                 "Includes local Markdown viewing, tabs, recent files, "
                 "light/dark themes, pinch font sizing, and offline behavior."
             ),
@@ -38,7 +38,7 @@ def release_notes():
         {
             "language": "ja-JP",
             "text": (
-                "MdLite Reader v0.1.0 の初回クローズドテストリリースです。"
+                "LocalMD Reader v0.1.0 の初回クローズドテストリリースです。"
                 "ローカルMarkdown表示、タブ、最近開いたファイル、ライト/"
                 "ダークテーマ、ピンチでのフォントサイズ変更、オフライン動作を"
                 "含みます。"
@@ -49,7 +49,7 @@ def release_notes():
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Upload MdLite Reader AAB to a Google Play testing track."
+        description="Upload LocalMD Reader AAB to a Google Play testing track."
     )
     parser.add_argument(
         "--service-account",
@@ -82,7 +82,7 @@ def parse_args():
     )
     parser.add_argument(
         "--name",
-        default="MdLite Reader v0.1.0 closed test",
+        default="LocalMD Reader v0.1.0 closed test",
         help="Release name shown in Play Console.",
     )
     parser.add_argument(

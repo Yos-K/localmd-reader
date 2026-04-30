@@ -1,6 +1,6 @@
 # Contributing
 
-MdLite Reader is in private early development.
+LocalMD Reader is in private early development.
 
 ## Development Rules
 

@@ -1,6 +1,6 @@
 # コントリビューション
 
-MdLite Reader は private の開発初期段階です。
+LocalMD Reader は private の開発初期段階です。
 
 ## 開発ルール
 

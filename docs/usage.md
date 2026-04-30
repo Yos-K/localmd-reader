@@ -1,6 +1,6 @@
 # Usage
 
-This guide explains how to use MdLite Reader v0.1.0.
+This guide explains how to use LocalMD Reader v0.1.0.
 
 ## Open A File
 
@@ -14,11 +14,11 @@ Open Markdown from Android:
 
 1. Open a file manager.
 2. Select a `.md` or `.markdown` file.
-3. Choose MdLite Reader when Android asks which app to use.
+3. Choose LocalMD Reader when Android asks which app to use.
 
 ## Open From Termux
 
-MdLite Reader can open Markdown files directly from Termux.
+LocalMD Reader can open Markdown files directly from Termux.
 
 ```sh
 mdlite-reader README.md
@@ -30,7 +30,7 @@ Open multiple files as tabs:
 mdlite-reader README.md docs/usage.md
 ```
 
-The Termux command reads Markdown text in Termux and sends it to MdLite Reader.
+The Termux command reads Markdown text in Termux and sends it to LocalMD Reader.
 This lets files under the Termux home directory open without broad Android
 storage permission.
 
@@ -62,12 +62,12 @@ Detailed setup notes are in `docs/termux-command.md`.
 
 Use `Menu` -> `Privacy` to read the in-app privacy statement.
 
-MdLite Reader v0.1.0 has no ads, analytics SDK, login, sync, crash reporting, or
+LocalMD Reader v0.1.0 has no ads, analytics SDK, login, sync, crash reporting, or
 network permission.
 
 ## Limitations
 
-MdLite Reader v0.1.0 is a viewer, not an editor.
+LocalMD Reader v0.1.0 is a viewer, not an editor.
 
 Not supported in v0.1.0:
 

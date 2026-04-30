@@ -1,6 +1,6 @@
 # Play Store Screenshots
 
-This document defines the screenshot capture workflow for MdLite Reader v0.1.0.
+This document defines the screenshot capture workflow for LocalMD Reader v0.1.0.
 
 ## Safety Rules
 

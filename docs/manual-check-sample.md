@@ -1,4 +1,4 @@
-# MdLite Reader Manual Check
+# LocalMD Reader Manual Check
 
 Use this file for v0.1.0 manual device checks.
 

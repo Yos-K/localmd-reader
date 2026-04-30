@@ -1,6 +1,6 @@
 # Free / Pro 機能方針
 
-この文書は MdLite Reader の Free / Pro 機能振り分けを定義します。
+この文書は LocalMD Reader の Free / Pro 機能振り分けを定義します。
 
 ## 原則
 

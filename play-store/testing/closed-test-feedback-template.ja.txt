@@ -1,4 +1,4 @@
-MdLite Reader クローズドテスト フィードバック
+LocalMD Reader クローズドテスト フィードバック
 
 端末:
 Android バージョン:

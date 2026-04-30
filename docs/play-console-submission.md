@@ -1,7 +1,7 @@
 # Play Console Submission Guide
 
 This guide lists the Google Play Console fields that must be entered manually
-for MdLite Reader v0.1.0.
+for LocalMD Reader v0.1.0.
 
 ## App Listing
 
@@ -101,7 +101,7 @@ Not applicable for collected data
 
 Reason:
 
-MdLite Reader v0.1.0 has no ads, analytics SDK, login, automatic crash
+LocalMD Reader v0.1.0 has no ads, analytics SDK, login, automatic crash
 reporting, or `android.permission.INTERNET` permission. It does not transmit
 Markdown content, file names, file paths, Android document URIs, or recent file
 metadata off device.

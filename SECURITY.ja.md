@@ -1,10 +1,10 @@
 # セキュリティポリシー
 
-MdLite Reader は権限を最小化し、Markdown レンダリングをローカルで行います。
+LocalMD Reader は権限を最小化し、Markdown レンダリングをローカルで行います。
 
 ## サポート対象バージョン
 
-MdLite Reader は private の開発初期段階です。初回公開リリースの準備が整うまでは、
+LocalMD Reader は private の開発初期段階です。初回公開リリースの準備が整うまでは、
 セキュリティ修正は現在の `main` ブランチに適用します。
 
 ## 脆弱性の報告
@@ -25,7 +25,7 @@ Advisory の手順を追記します。
 
 ## ファイルアクセス
 
-MdLite Reader は、ユーザーが選択した文書を Android のファイルアクセス機能で
+LocalMD Reader は、ユーザーが選択した文書を Android のファイルアクセス機能で
 開きます。
 
 `MANAGE_EXTERNAL_STORAGE` のような広範なストレージ権限は要求しません。

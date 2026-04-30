@@ -1,1 +1,1 @@
-MdLite Reader welcome screen with open file and recent file actions.
+LocalMD Reader welcome screen with open file and recent file actions.

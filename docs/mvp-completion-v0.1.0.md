@@ -1,10 +1,10 @@
 # v0.1.0 MVP Completion
 
-This document defines the completion criteria for MdLite Reader v0.1.0.
+This document defines the completion criteria for LocalMD Reader v0.1.0.
 
 ## MVP Goal
 
-MdLite Reader v0.1.0 is complete when a user can reliably open local Markdown
+LocalMD Reader v0.1.0 is complete when a user can reliably open local Markdown
 files on Android and read them without ads, tracking, login, sync, or network
 access.
 
