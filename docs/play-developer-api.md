@@ -106,6 +106,15 @@ Default AAB:
 ~/AndroidDev/releases/mdlite-reader/v0.1.0/mdlite-reader-0.1.0-release.aab
 ```
 
+Current v0.1.0 API upload:
+
+```text
+Track: alpha
+Status: draft
+Bundle versionCode: 1
+Edit: 18434202560416692159
+```
+
 Package name:
 
 ```text

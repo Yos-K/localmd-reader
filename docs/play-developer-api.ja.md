@@ -105,6 +105,15 @@ scripts/play-upload-closed-test.py \
 ~/AndroidDev/releases/mdlite-reader/v0.1.0/mdlite-reader-0.1.0-release.aab
 ```
 
+現在の v0.1.0 API アップロード:
+
+```text
+Track: alpha
+Status: draft
+Bundle versionCode: 1
+Edit: 18434202560416692159
+```
+
 パッケージ名:
 
 ```text
