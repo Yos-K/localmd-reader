@@ -1,5 +1,13 @@
 # MdLite Reader
 
+<p align="center">
+  <img src="play-store/icon-512.png" alt="MdLite Reader logo" width="128" height="128">
+</p>
+
+<p align="center">
+  Lightweight Android Markdown reading without ads, tracking, or network access.
+</p>
+
 MdLite Reader is a lightweight Android Markdown viewer.
 
 It is built for reading local Markdown files quickly without ads, tracking,

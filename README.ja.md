@@ -1,5 +1,13 @@
 # MdLite Reader
 
+<p align="center">
+  <img src="play-store/icon-512.png" alt="MdLite Reader logo" width="128" height="128">
+</p>
+
+<p align="center">
+  広告、トラッキング、ネットワークアクセスなしで読む軽量 Android Markdown ビューア。
+</p>
+
 MdLite Reader は、軽量な Android 向け Markdown ビューアです。
 
 ローカル Markdown ファイルをすばやく読むことを目的とし、広告、トラッキング、
