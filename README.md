@@ -107,8 +107,11 @@ See [docs/release-signing.md](docs/release-signing.md).
 
 ## Repository Status
 
-The repository should remain private during early development and become public
-when the first release is ready.
+This repository is public for closed testing and release preparation.
+
+Closed testing notes are in [docs/closed-testing-guide.md](docs/closed-testing-guide.md).
+Tester invitation text is in
+[play-store/testing/closed-test-invitation.txt](play-store/testing/closed-test-invitation.txt).
 
 ## License
 

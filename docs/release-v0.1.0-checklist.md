@@ -4,7 +4,7 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 
 ## Repository
 
-- [x] The repository is private before the first release is ready.
+- [x] The repository was kept private before closed testing recruitment.
 - [x] `main` is clean.
 - [x] All release changes are committed with Conventional Commits style.
 - [x] No production signing keys are committed.
@@ -207,4 +207,4 @@ This checklist defines the minimum checks before publishing MdLite Reader v0.1.0
 - [x] Copy the signed release AAB to the release staging location.
 - [x] Upload the signed release AAB to the closed testing track as a draft through Google Play Developer API.
 - [x] Tag the release as `v0.1.0`.
-- [x] Keep the repository private until the public release decision is made.
+- [x] Make the repository public for closed testing recruitment.
