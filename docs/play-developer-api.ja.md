@@ -132,7 +132,8 @@ io.github.yosk.mdlite
 
 ## ストア掲載情報を更新
 
-英語/日本語の掲載文、アプリアイコン、フィーチャーグラフィックを更新します。
+英語/日本語の掲載文、アプリアイコン、フィーチャーグラフィック、スクリーンショットを
+更新します。
 
 ```sh
 scripts/play-update-listing.py
@@ -145,6 +146,7 @@ play-store/listing/en-US/*.txt
 play-store/listing/ja-JP/*.txt
 play-store/icon-512.png
 play-store/feature-graphic-1024x500.png
+play-store/screenshots/*.jpg
 ```
 
 commit せずに検証だけ行う場合:
@@ -157,7 +159,8 @@ scripts/play-update-listing.py --validate-only
 
 ```text
 Status: committed
-Edit: 00044233089121248600
+Edit: 17933122043752272146
 Locales: en-US, ja-JP
 Images: icon, featureGraphic
+Screenshots: phoneScreenshots, sevenInchScreenshots, tenInchScreenshots
 ```

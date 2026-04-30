@@ -136,7 +136,8 @@ io.github.yosk.mdlite
 
 ## Update Store Listing
 
-Update English and Japanese listing text, app icon, and feature graphic:
+Update English and Japanese listing text, app icon, feature graphic, and
+screenshots:
 
 ```sh
 scripts/play-update-listing.py
@@ -149,6 +150,7 @@ play-store/listing/en-US/*.txt
 play-store/listing/ja-JP/*.txt
 play-store/icon-512.png
 play-store/feature-graphic-1024x500.png
+play-store/screenshots/*.jpg
 ```
 
 Validate without committing:
@@ -161,7 +163,8 @@ Current v0.1.0 listing API update:
 
 ```text
 Status: committed
-Edit: 00044233089121248600
+Edit: 17933122043752272146
 Locales: en-US, ja-JP
 Images: icon, featureGraphic
+Screenshots: phoneScreenshots, sevenInchScreenshots, tenInchScreenshots
 ```

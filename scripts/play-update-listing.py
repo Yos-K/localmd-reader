@@ -65,6 +65,37 @@ def upload_single_image(
     ).execute()
 
 
+def upload_screenshots(
+    publisher,
+    media_file_upload,
+    package_name,
+    edit_id,
+    locale,
+    image_type,
+    paths,
+):
+    publisher.edits().images().deleteall(
+        packageName=package_name,
+        editId=edit_id,
+        language=locale,
+        imageType=image_type,
+    ).execute()
+
+    for path in paths:
+        media = media_file_upload(
+            str(path),
+            mimetype="image/jpeg",
+            resumable=True,
+        )
+        publisher.edits().images().upload(
+            packageName=package_name,
+            editId=edit_id,
+            language=locale,
+            imageType=image_type,
+            media_body=media,
+        ).execute()
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Update Google Play store listing text and primary images."
@@ -99,6 +130,12 @@ def main():
     account_path = pathlib.Path(args.service_account).expanduser()
     icon_path = root / "play-store" / "icon-512.png"
     feature_graphic_path = root / "play-store" / "feature-graphic-1024x500.png"
+    screenshot_paths = [
+        root / "play-store" / "screenshots" / "phone-01-welcome.jpg",
+        root / "play-store" / "screenshots" / "phone-02-document.jpg",
+        root / "play-store" / "screenshots" / "phone-03-dark-table.jpg",
+        root / "play-store" / "screenshots" / "phone-04-tabs-menu.jpg",
+    ]
 
     if not account_path.is_file():
         raise SystemExit(f"Missing service account JSON: {account_path}")
@@ -106,6 +143,9 @@ def main():
         raise SystemExit(f"Missing app icon: {icon_path}")
     if not feature_graphic_path.is_file():
         raise SystemExit(f"Missing feature graphic: {feature_graphic_path}")
+    for screenshot_path in screenshot_paths:
+        if not screenshot_path.is_file():
+            raise SystemExit(f"Missing screenshot: {screenshot_path}")
 
     service_account, build, media_file_upload = load_google_api()
     credentials = service_account.Credentials.from_service_account_file(
@@ -155,6 +195,22 @@ def main():
             feature_graphic_path,
         )
         print(f"Uploaded feature graphic: {locale}")
+
+        for image_type in (
+            "phoneScreenshots",
+            "sevenInchScreenshots",
+            "tenInchScreenshots",
+        ):
+            upload_screenshots(
+                publisher,
+                media_file_upload,
+                package_name,
+                edit_id,
+                locale,
+                image_type,
+                screenshot_paths,
+            )
+            print(f"Uploaded {image_type}: {locale}")
 
     if args.validate_only:
         publisher.edits().validate(
