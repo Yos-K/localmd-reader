@@ -42,6 +42,9 @@ During closed testing preparation, the public repository contains only the
 Free/Pro boundary model and documentation. Pro feature implementation and Play
 Billing integration are deferred until the Free release path is stable.
 
+The current closed testing build always uses the Free entitlement. This keeps
+the submitted app behavior independent from future billing work.
+
 Initial Pro candidates:
 
 - Additional UI themes.
@@ -122,6 +125,9 @@ Gestures:
 
 - The Free/Pro boundary must be represented by explicit domain objects, not by
   scattered booleans in UI code.
+- The current release entitlement must be defined in one place so that future
+  billing integration can replace it without changing the Markdown reading
+  path.
 - Pro features must not require ads, tracking, login, or analytics.
 - Pro features must work offline unless the feature is explicitly documented as
   requiring external data.
