@@ -92,6 +92,9 @@ cd projects/localmd-reader
 ./build.sh
 ```
 
+このリポジトリでは、通常ビルドとリリースビルド時に `env.project.sh` を読み込み、
+このアプリ用の Android platform / build-tools バージョンを固定します。
+
 生成される debug APK:
 
 ```text

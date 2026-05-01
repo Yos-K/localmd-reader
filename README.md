@@ -93,6 +93,9 @@ cd projects/localmd-reader
 ./build.sh
 ```
 
+This repository also loads `env.project.sh` during local and release builds to
+keep the Android platform and build-tools versions stable for this app.
+
 The generated debug APK is:
 
 ```text

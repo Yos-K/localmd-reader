@@ -2,6 +2,9 @@
 set -eu
 
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+if [ -f "$ROOT/env.project.sh" ]; then
+  . "$ROOT/env.project.sh"
+fi
 ANDROID_HOME="${ANDROID_HOME:-$HOME/AndroidDev/sdk}"
 ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-33}"
 ANDROID_BUILD_TOOLS="${ANDROID_BUILD_TOOLS:-35.0.2}"
