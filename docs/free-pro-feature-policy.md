@@ -38,6 +38,10 @@ Markdown comfortably without paying.
 
 Pro is a one-time purchase for extra reading comfort and power-user workflows.
 
+During closed testing preparation, the public repository contains only the
+Free/Pro boundary model and documentation. Pro feature implementation and Play
+Billing integration are deferred until the Free release path is stable.
+
 Initial Pro candidates:
 
 - Additional UI themes.
@@ -116,6 +120,8 @@ Gestures:
 
 ## Pro Safety Requirements
 
+- The Free/Pro boundary must be represented by explicit domain objects, not by
+  scattered booleans in UI code.
 - Pro features must not require ads, tracking, login, or analytics.
 - Pro features must work offline unless the feature is explicitly documented as
   requiring external data.
