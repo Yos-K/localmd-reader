@@ -111,12 +111,12 @@ Current v0.1.0 API upload:
 ```text
 Track: alpha
 Status: draft
-Bundle versionCode: 3
+Bundle versionCode: 4
 Edit: 15583131403179485654
 ```
 
 VersionCode 1 was already uploaded to Google Play. Target SDK 35 builds must use
-versionCode 3 or later.
+versionCode 4 or later.
 
 Package name:
 

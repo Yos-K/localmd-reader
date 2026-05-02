@@ -17,6 +17,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.webkit.WebSettings;
@@ -49,7 +50,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class MainActivity extends Activity implements View.OnClickListener, DialogInterface.OnClickListener {
+public final class MainActivity extends Activity implements View.OnClickListener, DialogInterface.OnClickListener, View.OnApplyWindowInsetsListener {
     private static final int REQUEST_OPEN_DOCUMENT = 1001;
     private static final String ACTION_OPEN_TEXT = "io.github.yosk.mdlite.action.OPEN_TEXT";
     private static final String ACTION_OPEN_TEXTS = "io.github.yosk.mdlite.action.OPEN_TEXTS";
@@ -110,6 +111,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private LinearLayout controlsBar;
     private LinearLayout tabRow;
     private HorizontalScrollView tabScroller;
+    private int systemBottomInsetPx;
     private TextView appTitle;
     private TextView menuTitle;
     private TextView filesSection;
@@ -290,6 +292,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         applyControlsPlacement();
 
+        appRoot.setOnApplyWindowInsetsListener(this);
         appRoot.addView(root, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT));
@@ -366,6 +369,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         RecentDocument selected = displayedRecentDocuments.items().get(which);
         openUri(Uri.parse(selected.uri()), true);
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(View view, WindowInsets insets) {
+        systemBottomInsetPx = insets.getSystemWindowInsetBottom();
+        applyControlsBarInsets();
+        return insets;
     }
 
     @Override
@@ -752,6 +762,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void applyControlsPlacement() {
         root.removeAllViews();
+        applyControlsBarInsets();
         if (controlsPlacement.isBottom()) {
             root.addView(messageView, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -774,6 +785,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     0,
                     1));
+        }
+    }
+
+    private void applyControlsBarInsets() {
+        if (controlsPlacement.isBottom()) {
+            controlsBar.setPadding(0, 0, 0, systemBottomInsetPx);
+        } else {
+            controlsBar.setPadding(0, 0, 0, 0);
         }
     }
 
