@@ -44,6 +44,13 @@ sha256sum ~/AndroidDev/releases/mdlite-reader/v0.1.0/mdlite-reader-0.1.0-release
 - テスターには Play のテストリンクから opt-in してもらう。
 - 14日間が終わるまで opt-out しないよう依頼する。
 
+参加リンク:
+
+```text
+Web: https://play.google.com/apps/testing/io.github.yosk.mdlite
+Android: https://play.google.com/store/apps/details?id=io.github.yosk.mdlite
+```
+
 ## フィードバック窓口
 
 窓口は一つに絞ります。

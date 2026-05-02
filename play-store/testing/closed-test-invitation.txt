@@ -9,6 +9,10 @@ Request:
 - Open a Markdown file if possible.
 - Send brief feedback if you notice anything.
 
+Test links:
+- Web: https://play.google.com/apps/testing/io.github.yosk.mdlite
+- Android: https://play.google.com/store/apps/details?id=io.github.yosk.mdlite
+
 Feedback:
 https://github.com/Yos-K/localmd-reader/issues
 

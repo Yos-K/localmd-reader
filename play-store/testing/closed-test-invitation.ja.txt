@@ -9,6 +9,10 @@ Google Play公開前の動作確認とフィードバック収集
 - 可能なら Markdown ファイルを開いて表示確認
 - 気づいた点があれば短いフィードバック
 
+参加リンク:
+- Web: https://play.google.com/apps/testing/io.github.yosk.mdlite
+- Android: https://play.google.com/store/apps/details?id=io.github.yosk.mdlite
+
 フィードバック:
 https://github.com/Yos-K/localmd-reader/issues
 

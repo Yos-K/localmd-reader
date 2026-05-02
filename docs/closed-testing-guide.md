@@ -43,6 +43,13 @@ Recommended tester list:
 - Ask testers to opt in from the Play testing link.
 - Ask testers not to opt out until the 14-day period is complete.
 
+Test links:
+
+```text
+Web: https://play.google.com/apps/testing/io.github.yosk.mdlite
+Android: https://play.google.com/store/apps/details?id=io.github.yosk.mdlite
+```
+
 ## Feedback Channel
 
 Use one simple feedback channel:
