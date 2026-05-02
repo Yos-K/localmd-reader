@@ -25,7 +25,7 @@ public final class JavaSimpleMarkdownRenderer {
                 } else {
                     flushParagraph(html, paragraph);
                     openList = closeList(html, openList);
-                    html.append("<pre><code>");
+                    html.append(openCodeBlockHtml(line));
                     inCodeBlock = true;
                 }
                 continue;
@@ -138,6 +138,44 @@ public final class JavaSimpleMarkdownRenderer {
 
     private static boolean isFenceLine(String line) {
         return line.equals("```") || (line.startsWith("```") && line.trim().length() > 3);
+    }
+
+    private static String openCodeBlockHtml(String fenceLine) {
+        String language = codeFenceLanguage(fenceLine);
+        if (language.length() == 0) {
+            return "<pre><code>";
+        }
+        return "<pre><code class=\"language-" + language + "\">";
+    }
+
+    private static String codeFenceLanguage(String fenceLine) {
+        String trimmed = fenceLine.trim();
+        if (trimmed.length() <= 3) {
+            return "";
+        }
+        String language = trimmed.substring(3).trim();
+        if (!isSafeLanguageName(language)) {
+            return "";
+        }
+        return language;
+    }
+
+    private static boolean isSafeLanguageName(String language) {
+        if (language.length() == 0) {
+            return false;
+        }
+        for (int i = 0; i < language.length(); i++) {
+            char c = language.charAt(i);
+            boolean safe = (c >= 'a' && c <= 'z')
+                    || (c >= 'A' && c <= 'Z')
+                    || (c >= '0' && c <= '9')
+                    || c == '_'
+                    || c == '-';
+            if (!safe) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static int headingLevel(String line) {

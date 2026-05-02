@@ -13,6 +13,8 @@ public final class JavaSimpleMarkdownRendererTest {
         test.rendersPlainTextAsParagraph();
         test.rendersFencedCodeBlockWithEscapedContent();
         test.rendersFencedCodeBlockWithLanguageInfoAsCodeBlock();
+        test.rendersSafeLanguageClassForFencedCodeBlock();
+        test.doesNotRenderUnsafeLanguageClassForFencedCodeBlock();
         test.rendersInlineCodeWithEscapedContent();
         test.rendersHttpsMarkdownLinkAsSafeAnchor();
         test.rendersHttpMarkdownLinkAsSafeAnchor();
@@ -84,9 +86,23 @@ public final class JavaSimpleMarkdownRendererTest {
     public void rendersFencedCodeBlockWithLanguageInfoAsCodeBlock() {
         SafeHtml html = renderer.render("```text\ndata MarkdownFile = ReadableMarkdownFile OR UnsupportedFile\n```");
 
-        assertContains(html.value(), "<pre><code>", "fenced code block with language info must render as pre/code");
+        assertContains(html.value(), "<pre><code", "fenced code block with language info must render as pre/code");
         assertContains(html.value(), "data MarkdownFile = ReadableMarkdownFile OR UnsupportedFile", "fenced code block content must be preserved");
         assertNotContains(html.value(), "<p>```text", "language fence marker must not render as paragraph");
+    }
+
+    public void rendersSafeLanguageClassForFencedCodeBlock() {
+        SafeHtml html = renderer.render("```java\npublic final class Note {}\n```");
+
+        assertContains(html.value(), "<pre><code class=\"language-java\">", "safe language info must render as a language class");
+        assertContains(html.value(), "public final class Note {}", "code content must be preserved");
+    }
+
+    public void doesNotRenderUnsafeLanguageClassForFencedCodeBlock() {
+        SafeHtml html = renderer.render("```java\" onclick=\"alert(1)\nvalue\n```");
+
+        assertContains(html.value(), "<pre><code>", "unsafe language info must fall back to plain code block");
+        assertNotContains(html.value(), "onclick", "unsafe language info must not be emitted");
     }
 
     public void rendersInlineCodeWithEscapedContent() {
@@ -178,7 +194,7 @@ public final class JavaSimpleMarkdownRendererTest {
     public void rendererClosesUnterminatedCodeFenceInsteadOfCrashing() {
         SafeHtml html = renderer.render("```text\nvalue < 3");
 
-        assertContains(html.value(), "<pre><code>", "unterminated fenced code block must still open a code block");
+        assertContains(html.value(), "<pre><code", "unterminated fenced code block must still open a code block");
         assertContains(html.value(), "value &lt; 3", "unterminated fenced code block content must be escaped");
         assertContains(html.value(), "</code></pre>", "unterminated fenced code block must be closed at end of document");
     }
