@@ -1,0 +1,41 @@
+package io.github.yosk.mdlite.domain;
+
+public final class ProFeatureDescriptor {
+    private final ViewerFeature feature;
+    private final String title;
+    private final String description;
+
+    public ProFeatureDescriptor(ViewerFeature feature, String title, String description) {
+        if (feature == null) {
+            throw new IllegalArgumentException("Feature must not be null.");
+        }
+        if (title == null || title.length() == 0) {
+            throw new IllegalArgumentException("Title must not be empty.");
+        }
+        if (description == null || description.length() == 0) {
+            throw new IllegalArgumentException("Description must not be empty.");
+        }
+        this.feature = feature;
+        this.title = title;
+        this.description = description;
+    }
+
+    public ViewerFeature feature() {
+        return feature;
+    }
+
+    public String title() {
+        return title;
+    }
+
+    public String description() {
+        return description;
+    }
+
+    public boolean isAvailableFor(FeatureEntitlement entitlement) {
+        if (entitlement == null) {
+            throw new IllegalArgumentException("Entitlement must not be null.");
+        }
+        return entitlement.allows(feature);
+    }
+}

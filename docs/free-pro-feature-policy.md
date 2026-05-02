@@ -48,9 +48,9 @@ the submitted app behavior independent from future billing work.
 Initial Pro candidates:
 
 - Additional UI themes.
-- Mermaid diagram rendering.
 - Syntax highlighting for code blocks.
 - Custom gesture shortcuts.
+- Mermaid diagram rendering.
 - Table reading enhancements.
 - Recent files beyond 5 entries.
 - Table of contents.
@@ -98,6 +98,13 @@ Pro
 
 Rationale: Built-in basic gestures such as pinch font sizing stay Free. Custom
 tap, double-tap, long-press, or swipe shortcuts are power-user customization.
+
+Initial public Pro catalog order:
+
+1. Additional UI themes.
+2. Syntax highlighting for code blocks.
+3. Custom gesture shortcuts.
+4. Mermaid diagram rendering.
 
 ## Free Baseline For These Areas
 
