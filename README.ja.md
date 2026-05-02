@@ -12,6 +12,11 @@ LocalMD Reader は、軽量な Android 向け Markdown ビューアです。
 
 LocalMD Reader は現在 Google Play クローズドテストの準備中です。
 
+クローズドテスト参加リンク:
+
+- Web: https://play.google.com/apps/testing/io.github.yosk.mdlite
+- Android: https://play.google.com/store/apps/details?id=io.github.yosk.mdlite
+
 ローカル Markdown ファイルをすばやく読むことを目的とし、広告、トラッキング、
 ログイン、同期、ネットワークアクセスを前提にしません。
 
