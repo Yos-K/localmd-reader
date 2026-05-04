@@ -41,6 +41,7 @@ import io.github.yosk.mdlite.domain.ViewerLanguage;
 import io.github.yosk.mdlite.domain.ViewerTheme;
 import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
 import io.github.yosk.mdlite.infrastructure.JavaSimpleMarkdownRenderer;
+import io.github.yosk.mdlite.infrastructure.WelcomeDocumentBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -1166,48 +1167,21 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return new String(Base64.decode(value, Base64.NO_WRAP | Base64.URL_SAFE), StandardCharsets.UTF_8);
     }
 
-    private static void configureWebView(WebView webView) {
+    private void configureWebView(WebView webView) {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(false);
         settings.setDomStorageEnabled(false);
         settings.setDatabaseEnabled(false);
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
-        webView.setWebViewClient(new ExternalHttpLinkClient());
+        webView.setWebViewClient(new AppLinkClient(this));
     }
 
     private OpenDocumentTab initialTab() {
         return OpenDocumentTab.of(
                 currentLanguage.isJapanese() ? "ホーム" : "Welcome",
                 WELCOME_URI,
-                SafeHtml.fromTrustedRendererOutput(welcomeHtml()));
-    }
-
-    private String welcomeHtml() {
-        if (currentLanguage.isJapanese()) {
-            return "<section class=\"welcome\">"
-                    + "<p class=\"welcome-kicker\">ローカルMarkdownビューア</p>"
-                    + "<h1>LocalMD Reader</h1>"
-                    + "<p class=\"welcome-lead\">広告、トラッキング、ログイン、ネットワークアクセスなしでMarkdownファイルを読みます。</p>"
-                    + "<div class=\"welcome-grid\">"
-                    + "<div class=\"welcome-card\"><strong>開く</strong><span>メニューから .md または .markdown ファイルを選びます。</span></div>"
-                    + "<div class=\"welcome-card\"><strong>戻る</strong><span>最近開いたファイルには、この端末で開いた直近5件が残ります。</span></div>"
-                    + "<div class=\"welcome-card\"><strong>読む</strong><span>ピンチで文字サイズを変えられます。複数ファイルはタブで開きます。</span></div>"
-                    + "</div>"
-                    + "<p class=\"welcome-note\">生HTMLはテキストとして表示します。HTTP / HTTPSリンクはアプリ外で開きます。</p>"
-                    + "</section>";
-        }
-        return "<section class=\"welcome\">"
-                + "<p class=\"welcome-kicker\">Local Markdown reader</p>"
-                + "<h1>LocalMD Reader</h1>"
-                + "<p class=\"welcome-lead\">Open a Markdown file and read it without ads, tracking, login, or network access.</p>"
-                + "<div class=\"welcome-grid\">"
-                + "<div class=\"welcome-card\"><strong>Open</strong><span>Use Menu to choose a .md or .markdown file.</span></div>"
-                + "<div class=\"welcome-card\"><strong>Return</strong><span>Recent files keeps the last 5 documents on this device.</span></div>"
-                + "<div class=\"welcome-card\"><strong>Read</strong><span>Pinch to adjust text size. Open more files to create tabs.</span></div>"
-                + "</div>"
-                + "<p class=\"welcome-note\">Raw HTML is shown as text. HTTP and HTTPS links open outside the app.</p>"
-                + "</section>";
+                WelcomeDocumentBuilder.build(currentLanguage));
     }
 
     private void renderCurrentDocument() {
@@ -1311,9 +1285,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
     }
 
-    private static final class ExternalHttpLinkClient extends WebViewClient {
+    private static final class AppLinkClient extends WebViewClient {
+        private final MainActivity activity;
+
+        private AppLinkClient(MainActivity activity) {
+            this.activity = activity;
+        }
+
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if (WelcomeDocumentBuilder.OPEN_MARKDOWN_URL.equals(url)) {
+                activity.openMarkdownPicker();
+                return true;
+            }
             if (!isExternalHttpUrl(url)) {
                 return true;
             }
