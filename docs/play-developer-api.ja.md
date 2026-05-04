@@ -159,7 +159,7 @@ scripts/play-update-listing.py --validate-only
 
 ```text
 Status: committed
-Edit: 17933122043752272146
+Edit: 16402557780469891591
 Locales: en-US, ja-JP
 Images: icon, featureGraphic
 Screenshots: phoneScreenshots, sevenInchScreenshots, tenInchScreenshots
