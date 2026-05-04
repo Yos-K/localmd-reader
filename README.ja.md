@@ -1,7 +1,7 @@
 # LocalMD Reader
 
 <p align="center">
-  <img src="play-store/icon-512.png" alt="LocalMD Reader logo" width="128" height="128">
+  <img src="docs/assets/localmd-reader-icon-512.png" alt="LocalMD Reader logo" width="128" height="128">
 </p>
 
 <p align="center">
