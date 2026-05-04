@@ -112,6 +112,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private LinearLayout controlsBar;
     private LinearLayout tabRow;
     private HorizontalScrollView tabScroller;
+    private int systemTopInsetPx;
     private int systemBottomInsetPx;
     private TextView appTitle;
     private TextView menuTitle;
@@ -374,6 +375,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     @Override
     public WindowInsets onApplyWindowInsets(View view, WindowInsets insets) {
+        systemTopInsetPx = insets.getSystemWindowInsetTop();
         systemBottomInsetPx = insets.getSystemWindowInsetBottom();
         applyControlsBarInsets();
         return insets;
@@ -793,7 +795,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (controlsPlacement.isBottom()) {
             controlsBar.setPadding(0, 0, 0, systemBottomInsetPx);
         } else {
-            controlsBar.setPadding(0, 0, 0, 0);
+            controlsBar.setPadding(0, systemTopInsetPx, 0, 0);
         }
     }
 
