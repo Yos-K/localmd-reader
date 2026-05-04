@@ -148,7 +148,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         topBar = new LinearLayout(this);
         topBar.setOrientation(LinearLayout.HORIZONTAL);
         topBar.setGravity(Gravity.CENTER_VERTICAL);
-        topBar.setPadding(dp(12), dp(8), dp(12), dp(8));
+        topBar.setPadding(dp(14), dp(10), dp(14), dp(10));
         topBar.setBackgroundColor(backgroundColor());
 
         menuButton = new Button(this);
@@ -169,6 +169,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         appTitle.setGravity(Gravity.CENTER_VERTICAL);
         appTitle.setSingleLine(true);
         appTitle.setEllipsize(TextUtils.TruncateAt.END);
+        appTitle.setPadding(dp(14), 0, 0, 0);
         topBar.addView(appTitle, new LinearLayout.LayoutParams(
                 0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -887,7 +888,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         view.setTextColor(primaryStrongColor());
         view.setTextSize(15);
         view.setTypeface(Typeface.DEFAULT_BOLD);
-        view.setPadding(dp(14), dp(8), dp(14), dp(8));
+        view.setPadding(dp(16), dp(9), dp(16), dp(9));
         view.setBackground(makeRoundedBackground(surfaceAltColor(), borderColor(), 8));
     }
 
