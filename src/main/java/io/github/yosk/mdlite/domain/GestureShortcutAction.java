@@ -2,11 +2,13 @@ package io.github.yosk.mdlite.domain;
 
 public final class GestureShortcutAction {
     private static final int OFF = 1;
-    private static final int OPEN_MENU = 2;
-    private static final int NEXT_THEME = 3;
-    private static final int MOVE_CONTROLS = 4;
+    private static final int OPEN_FILE = 2;
+    private static final int OPEN_MENU = 3;
+    private static final int NEXT_THEME = 4;
+    private static final int MOVE_CONTROLS = 5;
 
     private static final String OFF_VALUE = "off";
+    private static final String OPEN_FILE_VALUE = "open_file";
     private static final String OPEN_MENU_VALUE = "open_menu";
     private static final String NEXT_THEME_VALUE = "next_theme";
     private static final String MOVE_CONTROLS_VALUE = "move_controls";
@@ -25,6 +27,10 @@ public final class GestureShortcutAction {
         return new GestureShortcutAction(OPEN_MENU);
     }
 
+    public static GestureShortcutAction openFile() {
+        return new GestureShortcutAction(OPEN_FILE);
+    }
+
     public static GestureShortcutAction nextTheme() {
         return new GestureShortcutAction(NEXT_THEME);
     }
@@ -36,6 +42,9 @@ public final class GestureShortcutAction {
     public static GestureShortcutAction fromStoredValue(String storedValue) {
         if (OPEN_MENU_VALUE.equals(storedValue)) {
             return openMenu();
+        }
+        if (OPEN_FILE_VALUE.equals(storedValue)) {
+            return openFile();
         }
         if (NEXT_THEME_VALUE.equals(storedValue)) {
             return nextTheme();
@@ -54,6 +63,10 @@ public final class GestureShortcutAction {
         return value == OPEN_MENU;
     }
 
+    public boolean isOpenFile() {
+        return value == OPEN_FILE;
+    }
+
     public boolean isNextTheme() {
         return value == NEXT_THEME;
     }
@@ -65,6 +78,9 @@ public final class GestureShortcutAction {
     public String storedValue() {
         if (isOpenMenu()) {
             return OPEN_MENU_VALUE;
+        }
+        if (isOpenFile()) {
+            return OPEN_FILE_VALUE;
         }
         if (isNextTheme()) {
             return NEXT_THEME_VALUE;
@@ -81,6 +97,9 @@ public final class GestureShortcutAction {
             return off();
         }
         if (isOff()) {
+            return openFile();
+        }
+        if (isOpenFile()) {
             return openMenu();
         }
         if (isOpenMenu()) {

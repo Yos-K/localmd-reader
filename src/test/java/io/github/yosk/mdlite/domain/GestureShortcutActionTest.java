@@ -5,6 +5,7 @@ import io.github.yosk.mdlite.testing.TestAssertions;
 public final class GestureShortcutActionTest {
     public static void main(String[] args) {
         offActionCyclesToOpenMenuForProUsers();
+        openFileActionCyclesToOpenMenuForProUsers();
         openMenuActionCyclesToNextThemeForProUsers();
         nextThemeActionCyclesToMoveControlsForProUsers();
         moveControlsActionCyclesToOffForProUsers();
@@ -16,7 +17,13 @@ public final class GestureShortcutActionTest {
     private static void offActionCyclesToOpenMenuForProUsers() {
         GestureShortcutAction action = GestureShortcutAction.off().next(FeatureEntitlement.pro());
 
-        TestAssertions.assertTrue(action.isOpenMenu(), "Pro double-tap shortcut must cycle from Off to Open menu");
+        TestAssertions.assertTrue(action.isOpenFile(), "Pro shortcut must cycle from Off to Open file");
+    }
+
+    private static void openFileActionCyclesToOpenMenuForProUsers() {
+        GestureShortcutAction action = GestureShortcutAction.openFile().next(FeatureEntitlement.pro());
+
+        TestAssertions.assertTrue(action.isOpenMenu(), "Pro shortcut must cycle from Open file to Open menu");
     }
 
     private static void openMenuActionCyclesToNextThemeForProUsers() {

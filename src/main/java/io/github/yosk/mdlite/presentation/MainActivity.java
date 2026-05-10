@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import io.github.yosk.mdlite.domain.CodeHighlighting;
 import io.github.yosk.mdlite.domain.CodeHighlightingPolicy;
+import io.github.yosk.mdlite.domain.CircleGesturePath;
 import io.github.yosk.mdlite.domain.ControlsPlacement;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
@@ -83,6 +84,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final String CONTROLS_PLACEMENT = "controls_placement";
     private static final String VIEWER_LANGUAGE = "viewer_language";
     private static final String DOUBLE_TAP_SHORTCUT = "double_tap_shortcut";
+    private static final String CIRCLE_GESTURE_SHORTCUT = "circle_gesture_shortcut";
     private static final String WELCOME_URI = "app://welcome";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
@@ -165,6 +167,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button languageButton;
     private Button controlsPlacementButton;
     private Button doubleTapShortcutButton;
+    private Button circleGestureShortcutButton;
     private Button proFeaturesButton;
     private Button privacyButton;
     private SwipeMenuLayout menuPanel;
@@ -186,12 +189,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private ViewerLanguage currentLanguage = ViewerLanguage.english();
     private ViewerTheme currentTheme = ViewerTheme.light();
     private GestureShortcutAction doubleTapShortcut = GestureShortcutAction.off();
+    private GestureShortcutAction circleGestureShortcut = GestureShortcutAction.off();
     private FontSize currentFontSize = FontSize.defaultSize();
     private FontSize renderedFontSize = FontSize.defaultSize();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
     private ScaleGestureDetector fontScaleGestureDetector;
     private GestureDetector shortcutGestureDetector;
     private float accumulatedPinchScale = 1f;
+    private final List<Float> circleGestureXs = new ArrayList<>();
+    private final List<Float> circleGestureYs = new ArrayList<>();
     private boolean trackingEdgeSwipe;
     private float edgeSwipeStartX;
     private float menuSwipeStartX;
@@ -205,6 +211,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         controlsPlacement = loadControlsPlacement();
         currentLanguage = loadViewerLanguage();
         doubleTapShortcut = loadDoubleTapShortcut();
+        circleGestureShortcut = loadCircleGestureShortcut();
 
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -269,6 +276,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         doubleTapShortcutButton.setOnClickListener(this);
         styleMenuButton(doubleTapShortcutButton);
 
+        circleGestureShortcutButton = new Button(this);
+        circleGestureShortcutButton.setAllCaps(false);
+        circleGestureShortcutButton.setOnClickListener(this);
+        styleMenuButton(circleGestureShortcutButton);
+
         proFeaturesButton = new Button(this);
         proFeaturesButton.setAllCaps(false);
         proFeaturesButton.setOnClickListener(this);
@@ -324,6 +336,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(doubleTapShortcutButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(circleGestureShortcutButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         infoSection = menuSection("");
@@ -428,6 +443,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } else if (view == doubleTapShortcutButton) {
             doubleTapShortcut = doubleTapShortcut.next(featureEntitlement);
             saveDoubleTapShortcut(doubleTapShortcut);
+            updateLocalizedText();
+            closeMenu();
+        } else if (view == circleGestureShortcutButton) {
+            circleGestureShortcut = circleGestureShortcut.next(featureEntitlement);
+            saveCircleGestureShortcut(circleGestureShortcut);
             updateLocalizedText();
             closeMenu();
         } else if (view == proFeaturesButton) {
@@ -782,10 +802,26 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return stored;
     }
 
+    private GestureShortcutAction loadCircleGestureShortcut() {
+        SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
+        GestureShortcutAction stored = GestureShortcutAction.fromStoredValue(prefs.getString(CIRCLE_GESTURE_SHORTCUT, "off"));
+        if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
+            return GestureShortcutAction.off();
+        }
+        return stored;
+    }
+
     private void saveDoubleTapShortcut(GestureShortcutAction action) {
         getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE)
                 .edit()
                 .putString(DOUBLE_TAP_SHORTCUT, action.storedValue())
+                .apply();
+    }
+
+    private void saveCircleGestureShortcut(GestureShortcutAction action) {
+        getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE)
+                .edit()
+                .putString(CIRCLE_GESTURE_SHORTCUT, action.storedValue())
                 .apply();
     }
 
@@ -810,20 +846,31 @@ public final class MainActivity extends Activity implements View.OnClickListener
             controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを下に移動" : "Move controls to bottom");
         }
         doubleTapShortcutButton.setText(doubleTapShortcutLabel());
+        circleGestureShortcutButton.setText(circleGestureShortcutLabel());
     }
 
     private String doubleTapShortcutLabel() {
-        String prefix = currentLanguage.isJapanese() ? "ダブルタップ: " : "Double tap: ";
+        return shortcutLabel(currentLanguage.isJapanese() ? "ダブルタップ: " : "Double tap: ", doubleTapShortcut);
+    }
+
+    private String circleGestureShortcutLabel() {
+        return shortcutLabel(currentLanguage.isJapanese() ? "円ジェスチャー: " : "Circle gesture: ", circleGestureShortcut);
+    }
+
+    private String shortcutLabel(String prefix, GestureShortcutAction action) {
         if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
             return prefix + (currentLanguage.isJapanese() ? "Proで利用可能" : "Pro only");
         }
-        if (doubleTapShortcut.isOpenMenu()) {
+        if (action.isOpenFile()) {
+            return prefix + (currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
+        }
+        if (action.isOpenMenu()) {
             return prefix + (currentLanguage.isJapanese() ? "メニューを開く" : "Open menu");
         }
-        if (doubleTapShortcut.isNextTheme()) {
+        if (action.isNextTheme()) {
             return prefix + (currentLanguage.isJapanese() ? "テーマ切り替え" : "Next theme");
         }
-        if (doubleTapShortcut.isMoveControls()) {
+        if (action.isMoveControls()) {
             return prefix + (currentLanguage.isJapanese() ? "操作バー移動" : "Move controls");
         }
         return prefix + (currentLanguage.isJapanese() ? "オフ" : "Off");
@@ -1569,18 +1616,57 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private boolean handleViewerTouch(MotionEvent event) {
         fontScaleGestureDetector.onTouchEvent(event);
         shortcutGestureDetector.onTouchEvent(event);
-        return event.getPointerCount() > 1 || fontScaleGestureDetector.isInProgress();
+        boolean circleHandled = handleCircleGestureTouch(event);
+        return circleHandled || event.getPointerCount() > 1 || fontScaleGestureDetector.isInProgress();
     }
 
     private boolean handleDoubleTapShortcut() {
+        return executeShortcutAction(doubleTapShortcut);
+    }
+
+    private boolean handleCircleGestureTouch(MotionEvent event) {
         if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
             return false;
         }
-        if (doubleTapShortcut.isOpenMenu()) {
+        if (circleGestureShortcut.isOff() || event.getPointerCount() > 1) {
+            resetCircleGesturePath();
+            return false;
+        }
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            resetCircleGesturePath();
+            appendCircleGesturePoint(event);
+            return false;
+        }
+        if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+            appendCircleGesturePoint(event);
+            return false;
+        }
+        if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            appendCircleGesturePoint(event);
+            boolean handled = CircleGesturePath.fromPoints(circleGestureXs(), circleGestureYs()).isCircleLike()
+                    && executeShortcutAction(circleGestureShortcut);
+            resetCircleGesturePath();
+            return handled;
+        }
+        if (event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+            resetCircleGesturePath();
+        }
+        return false;
+    }
+
+    private boolean executeShortcutAction(GestureShortcutAction action) {
+        if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
+            return false;
+        }
+        if (action.isOpenFile()) {
+            openMarkdownPicker();
+            return true;
+        }
+        if (action.isOpenMenu()) {
             openMenu();
             return true;
         }
-        if (doubleTapShortcut.isNextTheme()) {
+        if (action.isNextTheme()) {
             currentTheme = currentTheme.next(featureEntitlement);
             updateLocalizedText();
             applyNativeTheme();
@@ -1588,7 +1674,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             renderCurrentDocument();
             return true;
         }
-        if (doubleTapShortcut.isMoveControls()) {
+        if (action.isMoveControls()) {
             controlsPlacement = controlsPlacement.toggled();
             saveControlsPlacement(controlsPlacement);
             updateLocalizedText();
@@ -1596,6 +1682,32 @@ public final class MainActivity extends Activity implements View.OnClickListener
             return true;
         }
         return false;
+    }
+
+    private void appendCircleGesturePoint(MotionEvent event) {
+        circleGestureXs.add(Float.valueOf(event.getX()));
+        circleGestureYs.add(Float.valueOf(event.getY()));
+    }
+
+    private void resetCircleGesturePath() {
+        circleGestureXs.clear();
+        circleGestureYs.clear();
+    }
+
+    private float[] circleGestureXs() {
+        return toFloatArray(circleGestureXs);
+    }
+
+    private float[] circleGestureYs() {
+        return toFloatArray(circleGestureYs);
+    }
+
+    private static float[] toFloatArray(List<Float> values) {
+        float[] result = new float[values.size()];
+        for (int i = 0; i < values.size(); i++) {
+            result[i] = values.get(i).floatValue();
+        }
+        return result;
     }
 
     private void changeFontSizeByPinch(float scaleFactor) {
