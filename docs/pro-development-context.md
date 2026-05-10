@@ -95,12 +95,19 @@ slice is stable:
 
 Implementation continues with TDD:
 
+- Avoid test smells documented by `kawasima/savanna-maven-plugin`.
 - Tests must describe the user-visible specification in their names.
 - Boundary values must be covered where relevant.
 - Property-style or generated-input tests should be added for renderer safety
   when the behavior accepts arbitrary Markdown text.
 - Free behavior and Pro behavior must both be tested.
 - Safety tests must assert that raw HTML and unsafe attributes are not emitted.
+- Do not put conditional test logic (`if`, `while`, `switch`) in test bodies.
+- Do not use `Thread.sleep()` in tests.
+- Do not skip tests in build commands or project scripts.
+- Do not create ad hoc assertion helpers in each test file. Use
+  `io.github.yosk.mdlite.testing.TestAssertions` instead.
+- Each assertion must have a message that explains the expected behavior.
 
 ## Release Note
 
