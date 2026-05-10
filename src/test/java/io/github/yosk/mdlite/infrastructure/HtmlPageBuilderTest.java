@@ -12,6 +12,9 @@ public final class HtmlPageBuilderTest {
         test.rendersDarkThemeWithDarkBackgroundAndLightText();
         test.rendersAmoledThemeWithBlackBackgroundAndLightText();
         test.rendersGradientThemeWithModernReadableBackground();
+        test.rendersAuroraThemeWithModernReadableBackground();
+        test.rendersMistThemeWithModernReadableBackground();
+        test.rendersDuskThemeWithModernReadableBackground();
         test.includesRenderedMarkdownBodyUnchanged();
         test.appliesFontSizeToParagraphText();
         test.appliesFontSizeToHeadings();
@@ -56,6 +59,33 @@ public final class HtmlPageBuilderTest {
 
         TestAssertions.assertContains(page, "background:linear-gradient(135deg,#f7fbf8 0%,#dcefea 45%,#f4dedb 100%)", "Gradient theme must use a modern non-purple reading background");
         TestAssertions.assertContains(page, "color:#172121", "Gradient theme must keep dark readable text");
+    }
+
+    public void rendersAuroraThemeWithModernReadableBackground() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<h1>Title</h1>"),
+                ViewerTheme.aurora());
+
+        TestAssertions.assertContains(page, "background:linear-gradient(135deg,#f6fbf9 0%,#d8f0eb 38%,#f7e6ee 100%)", "Aurora theme must use a soft modern reading background");
+        TestAssertions.assertContains(page, "color:#162321", "Aurora theme must keep dark readable text");
+    }
+
+    public void rendersMistThemeWithModernReadableBackground() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<h1>Title</h1>"),
+                ViewerTheme.mist());
+
+        TestAssertions.assertContains(page, "background:linear-gradient(135deg,#f3f8f7 0%,#e4efed 50%,#f7f4ef 100%)", "Mist theme must use a calm modern reading background");
+        TestAssertions.assertContains(page, "color:#1c2524", "Mist theme must keep dark readable text");
+    }
+
+    public void rendersDuskThemeWithModernReadableBackground() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<h1>Title</h1>"),
+                ViewerTheme.dusk());
+
+        TestAssertions.assertContains(page, "background:linear-gradient(135deg,#fbf6f3 0%,#efe3dc 45%,#dbe9e4 100%)", "Dusk theme must use a warm modern reading background");
+        TestAssertions.assertContains(page, "color:#241d1b", "Dusk theme must keep dark readable text");
     }
 
     public void includesRenderedMarkdownBodyUnchanged() {

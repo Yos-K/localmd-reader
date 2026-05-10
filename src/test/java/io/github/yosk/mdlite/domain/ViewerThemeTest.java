@@ -8,10 +8,16 @@ public final class ViewerThemeTest {
         darkThemeIsDark();
         amoledThemeIsDarkAndAmoled();
         gradientThemeIsNotDarkAndUsesGradientIdentity();
+        auroraThemeIsNotDarkAndUsesAuroraIdentity();
+        mistThemeIsNotDarkAndUsesMistIdentity();
+        duskThemeIsNotDarkAndUsesDuskIdentity();
         freeEntitlementCyclesBetweenLightAndDarkOnly();
         proEntitlementCyclesFromDarkToAmoled();
         proEntitlementCyclesFromAmoledToGradient();
-        proEntitlementCyclesFromGradientToLight();
+        proEntitlementCyclesFromGradientToAurora();
+        proEntitlementCyclesFromAuroraToMist();
+        proEntitlementCyclesFromMistToDusk();
+        proEntitlementCyclesFromDuskToLight();
     }
 
     private static void lightThemeIsNotDark() {
@@ -44,6 +50,27 @@ public final class ViewerThemeTest {
         TestAssertions.assertTrue(theme.isGradient(), "Gradient theme must expose its specific identity");
     }
 
+    private static void auroraThemeIsNotDarkAndUsesAuroraIdentity() {
+        ViewerTheme theme = ViewerTheme.aurora();
+
+        TestAssertions.assertFalse(theme.isDark(), "Aurora theme must keep light text contrast rules");
+        TestAssertions.assertTrue(theme.isAurora(), "Aurora theme must expose its specific identity");
+    }
+
+    private static void mistThemeIsNotDarkAndUsesMistIdentity() {
+        ViewerTheme theme = ViewerTheme.mist();
+
+        TestAssertions.assertFalse(theme.isDark(), "Mist theme must keep light text contrast rules");
+        TestAssertions.assertTrue(theme.isMist(), "Mist theme must expose its specific identity");
+    }
+
+    private static void duskThemeIsNotDarkAndUsesDuskIdentity() {
+        ViewerTheme theme = ViewerTheme.dusk();
+
+        TestAssertions.assertFalse(theme.isDark(), "Dusk theme must keep light text contrast rules");
+        TestAssertions.assertTrue(theme.isDusk(), "Dusk theme must expose its specific identity");
+    }
+
     private static void freeEntitlementCyclesBetweenLightAndDarkOnly() {
         ViewerTheme next = ViewerTheme.dark().next(FeatureEntitlement.free());
 
@@ -63,10 +90,28 @@ public final class ViewerThemeTest {
         TestAssertions.assertTrue(next.isGradient(), "Pro theme cycle must include Gradient after AMOLED");
     }
 
-    private static void proEntitlementCyclesFromGradientToLight() {
+    private static void proEntitlementCyclesFromGradientToAurora() {
         ViewerTheme next = ViewerTheme.gradient().next(FeatureEntitlement.pro());
 
-        TestAssertions.assertFalse(next.isDark(), "Pro theme cycle must return from Gradient to Light");
-        TestAssertions.assertFalse(next.isGradient(), "Light theme after Gradient must not keep gradient identity");
+        TestAssertions.assertTrue(next.isAurora(), "Pro theme cycle must include Aurora after Gradient");
+    }
+
+    private static void proEntitlementCyclesFromAuroraToMist() {
+        ViewerTheme next = ViewerTheme.aurora().next(FeatureEntitlement.pro());
+
+        TestAssertions.assertTrue(next.isMist(), "Pro theme cycle must include Mist after Aurora");
+    }
+
+    private static void proEntitlementCyclesFromMistToDusk() {
+        ViewerTheme next = ViewerTheme.mist().next(FeatureEntitlement.pro());
+
+        TestAssertions.assertTrue(next.isDusk(), "Pro theme cycle must include Dusk after Mist");
+    }
+
+    private static void proEntitlementCyclesFromDuskToLight() {
+        ViewerTheme next = ViewerTheme.dusk().next(FeatureEntitlement.pro());
+
+        TestAssertions.assertFalse(next.isDark(), "Pro theme cycle must return from Dusk to Light");
+        TestAssertions.assertFalse(next.isDusk(), "Light theme after Dusk must not keep Dusk identity");
     }
 }

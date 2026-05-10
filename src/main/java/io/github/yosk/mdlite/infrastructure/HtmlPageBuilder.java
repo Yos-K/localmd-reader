@@ -15,27 +15,25 @@ public final class HtmlPageBuilder {
     public static String buildPage(SafeHtml body, ViewerTheme theme, FontSize fontSize) {
         ViewerTheme safeTheme = theme == null ? ViewerTheme.light() : theme;
         FontSize safeFontSize = fontSize == null ? FontSize.defaultSize() : fontSize;
-        String background = safeTheme.isGradient()
-                ? "linear-gradient(135deg,#f7fbf8 0%,#dcefea 45%,#f4dedb 100%)"
-                : (safeTheme.isAmoled() ? "#000000" : (safeTheme.isDark() ? "#101414" : "#f8fbfa"));
-        String tableBackground = safeTheme.isGradient() ? "#f7fbf8" : background;
-        String surface = safeTheme.isGradient() ? "#ffffff" : (safeTheme.isAmoled() ? "#080c0b" : (safeTheme.isDark() ? "#1b2423" : "#ffffff"));
-        String surfaceAlt = safeTheme.isGradient() ? "#e9f3ef" : (safeTheme.isAmoled() ? "#101817" : (safeTheme.isDark() ? "#25302f" : "#eef5f3"));
-        String text = safeTheme.isAmoled() ? "#f2f7f5" : (safeTheme.isDark() ? "#edf5f2" : "#172121");
-        String muted = safeTheme.isAmoled() ? "#9fb2ae" : (safeTheme.isDark() ? "#a7bbb7" : "#566664");
-        String primary = safeTheme.isGradient() ? "#0d756d" : (safeTheme.isAmoled() ? "#35b8a8" : (safeTheme.isDark() ? "#2a9d8f" : "#006d77"));
-        String link = safeTheme.isGradient() ? "#0b6f87" : (safeTheme.isAmoled() ? "#8ad9ed" : (safeTheme.isDark() ? "#7ccbe0" : "#0b6f87"));
-        String codeBackground = safeTheme.isGradient() ? "#e6eeee" : (safeTheme.isAmoled() ? "#101817" : (safeTheme.isDark() ? "#25302f" : "#e6eeee"));
+        String background = background(safeTheme);
+        String tableBackground = tableBackground(safeTheme);
+        String surface = surface(safeTheme);
+        String surfaceAlt = surfaceAlt(safeTheme);
+        String text = text(safeTheme);
+        String muted = muted(safeTheme);
+        String primary = primary(safeTheme);
+        String link = link(safeTheme);
+        String codeBackground = codeBackground(safeTheme);
         String codeKeyword = safeTheme.isAmoled() ? "#9bdcff" : (safeTheme.isDark() ? "#90d7ff" : "#0b5cad");
         String codeLiteral = safeTheme.isAmoled() ? "#f5c681" : (safeTheme.isDark() ? "#f3bd76" : "#8f4b00");
         String codeString = safeTheme.isAmoled() ? "#b0e69b" : (safeTheme.isDark() ? "#a7d98f" : "#3f6f1f");
         String codeCommand = safeTheme.isAmoled() ? "#dacbff" : (safeTheme.isDark() ? "#d4c5ff" : "#5c4da8");
-        String border = safeTheme.isGradient() ? "#b8d0cb" : (safeTheme.isAmoled() ? "#263432" : (safeTheme.isDark() ? "#3c4b49" : "#c9d8d5"));
+        String border = border(safeTheme);
         String tableScrollHint = safeTheme.isAmoled() ? "#6f9b93" : (safeTheme.isDark() ? "#80a8a1" : border);
         String tableScrollHintRgb = safeTheme.isAmoled() ? "111,155,147" : (safeTheme.isDark() ? "128,168,161" : "201,216,213");
         String tableScrollHintOpacity = safeTheme.isDark() ? "0.55" : "0.45";
-        String tableBackgroundRgb = safeTheme.isAmoled() ? "0,0,0" : (safeTheme.isDark() ? "16,20,20" : "248,251,250");
-        String tableScrollbarTrack = safeTheme.isAmoled() ? "#080c0b" : (safeTheme.isDark() ? "#1b2423" : "#eef5f3");
+        String tableBackgroundRgb = tableBackgroundRgb(safeTheme);
+        String tableScrollbarTrack = tableScrollbarTrack(safeTheme);
         int bodyFontSize = safeFontSize.sp();
         int h1FontSize = bodyFontSize + 8;
         int h2FontSize = bodyFontSize + 5;
@@ -83,5 +81,167 @@ public final class HtmlPageBuilder {
                 + "</style></head><body>"
                 + body.value()
                 + "</body></html>";
+    }
+
+    private static String background(ViewerTheme theme) {
+        if (theme.isGradient()) {
+            return "linear-gradient(135deg,#f7fbf8 0%,#dcefea 45%,#f4dedb 100%)";
+        }
+        if (theme.isAurora()) {
+            return "linear-gradient(135deg,#f6fbf9 0%,#d8f0eb 38%,#f7e6ee 100%)";
+        }
+        if (theme.isMist()) {
+            return "linear-gradient(135deg,#f3f8f7 0%,#e4efed 50%,#f7f4ef 100%)";
+        }
+        if (theme.isDusk()) {
+            return "linear-gradient(135deg,#fbf6f3 0%,#efe3dc 45%,#dbe9e4 100%)";
+        }
+        return theme.isAmoled() ? "#000000" : (theme.isDark() ? "#101414" : "#f8fbfa");
+    }
+
+    private static String tableBackground(ViewerTheme theme) {
+        if (theme.isGradient()) {
+            return "#f7fbf8";
+        }
+        if (theme.isAurora()) {
+            return "#f6fbf9";
+        }
+        if (theme.isMist()) {
+            return "#f3f8f7";
+        }
+        if (theme.isDusk()) {
+            return "#fbf6f3";
+        }
+        return background(theme);
+    }
+
+    private static String surface(ViewerTheme theme) {
+        return theme.isAmoled() ? "#080c0b" : (theme.isDark() ? "#1b2423" : "#ffffff");
+    }
+
+    private static String surfaceAlt(ViewerTheme theme) {
+        if (theme.isGradient()) {
+            return "#e9f3ef";
+        }
+        if (theme.isAurora()) {
+            return "#e8f6f1";
+        }
+        if (theme.isMist()) {
+            return "#e5eeec";
+        }
+        if (theme.isDusk()) {
+            return "#f0e8e3";
+        }
+        return theme.isAmoled() ? "#101817" : (theme.isDark() ? "#25302f" : "#eef5f3");
+    }
+
+    private static String text(ViewerTheme theme) {
+        if (theme.isAurora()) {
+            return "#162321";
+        }
+        if (theme.isMist()) {
+            return "#1c2524";
+        }
+        if (theme.isDusk()) {
+            return "#241d1b";
+        }
+        return theme.isAmoled() ? "#f2f7f5" : (theme.isDark() ? "#edf5f2" : "#172121");
+    }
+
+    private static String muted(ViewerTheme theme) {
+        if (theme.isAurora()) {
+            return "#58706b";
+        }
+        if (theme.isMist()) {
+            return "#5f6f6d";
+        }
+        if (theme.isDusk()) {
+            return "#6d5d57";
+        }
+        return theme.isAmoled() ? "#9fb2ae" : (theme.isDark() ? "#a7bbb7" : "#566664");
+    }
+
+    private static String primary(ViewerTheme theme) {
+        if (theme.isGradient()) {
+            return "#0d756d";
+        }
+        if (theme.isAurora()) {
+            return "#087f73";
+        }
+        if (theme.isMist()) {
+            return "#437b74";
+        }
+        if (theme.isDusk()) {
+            return "#735f5b";
+        }
+        return theme.isAmoled() ? "#35b8a8" : (theme.isDark() ? "#2a9d8f" : "#006d77");
+    }
+
+    private static String link(ViewerTheme theme) {
+        if (theme.isAurora()) {
+            return "#0a6f86";
+        }
+        if (theme.isMist()) {
+            return "#386f7a";
+        }
+        if (theme.isDusk()) {
+            return "#70595f";
+        }
+        return theme.isAmoled() ? "#8ad9ed" : (theme.isDark() ? "#7ccbe0" : "#0b6f87");
+    }
+
+    private static String codeBackground(ViewerTheme theme) {
+        if (theme.isAmoled()) {
+            return "#101817";
+        }
+        if (theme.isDark()) {
+            return "#25302f";
+        }
+        if (theme.isDusk()) {
+            return "#f0e8e3";
+        }
+        return "#e6eeee";
+    }
+
+    private static String border(ViewerTheme theme) {
+        if (theme.isGradient()) {
+            return "#b8d0cb";
+        }
+        if (theme.isAurora()) {
+            return "#b6d8d0";
+        }
+        if (theme.isMist()) {
+            return "#c2d1ce";
+        }
+        if (theme.isDusk()) {
+            return "#d8c8c0";
+        }
+        return theme.isAmoled() ? "#263432" : (theme.isDark() ? "#3c4b49" : "#c9d8d5");
+    }
+
+    private static String tableBackgroundRgb(ViewerTheme theme) {
+        if (theme.isAurora()) {
+            return "246,251,249";
+        }
+        if (theme.isMist()) {
+            return "243,248,247";
+        }
+        if (theme.isDusk()) {
+            return "251,246,243";
+        }
+        return theme.isAmoled() ? "0,0,0" : (theme.isDark() ? "16,20,20" : "248,251,250");
+    }
+
+    private static String tableScrollbarTrack(ViewerTheme theme) {
+        if (theme.isAurora()) {
+            return "#e8f6f1";
+        }
+        if (theme.isMist()) {
+            return "#e5eeec";
+        }
+        if (theme.isDusk()) {
+            return "#f0e8e3";
+        }
+        return theme.isAmoled() ? "#080c0b" : (theme.isDark() ? "#1b2423" : "#eef5f3");
     }
 }

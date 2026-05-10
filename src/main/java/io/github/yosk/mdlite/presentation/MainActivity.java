@@ -119,6 +119,33 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final int GRADIENT_PRIMARY_DARK = 0xff0f3d3e;
     private static final int GRADIENT_BORDER = 0xffb8d0cb;
     private static final int GRADIENT_MESSAGE = 0xffe9f3ef;
+    private static final int AURORA_BACKGROUND = 0xfff6fbf9;
+    private static final int AURORA_SURFACE = 0xffffffff;
+    private static final int AURORA_SURFACE_ALT = 0xffe8f6f1;
+    private static final int AURORA_TEXT = 0xff162321;
+    private static final int AURORA_MUTED = 0xff58706b;
+    private static final int AURORA_PRIMARY = 0xff087f73;
+    private static final int AURORA_PRIMARY_DARK = 0xff0e4a45;
+    private static final int AURORA_BORDER = 0xffb6d8d0;
+    private static final int AURORA_MESSAGE = 0xffe8f6f1;
+    private static final int MIST_BACKGROUND = 0xfff3f8f7;
+    private static final int MIST_SURFACE = 0xffffffff;
+    private static final int MIST_SURFACE_ALT = 0xffe5eeec;
+    private static final int MIST_TEXT = 0xff1c2524;
+    private static final int MIST_MUTED = 0xff5f6f6d;
+    private static final int MIST_PRIMARY = 0xff437b74;
+    private static final int MIST_PRIMARY_DARK = 0xff244f4a;
+    private static final int MIST_BORDER = 0xffc2d1ce;
+    private static final int MIST_MESSAGE = 0xffe5eeec;
+    private static final int DUSK_BACKGROUND = 0xfffbf6f3;
+    private static final int DUSK_SURFACE = 0xffffffff;
+    private static final int DUSK_SURFACE_ALT = 0xfff0e8e3;
+    private static final int DUSK_TEXT = 0xff241d1b;
+    private static final int DUSK_MUTED = 0xff6d5d57;
+    private static final int DUSK_PRIMARY = 0xff735f5b;
+    private static final int DUSK_PRIMARY_DARK = 0xff463936;
+    private static final int DUSK_BORDER = 0xffd8c8c0;
+    private static final int DUSK_MESSAGE = 0xfff0e8e3;
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
@@ -850,8 +877,29 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return currentLanguage.isJapanese() ? "グラデーションテーマ" : "Gradient theme";
     }
 
+    private String auroraThemeLabel() {
+        return currentLanguage.isJapanese() ? "オーロラテーマ" : "Aurora theme";
+    }
+
+    private String mistThemeLabel() {
+        return currentLanguage.isJapanese() ? "ミストテーマ" : "Mist theme";
+    }
+
+    private String duskThemeLabel() {
+        return currentLanguage.isJapanese() ? "夕暮れテーマ" : "Dusk theme";
+    }
+
     private String nextThemeLabel() {
         ViewerTheme nextTheme = currentTheme.next(featureEntitlement);
+        if (nextTheme.isAurora()) {
+            return auroraThemeLabel();
+        }
+        if (nextTheme.isMist()) {
+            return mistThemeLabel();
+        }
+        if (nextTheme.isDusk()) {
+            return duskThemeLabel();
+        }
         if (nextTheme.isGradient()) {
             return gradientThemeLabel();
         }
@@ -1035,39 +1083,147 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private int backgroundColor() {
-        return currentTheme.isGradient() ? GRADIENT_BACKGROUND : (currentTheme.isAmoled() ? AMOLED_BACKGROUND : (currentTheme.isDark() ? DARK_BACKGROUND : LIGHT_BACKGROUND));
+        if (currentTheme.isGradient()) {
+            return GRADIENT_BACKGROUND;
+        }
+        if (currentTheme.isAurora()) {
+            return AURORA_BACKGROUND;
+        }
+        if (currentTheme.isMist()) {
+            return MIST_BACKGROUND;
+        }
+        if (currentTheme.isDusk()) {
+            return DUSK_BACKGROUND;
+        }
+        return currentTheme.isAmoled() ? AMOLED_BACKGROUND : (currentTheme.isDark() ? DARK_BACKGROUND : LIGHT_BACKGROUND);
     }
 
     private int surfaceColor() {
-        return currentTheme.isGradient() ? GRADIENT_SURFACE : (currentTheme.isAmoled() ? AMOLED_SURFACE : (currentTheme.isDark() ? DARK_SURFACE : LIGHT_SURFACE));
+        if (currentTheme.isGradient()) {
+            return GRADIENT_SURFACE;
+        }
+        if (currentTheme.isAurora()) {
+            return AURORA_SURFACE;
+        }
+        if (currentTheme.isMist()) {
+            return MIST_SURFACE;
+        }
+        if (currentTheme.isDusk()) {
+            return DUSK_SURFACE;
+        }
+        return currentTheme.isAmoled() ? AMOLED_SURFACE : (currentTheme.isDark() ? DARK_SURFACE : LIGHT_SURFACE);
     }
 
     private int surfaceAltColor() {
-        return currentTheme.isGradient() ? GRADIENT_SURFACE_ALT : (currentTheme.isAmoled() ? AMOLED_SURFACE_ALT : (currentTheme.isDark() ? DARK_SURFACE_ALT : LIGHT_SURFACE_ALT));
+        if (currentTheme.isGradient()) {
+            return GRADIENT_SURFACE_ALT;
+        }
+        if (currentTheme.isAurora()) {
+            return AURORA_SURFACE_ALT;
+        }
+        if (currentTheme.isMist()) {
+            return MIST_SURFACE_ALT;
+        }
+        if (currentTheme.isDusk()) {
+            return DUSK_SURFACE_ALT;
+        }
+        return currentTheme.isAmoled() ? AMOLED_SURFACE_ALT : (currentTheme.isDark() ? DARK_SURFACE_ALT : LIGHT_SURFACE_ALT);
     }
 
     private int textColor() {
-        return currentTheme.isGradient() ? GRADIENT_TEXT : (currentTheme.isAmoled() ? AMOLED_TEXT : (currentTheme.isDark() ? DARK_TEXT : LIGHT_TEXT));
+        if (currentTheme.isGradient()) {
+            return GRADIENT_TEXT;
+        }
+        if (currentTheme.isAurora()) {
+            return AURORA_TEXT;
+        }
+        if (currentTheme.isMist()) {
+            return MIST_TEXT;
+        }
+        if (currentTheme.isDusk()) {
+            return DUSK_TEXT;
+        }
+        return currentTheme.isAmoled() ? AMOLED_TEXT : (currentTheme.isDark() ? DARK_TEXT : LIGHT_TEXT);
     }
 
     private int mutedColor() {
-        return currentTheme.isGradient() ? GRADIENT_MUTED : (currentTheme.isAmoled() ? AMOLED_MUTED : (currentTheme.isDark() ? DARK_MUTED : LIGHT_MUTED));
+        if (currentTheme.isGradient()) {
+            return GRADIENT_MUTED;
+        }
+        if (currentTheme.isAurora()) {
+            return AURORA_MUTED;
+        }
+        if (currentTheme.isMist()) {
+            return MIST_MUTED;
+        }
+        if (currentTheme.isDusk()) {
+            return DUSK_MUTED;
+        }
+        return currentTheme.isAmoled() ? AMOLED_MUTED : (currentTheme.isDark() ? DARK_MUTED : LIGHT_MUTED);
     }
 
     private int primaryColor() {
-        return currentTheme.isGradient() ? GRADIENT_PRIMARY : (currentTheme.isAmoled() ? AMOLED_PRIMARY : (currentTheme.isDark() ? DARK_PRIMARY : LIGHT_PRIMARY));
+        if (currentTheme.isGradient()) {
+            return GRADIENT_PRIMARY;
+        }
+        if (currentTheme.isAurora()) {
+            return AURORA_PRIMARY;
+        }
+        if (currentTheme.isMist()) {
+            return MIST_PRIMARY;
+        }
+        if (currentTheme.isDusk()) {
+            return DUSK_PRIMARY;
+        }
+        return currentTheme.isAmoled() ? AMOLED_PRIMARY : (currentTheme.isDark() ? DARK_PRIMARY : LIGHT_PRIMARY);
     }
 
     private int primaryStrongColor() {
-        return currentTheme.isGradient() ? GRADIENT_PRIMARY_DARK : (currentTheme.isAmoled() ? AMOLED_PRIMARY_DARK : (currentTheme.isDark() ? DARK_PRIMARY_DARK : LIGHT_PRIMARY_DARK));
+        if (currentTheme.isGradient()) {
+            return GRADIENT_PRIMARY_DARK;
+        }
+        if (currentTheme.isAurora()) {
+            return AURORA_PRIMARY_DARK;
+        }
+        if (currentTheme.isMist()) {
+            return MIST_PRIMARY_DARK;
+        }
+        if (currentTheme.isDusk()) {
+            return DUSK_PRIMARY_DARK;
+        }
+        return currentTheme.isAmoled() ? AMOLED_PRIMARY_DARK : (currentTheme.isDark() ? DARK_PRIMARY_DARK : LIGHT_PRIMARY_DARK);
     }
 
     private int borderColor() {
-        return currentTheme.isGradient() ? GRADIENT_BORDER : (currentTheme.isAmoled() ? AMOLED_BORDER : (currentTheme.isDark() ? DARK_BORDER : LIGHT_BORDER));
+        if (currentTheme.isGradient()) {
+            return GRADIENT_BORDER;
+        }
+        if (currentTheme.isAurora()) {
+            return AURORA_BORDER;
+        }
+        if (currentTheme.isMist()) {
+            return MIST_BORDER;
+        }
+        if (currentTheme.isDusk()) {
+            return DUSK_BORDER;
+        }
+        return currentTheme.isAmoled() ? AMOLED_BORDER : (currentTheme.isDark() ? DARK_BORDER : LIGHT_BORDER);
     }
 
     private int messageColor() {
-        return currentTheme.isGradient() ? GRADIENT_MESSAGE : (currentTheme.isAmoled() ? AMOLED_MESSAGE : (currentTheme.isDark() ? DARK_MESSAGE : LIGHT_MESSAGE));
+        if (currentTheme.isGradient()) {
+            return GRADIENT_MESSAGE;
+        }
+        if (currentTheme.isAurora()) {
+            return AURORA_MESSAGE;
+        }
+        if (currentTheme.isMist()) {
+            return MIST_MESSAGE;
+        }
+        if (currentTheme.isDusk()) {
+            return DUSK_MESSAGE;
+        }
+        return currentTheme.isAmoled() ? AMOLED_MESSAGE : (currentTheme.isDark() ? DARK_MESSAGE : LIGHT_MESSAGE);
     }
 
     private OpenDocumentTabs restoreOpenTabsOrInitial() {
