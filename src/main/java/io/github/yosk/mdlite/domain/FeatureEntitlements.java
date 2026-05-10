@@ -5,6 +5,12 @@ public final class FeatureEntitlements {
     }
 
     public static FeatureEntitlement currentClosedTestingRelease() {
-        return FeatureEntitlement.free();
+        return current(StaticEntitlementSource.free());
+    }
+
+    public static FeatureEntitlement current(EntitlementSource source) {
+        EntitlementSource safeSource = source == null ? StaticEntitlementSource.free() : source;
+        FeatureEntitlement entitlement = safeSource.currentEntitlement();
+        return entitlement == null ? FeatureEntitlement.free() : entitlement;
     }
 }

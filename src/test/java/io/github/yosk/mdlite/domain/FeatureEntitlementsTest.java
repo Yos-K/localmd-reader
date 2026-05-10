@@ -6,6 +6,8 @@ public final class FeatureEntitlementsTest {
     public static void main(String[] args) {
         currentClosedTestingReleaseUsesFreeEntitlement();
         currentClosedTestingReleaseKeepsProFeaturesLocked();
+        currentUsesProvidedProEntitlementSource();
+        missingEntitlementSourceFallsBackToFreeEntitlement();
     }
 
     private static void currentClosedTestingReleaseUsesFreeEntitlement() {
@@ -23,5 +25,19 @@ public final class FeatureEntitlementsTest {
         TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES), "Closed testing entitlement must keep extra themes locked");
         TestAssertions.assertFalse(entitlement.allows(ViewerFeature.MERMAID_RENDERING), "Closed testing entitlement must keep Mermaid rendering locked");
         TestAssertions.assertFalse(entitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS), "Closed testing entitlement must keep custom gesture shortcuts locked");
+    }
+
+    private static void currentUsesProvidedProEntitlementSource() {
+        FeatureEntitlement entitlement = FeatureEntitlements.current(StaticEntitlementSource.pro());
+
+        TestAssertions.assertTrue(entitlement.isPro(), "Current entitlement must use the provided Pro source");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.CODE_HIGHLIGHTING), "Provided Pro source must unlock code highlighting");
+    }
+
+    private static void missingEntitlementSourceFallsBackToFreeEntitlement() {
+        FeatureEntitlement entitlement = FeatureEntitlements.current(null);
+
+        TestAssertions.assertFalse(entitlement.isPro(), "Missing entitlement source must fall back to Free");
+        TestAssertions.assertFalse(entitlement.allows(ViewerFeature.CODE_HIGHLIGHTING), "Missing entitlement source must keep Pro features locked");
     }
 }

@@ -29,12 +29,16 @@ import android.widget.TextView;
 import io.github.yosk.mdlite.domain.CodeHighlighting;
 import io.github.yosk.mdlite.domain.CodeHighlightingPolicy;
 import io.github.yosk.mdlite.domain.ControlsPlacement;
+import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
 import io.github.yosk.mdlite.domain.FontSize;
 import io.github.yosk.mdlite.domain.MarkdownFileOpenResult;
 import io.github.yosk.mdlite.domain.OpenDocumentTab;
 import io.github.yosk.mdlite.domain.OpenDocumentTabs;
+import io.github.yosk.mdlite.domain.ProFeatureCatalog;
+import io.github.yosk.mdlite.domain.ProFeaturePresentation;
+import io.github.yosk.mdlite.domain.ProFeaturePresentationItem;
 import io.github.yosk.mdlite.domain.RecentDocument;
 import io.github.yosk.mdlite.domain.RecentDocuments;
 import io.github.yosk.mdlite.domain.RestorableOpenTab;
@@ -99,8 +103,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
-    private final CodeHighlighting codeHighlighting =
-            CodeHighlightingPolicy.fromEntitlement(FeatureEntitlements.currentClosedTestingRelease());
+    private final FeatureEntitlement featureEntitlement = FeatureEntitlements.currentClosedTestingRelease();
+    private final CodeHighlighting codeHighlighting = CodeHighlightingPolicy.fromEntitlement(featureEntitlement);
 
     private WebView webView;
     private TextView messageView;
@@ -110,6 +114,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button themeButton;
     private Button languageButton;
     private Button controlsPlacementButton;
+    private Button proFeaturesButton;
     private Button privacyButton;
     private SwipeMenuLayout menuPanel;
     private LinearLayout root;
@@ -205,6 +210,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         controlsPlacementButton.setOnClickListener(this);
         styleMenuButton(controlsPlacementButton);
 
+        proFeaturesButton = new Button(this);
+        proFeaturesButton.setAllCaps(false);
+        proFeaturesButton.setOnClickListener(this);
+        styleMenuButton(proFeaturesButton);
+
         privacyButton = new Button(this);
         privacyButton.setAllCaps(false);
         privacyButton.setOnClickListener(this);
@@ -256,6 +266,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         infoSection = menuSection("");
         menuPanel.addView(infoSection, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(proFeaturesButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(privacyButton, new LinearLayout.LayoutParams(
@@ -349,6 +362,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
             updateLocalizedText();
             applyControlsPlacement();
             closeMenu();
+        } else if (view == proFeaturesButton) {
+            closeMenu();
+            showProFeaturesDialog();
         } else if (view == privacyButton) {
             closeMenu();
             showPrivacyPolicyDialog();
@@ -661,6 +677,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
         showInfoDialog(privacyTitle(), privacyMessage());
     }
 
+    private void showProFeaturesDialog() {
+        showInfoDialog(proFeaturesTitle(), proFeaturesMessage());
+    }
+
     private ControlsPlacement loadControlsPlacement() {
         SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
         return ControlsPlacement.fromStoredValue(prefs.getString(CONTROLS_PLACEMENT, ControlsPlacement.TOP_VALUE));
@@ -698,6 +718,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         readingSection.setText(currentLanguage.isJapanese() ? "表示" : "Reading");
         layoutSection.setText(currentLanguage.isJapanese() ? "レイアウト" : "Layout");
         infoSection.setText(currentLanguage.isJapanese() ? "情報" : "Info");
+        proFeaturesButton.setText(currentLanguage.isJapanese() ? "Pro機能" : "Pro features");
         privacyButton.setText(currentLanguage.isJapanese() ? "プライバシー" : "Privacy");
         if (controlsPlacement.isBottom()) {
             controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを上に移動" : "Move controls to top");
@@ -728,6 +749,39 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String privacyTitle() {
         return currentLanguage.isJapanese() ? "プライバシー" : "Privacy";
+    }
+
+    private String proFeaturesTitle() {
+        return currentLanguage.isJapanese() ? "Pro機能" : "Pro features";
+    }
+
+    private String proFeaturesMessage() {
+        ProFeaturePresentationItem[] items = ProFeaturePresentation.from(
+                featureEntitlement,
+                ProFeatureCatalog.initialFeatures());
+        StringBuilder message = new StringBuilder();
+        message.append(currentLanguage.isJapanese()
+                ? "現在の状態: " + (featureEntitlement.isPro() ? "Pro有効" : "Free")
+                : "Current status: " + (featureEntitlement.isPro() ? "Pro active" : "Free"));
+        for (int i = 0; i < items.length; i++) {
+            ProFeaturePresentationItem item = items[i];
+            message.append("\n\n")
+                    .append(item.isAvailable() ? "[Available] " : "[Locked] ")
+                    .append(item.title())
+                    .append("\n")
+                    .append(item.isAvailable()
+                            ? (currentLanguage.isJapanese() ? "利用可能" : item.statusLabel())
+                            : (currentLanguage.isJapanese() ? "ロック中" : item.statusLabel()))
+                    .append(" - ")
+                    .append(item.description());
+        }
+        if (!featureEntitlement.isPro()) {
+            message.append("\n\n")
+                    .append(currentLanguage.isJapanese()
+                            ? "購入導線はまだ準備中です。"
+                            : "Purchase flow is not connected yet.");
+        }
+        return message.toString();
     }
 
     private String privacyMessage() {
@@ -921,6 +975,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         styleMenuButton(themeButton);
         styleMenuButton(languageButton);
         styleMenuButton(controlsPlacementButton);
+        styleMenuButton(proFeaturesButton);
         styleMenuButton(privacyButton);
         applyMenuSectionTheme();
     }
