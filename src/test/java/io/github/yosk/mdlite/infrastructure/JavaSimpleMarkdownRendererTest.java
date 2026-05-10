@@ -1,6 +1,7 @@
 package io.github.yosk.mdlite.infrastructure;
 
 import io.github.yosk.mdlite.domain.SafeHtml;
+import io.github.yosk.mdlite.domain.CodeHighlighting;
 
 public final class JavaSimpleMarkdownRendererTest {
     public static void main(String[] args) {
@@ -15,6 +16,10 @@ public final class JavaSimpleMarkdownRendererTest {
         test.rendersFencedCodeBlockWithLanguageInfoAsCodeBlock();
         test.rendersSafeLanguageClassForFencedCodeBlock();
         test.doesNotRenderUnsafeLanguageClassForFencedCodeBlock();
+        test.defaultRendererKeepsJavaCodeFencePlainForFreeReading();
+        test.syntaxHighlightedRendererHighlightsJavaKeywordsInFencedCodeBlock();
+        test.syntaxHighlightedRendererEscapesRawHtmlBeforeHighlightingCode();
+        test.syntaxHighlightedRendererLeavesUnknownLanguagesAsPlainEscapedCode();
         test.rendersInlineCodeWithEscapedContent();
         test.rendersHttpsMarkdownLinkAsSafeAnchor();
         test.rendersHttpMarkdownLinkAsSafeAnchor();
@@ -103,6 +108,43 @@ public final class JavaSimpleMarkdownRendererTest {
 
         assertContains(html.value(), "<pre><code>", "unsafe language info must fall back to plain code block");
         assertNotContains(html.value(), "onclick", "unsafe language info must not be emitted");
+    }
+
+    public void defaultRendererKeepsJavaCodeFencePlainForFreeReading() {
+        SafeHtml html = renderer.render("```java\npublic final class Note {}\n```");
+
+        assertContains(html.value(), "public final class Note {}", "Free rendering must keep Java code readable as plain escaped text");
+        assertNotContains(html.value(), "code-keyword", "Free rendering must not apply Pro syntax highlighting");
+    }
+
+    public void syntaxHighlightedRendererHighlightsJavaKeywordsInFencedCodeBlock() {
+        SafeHtml html = renderer.render(
+                "```java\npublic final class Note {\n  return true;\n}\n```",
+                CodeHighlighting.syntaxHighlighted());
+
+        assertContains(html.value(), "<span class=\"code-keyword\">public</span>", "Pro highlighting must mark Java access keywords");
+        assertContains(html.value(), "<span class=\"code-keyword\">final</span>", "Pro highlighting must mark Java modifier keywords");
+        assertContains(html.value(), "<span class=\"code-keyword\">class</span>", "Pro highlighting must mark Java declaration keywords");
+        assertContains(html.value(), "<span class=\"code-keyword\">return</span>", "Pro highlighting must mark Java flow keywords");
+        assertContains(html.value(), "<span class=\"code-literal\">true</span>", "Pro highlighting must mark Java boolean literals");
+    }
+
+    public void syntaxHighlightedRendererEscapesRawHtmlBeforeHighlightingCode() {
+        SafeHtml html = renderer.render(
+                "```java\npublic String html = \"<script>\";\n```",
+                CodeHighlighting.syntaxHighlighted());
+
+        assertContains(html.value(), "&lt;script&gt;", "Pro highlighting must still escape raw HTML inside code");
+        assertNotContains(html.value(), "<script>", "Pro highlighting must not emit raw script tags from code");
+    }
+
+    public void syntaxHighlightedRendererLeavesUnknownLanguagesAsPlainEscapedCode() {
+        SafeHtml html = renderer.render(
+                "```unknown\npublic <tag>\n```",
+                CodeHighlighting.syntaxHighlighted());
+
+        assertContains(html.value(), "public &lt;tag&gt;", "Unknown languages must stay plain and escaped");
+        assertNotContains(html.value(), "code-keyword", "Unknown languages must not receive Java highlighting");
     }
 
     public void rendersInlineCodeWithEscapedContent() {

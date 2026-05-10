@@ -1,5 +1,6 @@
 package io.github.yosk.mdlite.infrastructure;
 
+import io.github.yosk.mdlite.domain.CodeHighlighting;
 import io.github.yosk.mdlite.domain.SafeHtml;
 
 public final class JavaSimpleMarkdownRenderer {
@@ -9,10 +10,16 @@ public final class JavaSimpleMarkdownRenderer {
     private static final int LIST_CHECKLIST = 3;
 
     public SafeHtml render(String markdown) {
+        return render(markdown, CodeHighlighting.plain());
+    }
+
+    public SafeHtml render(String markdown, CodeHighlighting codeHighlighting) {
+        CodeHighlighting safeCodeHighlighting = codeHighlighting == null ? CodeHighlighting.plain() : codeHighlighting;
         String source = markdown == null ? "" : markdown;
         StringBuilder html = new StringBuilder();
         String[] lines = source.split("\\r?\\n", -1);
         boolean inCodeBlock = false;
+        String codeBlockLanguage = "";
         StringBuilder paragraph = new StringBuilder();
         int openList = LIST_NONE;
 
@@ -22,17 +29,19 @@ public final class JavaSimpleMarkdownRenderer {
                 if (inCodeBlock) {
                     html.append("</code></pre>");
                     inCodeBlock = false;
+                    codeBlockLanguage = "";
                 } else {
                     flushParagraph(html, paragraph);
                     openList = closeList(html, openList);
                     html.append(openCodeBlockHtml(line));
                     inCodeBlock = true;
+                    codeBlockLanguage = codeFenceLanguage(line);
                 }
                 continue;
             }
 
             if (inCodeBlock) {
-                html.append(escapeHtml(line)).append('\n');
+                html.append(renderCodeBlockLine(line, codeBlockLanguage, safeCodeHighlighting)).append('\n');
                 continue;
             }
 
@@ -134,6 +143,16 @@ public final class JavaSimpleMarkdownRenderer {
         flushParagraph(html, paragraph);
 
         return SafeHtml.fromTrustedRendererOutput(html.toString());
+    }
+
+    private static String renderCodeBlockLine(String line, String language, CodeHighlighting codeHighlighting) {
+        if (!codeHighlighting.isEnabled()) {
+            return escapeHtml(line);
+        }
+        if (!"java".equals(language)) {
+            return escapeHtml(line);
+        }
+        return JavaCodeHighlighter.highlightLine(line);
     }
 
     private static boolean isFenceLine(String line) {
