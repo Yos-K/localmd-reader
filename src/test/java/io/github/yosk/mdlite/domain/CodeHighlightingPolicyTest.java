@@ -1,5 +1,7 @@
 package io.github.yosk.mdlite.domain;
 
+import io.github.yosk.mdlite.testing.TestAssertions;
+
 public final class CodeHighlightingPolicyTest {
     public static void main(String[] args) {
         CodeHighlightingPolicyTest test = new CodeHighlightingPolicyTest();
@@ -11,30 +13,18 @@ public final class CodeHighlightingPolicyTest {
     public void freeEntitlementKeepsCodeHighlightingPlain() {
         CodeHighlighting highlighting = CodeHighlightingPolicy.fromEntitlement(FeatureEntitlement.free());
 
-        assertFalse(highlighting.isEnabled(), "Free entitlement must keep code blocks plain");
+        TestAssertions.assertFalse(highlighting.isEnabled(), "Free entitlement must keep code blocks plain");
     }
 
     public void proEntitlementEnablesSyntaxHighlightedCodeBlocks() {
         CodeHighlighting highlighting = CodeHighlightingPolicy.fromEntitlement(FeatureEntitlement.pro());
 
-        assertTrue(highlighting.isEnabled(), "Pro entitlement must enable syntax-highlighted code blocks");
+        TestAssertions.assertTrue(highlighting.isEnabled(), "Pro entitlement must enable syntax-highlighted code blocks");
     }
 
     public void missingEntitlementFallsBackToPlainCodeHighlighting() {
         CodeHighlighting highlighting = CodeHighlightingPolicy.fromEntitlement(null);
 
-        assertFalse(highlighting.isEnabled(), "Missing entitlement must keep the viewer usable as Free");
-    }
-
-    private static void assertTrue(boolean actual, String message) {
-        if (!actual) {
-            throw new AssertionError(message);
-        }
-    }
-
-    private static void assertFalse(boolean actual, String message) {
-        if (actual) {
-            throw new AssertionError(message);
-        }
+        TestAssertions.assertFalse(highlighting.isEnabled(), "Missing entitlement must keep the viewer usable as Free");
     }
 }

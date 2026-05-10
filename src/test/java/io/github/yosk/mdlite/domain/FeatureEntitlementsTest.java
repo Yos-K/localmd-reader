@@ -1,5 +1,7 @@
 package io.github.yosk.mdlite.domain;
 
+import io.github.yosk.mdlite.testing.TestAssertions;
+
 public final class FeatureEntitlementsTest {
     public static void main(String[] args) {
         currentClosedTestingReleaseUsesFreeEntitlement();
@@ -9,29 +11,17 @@ public final class FeatureEntitlementsTest {
     private static void currentClosedTestingReleaseUsesFreeEntitlement() {
         FeatureEntitlement entitlement = FeatureEntitlements.currentClosedTestingRelease();
 
-        assertFalse(entitlement.isPro());
-        assertTrue(entitlement.allows(ViewerFeature.OPEN_LOCAL_MARKDOWN));
-        assertTrue(entitlement.allows(ViewerFeature.TABS));
+        TestAssertions.assertFalse(entitlement.isPro(), "Closed testing entitlement must not be Pro");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.OPEN_LOCAL_MARKDOWN), "Closed testing entitlement must allow opening local Markdown");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.TABS), "Closed testing entitlement must allow tabs");
     }
 
     private static void currentClosedTestingReleaseKeepsProFeaturesLocked() {
         FeatureEntitlement entitlement = FeatureEntitlements.currentClosedTestingRelease();
 
-        assertFalse(entitlement.allows(ViewerFeature.CODE_HIGHLIGHTING));
-        assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES));
-        assertFalse(entitlement.allows(ViewerFeature.MERMAID_RENDERING));
-        assertFalse(entitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS));
-    }
-
-    private static void assertTrue(boolean actual) {
-        if (!actual) {
-            throw new AssertionError("Expected true.");
-        }
-    }
-
-    private static void assertFalse(boolean actual) {
-        if (actual) {
-            throw new AssertionError("Expected false.");
-        }
+        TestAssertions.assertFalse(entitlement.allows(ViewerFeature.CODE_HIGHLIGHTING), "Closed testing entitlement must keep code highlighting locked");
+        TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES), "Closed testing entitlement must keep extra themes locked");
+        TestAssertions.assertFalse(entitlement.allows(ViewerFeature.MERMAID_RENDERING), "Closed testing entitlement must keep Mermaid rendering locked");
+        TestAssertions.assertFalse(entitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS), "Closed testing entitlement must keep custom gesture shortcuts locked");
     }
 }

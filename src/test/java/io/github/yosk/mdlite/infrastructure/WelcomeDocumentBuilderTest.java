@@ -1,6 +1,7 @@
 package io.github.yosk.mdlite.infrastructure;
 
 import io.github.yosk.mdlite.domain.ViewerLanguage;
+import io.github.yosk.mdlite.testing.TestAssertions;
 
 public final class WelcomeDocumentBuilderTest {
     public static void main(String[] args) {
@@ -13,32 +14,20 @@ public final class WelcomeDocumentBuilderTest {
     public void englishWelcomeDocument_hasPrimaryOpenActionThatCanBeHandledByTheApp() {
         String html = WelcomeDocumentBuilder.build(ViewerLanguage.english()).value();
 
-        assertContains(html, "href=\"" + WelcomeDocumentBuilder.OPEN_MARKDOWN_URL + "\"");
-        assertContains(html, "Open Markdown file");
+        TestAssertions.assertContains(html, "href=\"" + WelcomeDocumentBuilder.OPEN_MARKDOWN_URL + "\"", "English welcome document must link the primary open action");
+        TestAssertions.assertContains(html, "Open Markdown file", "English welcome document must label the primary open action");
     }
 
     public void japaneseWelcomeDocument_hasPrimaryOpenActionThatCanBeHandledByTheApp() {
         String html = WelcomeDocumentBuilder.build(ViewerLanguage.japanese()).value();
 
-        assertContains(html, "href=\"" + WelcomeDocumentBuilder.OPEN_MARKDOWN_URL + "\"");
-        assertContains(html, "Markdownファイルを開く");
+        TestAssertions.assertContains(html, "href=\"" + WelcomeDocumentBuilder.OPEN_MARKDOWN_URL + "\"", "Japanese welcome document must link the primary open action");
+        TestAssertions.assertContains(html, "Markdownファイルを開く", "Japanese welcome document must label the primary open action");
     }
 
     public void welcomeDocument_doesNotPresentOpenAsANonClickableCard() {
         String html = WelcomeDocumentBuilder.build(ViewerLanguage.english()).value();
 
-        assertDoesNotContain(html, "<div class=\"welcome-card\"><strong>Open</strong>");
-    }
-
-    private static void assertContains(String actual, String expected) {
-        if (!actual.contains(expected)) {
-            throw new AssertionError("Expected to contain: " + expected + "\nActual: " + actual);
-        }
-    }
-
-    private static void assertDoesNotContain(String actual, String unexpected) {
-        if (actual.contains(unexpected)) {
-            throw new AssertionError("Expected not to contain: " + unexpected + "\nActual: " + actual);
-        }
+        TestAssertions.assertNotContains(html, "<div class=\"welcome-card\"><strong>Open</strong>", "Welcome document must not present Open as a non-clickable card");
     }
 }
