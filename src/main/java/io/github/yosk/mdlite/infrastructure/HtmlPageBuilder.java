@@ -15,19 +15,22 @@ public final class HtmlPageBuilder {
     public static String buildPage(SafeHtml body, ViewerTheme theme, FontSize fontSize) {
         ViewerTheme safeTheme = theme == null ? ViewerTheme.light() : theme;
         FontSize safeFontSize = fontSize == null ? FontSize.defaultSize() : fontSize;
-        String background = safeTheme.isAmoled() ? "#000000" : (safeTheme.isDark() ? "#101414" : "#f8fbfa");
-        String surface = safeTheme.isAmoled() ? "#080c0b" : (safeTheme.isDark() ? "#1b2423" : "#ffffff");
-        String surfaceAlt = safeTheme.isAmoled() ? "#101817" : (safeTheme.isDark() ? "#25302f" : "#eef5f3");
+        String background = safeTheme.isGradient()
+                ? "linear-gradient(135deg,#f7fbf8 0%,#dcefea 45%,#f4dedb 100%)"
+                : (safeTheme.isAmoled() ? "#000000" : (safeTheme.isDark() ? "#101414" : "#f8fbfa"));
+        String tableBackground = safeTheme.isGradient() ? "#f7fbf8" : background;
+        String surface = safeTheme.isGradient() ? "#ffffff" : (safeTheme.isAmoled() ? "#080c0b" : (safeTheme.isDark() ? "#1b2423" : "#ffffff"));
+        String surfaceAlt = safeTheme.isGradient() ? "#e9f3ef" : (safeTheme.isAmoled() ? "#101817" : (safeTheme.isDark() ? "#25302f" : "#eef5f3"));
         String text = safeTheme.isAmoled() ? "#f2f7f5" : (safeTheme.isDark() ? "#edf5f2" : "#172121");
         String muted = safeTheme.isAmoled() ? "#9fb2ae" : (safeTheme.isDark() ? "#a7bbb7" : "#566664");
-        String primary = safeTheme.isAmoled() ? "#35b8a8" : (safeTheme.isDark() ? "#2a9d8f" : "#006d77");
-        String link = safeTheme.isAmoled() ? "#8ad9ed" : (safeTheme.isDark() ? "#7ccbe0" : "#0b6f87");
-        String codeBackground = safeTheme.isAmoled() ? "#101817" : (safeTheme.isDark() ? "#25302f" : "#e6eeee");
+        String primary = safeTheme.isGradient() ? "#0d756d" : (safeTheme.isAmoled() ? "#35b8a8" : (safeTheme.isDark() ? "#2a9d8f" : "#006d77"));
+        String link = safeTheme.isGradient() ? "#0b6f87" : (safeTheme.isAmoled() ? "#8ad9ed" : (safeTheme.isDark() ? "#7ccbe0" : "#0b6f87"));
+        String codeBackground = safeTheme.isGradient() ? "#e6eeee" : (safeTheme.isAmoled() ? "#101817" : (safeTheme.isDark() ? "#25302f" : "#e6eeee"));
         String codeKeyword = safeTheme.isAmoled() ? "#9bdcff" : (safeTheme.isDark() ? "#90d7ff" : "#0b5cad");
         String codeLiteral = safeTheme.isAmoled() ? "#f5c681" : (safeTheme.isDark() ? "#f3bd76" : "#8f4b00");
         String codeString = safeTheme.isAmoled() ? "#b0e69b" : (safeTheme.isDark() ? "#a7d98f" : "#3f6f1f");
         String codeCommand = safeTheme.isAmoled() ? "#dacbff" : (safeTheme.isDark() ? "#d4c5ff" : "#5c4da8");
-        String border = safeTheme.isAmoled() ? "#263432" : (safeTheme.isDark() ? "#3c4b49" : "#c9d8d5");
+        String border = safeTheme.isGradient() ? "#b8d0cb" : (safeTheme.isAmoled() ? "#263432" : (safeTheme.isDark() ? "#3c4b49" : "#c9d8d5"));
         String tableScrollHint = safeTheme.isAmoled() ? "#6f9b93" : (safeTheme.isDark() ? "#80a8a1" : border);
         String tableScrollHintRgb = safeTheme.isAmoled() ? "111,155,147" : (safeTheme.isDark() ? "128,168,161" : "201,216,213");
         String tableScrollHintOpacity = safeTheme.isDark() ? "0.55" : "0.45";
@@ -61,7 +64,7 @@ public final class HtmlPageBuilder {
                 + "li{margin:4px 0;}"
                 + "ul.checklist{list-style:none;padding-left:0;}"
                 + "ul.checklist input{margin-right:8px;}"
-                + ".table-scroll{overflow-x:auto;margin:0 0 16px;background:linear-gradient(to right," + background + " 30%,rgba(" + tableBackgroundRgb + ",0)),linear-gradient(to right,rgba(" + tableBackgroundRgb + ",0)," + background + " 70%) 100% 0,linear-gradient(to right,rgba(" + tableScrollHintRgb + "," + tableScrollHintOpacity + "),rgba(" + tableScrollHintRgb + ",0)),linear-gradient(to left,rgba(" + tableScrollHintRgb + "," + tableScrollHintOpacity + "),rgba(" + tableScrollHintRgb + ",0)) 100% 0;background-repeat:no-repeat;background-size:32px 100%,32px 100%,16px 100%,16px 100%;background-attachment:local,local,scroll,scroll;}"
+                + ".table-scroll{overflow-x:auto;margin:0 0 16px;background:linear-gradient(to right," + tableBackground + " 30%,rgba(" + tableBackgroundRgb + ",0)),linear-gradient(to right,rgba(" + tableBackgroundRgb + ",0)," + tableBackground + " 70%) 100% 0,linear-gradient(to right,rgba(" + tableScrollHintRgb + "," + tableScrollHintOpacity + "),rgba(" + tableScrollHintRgb + ",0)),linear-gradient(to left,rgba(" + tableScrollHintRgb + "," + tableScrollHintOpacity + "),rgba(" + tableScrollHintRgb + ",0)) 100% 0;background-repeat:no-repeat;background-size:32px 100%,32px 100%,16px 100%,16px 100%;background-attachment:local,local,scroll,scroll;}"
                 + ".table-scroll::-webkit-scrollbar{height:8px;}"
                 + ".table-scroll::-webkit-scrollbar-track{background:" + tableScrollbarTrack + ";}"
                 + ".table-scroll::-webkit-scrollbar-thumb{background:" + tableScrollHint + ";border-radius:4px;}"

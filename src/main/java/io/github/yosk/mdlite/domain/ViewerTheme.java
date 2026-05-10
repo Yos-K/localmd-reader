@@ -4,11 +4,12 @@ public final class ViewerTheme {
     private static final int LIGHT = 1;
     private static final int DARK = 2;
     private static final int AMOLED = 3;
+    private static final int GRADIENT = 4;
 
     private final int value;
 
     private ViewerTheme(int value) {
-        if (value != LIGHT && value != DARK && value != AMOLED) {
+        if (value != LIGHT && value != DARK && value != AMOLED && value != GRADIENT) {
             throw new IllegalArgumentException("unsupported viewer theme");
         }
         this.value = value;
@@ -26,12 +27,20 @@ public final class ViewerTheme {
         return new ViewerTheme(AMOLED);
     }
 
+    public static ViewerTheme gradient() {
+        return new ViewerTheme(GRADIENT);
+    }
+
     public boolean isDark() {
         return value == DARK || value == AMOLED;
     }
 
     public boolean isAmoled() {
         return value == AMOLED;
+    }
+
+    public boolean isGradient() {
+        return value == GRADIENT;
     }
 
     public ViewerTheme toggled() {
@@ -48,6 +57,9 @@ public final class ViewerTheme {
         }
         if (value == DARK) {
             return amoled();
+        }
+        if (value == AMOLED) {
+            return gradient();
         }
         return light();
     }

@@ -110,6 +110,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final int AMOLED_PRIMARY_DARK = 0xff8ad9ed;
     private static final int AMOLED_BORDER = 0xff263432;
     private static final int AMOLED_MESSAGE = 0xff101817;
+    private static final int GRADIENT_BACKGROUND = 0xfff7fbf8;
+    private static final int GRADIENT_SURFACE = 0xffffffff;
+    private static final int GRADIENT_SURFACE_ALT = 0xffe9f3ef;
+    private static final int GRADIENT_TEXT = 0xff172121;
+    private static final int GRADIENT_MUTED = 0xff566664;
+    private static final int GRADIENT_PRIMARY = 0xff0d756d;
+    private static final int GRADIENT_PRIMARY_DARK = 0xff0f3d3e;
+    private static final int GRADIENT_BORDER = 0xffb8d0cb;
+    private static final int GRADIENT_MESSAGE = 0xffe9f3ef;
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
@@ -837,8 +846,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return currentLanguage.isJapanese() ? "AMOLEDテーマ" : "AMOLED theme";
     }
 
+    private String gradientThemeLabel() {
+        return currentLanguage.isJapanese() ? "グラデーションテーマ" : "Gradient theme";
+    }
+
     private String nextThemeLabel() {
         ViewerTheme nextTheme = currentTheme.next(featureEntitlement);
+        if (nextTheme.isGradient()) {
+            return gradientThemeLabel();
+        }
         if (nextTheme.isAmoled()) {
             return amoledThemeLabel();
         }
@@ -1019,39 +1035,39 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private int backgroundColor() {
-        return currentTheme.isAmoled() ? AMOLED_BACKGROUND : (currentTheme.isDark() ? DARK_BACKGROUND : LIGHT_BACKGROUND);
+        return currentTheme.isGradient() ? GRADIENT_BACKGROUND : (currentTheme.isAmoled() ? AMOLED_BACKGROUND : (currentTheme.isDark() ? DARK_BACKGROUND : LIGHT_BACKGROUND));
     }
 
     private int surfaceColor() {
-        return currentTheme.isAmoled() ? AMOLED_SURFACE : (currentTheme.isDark() ? DARK_SURFACE : LIGHT_SURFACE);
+        return currentTheme.isGradient() ? GRADIENT_SURFACE : (currentTheme.isAmoled() ? AMOLED_SURFACE : (currentTheme.isDark() ? DARK_SURFACE : LIGHT_SURFACE));
     }
 
     private int surfaceAltColor() {
-        return currentTheme.isAmoled() ? AMOLED_SURFACE_ALT : (currentTheme.isDark() ? DARK_SURFACE_ALT : LIGHT_SURFACE_ALT);
+        return currentTheme.isGradient() ? GRADIENT_SURFACE_ALT : (currentTheme.isAmoled() ? AMOLED_SURFACE_ALT : (currentTheme.isDark() ? DARK_SURFACE_ALT : LIGHT_SURFACE_ALT));
     }
 
     private int textColor() {
-        return currentTheme.isAmoled() ? AMOLED_TEXT : (currentTheme.isDark() ? DARK_TEXT : LIGHT_TEXT);
+        return currentTheme.isGradient() ? GRADIENT_TEXT : (currentTheme.isAmoled() ? AMOLED_TEXT : (currentTheme.isDark() ? DARK_TEXT : LIGHT_TEXT));
     }
 
     private int mutedColor() {
-        return currentTheme.isAmoled() ? AMOLED_MUTED : (currentTheme.isDark() ? DARK_MUTED : LIGHT_MUTED);
+        return currentTheme.isGradient() ? GRADIENT_MUTED : (currentTheme.isAmoled() ? AMOLED_MUTED : (currentTheme.isDark() ? DARK_MUTED : LIGHT_MUTED));
     }
 
     private int primaryColor() {
-        return currentTheme.isAmoled() ? AMOLED_PRIMARY : (currentTheme.isDark() ? DARK_PRIMARY : LIGHT_PRIMARY);
+        return currentTheme.isGradient() ? GRADIENT_PRIMARY : (currentTheme.isAmoled() ? AMOLED_PRIMARY : (currentTheme.isDark() ? DARK_PRIMARY : LIGHT_PRIMARY));
     }
 
     private int primaryStrongColor() {
-        return currentTheme.isAmoled() ? AMOLED_PRIMARY_DARK : (currentTheme.isDark() ? DARK_PRIMARY_DARK : LIGHT_PRIMARY_DARK);
+        return currentTheme.isGradient() ? GRADIENT_PRIMARY_DARK : (currentTheme.isAmoled() ? AMOLED_PRIMARY_DARK : (currentTheme.isDark() ? DARK_PRIMARY_DARK : LIGHT_PRIMARY_DARK));
     }
 
     private int borderColor() {
-        return currentTheme.isAmoled() ? AMOLED_BORDER : (currentTheme.isDark() ? DARK_BORDER : LIGHT_BORDER);
+        return currentTheme.isGradient() ? GRADIENT_BORDER : (currentTheme.isAmoled() ? AMOLED_BORDER : (currentTheme.isDark() ? DARK_BORDER : LIGHT_BORDER));
     }
 
     private int messageColor() {
-        return currentTheme.isAmoled() ? AMOLED_MESSAGE : (currentTheme.isDark() ? DARK_MESSAGE : LIGHT_MESSAGE);
+        return currentTheme.isGradient() ? GRADIENT_MESSAGE : (currentTheme.isAmoled() ? AMOLED_MESSAGE : (currentTheme.isDark() ? DARK_MESSAGE : LIGHT_MESSAGE));
     }
 
     private OpenDocumentTabs restoreOpenTabsOrInitial() {
