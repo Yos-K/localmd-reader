@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -33,6 +34,7 @@ import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
 import io.github.yosk.mdlite.domain.FontSize;
+import io.github.yosk.mdlite.domain.GestureShortcutAction;
 import io.github.yosk.mdlite.domain.MarkdownFileOpenResult;
 import io.github.yosk.mdlite.domain.OpenDocumentTab;
 import io.github.yosk.mdlite.domain.OpenDocumentTabs;
@@ -45,6 +47,7 @@ import io.github.yosk.mdlite.domain.RestorableOpenTab;
 import io.github.yosk.mdlite.domain.RestorableOpenTabs;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.ViewerLanguage;
+import io.github.yosk.mdlite.domain.ViewerFeature;
 import io.github.yosk.mdlite.domain.ViewerTheme;
 import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
 import io.github.yosk.mdlite.infrastructure.BuildEntitlementSource;
@@ -79,6 +82,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final String SETTINGS_PREFS = "viewer_settings";
     private static final String CONTROLS_PLACEMENT = "controls_placement";
     private static final String VIEWER_LANGUAGE = "viewer_language";
+    private static final String DOUBLE_TAP_SHORTCUT = "double_tap_shortcut";
     private static final String WELCOME_URI = "app://welcome";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
@@ -160,6 +164,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button themeButton;
     private Button languageButton;
     private Button controlsPlacementButton;
+    private Button doubleTapShortcutButton;
     private Button proFeaturesButton;
     private Button privacyButton;
     private SwipeMenuLayout menuPanel;
@@ -180,10 +185,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private ControlsPlacement controlsPlacement;
     private ViewerLanguage currentLanguage = ViewerLanguage.english();
     private ViewerTheme currentTheme = ViewerTheme.light();
+    private GestureShortcutAction doubleTapShortcut = GestureShortcutAction.off();
     private FontSize currentFontSize = FontSize.defaultSize();
     private FontSize renderedFontSize = FontSize.defaultSize();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
     private ScaleGestureDetector fontScaleGestureDetector;
+    private GestureDetector shortcutGestureDetector;
     private float accumulatedPinchScale = 1f;
     private boolean trackingEdgeSwipe;
     private float edgeSwipeStartX;
@@ -197,6 +204,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         controlsPlacement = loadControlsPlacement();
         currentLanguage = loadViewerLanguage();
+        doubleTapShortcut = loadDoubleTapShortcut();
 
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -256,6 +264,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         controlsPlacementButton.setOnClickListener(this);
         styleMenuButton(controlsPlacementButton);
 
+        doubleTapShortcutButton = new Button(this);
+        doubleTapShortcutButton.setAllCaps(false);
+        doubleTapShortcutButton.setOnClickListener(this);
+        styleMenuButton(doubleTapShortcutButton);
+
         proFeaturesButton = new Button(this);
         proFeaturesButton.setAllCaps(false);
         proFeaturesButton.setOnClickListener(this);
@@ -310,6 +323,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuPanel.addView(controlsPlacementButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(doubleTapShortcutButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
         infoSection = menuSection("");
         menuPanel.addView(infoSection, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -350,7 +366,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         webView = new WebView(this);
         configureWebView(webView);
         fontScaleGestureDetector = new ScaleGestureDetector(this, new FontScaleGestureListener(this));
-        webView.setOnTouchListener(new FontScaleTouchListener(this));
+        shortcutGestureDetector = new GestureDetector(this, new ShortcutGestureListener(this));
+        webView.setOnTouchListener(new ViewerTouchListener(this));
         updateLocalizedText();
         openTabs = restoreOpenTabsOrInitial();
         applyNativeTheme();
@@ -407,6 +424,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
             saveControlsPlacement(controlsPlacement);
             updateLocalizedText();
             applyControlsPlacement();
+            closeMenu();
+        } else if (view == doubleTapShortcutButton) {
+            doubleTapShortcut = doubleTapShortcut.next(featureEntitlement);
+            saveDoubleTapShortcut(doubleTapShortcut);
+            updateLocalizedText();
             closeMenu();
         } else if (view == proFeaturesButton) {
             closeMenu();
@@ -751,6 +773,22 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 .apply();
     }
 
+    private GestureShortcutAction loadDoubleTapShortcut() {
+        SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
+        GestureShortcutAction stored = GestureShortcutAction.fromStoredValue(prefs.getString(DOUBLE_TAP_SHORTCUT, "off"));
+        if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
+            return GestureShortcutAction.off();
+        }
+        return stored;
+    }
+
+    private void saveDoubleTapShortcut(GestureShortcutAction action) {
+        getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE)
+                .edit()
+                .putString(DOUBLE_TAP_SHORTCUT, action.storedValue())
+                .apply();
+    }
+
     private void updateLocalizedText() {
         menuButton.setText(currentLanguage.isJapanese() ? "☰ メニュー" : "☰ Menu");
         menuButton.setContentDescription(currentLanguage.isJapanese() ? "メニューを開く" : "Open menu");
@@ -771,6 +809,24 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } else {
             controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを下に移動" : "Move controls to bottom");
         }
+        doubleTapShortcutButton.setText(doubleTapShortcutLabel());
+    }
+
+    private String doubleTapShortcutLabel() {
+        String prefix = currentLanguage.isJapanese() ? "ダブルタップ: " : "Double tap: ";
+        if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
+            return prefix + (currentLanguage.isJapanese() ? "Proで利用可能" : "Pro only");
+        }
+        if (doubleTapShortcut.isOpenMenu()) {
+            return prefix + (currentLanguage.isJapanese() ? "メニューを開く" : "Open menu");
+        }
+        if (doubleTapShortcut.isNextTheme()) {
+            return prefix + (currentLanguage.isJapanese() ? "テーマ切り替え" : "Next theme");
+        }
+        if (doubleTapShortcut.isMoveControls()) {
+            return prefix + (currentLanguage.isJapanese() ? "操作バー移動" : "Move controls");
+        }
+        return prefix + (currentLanguage.isJapanese() ? "オフ" : "Off");
     }
 
     private String recentFilesTitle() {
@@ -1431,6 +1487,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         settings.setDatabaseEnabled(false);
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(false);
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setDisplayZoomControls(false);
         webView.setWebViewClient(new AppLinkClient(this));
     }
 
@@ -1507,9 +1566,36 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return !WELCOME_URI.equals(tab.uri());
     }
 
-    private boolean handleFontScaleTouch(MotionEvent event) {
+    private boolean handleViewerTouch(MotionEvent event) {
         fontScaleGestureDetector.onTouchEvent(event);
+        shortcutGestureDetector.onTouchEvent(event);
         return event.getPointerCount() > 1 || fontScaleGestureDetector.isInProgress();
+    }
+
+    private boolean handleDoubleTapShortcut() {
+        if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
+            return false;
+        }
+        if (doubleTapShortcut.isOpenMenu()) {
+            openMenu();
+            return true;
+        }
+        if (doubleTapShortcut.isNextTheme()) {
+            currentTheme = currentTheme.next(featureEntitlement);
+            updateLocalizedText();
+            applyNativeTheme();
+            renderTabs();
+            renderCurrentDocument();
+            return true;
+        }
+        if (doubleTapShortcut.isMoveControls()) {
+            controlsPlacement = controlsPlacement.toggled();
+            saveControlsPlacement(controlsPlacement);
+            updateLocalizedText();
+            applyControlsPlacement();
+            return true;
+        }
+        return false;
     }
 
     private void changeFontSizeByPinch(float scaleFactor) {
@@ -1659,16 +1745,29 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
     }
 
-    private static final class FontScaleTouchListener implements View.OnTouchListener {
+    private static final class ViewerTouchListener implements View.OnTouchListener {
         private final MainActivity activity;
 
-        private FontScaleTouchListener(MainActivity activity) {
+        private ViewerTouchListener(MainActivity activity) {
             this.activity = activity;
         }
 
         @Override
         public boolean onTouch(View view, MotionEvent event) {
-            return activity.handleFontScaleTouch(event);
+            return activity.handleViewerTouch(event);
+        }
+    }
+
+    private static final class ShortcutGestureListener extends GestureDetector.SimpleOnGestureListener {
+        private final MainActivity activity;
+
+        private ShortcutGestureListener(MainActivity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent event) {
+            return activity.handleDoubleTapShortcut();
         }
     }
 
