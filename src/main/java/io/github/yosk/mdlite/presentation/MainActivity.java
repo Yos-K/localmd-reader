@@ -47,6 +47,7 @@ import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.ViewerLanguage;
 import io.github.yosk.mdlite.domain.ViewerTheme;
 import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
+import io.github.yosk.mdlite.infrastructure.BuildEntitlementSource;
 import io.github.yosk.mdlite.infrastructure.JavaSimpleMarkdownRenderer;
 import io.github.yosk.mdlite.infrastructure.WelcomeDocumentBuilder;
 import java.io.ByteArrayOutputStream;
@@ -103,7 +104,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
-    private final FeatureEntitlement featureEntitlement = FeatureEntitlements.currentClosedTestingRelease();
+    private final FeatureEntitlement featureEntitlement = FeatureEntitlements.current(BuildEntitlementSource.current());
     private final CodeHighlighting codeHighlighting = CodeHighlightingPolicy.fromEntitlement(featureEntitlement);
 
     private WebView webView;

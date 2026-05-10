@@ -46,7 +46,19 @@ OUT_BUNDLE="${MDLITE_RELEASE_AAB:-$RELEASE_BUILD/mdlite-reader-$VERSION_NAME-rel
 
 rm -rf "$BUILD"
 mkdir -p "$BUILD/compiled" "$BUILD/generated" "$BUILD/classes" "$BUILD/dex" "$RELEASE_BUILD"
+mkdir -p "$BUILD/generated/io/github/yosk/mdlite/infrastructure"
+cat > "$BUILD/generated/io/github/yosk/mdlite/infrastructure/BuildConfig.java" <<EOF
+package io.github.yosk.mdlite.infrastructure;
+
+public final class BuildConfig {
+    public static final boolean PRO_FEATURES_ENABLED = false;
+
+    private BuildConfig() {
+    }
+}
+EOF
 find "$ROOT/src/main/java" -name "*.java" > "$BUILD/main-sources.txt"
+find "$BUILD/generated" -name "*.java" >> "$BUILD/main-sources.txt"
 
 "$AAPT2" compile --dir "$ROOT/src/main/res" -o "$BUILD/compiled/resources.zip"
 "$AAPT2" link \

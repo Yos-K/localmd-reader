@@ -8,8 +8,20 @@ TEST_CLASSES="$BUILD/test"
 
 rm -rf "$BUILD"
 mkdir -p "$MAIN_CLASSES" "$TEST_CLASSES"
+mkdir -p "$BUILD/generated/io/github/yosk/mdlite/infrastructure"
+cat > "$BUILD/generated/io/github/yosk/mdlite/infrastructure/BuildConfig.java" <<EOF
+package io.github.yosk.mdlite.infrastructure;
+
+public final class BuildConfig {
+    public static final boolean PRO_FEATURES_ENABLED = false;
+
+    private BuildConfig() {
+    }
+}
+EOF
 
 find "$ROOT/src/main/java" -name "*.java" ! -path "*/presentation/*" > "$BUILD/main-sources.txt"
+find "$BUILD/generated" -name "*.java" >> "$BUILD/main-sources.txt"
 find "$ROOT/src/test/java" -name "*.java" > "$BUILD/test-sources.txt"
 
 if [ -s "$BUILD/main-sources.txt" ]; then
@@ -19,6 +31,7 @@ javac -source 8 -target 8 -cp "$MAIN_CLASSES" -d "$TEST_CLASSES" @"$BUILD/test-s
 
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.infrastructure.JavaSimpleMarkdownRendererTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.infrastructure.HtmlPageBuilderTest
+java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.infrastructure.BuildEntitlementSourceTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.FileTypeDetectorTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.FileSizePolicyTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.MarkdownFileOpenResultTest

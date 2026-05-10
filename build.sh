@@ -29,7 +29,19 @@ KEYSTORE="$ROOT/debug.keystore"
 
 rm -rf "$BUILD"
 mkdir -p "$BUILD/compiled" "$BUILD/generated" "$BUILD/classes" "$BUILD/dex"
+mkdir -p "$BUILD/generated/io/github/yosk/mdlite/infrastructure"
+cat > "$BUILD/generated/io/github/yosk/mdlite/infrastructure/BuildConfig.java" <<EOF
+package io.github.yosk.mdlite.infrastructure;
+
+public final class BuildConfig {
+    public static final boolean PRO_FEATURES_ENABLED = ${MDLITE_DEBUG_PRO_FEATURES:-false};
+
+    private BuildConfig() {
+    }
+}
+EOF
 find "$ROOT/src/main/java" -name "*.java" > "$BUILD/main-sources.txt"
+find "$BUILD/generated" -name "*.java" >> "$BUILD/main-sources.txt"
 
 "$AAPT2" compile --dir "$ROOT/src/main/res" -o "$BUILD/compiled/resources.zip"
 "$AAPT2" link \
