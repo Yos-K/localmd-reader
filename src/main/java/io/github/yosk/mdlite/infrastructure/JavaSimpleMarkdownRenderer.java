@@ -149,10 +149,16 @@ public final class JavaSimpleMarkdownRenderer {
         if (!codeHighlighting.isEnabled()) {
             return escapeHtml(line);
         }
-        if (!"java".equals(language)) {
-            return escapeHtml(line);
+        if ("java".equals(language)) {
+            return JavaCodeHighlighter.highlightLine(line);
         }
-        return JavaCodeHighlighter.highlightLine(line);
+        if ("json".equals(language)) {
+            return JsonCodeHighlighter.highlightLine(line);
+        }
+        if ("sh".equals(language) || "bash".equals(language) || "shell".equals(language)) {
+            return ShellCodeHighlighter.highlightLine(line);
+        }
+        return escapeHtml(line);
     }
 
     private static boolean isFenceLine(String line) {

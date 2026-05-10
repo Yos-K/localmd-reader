@@ -25,6 +25,8 @@ public final class HtmlPageBuilder {
         String codeBackground = safeTheme.isDark() ? "#25302f" : "#e6eeee";
         String codeKeyword = safeTheme.isDark() ? "#90d7ff" : "#0b5cad";
         String codeLiteral = safeTheme.isDark() ? "#f3bd76" : "#8f4b00";
+        String codeString = safeTheme.isDark() ? "#a7d98f" : "#3f6f1f";
+        String codeCommand = safeTheme.isDark() ? "#d4c5ff" : "#5c4da8";
         String border = safeTheme.isDark() ? "#3c4b49" : "#c9d8d5";
         String tableScrollHint = safeTheme.isDark() ? "#80a8a1" : border;
         String tableScrollHintRgb = safeTheme.isDark() ? "128,168,161" : "201,216,213";
@@ -52,6 +54,8 @@ public final class HtmlPageBuilder {
                 + "pre code{background:transparent;padding:0;}"
                 + ".code-keyword{color:" + codeKeyword + ";font-weight:700;}"
                 + ".code-literal{color:" + codeLiteral + ";font-weight:700;}"
+                + ".code-string{color:" + codeString + ";}"
+                + ".code-command{color:" + codeCommand + ";font-weight:700;}"
                 + "a{color:" + link + ";text-decoration:underline;}"
                 + "blockquote{border-left:4px solid " + border + ";margin:0 0 16px;padding:6px 0 6px 14px;}"
                 + "li{margin:4px 0;}"

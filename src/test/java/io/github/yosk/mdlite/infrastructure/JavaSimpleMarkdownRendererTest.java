@@ -19,6 +19,8 @@ public final class JavaSimpleMarkdownRendererTest {
         test.doesNotRenderUnsafeLanguageClassForFencedCodeBlock();
         test.defaultRendererKeepsJavaCodeFencePlainForFreeReading();
         test.syntaxHighlightedRendererHighlightsJavaKeywordsInFencedCodeBlock();
+        test.syntaxHighlightedRendererHighlightsJsonStructuralTokensInFencedCodeBlock();
+        test.syntaxHighlightedRendererHighlightsShellCommandsInFencedCodeBlock();
         test.syntaxHighlightedRendererEscapesRawHtmlBeforeHighlightingCode();
         test.syntaxHighlightedRendererLeavesUnknownLanguagesAsPlainEscapedCode();
         test.rendersInlineCodeWithEscapedContent();
@@ -128,6 +130,25 @@ public final class JavaSimpleMarkdownRendererTest {
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">class</span>", "Pro highlighting must mark Java declaration keywords");
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">return</span>", "Pro highlighting must mark Java flow keywords");
         TestAssertions.assertContains(html.value(), "<span class=\"code-literal\">true</span>", "Pro highlighting must mark Java boolean literals");
+    }
+
+    public void syntaxHighlightedRendererHighlightsJsonStructuralTokensInFencedCodeBlock() {
+        SafeHtml html = renderer.render(
+                "```json\n{\"name\":\"LocalMD\",\"enabled\":true}\n```",
+                CodeHighlighting.syntaxHighlighted());
+
+        TestAssertions.assertContains(html.value(), "<span class=\"code-string\">&quot;name&quot;</span>", "Pro highlighting must mark JSON object keys as strings");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-string\">&quot;LocalMD&quot;</span>", "Pro highlighting must mark JSON string values");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-literal\">true</span>", "Pro highlighting must mark JSON boolean literals");
+    }
+
+    public void syntaxHighlightedRendererHighlightsShellCommandsInFencedCodeBlock() {
+        SafeHtml html = renderer.render(
+                "```sh\ncd ~/AndroidDev\nscripts/build-signed-release.sh aab\n```",
+                CodeHighlighting.syntaxHighlighted());
+
+        TestAssertions.assertContains(html.value(), "<span class=\"code-command\">cd</span>", "Pro highlighting must mark shell built-in commands");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-command\">scripts/build-signed-release.sh</span>", "Pro highlighting must mark shell command paths");
     }
 
     public void syntaxHighlightedRendererEscapesRawHtmlBeforeHighlightingCode() {
