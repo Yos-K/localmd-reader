@@ -10,6 +10,7 @@ public final class HtmlPageBuilderTest {
         HtmlPageBuilderTest test = new HtmlPageBuilderTest();
         test.rendersLightThemeWithLightBackgroundAndDarkText();
         test.rendersDarkThemeWithDarkBackgroundAndLightText();
+        test.rendersAmoledThemeWithBlackBackgroundAndLightText();
         test.includesRenderedMarkdownBodyUnchanged();
         test.appliesFontSizeToParagraphText();
         test.appliesFontSizeToHeadings();
@@ -36,6 +37,15 @@ public final class HtmlPageBuilderTest {
 
         TestAssertions.assertContains(page, "background:#101414", "dark theme must use dark page background");
         TestAssertions.assertContains(page, "color:#edf5f2", "dark theme must use light text");
+    }
+
+    public void rendersAmoledThemeWithBlackBackgroundAndLightText() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<h1>Title</h1>"),
+                ViewerTheme.amoled());
+
+        TestAssertions.assertContains(page, "background:#000000", "AMOLED theme must use a true black page background");
+        TestAssertions.assertContains(page, "color:#f2f7f5", "AMOLED theme must keep high-contrast light text");
     }
 
     public void includesRenderedMarkdownBodyUnchanged() {

@@ -101,6 +101,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final int DARK_PRIMARY_DARK = 0xff7ccbe0;
     private static final int DARK_BORDER = 0xff3c4b49;
     private static final int DARK_MESSAGE = 0xff25302f;
+    private static final int AMOLED_BACKGROUND = 0xff000000;
+    private static final int AMOLED_SURFACE = 0xff080c0b;
+    private static final int AMOLED_SURFACE_ALT = 0xff101817;
+    private static final int AMOLED_TEXT = 0xfff2f7f5;
+    private static final int AMOLED_MUTED = 0xff9fb2ae;
+    private static final int AMOLED_PRIMARY = 0xff35b8a8;
+    private static final int AMOLED_PRIMARY_DARK = 0xff8ad9ed;
+    private static final int AMOLED_BORDER = 0xff263432;
+    private static final int AMOLED_MESSAGE = 0xff101817;
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
@@ -341,7 +350,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             closeMenu();
             showRecentDocuments();
         } else if (view == themeButton) {
-            currentTheme = currentTheme.toggled();
+            currentTheme = currentTheme.next(featureEntitlement);
             updateLocalizedText();
             applyNativeTheme();
             closeMenu();
@@ -712,7 +721,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         appTitle.setText("LocalMD Reader");
         openButton.setText(currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
         recentButton.setText(recentFilesTitle());
-        themeButton.setText(currentTheme.isDark() ? lightThemeLabel() : darkThemeLabel());
+        themeButton.setText(nextThemeLabel());
         languageButton.setText(currentLanguage.isJapanese() ? "Switch to English" : "日本語に切り替え");
         menuTitle.setText("LocalMD Reader");
         filesSection.setText(currentLanguage.isJapanese() ? "ファイル" : "Files");
@@ -822,6 +831,18 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String lightThemeLabel() {
         return currentLanguage.isJapanese() ? "ライトテーマ" : "Light theme";
+    }
+
+    private String amoledThemeLabel() {
+        return currentLanguage.isJapanese() ? "AMOLEDテーマ" : "AMOLED theme";
+    }
+
+    private String nextThemeLabel() {
+        ViewerTheme nextTheme = currentTheme.next(featureEntitlement);
+        if (nextTheme.isAmoled()) {
+            return amoledThemeLabel();
+        }
+        return nextTheme.isDark() ? darkThemeLabel() : lightThemeLabel();
     }
 
     private void applyControlsPlacement() {
@@ -998,39 +1019,39 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private int backgroundColor() {
-        return currentTheme.isDark() ? DARK_BACKGROUND : LIGHT_BACKGROUND;
+        return currentTheme.isAmoled() ? AMOLED_BACKGROUND : (currentTheme.isDark() ? DARK_BACKGROUND : LIGHT_BACKGROUND);
     }
 
     private int surfaceColor() {
-        return currentTheme.isDark() ? DARK_SURFACE : LIGHT_SURFACE;
+        return currentTheme.isAmoled() ? AMOLED_SURFACE : (currentTheme.isDark() ? DARK_SURFACE : LIGHT_SURFACE);
     }
 
     private int surfaceAltColor() {
-        return currentTheme.isDark() ? DARK_SURFACE_ALT : LIGHT_SURFACE_ALT;
+        return currentTheme.isAmoled() ? AMOLED_SURFACE_ALT : (currentTheme.isDark() ? DARK_SURFACE_ALT : LIGHT_SURFACE_ALT);
     }
 
     private int textColor() {
-        return currentTheme.isDark() ? DARK_TEXT : LIGHT_TEXT;
+        return currentTheme.isAmoled() ? AMOLED_TEXT : (currentTheme.isDark() ? DARK_TEXT : LIGHT_TEXT);
     }
 
     private int mutedColor() {
-        return currentTheme.isDark() ? DARK_MUTED : LIGHT_MUTED;
+        return currentTheme.isAmoled() ? AMOLED_MUTED : (currentTheme.isDark() ? DARK_MUTED : LIGHT_MUTED);
     }
 
     private int primaryColor() {
-        return currentTheme.isDark() ? DARK_PRIMARY : LIGHT_PRIMARY;
+        return currentTheme.isAmoled() ? AMOLED_PRIMARY : (currentTheme.isDark() ? DARK_PRIMARY : LIGHT_PRIMARY);
     }
 
     private int primaryStrongColor() {
-        return currentTheme.isDark() ? DARK_PRIMARY_DARK : LIGHT_PRIMARY_DARK;
+        return currentTheme.isAmoled() ? AMOLED_PRIMARY_DARK : (currentTheme.isDark() ? DARK_PRIMARY_DARK : LIGHT_PRIMARY_DARK);
     }
 
     private int borderColor() {
-        return currentTheme.isDark() ? DARK_BORDER : LIGHT_BORDER;
+        return currentTheme.isAmoled() ? AMOLED_BORDER : (currentTheme.isDark() ? DARK_BORDER : LIGHT_BORDER);
     }
 
     private int messageColor() {
-        return currentTheme.isDark() ? DARK_MESSAGE : LIGHT_MESSAGE;
+        return currentTheme.isAmoled() ? AMOLED_MESSAGE : (currentTheme.isDark() ? DARK_MESSAGE : LIGHT_MESSAGE);
     }
 
     private OpenDocumentTabs restoreOpenTabsOrInitial() {
