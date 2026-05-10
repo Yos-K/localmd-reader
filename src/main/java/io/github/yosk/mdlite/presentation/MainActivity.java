@@ -26,7 +26,10 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import io.github.yosk.mdlite.domain.CodeHighlighting;
+import io.github.yosk.mdlite.domain.CodeHighlightingPolicy;
 import io.github.yosk.mdlite.domain.ControlsPlacement;
+import io.github.yosk.mdlite.domain.FeatureEntitlements;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
 import io.github.yosk.mdlite.domain.FontSize;
 import io.github.yosk.mdlite.domain.MarkdownFileOpenResult;
@@ -96,6 +99,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
+    private final CodeHighlighting codeHighlighting =
+            CodeHighlightingPolicy.fromEntitlement(FeatureEntitlements.currentClosedTestingRelease());
 
     private WebView webView;
     private TextView messageView;
@@ -476,7 +481,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
         try {
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
-            SafeHtml rendered = renderer.render(markdown);
+            SafeHtml rendered = renderer.render(markdown, codeHighlighting);
             openTabs = openTabs.open(OpenDocumentTab.of(readableFile.displayName(), uri.toString(), rendered));
             renderTabs();
             renderCurrentDocument();
@@ -506,7 +511,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
 
         MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
-        SafeHtml rendered = renderer.render(text);
+        SafeHtml rendered = renderer.render(text, codeHighlighting);
         String uri = "termux://open/" + Uri.encode(sourceId);
         openTabs = openTabs.open(OpenDocumentTab.of(readableFile.displayName(), uri, rendered));
         renderTabs();
@@ -1015,7 +1020,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
             MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
-            SafeHtml rendered = renderer.render(markdown);
+            SafeHtml rendered = renderer.render(markdown, codeHighlighting);
             return OpenDocumentTab.of(readableFile.displayName(), uri.toString(), rendered);
         } catch (IllegalArgumentException e) {
             return null;
