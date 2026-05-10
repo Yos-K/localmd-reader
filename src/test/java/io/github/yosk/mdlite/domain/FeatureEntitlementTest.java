@@ -46,9 +46,29 @@ public final class FeatureEntitlementTest {
     private static void proEntitlementAllowsEveryFreeAndProFeature() {
         FeatureEntitlement entitlement = FeatureEntitlement.pro();
 
-        for (ViewerFeature feature : ViewerFeature.values()) {
-            TestAssertions.assertTrue(entitlement.allows(feature), "Pro entitlement must allow every viewer feature");
-        }
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.OPEN_LOCAL_MARKDOWN), "Pro entitlement must allow local Markdown opening");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.OPEN_FROM_TERMUX), "Pro entitlement must allow Termux opening");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.LIGHT_AND_DARK_THEME), "Pro entitlement must allow light and dark theme");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.PINCH_FONT_SIZE), "Pro entitlement must allow pinch font size");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.TABS), "Pro entitlement must allow tabs");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.RESTORE_TABS), "Pro entitlement must allow tab restoration");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.RECENT_FILES_LIMITED), "Pro entitlement must allow limited recent files");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.CLEAR_RECENT_FILES), "Pro entitlement must allow clearing recent files");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.CONTROLS_PLACEMENT), "Pro entitlement must allow controls placement");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.ENGLISH_AND_JAPANESE_UI), "Pro entitlement must allow English and Japanese UI");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.PRIVACY_DIALOG), "Pro entitlement must allow privacy dialog");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.EXTRA_THEMES), "Pro entitlement must allow extra themes");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.MERMAID_RENDERING), "Pro entitlement must allow Mermaid rendering");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.CODE_HIGHLIGHTING), "Pro entitlement must allow code highlighting");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS), "Pro entitlement must allow custom gestures");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.TABLE_READING_ENHANCEMENTS), "Pro entitlement must allow table reading enhancements");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.EXTENDED_RECENT_FILES), "Pro entitlement must allow extended recent files");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.TABLE_OF_CONTENTS), "Pro entitlement must allow table of contents");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.HEADING_JUMP), "Pro entitlement must allow heading jump");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.FOLDER_BROWSING), "Pro entitlement must allow folder browsing");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.RELATIVE_LINKS), "Pro entitlement must allow relative links");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.RELATIVE_IMAGES), "Pro entitlement must allow relative images");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.EXPORT_OPTIONS), "Pro entitlement must allow export options");
     }
 
     private static void unknownFeatureCannotBeCreated() {

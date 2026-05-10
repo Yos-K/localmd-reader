@@ -25,31 +25,33 @@ public final class ProFeatureCatalogTest {
     private static void descriptorsExposeFeatureTitleAndDescriptionWithoutNulls() {
         ProFeatureDescriptor[] descriptors = ProFeatureCatalog.initialFeatures();
 
-        for (int i = 0; i < descriptors.length; i++) {
-            ProFeatureDescriptor descriptor = descriptors[i];
-            TestAssertions.assertNotEmpty(descriptor.title(), "title");
-            TestAssertions.assertNotEmpty(descriptor.description(), "description");
-        }
+        descriptorTextIsPresent(descriptors[0], "first descriptor");
+        descriptorTextIsPresent(descriptors[1], "second descriptor");
+        descriptorTextIsPresent(descriptors[2], "third descriptor");
+        descriptorTextIsPresent(descriptors[3], "fourth descriptor");
     }
 
     private static void freeEntitlementMarksEveryCatalogItemLocked() {
         ProFeatureDescriptor[] descriptors = ProFeatureCatalog.initialFeatures();
 
-        for (int i = 0; i < descriptors.length; i++) {
-            TestAssertions.assertFalse(
-                    descriptors[i].isAvailableFor(FeatureEntitlement.free()),
-                    "Free entitlement must keep Pro catalog items locked");
-        }
+        TestAssertions.assertFalse(descriptors[0].isAvailableFor(FeatureEntitlement.free()), "Free entitlement must keep first Pro catalog item locked");
+        TestAssertions.assertFalse(descriptors[1].isAvailableFor(FeatureEntitlement.free()), "Free entitlement must keep second Pro catalog item locked");
+        TestAssertions.assertFalse(descriptors[2].isAvailableFor(FeatureEntitlement.free()), "Free entitlement must keep third Pro catalog item locked");
+        TestAssertions.assertFalse(descriptors[3].isAvailableFor(FeatureEntitlement.free()), "Free entitlement must keep fourth Pro catalog item locked");
     }
 
     private static void proEntitlementMarksEveryCatalogItemAvailable() {
         ProFeatureDescriptor[] descriptors = ProFeatureCatalog.initialFeatures();
 
-        for (int i = 0; i < descriptors.length; i++) {
-            TestAssertions.assertTrue(
-                    descriptors[i].isAvailableFor(FeatureEntitlement.pro()),
-                    "Pro entitlement must allow every Pro catalog item");
-        }
+        TestAssertions.assertTrue(descriptors[0].isAvailableFor(FeatureEntitlement.pro()), "Pro entitlement must allow first Pro catalog item");
+        TestAssertions.assertTrue(descriptors[1].isAvailableFor(FeatureEntitlement.pro()), "Pro entitlement must allow second Pro catalog item");
+        TestAssertions.assertTrue(descriptors[2].isAvailableFor(FeatureEntitlement.pro()), "Pro entitlement must allow third Pro catalog item");
+        TestAssertions.assertTrue(descriptors[3].isAvailableFor(FeatureEntitlement.pro()), "Pro entitlement must allow fourth Pro catalog item");
+    }
+
+    private static void descriptorTextIsPresent(ProFeatureDescriptor descriptor, String label) {
+        TestAssertions.assertNotEmpty(descriptor.title(), label + " title");
+        TestAssertions.assertNotEmpty(descriptor.description(), label + " description");
     }
 
     private static void catalogLookupReturnsTheMatchingDescriptor() {

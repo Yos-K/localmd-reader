@@ -14,10 +14,10 @@ public final class ProFeaturePresentationTest {
                 ProFeaturePresentation.from(FeatureEntitlement.free(), ProFeatureCatalog.initialFeatures());
 
         TestAssertions.assertEquals(4, items.length, "presentation item count");
-        for (int i = 0; i < items.length; i++) {
-            TestAssertions.assertFalse(items[i].isAvailable(), "Free entitlement must lock Pro presentation items");
-            TestAssertions.assertEquals("Locked", items[i].statusLabel(), "Free status label");
-        }
+        lockedPresentationItem(items[0], "first item");
+        lockedPresentationItem(items[1], "second item");
+        lockedPresentationItem(items[2], "third item");
+        lockedPresentationItem(items[3], "fourth item");
     }
 
     private static void proEntitlementCreatesAvailableItemsForTheInitialCatalog() {
@@ -25,10 +25,20 @@ public final class ProFeaturePresentationTest {
                 ProFeaturePresentation.from(FeatureEntitlement.pro(), ProFeatureCatalog.initialFeatures());
 
         TestAssertions.assertEquals(4, items.length, "presentation item count");
-        for (int i = 0; i < items.length; i++) {
-            TestAssertions.assertTrue(items[i].isAvailable(), "Pro entitlement must make Pro presentation items available");
-            TestAssertions.assertEquals("Available", items[i].statusLabel(), "Pro status label");
-        }
+        availablePresentationItem(items[0], "first item");
+        availablePresentationItem(items[1], "second item");
+        availablePresentationItem(items[2], "third item");
+        availablePresentationItem(items[3], "fourth item");
+    }
+
+    private static void lockedPresentationItem(ProFeaturePresentationItem item, String label) {
+        TestAssertions.assertFalse(item.isAvailable(), "Free entitlement must lock Pro presentation " + label);
+        TestAssertions.assertEquals("Locked", item.statusLabel(), "Free status label for " + label);
+    }
+
+    private static void availablePresentationItem(ProFeaturePresentationItem item, String label) {
+        TestAssertions.assertTrue(item.isAvailable(), "Pro entitlement must make Pro presentation " + label + " available");
+        TestAssertions.assertEquals("Available", item.statusLabel(), "Pro status label for " + label);
     }
 
     private static void presentationItemsPreserveDescriptorText() {

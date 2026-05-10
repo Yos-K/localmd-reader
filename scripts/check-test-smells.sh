@@ -29,7 +29,7 @@ record_matches() {
   fi
 }
 
-record_matches "Conditional Test Logic: test source must not use if/while/switch." '^[[:space:]]*(if|while|switch)[[:space:]]*\('
+record_matches "Conditional Test Logic: test source must not use if/for/while/switch." '^[[:space:]]*(if|for|while|switch)[[:space:]]*\('
 record_matches "Sleepy Test: test source must not use Thread.sleep." 'Thread[.]sleep[[:space:]]*\('
 record_matches "Skip Testing: test source must not mention skipTests or maven.test.skip." 'skipTests|maven[.]test[.]skip'
 record_matches "Assertion Roulette: use TestAssertions with explicit messages, not raw AssertionError." 'new[[:space:]]+AssertionError[[:space:]]*\('

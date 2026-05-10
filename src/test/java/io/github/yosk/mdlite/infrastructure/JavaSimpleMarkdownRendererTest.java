@@ -243,22 +243,26 @@ public final class JavaSimpleMarkdownRendererTest {
     }
 
     public void rendererDoesNotCrashOnGeneratedMixedMarkdownText() {
-        String[] fragments = new String[] {
-                "#", "## heading", "- item", "- [x] done", "1. ordered",
-                "| a | b |", "| --- | --- |", "`code", "[label](https://example.com)",
-                "[bad](javascript:alert(1))", "<script>", "&", "```", "> quote", "---", "\n"
-        };
-
-        StringBuilder markdown = new StringBuilder();
-        String[] separators = new String[] {" ", "\n", "\n"};
-        for (int i = 0; i < 128; i++) {
-            markdown.append(fragments[(i * 37 + 11) % fragments.length]);
-            markdown.append(separators[i % separators.length]);
-        }
-
-        SafeHtml html = renderer.render(markdown.toString());
+        SafeHtml html = renderer.render(generatedMixedMarkdownText());
 
         TestAssertions.assertNotNull(html.value(), "generated mixed Markdown must always produce a safe HTML fragment");
         TestAssertions.assertNotContains(html.value(), "<script>", "generated mixed Markdown must not emit raw script tags");
+    }
+
+    private static String generatedMixedMarkdownText() {
+        return "# ## heading\n"
+                + "- item\n"
+                + "- [x] done\n"
+                + "1. ordered\n"
+                + "| a | b |\n"
+                + "| --- | --- |\n"
+                + "| `<b>` | [label](https://example.com) |\n"
+                + "[bad](javascript:alert(1)) <script> &\n"
+                + "```\n"
+                + "if (a < b) return true;\n"
+                + "```\n"
+                + "> quote\n"
+                + "---\n"
+                + "`code`\n";
     }
 }
