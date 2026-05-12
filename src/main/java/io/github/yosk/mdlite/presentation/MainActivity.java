@@ -80,84 +80,17 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final String OPEN_TABS_PREFS = "open_tabs";
     private static final String OPEN_TABS_ITEMS = "items";
     private static final String OPEN_TABS_ACTIVE_INDEX = "active_index";
-    private static final String SETTINGS_PREFS = "viewer_settings";
-    private static final String CONTROLS_PLACEMENT = "controls_placement";
-    private static final String VIEWER_LANGUAGE = "viewer_language";
-    private static final String DOUBLE_TAP_SHORTCUT = "double_tap_shortcut";
-    private static final String CIRCLE_GESTURE_SHORTCUT = "circle_gesture_shortcut";
     private static final String WELCOME_URI = "app://welcome";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
     private static final int MENU_SWIPE_MIN_DISTANCE_DP = 72;
-    private static final int LIGHT_BACKGROUND = 0xfff8fbfa;
-    private static final int LIGHT_SURFACE = 0xffffffff;
-    private static final int LIGHT_SURFACE_ALT = 0xffeef5f3;
-    private static final int LIGHT_TEXT = 0xff172121;
-    private static final int LIGHT_MUTED = 0xff566664;
-    private static final int LIGHT_PRIMARY = 0xff006d77;
-    private static final int LIGHT_PRIMARY_DARK = 0xff0f3d3e;
-    private static final int LIGHT_BORDER = 0xffc9d8d5;
-    private static final int LIGHT_MESSAGE = 0xffe6eeee;
-    private static final int DARK_BACKGROUND = 0xff101414;
-    private static final int DARK_SURFACE = 0xff1b2423;
-    private static final int DARK_SURFACE_ALT = 0xff25302f;
-    private static final int DARK_TEXT = 0xffedf5f2;
-    private static final int DARK_MUTED = 0xffa7bbb7;
-    private static final int DARK_PRIMARY = 0xff2a9d8f;
-    private static final int DARK_PRIMARY_DARK = 0xff7ccbe0;
-    private static final int DARK_BORDER = 0xff3c4b49;
-    private static final int DARK_MESSAGE = 0xff25302f;
-    private static final int AMOLED_BACKGROUND = 0xff000000;
-    private static final int AMOLED_SURFACE = 0xff080c0b;
-    private static final int AMOLED_SURFACE_ALT = 0xff101817;
-    private static final int AMOLED_TEXT = 0xfff2f7f5;
-    private static final int AMOLED_MUTED = 0xff9fb2ae;
-    private static final int AMOLED_PRIMARY = 0xff35b8a8;
-    private static final int AMOLED_PRIMARY_DARK = 0xff8ad9ed;
-    private static final int AMOLED_BORDER = 0xff263432;
-    private static final int AMOLED_MESSAGE = 0xff101817;
-    private static final int GRADIENT_BACKGROUND = 0xfff7fbf8;
-    private static final int GRADIENT_SURFACE = 0xffffffff;
-    private static final int GRADIENT_SURFACE_ALT = 0xffe9f3ef;
-    private static final int GRADIENT_TEXT = 0xff172121;
-    private static final int GRADIENT_MUTED = 0xff566664;
-    private static final int GRADIENT_PRIMARY = 0xff0d756d;
-    private static final int GRADIENT_PRIMARY_DARK = 0xff0f3d3e;
-    private static final int GRADIENT_BORDER = 0xffb8d0cb;
-    private static final int GRADIENT_MESSAGE = 0xffe9f3ef;
-    private static final int AURORA_BACKGROUND = 0xfff6fbf9;
-    private static final int AURORA_SURFACE = 0xffffffff;
-    private static final int AURORA_SURFACE_ALT = 0xffe8f6f1;
-    private static final int AURORA_TEXT = 0xff162321;
-    private static final int AURORA_MUTED = 0xff58706b;
-    private static final int AURORA_PRIMARY = 0xff087f73;
-    private static final int AURORA_PRIMARY_DARK = 0xff0e4a45;
-    private static final int AURORA_BORDER = 0xffb6d8d0;
-    private static final int AURORA_MESSAGE = 0xffe8f6f1;
-    private static final int MIST_BACKGROUND = 0xfff3f8f7;
-    private static final int MIST_SURFACE = 0xffffffff;
-    private static final int MIST_SURFACE_ALT = 0xffe5eeec;
-    private static final int MIST_TEXT = 0xff1c2524;
-    private static final int MIST_MUTED = 0xff5f6f6d;
-    private static final int MIST_PRIMARY = 0xff437b74;
-    private static final int MIST_PRIMARY_DARK = 0xff244f4a;
-    private static final int MIST_BORDER = 0xffc2d1ce;
-    private static final int MIST_MESSAGE = 0xffe5eeec;
-    private static final int DUSK_BACKGROUND = 0xfffbf6f3;
-    private static final int DUSK_SURFACE = 0xffffffff;
-    private static final int DUSK_SURFACE_ALT = 0xfff0e8e3;
-    private static final int DUSK_TEXT = 0xff241d1b;
-    private static final int DUSK_MUTED = 0xff6d5d57;
-    private static final int DUSK_PRIMARY = 0xff735f5b;
-    private static final int DUSK_PRIMARY_DARK = 0xff463936;
-    private static final int DUSK_BORDER = 0xffd8c8c0;
-    private static final int DUSK_MESSAGE = 0xfff0e8e3;
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     private final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
     private final FeatureEntitlement featureEntitlement = FeatureEntitlements.current(BuildEntitlementSource.current());
     private final CodeHighlighting codeHighlighting = CodeHighlightingPolicy.fromEntitlement(featureEntitlement);
 
+    private ViewerSettingsStore settingsStore;
     private WebView webView;
     private TextView messageView;
     private Button menuButton;
@@ -208,10 +141,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         EdgeSwipeFrameLayout appRoot = new EdgeSwipeFrameLayout(this);
 
-        controlsPlacement = loadControlsPlacement();
-        currentLanguage = loadViewerLanguage();
-        doubleTapShortcut = loadDoubleTapShortcut();
-        circleGestureShortcut = loadCircleGestureShortcut();
+        settingsStore = new ViewerSettingsStore(this, featureEntitlement);
+        controlsPlacement = settingsStore.loadControlsPlacement();
+        currentLanguage = settingsStore.loadViewerLanguage();
+        doubleTapShortcut = settingsStore.loadDoubleTapShortcut();
+        circleGestureShortcut = settingsStore.loadCircleGestureShortcut();
 
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -426,7 +360,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             renderCurrentDocument();
         } else if (view == languageButton) {
             currentLanguage = currentLanguage.toggled();
-            saveViewerLanguage(currentLanguage);
+            settingsStore.saveViewerLanguage(currentLanguage);
             updateLocalizedText();
             if (WELCOME_URI.equals(openTabs.activeTab().uri())) {
                 openTabs = OpenDocumentTabs.withInitialTab(initialTab());
@@ -436,18 +370,18 @@ public final class MainActivity extends Activity implements View.OnClickListener
             closeMenu();
         } else if (view == controlsPlacementButton) {
             controlsPlacement = controlsPlacement.toggled();
-            saveControlsPlacement(controlsPlacement);
+            settingsStore.saveControlsPlacement(controlsPlacement);
             updateLocalizedText();
             applyControlsPlacement();
             closeMenu();
         } else if (view == doubleTapShortcutButton) {
             doubleTapShortcut = doubleTapShortcut.next(featureEntitlement);
-            saveDoubleTapShortcut(doubleTapShortcut);
+            settingsStore.saveDoubleTapShortcut(doubleTapShortcut);
             updateLocalizedText();
             closeMenu();
         } else if (view == circleGestureShortcutButton) {
             circleGestureShortcut = circleGestureShortcut.next(featureEntitlement);
-            saveCircleGestureShortcut(circleGestureShortcut);
+            settingsStore.saveCircleGestureShortcut(circleGestureShortcut);
             updateLocalizedText();
             closeMenu();
         } else if (view == proFeaturesButton) {
@@ -767,62 +701,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void showProFeaturesDialog() {
         showInfoDialog(proFeaturesTitle(), proFeaturesMessage());
-    }
-
-    private ControlsPlacement loadControlsPlacement() {
-        SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
-        return ControlsPlacement.fromStoredValue(prefs.getString(CONTROLS_PLACEMENT, ControlsPlacement.TOP_VALUE));
-    }
-
-    private void saveControlsPlacement(ControlsPlacement placement) {
-        getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE)
-                .edit()
-                .putString(CONTROLS_PLACEMENT, placement.storedValue())
-                .apply();
-    }
-
-    private ViewerLanguage loadViewerLanguage() {
-        SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
-        return ViewerLanguage.fromStoredValue(prefs.getString(VIEWER_LANGUAGE, ViewerLanguage.ENGLISH_VALUE));
-    }
-
-    private void saveViewerLanguage(ViewerLanguage language) {
-        getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE)
-                .edit()
-                .putString(VIEWER_LANGUAGE, language.storedValue())
-                .apply();
-    }
-
-    private GestureShortcutAction loadDoubleTapShortcut() {
-        SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
-        GestureShortcutAction stored = GestureShortcutAction.fromStoredValue(prefs.getString(DOUBLE_TAP_SHORTCUT, "off"));
-        if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
-            return GestureShortcutAction.off();
-        }
-        return stored;
-    }
-
-    private GestureShortcutAction loadCircleGestureShortcut() {
-        SharedPreferences prefs = getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE);
-        GestureShortcutAction stored = GestureShortcutAction.fromStoredValue(prefs.getString(CIRCLE_GESTURE_SHORTCUT, "off"));
-        if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
-            return GestureShortcutAction.off();
-        }
-        return stored;
-    }
-
-    private void saveDoubleTapShortcut(GestureShortcutAction action) {
-        getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE)
-                .edit()
-                .putString(DOUBLE_TAP_SHORTCUT, action.storedValue())
-                .apply();
-    }
-
-    private void saveCircleGestureShortcut(GestureShortcutAction action) {
-        getSharedPreferences(SETTINGS_PREFS, MODE_PRIVATE)
-                .edit()
-                .putString(CIRCLE_GESTURE_SHORTCUT, action.storedValue())
-                .apply();
     }
 
     private void updateLocalizedText() {
@@ -1186,147 +1064,39 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private int backgroundColor() {
-        if (currentTheme.isGradient()) {
-            return GRADIENT_BACKGROUND;
-        }
-        if (currentTheme.isAurora()) {
-            return AURORA_BACKGROUND;
-        }
-        if (currentTheme.isMist()) {
-            return MIST_BACKGROUND;
-        }
-        if (currentTheme.isDusk()) {
-            return DUSK_BACKGROUND;
-        }
-        return currentTheme.isAmoled() ? AMOLED_BACKGROUND : (currentTheme.isDark() ? DARK_BACKGROUND : LIGHT_BACKGROUND);
+        return ViewerPalette.from(currentTheme).background;
     }
 
     private int surfaceColor() {
-        if (currentTheme.isGradient()) {
-            return GRADIENT_SURFACE;
-        }
-        if (currentTheme.isAurora()) {
-            return AURORA_SURFACE;
-        }
-        if (currentTheme.isMist()) {
-            return MIST_SURFACE;
-        }
-        if (currentTheme.isDusk()) {
-            return DUSK_SURFACE;
-        }
-        return currentTheme.isAmoled() ? AMOLED_SURFACE : (currentTheme.isDark() ? DARK_SURFACE : LIGHT_SURFACE);
+        return ViewerPalette.from(currentTheme).surface;
     }
 
     private int surfaceAltColor() {
-        if (currentTheme.isGradient()) {
-            return GRADIENT_SURFACE_ALT;
-        }
-        if (currentTheme.isAurora()) {
-            return AURORA_SURFACE_ALT;
-        }
-        if (currentTheme.isMist()) {
-            return MIST_SURFACE_ALT;
-        }
-        if (currentTheme.isDusk()) {
-            return DUSK_SURFACE_ALT;
-        }
-        return currentTheme.isAmoled() ? AMOLED_SURFACE_ALT : (currentTheme.isDark() ? DARK_SURFACE_ALT : LIGHT_SURFACE_ALT);
+        return ViewerPalette.from(currentTheme).surfaceAlt;
     }
 
     private int textColor() {
-        if (currentTheme.isGradient()) {
-            return GRADIENT_TEXT;
-        }
-        if (currentTheme.isAurora()) {
-            return AURORA_TEXT;
-        }
-        if (currentTheme.isMist()) {
-            return MIST_TEXT;
-        }
-        if (currentTheme.isDusk()) {
-            return DUSK_TEXT;
-        }
-        return currentTheme.isAmoled() ? AMOLED_TEXT : (currentTheme.isDark() ? DARK_TEXT : LIGHT_TEXT);
+        return ViewerPalette.from(currentTheme).text;
     }
 
     private int mutedColor() {
-        if (currentTheme.isGradient()) {
-            return GRADIENT_MUTED;
-        }
-        if (currentTheme.isAurora()) {
-            return AURORA_MUTED;
-        }
-        if (currentTheme.isMist()) {
-            return MIST_MUTED;
-        }
-        if (currentTheme.isDusk()) {
-            return DUSK_MUTED;
-        }
-        return currentTheme.isAmoled() ? AMOLED_MUTED : (currentTheme.isDark() ? DARK_MUTED : LIGHT_MUTED);
+        return ViewerPalette.from(currentTheme).muted;
     }
 
     private int primaryColor() {
-        if (currentTheme.isGradient()) {
-            return GRADIENT_PRIMARY;
-        }
-        if (currentTheme.isAurora()) {
-            return AURORA_PRIMARY;
-        }
-        if (currentTheme.isMist()) {
-            return MIST_PRIMARY;
-        }
-        if (currentTheme.isDusk()) {
-            return DUSK_PRIMARY;
-        }
-        return currentTheme.isAmoled() ? AMOLED_PRIMARY : (currentTheme.isDark() ? DARK_PRIMARY : LIGHT_PRIMARY);
+        return ViewerPalette.from(currentTheme).primary;
     }
 
     private int primaryStrongColor() {
-        if (currentTheme.isGradient()) {
-            return GRADIENT_PRIMARY_DARK;
-        }
-        if (currentTheme.isAurora()) {
-            return AURORA_PRIMARY_DARK;
-        }
-        if (currentTheme.isMist()) {
-            return MIST_PRIMARY_DARK;
-        }
-        if (currentTheme.isDusk()) {
-            return DUSK_PRIMARY_DARK;
-        }
-        return currentTheme.isAmoled() ? AMOLED_PRIMARY_DARK : (currentTheme.isDark() ? DARK_PRIMARY_DARK : LIGHT_PRIMARY_DARK);
+        return ViewerPalette.from(currentTheme).primaryStrong;
     }
 
     private int borderColor() {
-        if (currentTheme.isGradient()) {
-            return GRADIENT_BORDER;
-        }
-        if (currentTheme.isAurora()) {
-            return AURORA_BORDER;
-        }
-        if (currentTheme.isMist()) {
-            return MIST_BORDER;
-        }
-        if (currentTheme.isDusk()) {
-            return DUSK_BORDER;
-        }
-        return currentTheme.isAmoled() ? AMOLED_BORDER : (currentTheme.isDark() ? DARK_BORDER : LIGHT_BORDER);
+        return ViewerPalette.from(currentTheme).border;
     }
 
     private int messageColor() {
-        if (currentTheme.isGradient()) {
-            return GRADIENT_MESSAGE;
-        }
-        if (currentTheme.isAurora()) {
-            return AURORA_MESSAGE;
-        }
-        if (currentTheme.isMist()) {
-            return MIST_MESSAGE;
-        }
-        if (currentTheme.isDusk()) {
-            return DUSK_MESSAGE;
-        }
-        return currentTheme.isAmoled() ? AMOLED_MESSAGE : (currentTheme.isDark() ? DARK_MESSAGE : LIGHT_MESSAGE);
+        return ViewerPalette.from(currentTheme).message;
     }
 
     private OpenDocumentTabs restoreOpenTabsOrInitial() {
@@ -1676,7 +1446,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         if (action.isMoveControls()) {
             controlsPlacement = controlsPlacement.toggled();
-            saveControlsPlacement(controlsPlacement);
+            settingsStore.saveControlsPlacement(controlsPlacement);
             updateLocalizedText();
             applyControlsPlacement();
             return true;
