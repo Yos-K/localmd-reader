@@ -546,6 +546,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private CharSequence clipboardText() {
+        ClipData clip = clipboardClip();
+        if (clip == null) {
+            return null;
+        }
+        return clip.getItemAt(0).coerceToStyledText(this);
+    }
+
+    private ClipData clipboardClip() {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         if (clipboard == null || !clipboard.hasPrimaryClip()) {
             return null;
@@ -554,7 +562,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (clip == null || clip.getItemCount() == 0) {
             return null;
         }
-        return clip.getItemAt(0).coerceToStyledText(this);
+        return clip;
     }
 
     private void createMarkdownFile(String title, String markdown) {
@@ -803,8 +811,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void showClipboardDiagnosticsDialog() {
-        CharSequence text = clipboardText();
-        showInfoDialog(clipboardDiagnosticsTitle(), AndroidTextDiagnostics.describe(text));
+        showInfoDialog(clipboardDiagnosticsTitle(), AndroidTextDiagnostics.describe(this, clipboardClip()));
     }
 
     private void updateLocalizedText() {
