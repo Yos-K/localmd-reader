@@ -521,7 +521,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showFileOpenError(noTextToCreateMessage());
             return;
         }
-        createMarkdownFile("Selected text", selectedText.toString());
+        createMarkdownFile("Selected text", AndroidStyledTextMarkdown.from(selectedText));
     }
 
     private void createMarkdownFromClipboard() {
@@ -530,7 +530,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showFileOpenError(noClipboardTextMessage());
             return;
         }
-        createMarkdownFile("Clipboard", clipboardText.toString());
+        createMarkdownFile("Clipboard", AndroidStyledTextMarkdown.from(clipboardText));
     }
 
     private CharSequence clipboardText() {
@@ -542,7 +542,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (clip == null || clip.getItemCount() == 0) {
             return null;
         }
-        return clip.getItemAt(0).coerceToText(this);
+        return clip.getItemAt(0).coerceToStyledText(this);
     }
 
     private void createMarkdownFile(String title, String markdown) {
