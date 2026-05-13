@@ -105,8 +105,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button themeButton;
     private Button languageButton;
     private Button controlsPlacementButton;
-    private Button doubleTapShortcutButton;
-    private Button circleGestureShortcutButton;
+    private Button gestureShortcutsButton;
     private Button proFeaturesButton;
     private Button clipboardDiagnosticsButton;
     private Button privacyButton;
@@ -217,15 +216,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
         controlsPlacementButton.setOnClickListener(this);
         styleMenuButton(controlsPlacementButton);
 
-        doubleTapShortcutButton = new Button(this);
-        doubleTapShortcutButton.setAllCaps(false);
-        doubleTapShortcutButton.setOnClickListener(this);
-        styleMenuButton(doubleTapShortcutButton);
-
-        circleGestureShortcutButton = new Button(this);
-        circleGestureShortcutButton.setAllCaps(false);
-        circleGestureShortcutButton.setOnClickListener(this);
-        styleMenuButton(circleGestureShortcutButton);
+        gestureShortcutsButton = new Button(this);
+        gestureShortcutsButton.setAllCaps(false);
+        gestureShortcutsButton.setOnClickListener(this);
+        styleMenuButton(gestureShortcutsButton);
 
         proFeaturesButton = new Button(this);
         proFeaturesButton.setAllCaps(false);
@@ -289,10 +283,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuPanel.addView(controlsPlacementButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
-        menuPanel.addView(doubleTapShortcutButton, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-        menuPanel.addView(circleGestureShortcutButton, new LinearLayout.LayoutParams(
+        menuPanel.addView(gestureShortcutsButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         infoSection = menuSection("");
@@ -400,16 +391,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
             updateLocalizedText();
             applyControlsPlacement();
             closeMenu();
-        } else if (view == doubleTapShortcutButton) {
-            doubleTapShortcut = doubleTapShortcut.next(featureEntitlement);
-            settingsStore.saveDoubleTapShortcut(doubleTapShortcut);
-            updateLocalizedText();
+        } else if (view == gestureShortcutsButton) {
             closeMenu();
-        } else if (view == circleGestureShortcutButton) {
-            circleGestureShortcut = circleGestureShortcut.next(featureEntitlement);
-            settingsStore.saveCircleGestureShortcut(circleGestureShortcut);
-            updateLocalizedText();
-            closeMenu();
+            showGestureShortcutsDialog();
         } else if (view == proFeaturesButton) {
             closeMenu();
             showProFeaturesDialog();
@@ -810,6 +794,35 @@ public final class MainActivity extends Activity implements View.OnClickListener
         showInfoDialog(proFeaturesTitle(), proFeaturesMessage());
     }
 
+    private void showGestureShortcutsDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(currentLanguage.isJapanese() ? "ジェスチャー" : "Gestures")
+                .setItems(gestureShortcutLabels(), new GestureShortcutClickListener(this))
+                .setNegativeButton("OK", null)
+                .show();
+    }
+
+    private String[] gestureShortcutLabels() {
+        return new String[] {
+            shortcutLabel(currentLanguage.isJapanese() ? "ダブルタップ: " : "Double tap: ", doubleTapShortcut),
+            shortcutLabel(currentLanguage.isJapanese() ? "円ジェスチャー: " : "Circle gesture: ", circleGestureShortcut)
+        };
+    }
+
+    private void cycleGestureShortcut(int index) {
+        if (index == 0) {
+            doubleTapShortcut = doubleTapShortcut.next(featureEntitlement);
+            settingsStore.saveDoubleTapShortcut(doubleTapShortcut);
+            showGestureShortcutsDialog();
+            return;
+        }
+        if (index == 1) {
+            circleGestureShortcut = circleGestureShortcut.next(featureEntitlement);
+            settingsStore.saveCircleGestureShortcut(circleGestureShortcut);
+            showGestureShortcutsDialog();
+        }
+    }
+
     private void showClipboardDiagnosticsDialog() {
         showInfoDialog(clipboardDiagnosticsTitle(), AndroidTextDiagnostics.describe(this, clipboardClip()));
     }
@@ -836,16 +849,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } else {
             controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを下に移動" : "Move controls to bottom");
         }
-        doubleTapShortcutButton.setText(doubleTapShortcutLabel());
-        circleGestureShortcutButton.setText(circleGestureShortcutLabel());
-    }
-
-    private String doubleTapShortcutLabel() {
-        return shortcutLabel(currentLanguage.isJapanese() ? "ダブルタップ: " : "Double tap: ", doubleTapShortcut);
-    }
-
-    private String circleGestureShortcutLabel() {
-        return shortcutLabel(currentLanguage.isJapanese() ? "円ジェスチャー: " : "Circle gesture: ", circleGestureShortcut);
+        gestureShortcutsButton.setText(currentLanguage.isJapanese() ? "ジェスチャー" : "Gestures");
     }
 
     private String shortcutLabel(String prefix, GestureShortcutAction action) {
@@ -1731,6 +1735,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         private int tabIndex() {
             return tabIndex;
+        }
+    }
+
+    private static final class GestureShortcutClickListener implements DialogInterface.OnClickListener {
+        private final MainActivity activity;
+
+        private GestureShortcutClickListener(MainActivity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            activity.cycleGestureShortcut(which);
         }
     }
 
