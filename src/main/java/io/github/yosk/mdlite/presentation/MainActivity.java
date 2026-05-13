@@ -108,6 +108,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button doubleTapShortcutButton;
     private Button circleGestureShortcutButton;
     private Button proFeaturesButton;
+    private Button clipboardDiagnosticsButton;
     private Button privacyButton;
     private SwipeMenuLayout menuPanel;
     private LinearLayout root;
@@ -231,6 +232,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         proFeaturesButton.setOnClickListener(this);
         styleMenuButton(proFeaturesButton);
 
+        clipboardDiagnosticsButton = new Button(this);
+        clipboardDiagnosticsButton.setAllCaps(false);
+        clipboardDiagnosticsButton.setOnClickListener(this);
+        styleMenuButton(clipboardDiagnosticsButton);
+
         privacyButton = new Button(this);
         privacyButton.setAllCaps(false);
         privacyButton.setOnClickListener(this);
@@ -294,6 +300,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(proFeaturesButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(clipboardDiagnosticsButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(privacyButton, new LinearLayout.LayoutParams(
@@ -404,6 +413,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } else if (view == proFeaturesButton) {
             closeMenu();
             showProFeaturesDialog();
+        } else if (view == clipboardDiagnosticsButton) {
+            closeMenu();
+            showClipboardDiagnosticsDialog();
         } else if (view == privacyButton) {
             closeMenu();
             showPrivacyPolicyDialog();
@@ -790,6 +802,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         showInfoDialog(proFeaturesTitle(), proFeaturesMessage());
     }
 
+    private void showClipboardDiagnosticsDialog() {
+        CharSequence text = clipboardText();
+        showInfoDialog(clipboardDiagnosticsTitle(), AndroidTextDiagnostics.describe(text));
+    }
+
     private void updateLocalizedText() {
         menuButton.setText(currentLanguage.isJapanese() ? "☰ メニュー" : "☰ Menu");
         menuButton.setContentDescription(currentLanguage.isJapanese() ? "メニューを開く" : "Open menu");
@@ -805,6 +822,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         layoutSection.setText(currentLanguage.isJapanese() ? "レイアウト" : "Layout");
         infoSection.setText(currentLanguage.isJapanese() ? "情報" : "Info");
         proFeaturesButton.setText(currentLanguage.isJapanese() ? "Pro機能" : "Pro features");
+        clipboardDiagnosticsButton.setText(currentLanguage.isJapanese() ? "クリップボード診断" : "Clipboard diagnostics");
         privacyButton.setText(currentLanguage.isJapanese() ? "プライバシー" : "Privacy");
         if (controlsPlacement.isBottom()) {
             controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを上に移動" : "Move controls to top");
@@ -892,6 +910,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String proFeaturesTitle() {
         return currentLanguage.isJapanese() ? "Pro機能" : "Pro features";
+    }
+
+    private String clipboardDiagnosticsTitle() {
+        return currentLanguage.isJapanese() ? "クリップボード診断" : "Clipboard diagnostics";
     }
 
     private String proFeaturesMessage() {
