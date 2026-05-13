@@ -61,15 +61,18 @@ import io.github.yosk.mdlite.infrastructure.WelcomeDocumentBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class MainActivity extends Activity implements View.OnClickListener, DialogInterface.OnClickListener, View.OnApplyWindowInsetsListener {
     private static final int REQUEST_OPEN_DOCUMENT = 1001;
+    private static final int REQUEST_SAVE_DOCUMENT = 1002;
     private static final String ACTION_OPEN_TEXT = "io.github.yosk.mdlite.action.OPEN_TEXT";
     private static final String ACTION_OPEN_TEXTS = "io.github.yosk.mdlite.action.OPEN_TEXTS";
     private static final String EXTRA_MARKDOWN_TITLE = "io.github.yosk.mdlite.extra.MARKDOWN_TITLE";
@@ -86,6 +89,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final String OPEN_TABS_ITEMS = "items";
     private static final String OPEN_TABS_ACTIVE_INDEX = "active_index";
     private static final String WELCOME_URI = "app://welcome";
+    private static final String DRAFT_URI_PREFIX = "draft://";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
     private static final int MENU_SWIPE_MIN_DISTANCE_DP = 72;
@@ -101,6 +105,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private Button menuButton;
     private Button openButton;
     private Button createFromClipboardButton;
+    private Button saveAsButton;
     private Button recentButton;
     private Button themeButton;
     private Button languageButton;
@@ -131,6 +136,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private GestureShortcutAction circleGestureShortcut = GestureShortcutAction.off();
     private FontSize currentFontSize = FontSize.defaultSize();
     private FontSize renderedFontSize = FontSize.defaultSize();
+    private String pendingSaveMarkdown = "";
+    private final Map<String, String> draftMarkdownByUri = new HashMap<String, String>();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
     private ScaleGestureDetector fontScaleGestureDetector;
     private GestureDetector shortcutGestureDetector;
@@ -195,6 +202,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         createFromClipboardButton.setAllCaps(false);
         createFromClipboardButton.setOnClickListener(this);
         styleMenuButton(createFromClipboardButton);
+
+        saveAsButton = new Button(this);
+        saveAsButton.setAllCaps(false);
+        saveAsButton.setOnClickListener(this);
+        styleMenuButton(saveAsButton);
 
         recentButton = new Button(this);
         recentButton.setAllCaps(false);
@@ -261,6 +273,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(createFromClipboardButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(saveAsButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(recentButton, new LinearLayout.LayoutParams(
@@ -365,6 +380,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } else if (view == createFromClipboardButton) {
             closeMenu();
             createMarkdownFromClipboard();
+        } else if (view == saveAsButton) {
+            closeMenu();
+            saveActiveMarkdownAs();
         } else if (view == recentButton) {
             closeMenu();
             showRecentDocuments();
@@ -454,6 +472,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 persistReadPermission(data, uri);
                 openUri(uri, true);
             }
+            return;
+        }
+        if (requestCode == REQUEST_SAVE_DOCUMENT && resultCode == RESULT_OK && data != null) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                writePendingMarkdown(uri);
+            }
         }
     }
 
@@ -517,7 +542,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showFileOpenError(noTextToCreateMessage());
             return;
         }
-        createMarkdownFile("Selected text", AndroidStyledTextMarkdown.from(selectedText));
+        openTemporaryMarkdown("Selected text", AndroidStyledTextMarkdown.from(selectedText));
     }
 
     private void createMarkdownFromClipboard() {
@@ -526,7 +551,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showFileOpenError(noClipboardTextMessage());
             return;
         }
-        createMarkdownFile("Clipboard", AndroidStyledTextMarkdown.from(clipboardText));
+        openTemporaryMarkdown("Clipboard", AndroidStyledTextMarkdown.from(clipboardText));
     }
 
     private CharSequence clipboardText() {
@@ -549,7 +574,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return clip;
     }
 
-    private void createMarkdownFile(String title, String markdown) {
+    private void openTemporaryMarkdown(String title, String markdown) {
         String text = markdown == null ? "" : markdown;
         long sizeBytes = text.getBytes(StandardCharsets.UTF_8).length;
         MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(title + ".md", sizeBytes, fileSizePolicy);
@@ -557,33 +582,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showFileOpenError(fileTooLargeMessage());
             return;
         }
-        try {
-            File file = nextCreatedMarkdownFile(title);
-            FileOutputStream output = new FileOutputStream(file);
-            try {
-                output.write(text.getBytes(StandardCharsets.UTF_8));
-            } finally {
-                output.close();
-            }
-            openUri(Uri.fromFile(file), false);
-            showMessage(createdMarkdownMessage(file.getName()));
-        } catch (IOException e) {
-            showFileOpenError(createMarkdownFailedMessage());
-        }
-    }
 
-    private File nextCreatedMarkdownFile(String title) throws IOException {
-        File directory = new File(getFilesDir(), "created");
-        if (!directory.exists() && !directory.mkdirs()) {
-            throw new IOException("Could not create Markdown directory.");
-        }
-        int sequence = 1;
-        File candidate = new File(directory, MarkdownDraftFileName.fromTitle(title, sequence).value());
-        while (candidate.exists()) {
-            sequence++;
-            candidate = new File(directory, MarkdownDraftFileName.fromTitle(title, sequence).value());
-        }
-        return candidate;
+        SafeHtml rendered = renderer.render(text, codeHighlighting);
+        String displayName = MarkdownDraftFileName.fromTitle(title, 1).value();
+        String draftUri = DRAFT_URI_PREFIX + Uri.encode(displayName);
+        draftMarkdownByUri.put(draftUri, text);
+        openTabs = openTabs.open(OpenDocumentTab.of(displayName, draftUri, rendered));
+        renderTabs();
+        renderCurrentDocument();
+        showMessage(temporaryMarkdownMessage());
     }
 
     private void openUris(List<Uri> uris, boolean remember, Intent permissionIntent) {
@@ -647,6 +654,63 @@ public final class MainActivity extends Activity implements View.OnClickListener
         renderCurrentDocument();
         saveOpenTabs();
         showMessage("");
+    }
+
+    private void saveActiveMarkdownAs() {
+        OpenDocumentTab tab = openTabs.activeTab();
+        if (WELCOME_URI.equals(tab.uri())) {
+            showFileOpenError(noDocumentToSaveMessage());
+            return;
+        }
+        String markdown = markdownForSave(tab);
+        if (markdown.length() == 0) {
+            showFileOpenError(noDocumentToSaveMessage());
+            return;
+        }
+        pendingSaveMarkdown = markdown;
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/markdown");
+        intent.putExtra(Intent.EXTRA_TITLE, tab.title());
+        startActivityForResult(intent, REQUEST_SAVE_DOCUMENT);
+    }
+
+    private String markdownForSave(OpenDocumentTab tab) {
+        if (tab.uri().startsWith(DRAFT_URI_PREFIX)) {
+            return draftMarkdownFrom(tab);
+        }
+        try {
+            return readText(Uri.parse(tab.uri()), MAX_FILE_SIZE_BYTES);
+        } catch (IOException e) {
+            return "";
+        } catch (SecurityException e) {
+            return "";
+        }
+    }
+
+    private String draftMarkdownFrom(OpenDocumentTab tab) {
+        String markdown = draftMarkdownByUri.get(tab.uri());
+        return markdown == null ? "" : markdown;
+    }
+
+    private void writePendingMarkdown(Uri uri) {
+        try {
+            OutputStream output = getContentResolver().openOutputStream(uri);
+            if (output == null) {
+                showFileOpenError(createMarkdownFailedMessage());
+                return;
+            }
+            try {
+                output.write(pendingSaveMarkdown.getBytes(StandardCharsets.UTF_8));
+            } finally {
+                output.close();
+            }
+            pendingSaveMarkdown = "";
+            openUri(uri, true);
+            showMessage(savedMarkdownMessage());
+        } catch (IOException e) {
+            showFileOpenError(createMarkdownFailedMessage());
+        }
     }
 
     private void openMarkdownTexts(String[] titles, String[] sources, String[] textsBase64) {
@@ -833,6 +897,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         appTitle.setText("LocalMD Reader");
         openButton.setText(currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
         createFromClipboardButton.setText(currentLanguage.isJapanese() ? "クリップボードから作成" : "Create from clipboard");
+        saveAsButton.setText(currentLanguage.isJapanese() ? "名前を付けて保存" : "Save as...");
         recentButton.setText(recentFilesTitle());
         themeButton.setText(nextThemeLabel());
         languageButton.setText(currentLanguage.isJapanese() ? "Switch to English" : "日本語に切り替え");
@@ -903,16 +968,28 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 : "There is no clipboard text to create a Markdown file.";
     }
 
+    private String noDocumentToSaveMessage() {
+        return currentLanguage.isJapanese()
+                ? "保存できるMarkdown文書がありません。"
+                : "There is no Markdown document to save.";
+    }
+
     private String createMarkdownFailedMessage() {
         return currentLanguage.isJapanese()
                 ? "Markdownファイルを作成できませんでした。"
                 : "The Markdown file could not be created.";
     }
 
-    private String createdMarkdownMessage(String fileName) {
+    private String temporaryMarkdownMessage() {
         return currentLanguage.isJapanese()
-                ? fileName + " を作成しました。"
-                : "Created " + fileName + ".";
+                ? "一時的なMarkdownとして開きました。保存するには「名前を付けて保存」を使ってください。"
+                : "Opened as temporary Markdown. Use Save as... to keep it as a file.";
+    }
+
+    private String savedMarkdownMessage() {
+        return currentLanguage.isJapanese()
+                ? "Markdownファイルを保存しました。"
+                : "Saved Markdown file.";
     }
 
     private String privacyTitle() {
@@ -1328,7 +1405,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         int savedActiveIndex = 0;
         for (int i = 0; i < openTabs.tabs().size(); i++) {
             OpenDocumentTab tab = openTabs.tabs().get(i);
-            if (WELCOME_URI.equals(tab.uri())) {
+            if (WELCOME_URI.equals(tab.uri()) || tab.uri().startsWith(DRAFT_URI_PREFIX)) {
                 continue;
             }
             if (i == openTabs.activeIndex()) {
