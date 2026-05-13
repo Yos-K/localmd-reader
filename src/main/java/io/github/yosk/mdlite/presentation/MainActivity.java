@@ -1142,10 +1142,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void applyControlsBarInsets() {
         if (controlsPlacement.isBottom()) {
+            root.setPadding(0, systemTopInsetPx, 0, 0);
             controlsBar.setPadding(0, 0, 0, systemBottomInsetPx);
         } else {
+            root.setPadding(0, 0, 0, 0);
             controlsBar.setPadding(0, systemTopInsetPx, 0, 0);
         }
+        menuPanel.setPadding(dp(18), systemTopInsetPx + dp(28), dp(18), dp(18));
     }
 
     private void toggleMenu() {
