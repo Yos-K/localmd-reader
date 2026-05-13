@@ -3,6 +3,7 @@ package io.github.yosk.mdlite.presentation;
 import android.graphics.Typeface;
 import android.text.Spanned;
 import android.text.style.AbsoluteSizeSpan;
+import android.text.style.BulletSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
@@ -52,6 +53,10 @@ final class AndroidStyledTextMarkdown {
         int headingLevel = headingLevelAt(spanned, start, end);
         if (headingLevel > 0) {
             style = style.withHeadingLevel(headingLevel);
+        }
+        BulletSpan[] bulletSpans = spanned.getSpans(start, end, BulletSpan.class);
+        if (bulletSpans.length > 0) {
+            style = style.withBulletListItem();
         }
         return style;
     }

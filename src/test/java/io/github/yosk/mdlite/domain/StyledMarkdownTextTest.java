@@ -10,6 +10,8 @@ public final class StyledMarkdownTextTest {
         underlineTextCreatesHtmlUnderlineTag();
         linkTextCreatesMarkdownLinkTag();
         headingTextCreatesMarkdownHeadingTag();
+        bulletTextCreatesMarkdownListItem();
+        tabSeparatedLinesCreateMarkdownTable();
         markdownSpecialCharactersAreEscapedBeforeApplyingStyle();
     }
 
@@ -59,6 +61,23 @@ public final class StyledMarkdownTextTest {
                 .value();
 
         TestAssertions.assertEquals("## Section\n\n", markdown, "large copied text must become a Markdown heading");
+    }
+
+    private static void bulletTextCreatesMarkdownListItem() {
+        String markdown = new StyledMarkdownText()
+                .append("First item\n", MarkdownStyle.plain().withBulletListItem())
+                .append("Second item", MarkdownStyle.plain().withBulletListItem())
+                .value();
+
+        TestAssertions.assertEquals("- First item\n- Second item\n", markdown, "bulleted copied text must become Markdown list items");
+    }
+
+    private static void tabSeparatedLinesCreateMarkdownTable() {
+        String markdown = new StyledMarkdownText()
+                .append("Name\tValue\nAlpha\t1\nBeta\t2", MarkdownStyle.plain())
+                .value();
+
+        TestAssertions.assertEquals("| Name | Value |\n| --- | --- |\n| Alpha | 1 |\n| Beta | 2 |", markdown, "tab-separated copied text must become a Markdown table");
     }
 
     private static void markdownSpecialCharactersAreEscapedBeforeApplyingStyle() {
