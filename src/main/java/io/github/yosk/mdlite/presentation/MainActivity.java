@@ -2,6 +2,9 @@ package io.github.yosk.mdlite.presentation;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,6 +39,7 @@ import io.github.yosk.mdlite.domain.FeatureEntitlements;
 import io.github.yosk.mdlite.domain.FileSizePolicy;
 import io.github.yosk.mdlite.domain.FontSize;
 import io.github.yosk.mdlite.domain.GestureShortcutAction;
+import io.github.yosk.mdlite.domain.MarkdownDraftFileName;
 import io.github.yosk.mdlite.domain.MarkdownFileOpenResult;
 import io.github.yosk.mdlite.domain.OpenDocumentTab;
 import io.github.yosk.mdlite.domain.OpenDocumentTabs;
@@ -57,6 +61,7 @@ import io.github.yosk.mdlite.infrastructure.WelcomeDocumentBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -95,6 +100,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private TextView messageView;
     private Button menuButton;
     private Button openButton;
+    private Button createFromClipboardButton;
     private Button recentButton;
     private Button themeButton;
     private Button languageButton;
@@ -185,6 +191,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         openButton.setOnClickListener(this);
         styleMenuButton(openButton);
 
+        createFromClipboardButton = new Button(this);
+        createFromClipboardButton.setAllCaps(false);
+        createFromClipboardButton.setOnClickListener(this);
+        styleMenuButton(createFromClipboardButton);
+
         recentButton = new Button(this);
         recentButton.setAllCaps(false);
         recentButton.setOnClickListener(this);
@@ -247,6 +258,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(openButton, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        menuPanel.addView(createFromClipboardButton, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         menuPanel.addView(recentButton, new LinearLayout.LayoutParams(
@@ -348,6 +362,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         } else if (view == openButton) {
             closeMenu();
             openMarkdownPicker();
+        } else if (view == createFromClipboardButton) {
+            closeMenu();
+            createMarkdownFromClipboard();
         } else if (view == recentButton) {
             closeMenu();
             showRecentDocuments();
@@ -480,6 +497,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
             }
             return;
         }
+        if (Intent.ACTION_PROCESS_TEXT.equals(action)) {
+            createMarkdownFromSelectedText(intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT));
+            return;
+        }
         if (ACTION_OPEN_TEXT.equals(action)) {
             openMarkdownText(
                     intent.getStringExtra(EXTRA_MARKDOWN_TITLE),
@@ -493,6 +514,72 @@ public final class MainActivity extends Activity implements View.OnClickListener
                     intent.getStringArrayExtra(EXTRA_MARKDOWN_SOURCES),
                     intent.getStringArrayExtra(EXTRA_MARKDOWN_TEXTS_BASE64));
         }
+    }
+
+    private void createMarkdownFromSelectedText(CharSequence selectedText) {
+        if (selectedText == null || selectedText.length() == 0) {
+            showFileOpenError(noTextToCreateMessage());
+            return;
+        }
+        createMarkdownFile("Selected text", selectedText.toString());
+    }
+
+    private void createMarkdownFromClipboard() {
+        CharSequence clipboardText = clipboardText();
+        if (clipboardText == null || clipboardText.length() == 0) {
+            showFileOpenError(noClipboardTextMessage());
+            return;
+        }
+        createMarkdownFile("Clipboard", clipboardText.toString());
+    }
+
+    private CharSequence clipboardText() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard == null || !clipboard.hasPrimaryClip()) {
+            return null;
+        }
+        ClipData clip = clipboard.getPrimaryClip();
+        if (clip == null || clip.getItemCount() == 0) {
+            return null;
+        }
+        return clip.getItemAt(0).coerceToText(this);
+    }
+
+    private void createMarkdownFile(String title, String markdown) {
+        String text = markdown == null ? "" : markdown;
+        long sizeBytes = text.getBytes(StandardCharsets.UTF_8).length;
+        MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(title + ".md", sizeBytes, fileSizePolicy);
+        if (openResult instanceof MarkdownFileOpenResult.OversizedMarkdownFile) {
+            showFileOpenError(fileTooLargeMessage());
+            return;
+        }
+        try {
+            File file = nextCreatedMarkdownFile(title);
+            FileOutputStream output = new FileOutputStream(file);
+            try {
+                output.write(text.getBytes(StandardCharsets.UTF_8));
+            } finally {
+                output.close();
+            }
+            openUri(Uri.fromFile(file), false);
+            showMessage(createdMarkdownMessage(file.getName()));
+        } catch (IOException e) {
+            showFileOpenError(createMarkdownFailedMessage());
+        }
+    }
+
+    private File nextCreatedMarkdownFile(String title) throws IOException {
+        File directory = new File(getFilesDir(), "created");
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw new IOException("Could not create Markdown directory.");
+        }
+        int sequence = 1;
+        File candidate = new File(directory, MarkdownDraftFileName.fromTitle(title, sequence).value());
+        while (candidate.exists()) {
+            sequence++;
+            candidate = new File(directory, MarkdownDraftFileName.fromTitle(title, sequence).value());
+        }
+        return candidate;
     }
 
     private void openUris(List<Uri> uris, boolean remember, Intent permissionIntent) {
@@ -708,6 +795,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuButton.setContentDescription(currentLanguage.isJapanese() ? "メニューを開く" : "Open menu");
         appTitle.setText("LocalMD Reader");
         openButton.setText(currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
+        createFromClipboardButton.setText(currentLanguage.isJapanese() ? "クリップボードから作成" : "Create from clipboard");
         recentButton.setText(recentFilesTitle());
         themeButton.setText(nextThemeLabel());
         languageButton.setText(currentLanguage.isJapanese() ? "Switch to English" : "日本語に切り替え");
@@ -772,6 +860,30 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String recentFilesClearedMessage() {
         return currentLanguage.isJapanese() ? "最近開いたファイルをクリアしました。" : "Recent files cleared.";
+    }
+
+    private String noTextToCreateMessage() {
+        return currentLanguage.isJapanese()
+                ? "Markdownファイルを作成できる選択テキストがありません。"
+                : "There is no selected text to create a Markdown file.";
+    }
+
+    private String noClipboardTextMessage() {
+        return currentLanguage.isJapanese()
+                ? "クリップボードにMarkdownファイルを作成できるテキストがありません。"
+                : "There is no clipboard text to create a Markdown file.";
+    }
+
+    private String createMarkdownFailedMessage() {
+        return currentLanguage.isJapanese()
+                ? "Markdownファイルを作成できませんでした。"
+                : "The Markdown file could not be created.";
+    }
+
+    private String createdMarkdownMessage(String fileName) {
+        return currentLanguage.isJapanese()
+                ? fileName + " を作成しました。"
+                : "Created " + fileName + ".";
     }
 
     private String privacyTitle() {
