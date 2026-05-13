@@ -28,7 +28,18 @@ public final class StyledMarkdownText {
         if (style.linkUrl().length() > 0) {
             styled = "[" + styled + "](" + escapeUrl(style.linkUrl()) + ")";
         }
+        if (style.headingLevel() > 0) {
+            styled = headingPrefix(style.headingLevel()) + styled.trim() + "\n\n";
+        }
         return styled;
+    }
+
+    private static String headingPrefix(int level) {
+        StringBuilder prefix = new StringBuilder();
+        for (int i = 0; i < level; i++) {
+            prefix.append('#');
+        }
+        return prefix.append(' ').toString();
     }
 
     private static String escapeMarkdown(String text) {

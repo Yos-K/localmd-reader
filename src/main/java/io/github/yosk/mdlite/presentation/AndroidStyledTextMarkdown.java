@@ -2,6 +2,8 @@ package io.github.yosk.mdlite.presentation;
 
 import android.graphics.Typeface;
 import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
@@ -47,6 +49,34 @@ final class AndroidStyledTextMarkdown {
         if (urlSpans.length > 0) {
             style = style.withLink(urlSpans[0].getURL());
         }
+        int headingLevel = headingLevelAt(spanned, start, end);
+        if (headingLevel > 0) {
+            style = style.withHeadingLevel(headingLevel);
+        }
         return style;
+    }
+
+    private static int headingLevelAt(Spanned spanned, int start, int end) {
+        RelativeSizeSpan[] relativeSpans = spanned.getSpans(start, end, RelativeSizeSpan.class);
+        for (int i = 0; i < relativeSpans.length; i++) {
+            float sizeChange = relativeSpans[i].getSizeChange();
+            if (sizeChange >= 1.5f) {
+                return 1;
+            }
+            if (sizeChange >= 1.25f) {
+                return 2;
+            }
+        }
+        AbsoluteSizeSpan[] absoluteSpans = spanned.getSpans(start, end, AbsoluteSizeSpan.class);
+        for (int i = 0; i < absoluteSpans.length; i++) {
+            int size = absoluteSpans[i].getSize();
+            if (size >= 24) {
+                return 1;
+            }
+            if (size >= 20) {
+                return 2;
+            }
+        }
+        return 0;
     }
 }

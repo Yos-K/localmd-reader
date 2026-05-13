@@ -9,6 +9,7 @@ public final class StyledMarkdownTextTest {
         italicTextCreatesMarkdownItalicTag();
         underlineTextCreatesHtmlUnderlineTag();
         linkTextCreatesMarkdownLinkTag();
+        headingTextCreatesMarkdownHeadingTag();
         markdownSpecialCharactersAreEscapedBeforeApplyingStyle();
     }
 
@@ -50,6 +51,14 @@ public final class StyledMarkdownTextTest {
                 .value();
 
         TestAssertions.assertEquals("[OpenAI](https://openai.com)", markdown, "linked copied text must become a Markdown link");
+    }
+
+    private static void headingTextCreatesMarkdownHeadingTag() {
+        String markdown = new StyledMarkdownText()
+                .append("Section", MarkdownStyle.plain().withHeadingLevel(2))
+                .value();
+
+        TestAssertions.assertEquals("## Section\n\n", markdown, "large copied text must become a Markdown heading");
     }
 
     private static void markdownSpecialCharactersAreEscapedBeforeApplyingStyle() {
