@@ -46,7 +46,7 @@ cat > "$BUILD/generated/io/github/yosk/mdlite/infrastructure/BuildConfig.java" <
 package io.github.yosk.mdlite.infrastructure;
 
 public final class BuildConfig {
-    public static final boolean PRO_FEATURES_ENABLED = ${MDLITE_DEBUG_PRO_FEATURES:-false};
+    public static final boolean PRO_FEATURES_ENABLED = ${MDLITE_DEBUG_PRO_FEATURES:-true};
 
     private BuildConfig() {
     }
