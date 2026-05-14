@@ -85,6 +85,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final int MAX_RECENT_DOCUMENTS = 5;
     private static final String RECENT_PREFS = "recent_documents";
     private static final String RECENT_ITEMS = "items";
+    private static final String CLIPBOARD_HISTORY_PREFS = "clipboard_history";
+    private static final String CLIPBOARD_HISTORY_ITEMS = "items";
+    private static final int MAX_CLIPBOARD_HISTORY = 10;
     private static final String OPEN_TABS_PREFS = "open_tabs";
     private static final String OPEN_TABS_ITEMS = "items";
     private static final String OPEN_TABS_ACTIVE_INDEX = "active_index";
@@ -549,20 +552,117 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void createMarkdownFromClipboard() {
-        CharSequence clipboardText = clipboardText();
-        if (clipboardText == null || clipboardText.length() == 0) {
+        ClipData clip = clipboardClip();
+        List<ClipboardMarkdownItem> items = clipboardMarkdownItems(clip);
+        if (items.isEmpty()) {
             showFileOpenError(noClipboardTextMessage());
             return;
         }
-        openTemporaryMarkdown("Clipboard", AndroidStyledTextMarkdown.from(clipboardText));
+        if (items.size() == 1) {
+            openClipboardMarkdownItem(items.get(0));
+            return;
+        }
+        showClipboardItemPicker(items);
     }
 
-    private CharSequence clipboardText() {
-        ClipData clip = clipboardClip();
+    private List<ClipboardMarkdownItem> clipboardMarkdownItems(ClipData clip) {
+        ArrayList<ClipboardMarkdownItem> items = new ArrayList<ClipboardMarkdownItem>();
+        appendCurrentClipboardItems(items, clip);
+        appendClipboardHistoryItems(items);
+        return items;
+    }
+
+    private void appendCurrentClipboardItems(List<ClipboardMarkdownItem> items, ClipData clip) {
         if (clip == null) {
+            return;
+        }
+        for (int i = 0; i < clip.getItemCount(); i++) {
+            CharSequence text = clip.getItemAt(i).coerceToStyledText(this);
+            ClipboardMarkdownItem item = clipboardMarkdownItem(currentClipboardTitle(i), text);
+            if (item != null) {
+                items.add(item);
+            }
+        }
+    }
+
+    private void appendClipboardHistoryItems(List<ClipboardMarkdownItem> items) {
+        List<String> history = loadClipboardHistory();
+        for (int i = 0; i < history.size(); i++) {
+            ClipboardMarkdownItem item = clipboardMarkdownItem(historyClipboardTitle(i), history.get(i));
+            if (item != null && !containsClipboardMarkdown(items, item.markdown())) {
+                items.add(item);
+            }
+        }
+    }
+
+    private ClipboardMarkdownItem clipboardMarkdownItem(String title, CharSequence text) {
+        if (text == null || text.length() == 0) {
             return null;
         }
-        return clip.getItemAt(0).coerceToStyledText(this);
+        String markdown = AndroidStyledTextMarkdown.from(text);
+        if (markdown.length() == 0) {
+            return null;
+        }
+        return new ClipboardMarkdownItem(title, markdown);
+    }
+
+    private boolean containsClipboardMarkdown(List<ClipboardMarkdownItem> items, String markdown) {
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).markdown().equals(markdown)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String currentClipboardTitle(int index) {
+        return index == 0 ? "Clipboard" : "Clipboard " + (index + 1);
+    }
+
+    private String historyClipboardTitle(int index) {
+        return currentLanguage.isJapanese() ? "履歴 " + (index + 1) : "History " + (index + 1);
+    }
+
+    private void showClipboardItemPicker(List<ClipboardMarkdownItem> items) {
+        boolean[] selected = new boolean[items.size()];
+        new AlertDialog.Builder(this)
+                .setTitle(clipboardItemsTitle())
+                .setMultiChoiceItems(clipboardItemLabels(items), selected, new ClipboardItemCheckedListener(selected))
+                .setPositiveButton(openSelectedClipboardItemsLabel(), new ClipboardItemsOpenListener(this, items, selected))
+                .setNegativeButton(cancelLabel(), null)
+                .show();
+    }
+
+    private String[] clipboardItemLabels(List<ClipboardMarkdownItem> items) {
+        String[] labels = new String[items.size()];
+        for (int i = 0; i < items.size(); i++) {
+            labels[i] = clipboardItemLabel(items.get(i));
+        }
+        return labels;
+    }
+
+    private String clipboardItemLabel(ClipboardMarkdownItem item) {
+        String preview = item.markdown().replace('\n', ' ').trim();
+        String clipped = preview.length() > 48 ? preview.substring(0, 48) + "..." : preview;
+        return item.title() + ": " + clipped;
+    }
+
+    private void openSelectedClipboardItems(List<ClipboardMarkdownItem> items, boolean[] selected) {
+        boolean opened = false;
+        for (int i = 0; i < selected.length; i++) {
+            if (selected[i]) {
+                openClipboardMarkdownItem(items.get(i));
+                opened = true;
+            }
+        }
+        if (!opened) {
+            showFileOpenError(noClipboardItemSelectedMessage());
+        }
+    }
+
+    private void openClipboardMarkdownItem(ClipboardMarkdownItem item) {
+        recordClipboardHistory(item.markdown());
+        openTemporaryMarkdown(item.title(), item.markdown());
     }
 
     private ClipData clipboardClip() {
@@ -587,7 +687,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
 
         SafeHtml rendered = renderer.render(text, codeHighlighting);
-        String displayName = MarkdownDraftFileName.fromTitle(title, 1).value();
+        String displayName = nextDraftDisplayName(title);
         String draftUri = DRAFT_URI_PREFIX + Uri.encode(displayName);
         draftMarkdownByUri.put(draftUri, text);
         openTabs = openTabs.open(OpenDocumentTab.of(displayName, draftUri, rendered));
@@ -595,6 +695,16 @@ public final class MainActivity extends Activity implements View.OnClickListener
         renderTabs();
         renderCurrentDocument();
         showMessage(temporaryMarkdownMessage());
+    }
+
+    private String nextDraftDisplayName(String title) {
+        int sequence = 1;
+        String displayName = MarkdownDraftFileName.fromTitle(title, sequence).value();
+        while (draftMarkdownByUri.containsKey(DRAFT_URI_PREFIX + Uri.encode(displayName))) {
+            sequence++;
+            displayName = MarkdownDraftFileName.fromTitle(title, sequence).value();
+        }
+        return displayName;
     }
 
     private void openUris(List<Uri> uris, boolean remember, Intent permissionIntent) {
@@ -977,6 +1087,28 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return currentLanguage.isJapanese()
                 ? "クリップボードにMarkdownファイルを作成できるテキストがありません。"
                 : "There is no clipboard text to create a Markdown file.";
+    }
+
+    private String clipboardItemsTitle() {
+        return currentLanguage.isJapanese()
+                ? "開くクリップボード項目"
+                : "Clipboard items to open";
+    }
+
+    private String openSelectedClipboardItemsLabel() {
+        return currentLanguage.isJapanese()
+                ? "選択した項目を開く"
+                : "Open selected";
+    }
+
+    private String cancelLabel() {
+        return currentLanguage.isJapanese() ? "キャンセル" : "Cancel";
+    }
+
+    private String noClipboardItemSelectedMessage() {
+        return currentLanguage.isJapanese()
+                ? "開くクリップボード項目を選択してください。"
+                : "Select clipboard items to open.";
     }
 
     private String noDocumentToSaveMessage() {
@@ -1508,6 +1640,63 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 .apply();
     }
 
+    private List<String> loadClipboardHistory() {
+        SharedPreferences prefs = getSharedPreferences(CLIPBOARD_HISTORY_PREFS, MODE_PRIVATE);
+        String raw = prefs.getString(CLIPBOARD_HISTORY_ITEMS, "");
+        ArrayList<String> items = new ArrayList<String>();
+        if (raw != null && raw.length() > 0) {
+            String[] lines = raw.split("\\n", -1);
+            for (int i = 0; i < lines.length; i++) {
+                String markdown = decodeClipboardHistoryItem(lines[i]);
+                if (markdown != null) {
+                    items.add(markdown);
+                }
+            }
+        }
+        return items;
+    }
+
+    private void recordClipboardHistory(String markdown) {
+        if (markdown == null || markdown.length() == 0) {
+            return;
+        }
+        ArrayList<String> items = new ArrayList<String>();
+        items.add(markdown);
+        List<String> existing = loadClipboardHistory();
+        for (int i = 0; i < existing.size(); i++) {
+            String item = existing.get(i);
+            if (!markdown.equals(item) && items.size() < MAX_CLIPBOARD_HISTORY) {
+                items.add(item);
+            }
+        }
+        saveClipboardHistory(items);
+    }
+
+    private void saveClipboardHistory(List<String> items) {
+        StringBuilder raw = new StringBuilder();
+        for (int i = 0; i < items.size(); i++) {
+            if (i > 0) {
+                raw.append('\n');
+            }
+            raw.append(encode(items.get(i)));
+        }
+        getSharedPreferences(CLIPBOARD_HISTORY_PREFS, MODE_PRIVATE)
+                .edit()
+                .putString(CLIPBOARD_HISTORY_ITEMS, raw.toString())
+                .apply();
+    }
+
+    private static String decodeClipboardHistoryItem(String line) {
+        if (line == null || line.length() == 0) {
+            return null;
+        }
+        try {
+            return decode(line);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     private static RecentDocument decodeRecentDocument(String line) {
         if (line == null || line.length() == 0) {
             return null;
@@ -1839,6 +2028,54 @@ public final class MainActivity extends Activity implements View.OnClickListener
         @Override
         public void onClick(DialogInterface dialog, int which) {
             activity.cycleGestureShortcut(which);
+        }
+    }
+
+    private static final class ClipboardItemCheckedListener implements DialogInterface.OnMultiChoiceClickListener {
+        private final boolean[] selected;
+
+        private ClipboardItemCheckedListener(boolean[] selected) {
+            this.selected = selected;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+            selected[which] = isChecked;
+        }
+    }
+
+    private static final class ClipboardItemsOpenListener implements DialogInterface.OnClickListener {
+        private final MainActivity activity;
+        private final List<ClipboardMarkdownItem> items;
+        private final boolean[] selected;
+
+        private ClipboardItemsOpenListener(MainActivity activity, List<ClipboardMarkdownItem> items, boolean[] selected) {
+            this.activity = activity;
+            this.items = items;
+            this.selected = selected;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            activity.openSelectedClipboardItems(items, selected);
+        }
+    }
+
+    private static final class ClipboardMarkdownItem {
+        private final String title;
+        private final String markdown;
+
+        private ClipboardMarkdownItem(String title, String markdown) {
+            this.title = title;
+            this.markdown = markdown;
+        }
+
+        private String title() {
+            return title;
+        }
+
+        private String markdown() {
+            return markdown;
         }
     }
 
