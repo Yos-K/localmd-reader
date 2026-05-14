@@ -101,34 +101,34 @@ public final class ViewerThemeStyle {
 
     private static ViewerThemeStyle dark() {
         return new ViewerThemeStyle(
-                "#101414", "#101414", "#101414", "#1b2423", "#25302f", "#edf5f2", "#a7bbb7",
-                "#2a9d8f", "#7ccbe0", "#7ccbe0", "#25302f", "#90d7ff", "#f3bd76",
-                "#a7d98f", "#d4c5ff", "#3c4b49", "#25302f", "#80a8a1",
-                "128,168,161", "0.55", "16,20,20", "#1b2423");
+                "#141a1f", "#141a1f", "#141a1f", "#202a31", "#2b3740", "#f4faf8", "#b7c6c1",
+                "#49b3a5", "#9dd8cf", "#8bd7ff", "#2b3740", "#94d7ff", "#f4c47b",
+                "#bae89f", "#d7c6ff", "#46545c", "#2b3740", "#8fb8ad",
+                "143,184,173", "0.58", "20,26,31", "#202a31");
     }
 
     private static ViewerThemeStyle amoled() {
         return new ViewerThemeStyle(
-                "#000000", "#000000", "#000000", "#080c0b", "#101817", "#f2f7f5", "#9fb2ae",
-                "#35b8a8", "#8ad9ed", "#8ad9ed", "#101817", "#9bdcff", "#f5c681",
-                "#b0e69b", "#dacbff", "#263432", "#101817", "#6f9b93",
-                "111,155,147", "0.55", "0,0,0", "#080c0b");
+                "#000000", "#000000", "#000000", "#050505", "#101010", "#f7fff9", "#a9b8ad",
+                "#4ee88a", "#a8ffbf", "#80ffd4", "#101010", "#8de8ff", "#ffd487",
+                "#baff94", "#d8c2ff", "#252525", "#101010", "#6cff9e",
+                "108,255,158", "0.62", "0,0,0", "#050505");
     }
 
     private static ViewerThemeStyle gradient() {
         return new ViewerThemeStyle(
-                "#f7fbf8", "linear-gradient(135deg,#f7fbf8 0%,#dcefea 45%,#f4dedb 100%)", "#f7fbf8", "#ffffff", "#e9f3ef", "#172121", "#566664",
-                "#0d756d", "#0f3d3e", "#0b6f87", "#e6eeee", "#0b5cad", "#8f4b00",
-                "#3f6f1f", "#5c4da8", "#b8d0cb", "#e9f3ef", "#b8d0cb",
-                "201,216,213", "0.45", "248,251,250", "#eef5f3");
+                "#fbf7f2", "linear-gradient(135deg,#fbf7f2 0%,#d7efe7 38%,#f6d7c8 72%,#f8e8aa 100%)", "#fbf7f2", "#fffaf4", "#f1e6d3", "#241f1a", "#6c6256",
+                "#a85a2a", "#5a351f", "#8a5d00", "#f1e6d3", "#8a4e08", "#7c5100",
+                "#4e6c1f", "#6650a8", "#d8c6aa", "#f1e6d3", "#c9a873",
+                "201,168,115", "0.48", "251,247,242", "#f1e6d3");
     }
 
     private static ViewerThemeStyle aurora() {
         return new ViewerThemeStyle(
-                "#f6fbf9", "linear-gradient(135deg,#f6fbf9 0%,#d8f0eb 38%,#f7e6ee 100%)", "#f6fbf9", "#ffffff", "#e8f6f1", "#162321", "#58706b",
-                "#087f73", "#0e4a45", "#0a6f86", "#e6eeee", "#0b5cad", "#8f4b00",
-                "#3f6f1f", "#5c4da8", "#b6d8d0", "#e8f6f1", "#b6d8d0",
-                "201,216,213", "0.45", "246,251,249", "#e8f6f1");
+                "#081411", "linear-gradient(135deg,#081411 0%,#123d36 34%,#0a5c58 64%,#3a5b2a 100%)", "#081411", "#10211d", "#18342e", "#f2fff7", "#aec9bd",
+                "#54d6a7", "#b8ffd7", "#8ceeff", "#18342e", "#9eeeff", "#ffd184",
+                "#b9f28f", "#d4c4ff", "#315248", "#18342e", "#64d6a4",
+                "100,214,164", "0.60", "8,20,17", "#10211d");
     }
 
     private static ViewerThemeStyle mist() {

@@ -24,6 +24,10 @@ public final class TestAssertions {
         require(expected.equals(actual), message + "\nExpected: " + expected + "\nActual: " + actual);
     }
 
+    public static void assertNotEquals(String unexpected, String actual, String message) {
+        require(!unexpected.equals(actual), message + "\nUnexpected: " + unexpected + "\nActual: " + actual);
+    }
+
     public static void assertSame(Object expected, Object actual, String message) {
         require(expected == actual, message);
     }

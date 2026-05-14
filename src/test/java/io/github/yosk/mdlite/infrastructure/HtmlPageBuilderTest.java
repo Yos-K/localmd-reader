@@ -39,8 +39,8 @@ public final class HtmlPageBuilderTest {
                 SafeHtml.fromTrustedRendererOutput("<h1>Title</h1>"),
                 ViewerTheme.dark());
 
-        TestAssertions.assertContains(page, "background:#101414", "dark theme must use dark page background");
-        TestAssertions.assertContains(page, "color:#edf5f2", "dark theme must use light text");
+        TestAssertions.assertContains(page, "background:#141a1f", "dark theme must use dark page background");
+        TestAssertions.assertContains(page, "color:#f4faf8", "dark theme must use light text");
     }
 
     public void rendersAmoledThemeWithBlackBackgroundAndLightText() {
@@ -49,7 +49,7 @@ public final class HtmlPageBuilderTest {
                 ViewerTheme.amoled());
 
         TestAssertions.assertContains(page, "background:#000000", "AMOLED theme must use a true black page background");
-        TestAssertions.assertContains(page, "color:#f2f7f5", "AMOLED theme must keep high-contrast light text");
+        TestAssertions.assertContains(page, "color:#f7fff9", "AMOLED theme must keep high-contrast light text");
     }
 
     public void rendersGradientThemeWithModernReadableBackground() {
@@ -57,8 +57,8 @@ public final class HtmlPageBuilderTest {
                 SafeHtml.fromTrustedRendererOutput("<h1>Title</h1>"),
                 ViewerTheme.gradient());
 
-        TestAssertions.assertContains(page, "background:linear-gradient(135deg,#f7fbf8 0%,#dcefea 45%,#f4dedb 100%)", "Gradient theme must use a modern non-purple reading background");
-        TestAssertions.assertContains(page, "color:#172121", "Gradient theme must keep dark readable text");
+        TestAssertions.assertContains(page, "background:linear-gradient(135deg,#fbf7f2 0%,#d7efe7 38%,#f6d7c8 72%,#f8e8aa 100%)", "Gradient theme must use a modern non-purple reading background");
+        TestAssertions.assertContains(page, "color:#241f1a", "Gradient theme must keep dark readable text");
     }
 
     public void rendersAuroraThemeWithModernReadableBackground() {
@@ -66,8 +66,8 @@ public final class HtmlPageBuilderTest {
                 SafeHtml.fromTrustedRendererOutput("<h1>Title</h1>"),
                 ViewerTheme.aurora());
 
-        TestAssertions.assertContains(page, "background:linear-gradient(135deg,#f6fbf9 0%,#d8f0eb 38%,#f7e6ee 100%)", "Aurora theme must use a soft modern reading background");
-        TestAssertions.assertContains(page, "color:#162321", "Aurora theme must keep dark readable text");
+        TestAssertions.assertContains(page, "background:linear-gradient(135deg,#081411 0%,#123d36 34%,#0a5c58 64%,#3a5b2a 100%)", "Aurora theme must use a distinct dark aurora reading background");
+        TestAssertions.assertContains(page, "color:#f2fff7", "Aurora theme must keep light readable text");
     }
 
     public void rendersMistThemeWithModernReadableBackground() {
@@ -126,7 +126,7 @@ public final class HtmlPageBuilderTest {
                 FontSize.of(18));
 
         TestAssertions.assertContains(lightPage, "a{color:#0b6f87;text-decoration:underline;}", "light theme links must be visibly styled");
-        TestAssertions.assertContains(darkPage, "a{color:#7ccbe0;text-decoration:underline;}", "dark theme links must be visibly styled");
+        TestAssertions.assertContains(darkPage, "a{color:#8bd7ff;text-decoration:underline;}", "dark theme links must be visibly styled");
     }
 
     public void stylesChecklistForReadableMobileLayout() {
@@ -157,8 +157,8 @@ public final class HtmlPageBuilderTest {
                 ViewerTheme.dark(),
                 FontSize.of(18));
 
-        TestAssertions.assertContains(page, "linear-gradient(to right,rgba(128,168,161,0.55),rgba(128,168,161,0))", "dark table scroll hint must be brighter than the dark border");
-        TestAssertions.assertContains(page, ".table-scroll::-webkit-scrollbar-thumb{background:#80a8a1;border-radius:4px;}", "dark table scrollbar thumb must be visible");
+        TestAssertions.assertContains(page, "linear-gradient(to right,rgba(143,184,173,0.58),rgba(143,184,173,0))", "dark table scroll hint must be brighter than the dark border");
+        TestAssertions.assertContains(page, ".table-scroll::-webkit-scrollbar-thumb{background:#8fb8ad;border-radius:4px;}", "dark table scrollbar thumb must be visible");
     }
 
     public void stylesWelcomeHomeForFirstRun() {
