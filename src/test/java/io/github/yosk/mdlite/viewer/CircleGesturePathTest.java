@@ -8,6 +8,7 @@ public final class CircleGesturePathTest {
         openPathIsNotRecognizedAsCircleGesture();
         tinyClosedPathIsNotRecognizedAsCircleGesture();
         flatClosedPathIsNotRecognizedAsCircleGesture();
+        imperfectClosedPathIsRecognizedAsCircleGesture();
     }
 
     private static void closedRoundPathIsRecognizedAsCircleGesture() {
@@ -40,5 +41,13 @@ public final class CircleGesturePathTest {
                 new float[] { 50f, 52f, 54f, 50f, 46f, 48f, 50f });
 
         TestAssertions.assertFalse(path.isCircleLike(), "flat closed path must not be recognized as a circle gesture");
+    }
+
+    private static void imperfectClosedPathIsRecognizedAsCircleGesture() {
+        CircleGesturePath path = CircleGesturePath.fromPoints(
+                new float[] { 100f, 150f, 178f, 151f, 105f, 57f, 35f, 65f, 121f },
+                new float[] { 42f, 60f, 104f, 148f, 166f, 141f, 95f, 54f, 51f });
+
+        TestAssertions.assertTrue(path.isCircleLike(), "imperfect one-finger circle path must still trigger the circle shortcut");
     }
 }

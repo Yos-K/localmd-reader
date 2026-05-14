@@ -58,6 +58,14 @@ public final class GestureShortcutAction {
         return off();
     }
 
+    public static GestureShortcutAction[] availableActions(FeatureEntitlement entitlement) {
+        FeatureEntitlement safeEntitlement = entitlement == null ? FeatureEntitlement.free() : entitlement;
+        if (!safeEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
+            return new GestureShortcutAction[] { off() };
+        }
+        return new GestureShortcutAction[] { off(), openFile(), openMenu(), nextTheme(), moveControls() };
+    }
+
     public boolean isOff() {
         return value == OFF;
     }

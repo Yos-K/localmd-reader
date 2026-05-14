@@ -19,6 +19,9 @@ public final class ViewerThemeTest {
         proEntitlementCyclesFromAuroraToMist();
         proEntitlementCyclesFromMistToDusk();
         proEntitlementCyclesFromDuskToLight();
+        storedValueRestoresGradientTheme();
+        freeAvailableThemesContainOnlyLightAndDark();
+        proAvailableThemesIncludeDuskTheme();
     }
 
     private static void lightThemeIsNotDark() {
@@ -114,5 +117,26 @@ public final class ViewerThemeTest {
 
         TestAssertions.assertFalse(next.isDark(), "Pro theme cycle must return from Dusk to Light");
         TestAssertions.assertFalse(next.isDusk(), "Light theme after Dusk must not keep Dusk identity");
+    }
+
+    private static void storedValueRestoresGradientTheme() {
+        ViewerTheme theme = ViewerTheme.fromStoredValue(ViewerTheme.gradient().storedValue());
+
+        TestAssertions.assertTrue(theme.isGradient(), "stored gradient value must restore the gradient theme");
+    }
+
+    private static void freeAvailableThemesContainOnlyLightAndDark() {
+        ViewerTheme[] themes = ViewerTheme.availableThemes(FeatureEntitlement.free());
+
+        TestAssertions.assertEquals(2, themes.length, "Free theme picker must expose only Light and Dark");
+        TestAssertions.assertFalse(themes[0].isDark(), "Free theme picker must expose Light first");
+        TestAssertions.assertTrue(themes[1].isDark(), "Free theme picker must expose Dark second");
+    }
+
+    private static void proAvailableThemesIncludeDuskTheme() {
+        ViewerTheme[] themes = ViewerTheme.availableThemes(FeatureEntitlement.pro());
+
+        TestAssertions.assertEquals(7, themes.length, "Pro theme picker must expose all visual themes");
+        TestAssertions.assertTrue(themes[6].isDusk(), "Pro theme picker must include Dusk as a direct choice");
     }
 }

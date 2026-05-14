@@ -13,6 +13,8 @@ public final class GestureShortcutActionTest {
         freeUsersAlwaysKeepGestureShortcutsOff();
         storedValueRestoresOpenMenuAction();
         unknownStoredValueRestoresOffAction();
+        freeAvailableActionsContainOnlyOff();
+        proAvailableActionsExposeMoveControlsAsDirectChoice();
     }
 
     private static void offActionCyclesToOpenMenuForProUsers() {
@@ -61,5 +63,19 @@ public final class GestureShortcutActionTest {
         GestureShortcutAction action = GestureShortcutAction.fromStoredValue("bad_value");
 
         TestAssertions.assertTrue(action.isOff(), "unknown stored gesture shortcut values must safely restore Off");
+    }
+
+    private static void freeAvailableActionsContainOnlyOff() {
+        GestureShortcutAction[] actions = GestureShortcutAction.availableActions(FeatureEntitlement.free());
+
+        TestAssertions.assertEquals(1, actions.length, "Free gesture shortcut picker must expose only Off");
+        TestAssertions.assertTrue(actions[0].isOff(), "Free gesture shortcut picker must expose Off");
+    }
+
+    private static void proAvailableActionsExposeMoveControlsAsDirectChoice() {
+        GestureShortcutAction[] actions = GestureShortcutAction.availableActions(FeatureEntitlement.pro());
+
+        TestAssertions.assertEquals(5, actions.length, "Pro gesture shortcut picker must expose all actions");
+        TestAssertions.assertTrue(actions[4].isMoveControls(), "Pro gesture shortcut picker must expose Move controls directly");
     }
 }

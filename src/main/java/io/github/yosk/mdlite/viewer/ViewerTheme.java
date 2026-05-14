@@ -11,6 +11,13 @@ public final class ViewerTheme {
     private static final int AURORA = 5;
     private static final int MIST = 6;
     private static final int DUSK = 7;
+    public static final String LIGHT_VALUE = "light";
+    public static final String DARK_VALUE = "dark";
+    public static final String AMOLED_VALUE = "amoled";
+    public static final String GRADIENT_VALUE = "gradient";
+    public static final String AURORA_VALUE = "aurora";
+    public static final String MIST_VALUE = "mist";
+    public static final String DUSK_VALUE = "dusk";
 
     private final int value;
 
@@ -48,6 +55,36 @@ public final class ViewerTheme {
 
     public static ViewerTheme dusk() {
         return new ViewerTheme(DUSK);
+    }
+
+    public static ViewerTheme fromStoredValue(String storedValue) {
+        if (DARK_VALUE.equals(storedValue)) {
+            return dark();
+        }
+        if (AMOLED_VALUE.equals(storedValue)) {
+            return amoled();
+        }
+        if (GRADIENT_VALUE.equals(storedValue)) {
+            return gradient();
+        }
+        if (AURORA_VALUE.equals(storedValue)) {
+            return aurora();
+        }
+        if (MIST_VALUE.equals(storedValue)) {
+            return mist();
+        }
+        if (DUSK_VALUE.equals(storedValue)) {
+            return dusk();
+        }
+        return light();
+    }
+
+    public static ViewerTheme[] availableThemes(FeatureEntitlement entitlement) {
+        FeatureEntitlement safeEntitlement = entitlement == null ? FeatureEntitlement.free() : entitlement;
+        if (!safeEntitlement.allows(ViewerFeature.EXTRA_THEMES)) {
+            return new ViewerTheme[] { light(), dark() };
+        }
+        return new ViewerTheme[] { light(), dark(), amoled(), gradient(), aurora(), mist(), dusk() };
     }
 
     public boolean isDark() {
@@ -102,5 +139,27 @@ public final class ViewerTheme {
             return dusk();
         }
         return light();
+    }
+
+    public String storedValue() {
+        if (value == DARK) {
+            return DARK_VALUE;
+        }
+        if (value == AMOLED) {
+            return AMOLED_VALUE;
+        }
+        if (value == GRADIENT) {
+            return GRADIENT_VALUE;
+        }
+        if (value == AURORA) {
+            return AURORA_VALUE;
+        }
+        if (value == MIST) {
+            return MIST_VALUE;
+        }
+        if (value == DUSK) {
+            return DUSK_VALUE;
+        }
+        return LIGHT_VALUE;
     }
 }

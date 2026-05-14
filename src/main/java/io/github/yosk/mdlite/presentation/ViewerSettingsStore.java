@@ -7,11 +7,13 @@ import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.viewer.GestureShortcutAction;
 import io.github.yosk.mdlite.domain.ViewerFeature;
 import io.github.yosk.mdlite.viewer.ViewerLanguage;
+import io.github.yosk.mdlite.viewer.ViewerTheme;
 
 final class ViewerSettingsStore {
     private static final String SETTINGS_PREFS = "viewer_settings";
     private static final String CONTROLS_PLACEMENT = "controls_placement";
     private static final String VIEWER_LANGUAGE = "viewer_language";
+    private static final String VIEWER_THEME = "viewer_theme";
     private static final String DOUBLE_TAP_SHORTCUT = "double_tap_shortcut";
     private static final String CIRCLE_GESTURE_SHORTCUT = "circle_gesture_shortcut";
 
@@ -37,6 +39,19 @@ final class ViewerSettingsStore {
 
     void saveViewerLanguage(ViewerLanguage language) {
         prefs().edit().putString(VIEWER_LANGUAGE, language.storedValue()).apply();
+    }
+
+    ViewerTheme loadViewerTheme() {
+        ViewerTheme stored = ViewerTheme.fromStoredValue(prefs().getString(VIEWER_THEME, ViewerTheme.LIGHT_VALUE));
+        if (!entitlement.allows(ViewerFeature.EXTRA_THEMES)
+                && !ViewerTheme.DARK_VALUE.equals(stored.storedValue())) {
+            return ViewerTheme.light();
+        }
+        return stored;
+    }
+
+    void saveViewerTheme(ViewerTheme theme) {
+        prefs().edit().putString(VIEWER_THEME, theme.storedValue()).apply();
     }
 
     GestureShortcutAction loadDoubleTapShortcut() {

@@ -167,6 +167,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         controlsPlacement = settingsStore.loadControlsPlacement();
         currentLanguage = settingsStore.loadViewerLanguage();
         viewerText = ViewerText.fromLanguage(currentLanguage);
+        currentTheme = settingsStore.loadViewerTheme();
+        viewerPalette = ViewerPalette.from(currentTheme);
         doubleTapShortcut = settingsStore.loadDoubleTapShortcut();
         circleGestureShortcut = settingsStore.loadCircleGestureShortcut();
 
@@ -398,13 +400,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
             closeMenu();
             showRecentDocuments();
         } else if (view == themeButton) {
-            currentTheme = currentTheme.next(featureEntitlement);
-            viewerPalette = ViewerPalette.from(currentTheme);
-            updateLocalizedText();
-            applyNativeTheme();
             closeMenu();
-            renderTabs();
-            renderCurrentDocument();
+            showThemeDialog();
         } else if (view == languageButton) {
             currentLanguage = currentLanguage.toggled();
             viewerText = ViewerText.fromLanguage(currentLanguage);
@@ -1022,6 +1019,27 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 .show();
     }
 
+    private void showThemeDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(viewerText.themeLabel(currentTheme))
+                .setItems(themeLabels(), new ThemeClickListener(this, availableThemes()))
+                .setNegativeButton("OK", null)
+                .show();
+    }
+
+    private ViewerTheme[] availableThemes() {
+        return ViewerTheme.availableThemes(featureEntitlement);
+    }
+
+    private String[] themeLabels() {
+        ViewerTheme[] themes = availableThemes();
+        String[] labels = new String[themes.length];
+        for (int i = 0; i < themes.length; i++) {
+            labels[i] = viewerText.themeLabel(themes[i]);
+        }
+        return labels;
+    }
+
     private String[] gestureShortcutLabels() {
         return new String[] {
             shortcutLabel(viewerText.doubleTapPrefix(), doubleTapShortcut),
@@ -1029,18 +1047,43 @@ public final class MainActivity extends Activity implements View.OnClickListener
         };
     }
 
-    private void cycleGestureShortcut(int index) {
+    private void selectGestureTarget(int index) {
         if (index == 0) {
-            doubleTapShortcut = doubleTapShortcut.next(featureEntitlement);
-            settingsStore.saveDoubleTapShortcut(doubleTapShortcut);
-            showGestureShortcutsDialog();
+            showDoubleTapShortcutDialog();
             return;
         }
         if (index == 1) {
-            circleGestureShortcut = circleGestureShortcut.next(featureEntitlement);
-            settingsStore.saveCircleGestureShortcut(circleGestureShortcut);
-            showGestureShortcutsDialog();
+            showCircleGestureShortcutDialog();
         }
+    }
+
+    private void showDoubleTapShortcutDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(viewerText.doubleTapPrefix())
+                .setItems(gestureActionLabels(), new DoubleTapShortcutClickListener(this, availableGestureActions()))
+                .setNegativeButton("OK", null)
+                .show();
+    }
+
+    private void showCircleGestureShortcutDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(viewerText.circleGesturePrefix())
+                .setItems(gestureActionLabels(), new CircleGestureShortcutClickListener(this, availableGestureActions()))
+                .setNegativeButton("OK", null)
+                .show();
+    }
+
+    private GestureShortcutAction[] availableGestureActions() {
+        return GestureShortcutAction.availableActions(featureEntitlement);
+    }
+
+    private String[] gestureActionLabels() {
+        GestureShortcutAction[] actions = availableGestureActions();
+        String[] labels = new String[actions.length];
+        for (int i = 0; i < actions.length; i++) {
+            labels[i] = actionLabel(actions[i]);
+        }
+        return labels;
     }
 
     private void showClipboardDiagnosticsDialog() {
@@ -1056,7 +1099,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         saveAsButton.setText(viewerText.saveAs());
         saveAsButton.setVisibility(activeTabIsDraft() ? View.VISIBLE : View.GONE);
         recentButton.setText(recentFilesTitle());
-        themeButton.setText(nextThemeLabel());
+        themeButton.setText(viewerText.themeLabel(currentTheme));
         languageButton.setText(viewerText.switchLanguage());
         menuTitle.setText("LocalMD Reader");
         filesSection.setText(viewerText.filesSection());
@@ -1091,19 +1134,45 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
             return prefix + viewerText.proOnly();
         }
+        return prefix + actionLabel(action);
+    }
+
+    private String actionLabel(GestureShortcutAction action) {
         if (action.isOpenFile()) {
-            return prefix + viewerText.openFile();
+            return viewerText.openFile();
         }
         if (action.isOpenMenu()) {
-            return prefix + viewerText.openMenu();
+            return viewerText.openMenu();
         }
         if (action.isNextTheme()) {
-            return prefix + viewerText.nextThemeAction();
+            return viewerText.nextThemeAction();
         }
         if (action.isMoveControls()) {
-            return prefix + viewerText.moveControlsAction();
+            return viewerText.moveControlsAction();
         }
-        return prefix + viewerText.off();
+        return viewerText.off();
+    }
+
+    private void applySelectedTheme(ViewerTheme theme) {
+        currentTheme = theme;
+        settingsStore.saveViewerTheme(currentTheme);
+        viewerPalette = ViewerPalette.from(currentTheme);
+        updateLocalizedText();
+        applyNativeTheme();
+        renderTabs();
+        renderCurrentDocument();
+    }
+
+    private void applyDoubleTapShortcut(GestureShortcutAction action) {
+        doubleTapShortcut = action;
+        settingsStore.saveDoubleTapShortcut(doubleTapShortcut);
+        updateLocalizedText();
+    }
+
+    private void applyCircleGestureShortcut(GestureShortcutAction action) {
+        circleGestureShortcut = action;
+        settingsStore.saveCircleGestureShortcut(circleGestureShortcut);
+        updateLocalizedText();
     }
 
     private boolean activeTabIsDraft() {
@@ -1215,10 +1284,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String unreadableFileMessage() {
         return viewerText.unreadableFile();
-    }
-
-    private String nextThemeLabel() {
-        return viewerText.themeLabel(currentTheme.next(featureEntitlement));
     }
 
     private void applyControlsPlacement() {
@@ -1372,11 +1437,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
         messageView.setBackgroundColor(messageColor());
         styleToolbarButton(menuButton);
         styleMenuButton(openButton);
+        styleMenuButton(createFromClipboardButton);
+        styleMenuButton(saveAsButton);
         styleMenuButton(recentButton);
         styleMenuButton(themeButton);
         styleMenuButton(languageButton);
         styleMenuButton(controlsPlacementButton);
+        styleMenuButton(gestureShortcutsButton);
         styleMenuButton(proFeaturesButton);
+        styleMenuButton(clipboardDiagnosticsButton);
         styleMenuButton(privacyButton);
         applyMenuSectionTheme();
     }
@@ -1794,18 +1863,18 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             resetCircleGesturePath();
             appendCircleGesturePoint(event);
-            return false;
+            return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
             appendCircleGesturePoint(event);
-            return false;
+            return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
             appendCircleGesturePoint(event);
             boolean handled = CircleGesturePath.fromPoints(circleGestureXs(), circleGestureYs()).isCircleLike()
                     && executeShortcutAction(circleGestureShortcut);
             resetCircleGesturePath();
-            return handled;
+            return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
             resetCircleGesturePath();
@@ -1827,6 +1896,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         if (action.isNextTheme()) {
             currentTheme = currentTheme.next(featureEntitlement);
+            settingsStore.saveViewerTheme(currentTheme);
             viewerPalette = ViewerPalette.from(currentTheme);
             updateLocalizedText();
             applyNativeTheme();
@@ -1992,7 +2062,52 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            activity.cycleGestureShortcut(which);
+            activity.selectGestureTarget(which);
+        }
+    }
+
+    private static final class ThemeClickListener implements DialogInterface.OnClickListener {
+        private final MainActivity activity;
+        private final ViewerTheme[] themes;
+
+        private ThemeClickListener(MainActivity activity, ViewerTheme[] themes) {
+            this.activity = activity;
+            this.themes = themes;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            activity.applySelectedTheme(themes[which]);
+        }
+    }
+
+    private static final class DoubleTapShortcutClickListener implements DialogInterface.OnClickListener {
+        private final MainActivity activity;
+        private final GestureShortcutAction[] actions;
+
+        private DoubleTapShortcutClickListener(MainActivity activity, GestureShortcutAction[] actions) {
+            this.activity = activity;
+            this.actions = actions;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            activity.applyDoubleTapShortcut(actions[which]);
+        }
+    }
+
+    private static final class CircleGestureShortcutClickListener implements DialogInterface.OnClickListener {
+        private final MainActivity activity;
+        private final GestureShortcutAction[] actions;
+
+        private CircleGestureShortcutClickListener(MainActivity activity, GestureShortcutAction[] actions) {
+            this.activity = activity;
+            this.actions = actions;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            activity.applyCircleGestureShortcut(actions[which]);
         }
     }
 
