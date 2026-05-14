@@ -15,6 +15,7 @@ public final class HtmlPageBuilderTest {
         test.rendersAuroraThemeWithModernReadableBackground();
         test.rendersMistThemeWithModernReadableBackground();
         test.rendersDuskThemeWithModernReadableBackground();
+        test.welcomePrimaryActionUsesSolidTextColorOnGradientThemes();
         test.includesRenderedMarkdownBodyUnchanged();
         test.appliesFontSizeToParagraphText();
         test.appliesFontSizeToHeadings();
@@ -57,8 +58,8 @@ public final class HtmlPageBuilderTest {
                 SafeHtml.fromTrustedRendererOutput("<h1>Title</h1>"),
                 ViewerTheme.gradient());
 
-        TestAssertions.assertContains(page, "background:linear-gradient(135deg,#fbf7f2 0%,#d7efe7 38%,#f6d7c8 72%,#f8e8aa 100%)", "Gradient theme must use a modern non-purple reading background");
-        TestAssertions.assertContains(page, "color:#241f1a", "Gradient theme must keep dark readable text");
+        TestAssertions.assertContains(page, "background:linear-gradient(135deg,#f7fbf9 0%,#dceee9 36%,#f2e7dc 70%,#f7f1e7 100%)", "Gradient theme must use a modern non-purple reading background");
+        TestAssertions.assertContains(page, "color:#172121", "Gradient theme must keep dark readable text");
     }
 
     public void rendersAuroraThemeWithModernReadableBackground() {
@@ -86,6 +87,15 @@ public final class HtmlPageBuilderTest {
 
         TestAssertions.assertContains(page, "background:linear-gradient(135deg,#fbf6f3 0%,#efe3dc 45%,#dbe9e4 100%)", "Dusk theme must use a warm modern reading background");
         TestAssertions.assertContains(page, "color:#241d1b", "Dusk theme must keep dark readable text");
+    }
+
+    public void welcomePrimaryActionUsesSolidTextColorOnGradientThemes() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<section class=\"welcome\"><a class=\"welcome-primary-action\">Open Markdown file</a></section>"),
+                ViewerTheme.gradient());
+
+        TestAssertions.assertContains(page, ".welcome-primary-action{display:block;box-sizing:border-box;width:100%;background:#0d756d;color:#f7fbf9;", "welcome primary action must use a readable solid text color");
+        TestAssertions.assertNotContains(page, ".welcome-primary-action{display:block;box-sizing:border-box;width:100%;background:#0d756d;color:linear-gradient", "welcome primary action text color must not use CSS gradients");
     }
 
     public void includesRenderedMarkdownBodyUnchanged() {

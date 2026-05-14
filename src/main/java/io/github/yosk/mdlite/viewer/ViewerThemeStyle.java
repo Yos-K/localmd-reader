@@ -117,10 +117,10 @@ public final class ViewerThemeStyle {
 
     private static ViewerThemeStyle gradient() {
         return new ViewerThemeStyle(
-                "#fbf7f2", "linear-gradient(135deg,#fbf7f2 0%,#d7efe7 38%,#f6d7c8 72%,#f8e8aa 100%)", "#fbf7f2", "#fffaf4", "#f1e6d3", "#241f1a", "#6c6256",
-                "#a85a2a", "#5a351f", "#8a5d00", "#f1e6d3", "#8a4e08", "#7c5100",
-                "#4e6c1f", "#6650a8", "#d8c6aa", "#f1e6d3", "#c9a873",
-                "201,168,115", "0.48", "251,247,242", "#f1e6d3");
+                "#f7fbf9", "linear-gradient(135deg,#f7fbf9 0%,#dceee9 36%,#f2e7dc 70%,#f7f1e7 100%)", "#f7fbf9", "#ffffff", "#e9f1ee", "#172121", "#5d6a66",
+                "#0d756d", "#0f3d3e", "#0b6f87", "#e6eeee", "#0b5cad", "#8f4b00",
+                "#3f6f1f", "#5c4da8", "#b8d0cb", "#e9f1ee", "#9fb9b4",
+                "159,185,180", "0.48", "247,251,249", "#e9f1ee");
     }
 
     private static ViewerThemeStyle aurora() {

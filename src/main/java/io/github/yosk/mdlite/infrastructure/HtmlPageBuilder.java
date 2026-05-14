@@ -53,7 +53,7 @@ public final class HtmlPageBuilder {
                 + ".welcome{padding:4px 0 0;}"
                 + ".welcome-kicker{font-size:" + (bodyFontSize - 2) + "px;color:" + style.primary + ";font-weight:700;margin:0 0 8px;}"
                 + ".welcome-lead{font-size:" + (bodyFontSize + 2) + "px;line-height:1.55;margin:0 0 20px;}"
-                + ".welcome-primary-action{display:block;box-sizing:border-box;width:100%;background:" + style.primary + ";color:" + style.background + ";text-align:center;text-decoration:none;font-weight:700;border-radius:8px;padding:14px;margin:0 0 14px;}"
+                + ".welcome-primary-action{display:block;box-sizing:border-box;width:100%;background:" + style.primary + ";color:" + style.solidBackground + ";text-align:center;text-decoration:none;font-weight:700;border-radius:8px;padding:14px;margin:0 0 14px;}"
                 + ".welcome-grid{display:grid;gap:10px;margin:0 0 18px;}"
                 + ".welcome-card{background:" + style.surface + ";border:1px solid " + style.border + ";border-radius:8px;padding:14px;}"
                 + ".welcome-card strong{display:block;font-size:" + bodyFontSize + "px;margin:0 0 4px;color:" + style.text + ";}"

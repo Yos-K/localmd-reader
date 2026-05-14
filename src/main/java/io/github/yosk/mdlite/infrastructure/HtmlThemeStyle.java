@@ -5,6 +5,7 @@ import io.github.yosk.mdlite.viewer.ViewerThemeStyle;
 
 final class HtmlThemeStyle {
     final String background;
+    final String solidBackground;
     final String tableBackground;
     final String surface;
     final String surfaceAlt;
@@ -26,6 +27,7 @@ final class HtmlThemeStyle {
 
     private HtmlThemeStyle(ViewerThemeStyle style) {
         this.background = style.cssBackground;
+        this.solidBackground = style.background;
         this.tableBackground = style.tableBackground;
         this.surface = style.surface;
         this.surfaceAlt = style.surfaceAlt;

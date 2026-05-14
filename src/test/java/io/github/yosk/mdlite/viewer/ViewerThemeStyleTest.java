@@ -24,9 +24,9 @@ public final class ViewerThemeStyleTest {
     public void gradientThemeStyleProvidesNativeColorAndCssGradient() {
         ViewerThemeStyle style = ViewerThemeStyle.from(ViewerTheme.gradient());
 
-        TestAssertions.assertEquals("#fbf7f2", style.background, "Gradient theme native background must keep a solid color fallback");
+        TestAssertions.assertEquals("#f7fbf9", style.background, "Gradient theme native background must keep a solid color fallback");
         TestAssertions.assertEquals(
-                "linear-gradient(135deg,#fbf7f2 0%,#d7efe7 38%,#f6d7c8 72%,#f8e8aa 100%)",
+                "linear-gradient(135deg,#f7fbf9 0%,#dceee9 36%,#f2e7dc 70%,#f7f1e7 100%)",
                 style.cssBackground,
                 "Gradient theme CSS background must come from the shared theme style");
     }
