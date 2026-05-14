@@ -373,6 +373,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     @Override
     public void onClick(View view) {
         if (view == menuButton) {
+            updateLocalizedText();
             toggleMenu();
         } else if (view == openButton) {
             closeMenu();
@@ -423,11 +424,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showPrivacyPolicyDialog();
         } else if (view instanceof TabButton) {
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
+            updateLocalizedText();
             renderTabs();
             renderCurrentDocument();
             saveOpenTabs();
         } else if (view instanceof CloseTabText) {
             openTabs = openTabs.closeOrFallback(((CloseTabText) view).tabIndex(), initialTab());
+            updateLocalizedText();
             renderTabs();
             renderCurrentDocument();
             saveOpenTabs();
@@ -588,6 +591,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         String draftUri = DRAFT_URI_PREFIX + Uri.encode(displayName);
         draftMarkdownByUri.put(draftUri, text);
         openTabs = openTabs.open(OpenDocumentTab.of(displayName, draftUri, rendered));
+        updateLocalizedText();
         renderTabs();
         renderCurrentDocument();
         showMessage(temporaryMarkdownMessage());
@@ -619,6 +623,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
             SafeHtml rendered = renderer.render(markdown, codeHighlighting);
             openTabs = openTabs.open(OpenDocumentTab.of(readableFile.displayName(), uri.toString(), rendered));
+            updateLocalizedText();
             renderTabs();
             renderCurrentDocument();
             saveOpenTabs();
@@ -650,6 +655,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         SafeHtml rendered = renderer.render(text, codeHighlighting);
         String uri = "termux://open/" + Uri.encode(sourceId);
         openTabs = openTabs.open(OpenDocumentTab.of(readableFile.displayName(), uri, rendered));
+        updateLocalizedText();
         renderTabs();
         renderCurrentDocument();
         saveOpenTabs();
@@ -898,6 +904,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         openButton.setText(currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
         createFromClipboardButton.setText(currentLanguage.isJapanese() ? "クリップボードから作成" : "Create from clipboard");
         saveAsButton.setText(currentLanguage.isJapanese() ? "名前を付けて保存" : "Save as...");
+        saveAsButton.setVisibility(activeTabIsDraft() ? View.VISIBLE : View.GONE);
         recentButton.setText(recentFilesTitle());
         themeButton.setText(nextThemeLabel());
         languageButton.setText(currentLanguage.isJapanese() ? "Switch to English" : "日本語に切り替え");
@@ -934,6 +941,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
             return prefix + (currentLanguage.isJapanese() ? "操作バー移動" : "Move controls");
         }
         return prefix + (currentLanguage.isJapanese() ? "オフ" : "Off");
+    }
+
+    private boolean activeTabIsDraft() {
+        return openTabs != null && openTabs.activeTab().uri().startsWith(DRAFT_URI_PREFIX);
     }
 
     private String recentFilesTitle() {
