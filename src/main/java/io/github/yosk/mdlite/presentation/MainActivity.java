@@ -25,6 +25,7 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.webkit.WebSettings;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -2093,6 +2094,16 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            return handleUrlLoading(view, url);
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            Uri uri = request == null ? null : request.getUrl();
+            return handleUrlLoading(view, uri == null ? null : uri.toString());
+        }
+
+        private boolean handleUrlLoading(WebView view, String url) {
             if (WelcomeDocumentBuilder.OPEN_MARKDOWN_URL.equals(url)) {
                 activity.openMarkdownPicker();
                 return true;
