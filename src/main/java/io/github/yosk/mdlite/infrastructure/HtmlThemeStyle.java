@@ -7,6 +7,7 @@ final class HtmlThemeStyle {
     final String background;
     final String solidBackground;
     final String tableBackground;
+    final String tableCellBackground;
     final String surface;
     final String surfaceAlt;
     final String text;
@@ -29,6 +30,7 @@ final class HtmlThemeStyle {
         this.background = style.cssBackground;
         this.solidBackground = style.background;
         this.tableBackground = style.tableBackground;
+        this.tableCellBackground = style.tableCellBackground;
         this.surface = style.surface;
         this.surfaceAlt = style.surfaceAlt;
         this.text = style.text;

@@ -23,6 +23,7 @@ public final class HtmlPageBuilderTest {
         test.stylesChecklistForReadableMobileLayout();
         test.stylesTablesForReadableMobileLayout();
         test.stylesTablesWithVisibleScrollHintInDarkTheme();
+        test.stylesTablesWithOpaqueCellsInAuroraTheme();
         test.stylesWelcomeHomeForFirstRun();
     }
 
@@ -157,8 +158,8 @@ public final class HtmlPageBuilderTest {
 
         TestAssertions.assertContains(page, ".table-scroll{overflow-x:auto;margin:0 0 16px;background:linear-gradient(to right,#f8fbfa 30%,rgba(248,251,250,0)),linear-gradient(to right,rgba(248,251,250,0),#f8fbfa 70%) 100% 0,linear-gradient(to right,rgba(201,216,213,0.45),rgba(201,216,213,0)),linear-gradient(to left,rgba(201,216,213,0.45),rgba(201,216,213,0)) 100% 0;background-repeat:no-repeat;background-size:32px 100%,32px 100%,16px 100%,16px 100%;background-attachment:local,local,scroll,scroll;}", "table scroll container must hint overflow without looking scrollable when the table fits");
         TestAssertions.assertContains(page, ".table-scroll::-webkit-scrollbar-thumb{background:#c9d8d5;border-radius:4px;}", "table scrollbar thumb must be visible");
-        TestAssertions.assertContains(page, "table{font-size:18px;border-collapse:collapse;min-width:max-content;}", "table CSS must use selected font size and preserve wide content");
-        TestAssertions.assertContains(page, "th,td{border:1px solid #c9d8d5;padding:6px 8px;text-align:left;}", "table cells must have readable borders and padding");
+        TestAssertions.assertContains(page, "table{font-size:18px;border-collapse:collapse;min-width:max-content;background:#ffffff;}", "table CSS must use selected font size and preserve wide content");
+        TestAssertions.assertContains(page, "th,td{border:1px solid #c9d8d5;padding:6px 8px;text-align:left;background:#ffffff;}", "table cells must have readable borders and padding");
     }
 
     public void stylesTablesWithVisibleScrollHintInDarkTheme() {
@@ -169,6 +170,17 @@ public final class HtmlPageBuilderTest {
 
         TestAssertions.assertContains(page, "linear-gradient(to right,rgba(143,184,173,0.58),rgba(143,184,173,0))", "dark table scroll hint must be brighter than the dark border");
         TestAssertions.assertContains(page, ".table-scroll::-webkit-scrollbar-thumb{background:#8fb8ad;border-radius:4px;}", "dark table scrollbar thumb must be visible");
+    }
+
+    public void stylesTablesWithOpaqueCellsInAuroraTheme() {
+        String page = HtmlPageBuilder.buildPage(
+                SafeHtml.fromTrustedRendererOutput("<div class=\"table-scroll\"><table><thead><tr><th>Name</th></tr></thead><tbody><tr><td>Value</td></tr></tbody></table></div>"),
+                ViewerTheme.aurora(),
+                FontSize.of(18));
+
+        TestAssertions.assertContains(page, "table{font-size:18px;border-collapse:collapse;min-width:max-content;background:#10211d;}", "Aurora table must use an opaque cell background");
+        TestAssertions.assertContains(page, "th,td{border:1px solid #4f7569;padding:6px 8px;text-align:left;background:#10211d;}", "Aurora table cell borders must remain visible against the dark cell background");
+        TestAssertions.assertContains(page, ".table-scroll::-webkit-scrollbar-thumb{background:#7ce7b6;border-radius:4px;}", "Aurora table scrollbar thumb must be visible");
     }
 
     public void stylesWelcomeHomeForFirstRun() {

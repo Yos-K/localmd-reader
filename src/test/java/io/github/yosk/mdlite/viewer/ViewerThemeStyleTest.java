@@ -53,6 +53,8 @@ public final class ViewerThemeStyleTest {
         ViewerThemeStyle style = ViewerThemeStyle.from(ViewerTheme.aurora());
 
         TestAssertions.assertEquals("#10211d", style.surface, "Aurora button surface must be dark enough for light text");
+        TestAssertions.assertEquals("#10211d", style.tableCellBackground, "Aurora table cells must hide the page gradient behind table content");
+        TestAssertions.assertEquals("#4f7569", style.border, "Aurora borders must be visible against dark table cells");
         TestAssertions.assertEquals("#f2fff7", style.text, "Aurora native text must be light enough for dark surfaces");
     }
 
