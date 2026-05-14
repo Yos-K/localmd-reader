@@ -9,6 +9,7 @@ public final class ViewerTextTest {
         test.japaneseViewerTextProvidesJapaneseTemporaryMarkdownMessage();
         test.viewerTextFromLanguageUsesLanguageSpecificTextSet();
         test.languageSwitchActionDescribesTargetLanguage();
+        test.themeLabelComesFromViewerTextLanguageSet();
     }
 
     public void englishViewerTextProvidesEnglishTemporaryMarkdownMessage() {
@@ -50,5 +51,14 @@ public final class ViewerTextTest {
                 "Switch to English",
                 japaneseText.switchLanguage(),
                 "Japanese UI must describe switching to English");
+    }
+
+    public void themeLabelComesFromViewerTextLanguageSet() {
+        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.japanese());
+
+        TestAssertions.assertEquals(
+                "オーロラテーマ",
+                text.themeLabel(ViewerTheme.aurora()),
+                "Theme label must be selected from the active viewer text set");
     }
 }

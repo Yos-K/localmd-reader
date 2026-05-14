@@ -56,6 +56,7 @@ public abstract class ViewerText {
     public abstract String auroraTheme();
     public abstract String mistTheme();
     public abstract String duskTheme();
+    public abstract String themeLabel(ViewerTheme theme);
     public abstract String welcomeTabTitle();
     public abstract String closeTabDescription(String title);
     public abstract String historyClipboardTitle(int index);
@@ -114,6 +115,25 @@ public abstract class ViewerText {
         @Override public String auroraTheme() { return "Aurora theme"; }
         @Override public String mistTheme() { return "Mist theme"; }
         @Override public String duskTheme() { return "Dusk theme"; }
+        @Override public String themeLabel(ViewerTheme theme) {
+            ViewerTheme safeTheme = theme == null ? ViewerTheme.light() : theme;
+            if (safeTheme.isAurora()) {
+                return auroraTheme();
+            }
+            if (safeTheme.isMist()) {
+                return mistTheme();
+            }
+            if (safeTheme.isDusk()) {
+                return duskTheme();
+            }
+            if (safeTheme.isGradient()) {
+                return gradientTheme();
+            }
+            if (safeTheme.isAmoled()) {
+                return amoledTheme();
+            }
+            return safeTheme.isDark() ? darkTheme() : lightTheme();
+        }
         @Override public String welcomeTabTitle() { return "Welcome"; }
         @Override public String closeTabDescription(String title) { return "Close tab: " + title; }
         @Override public String historyClipboardTitle(int index) { return "History " + (index + 1); }
@@ -178,6 +198,25 @@ public abstract class ViewerText {
         @Override public String auroraTheme() { return "オーロラテーマ"; }
         @Override public String mistTheme() { return "ミストテーマ"; }
         @Override public String duskTheme() { return "夕暮れテーマ"; }
+        @Override public String themeLabel(ViewerTheme theme) {
+            ViewerTheme safeTheme = theme == null ? ViewerTheme.light() : theme;
+            if (safeTheme.isAurora()) {
+                return auroraTheme();
+            }
+            if (safeTheme.isMist()) {
+                return mistTheme();
+            }
+            if (safeTheme.isDusk()) {
+                return duskTheme();
+            }
+            if (safeTheme.isGradient()) {
+                return gradientTheme();
+            }
+            if (safeTheme.isAmoled()) {
+                return amoledTheme();
+            }
+            return safeTheme.isDark() ? darkTheme() : lightTheme();
+        }
         @Override public String welcomeTabTitle() { return "ホーム"; }
         @Override public String closeTabDescription(String title) { return "タブを閉じる: " + title; }
         @Override public String historyClipboardTitle(int index) { return "履歴 " + (index + 1); }

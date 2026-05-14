@@ -139,6 +139,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private ControlsPlacement controlsPlacement;
     private ViewerLanguage currentLanguage = ViewerLanguage.english();
     private ViewerTheme currentTheme = ViewerTheme.light();
+    private ViewerPalette viewerPalette = ViewerPalette.from(ViewerTheme.light());
     private GestureShortcutAction doubleTapShortcut = GestureShortcutAction.off();
     private GestureShortcutAction circleGestureShortcut = GestureShortcutAction.off();
     private ViewerText viewerText = ViewerText.fromLanguage(ViewerLanguage.english());
@@ -399,6 +400,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showRecentDocuments();
         } else if (view == themeButton) {
             currentTheme = currentTheme.next(featureEntitlement);
+            viewerPalette = ViewerPalette.from(currentTheme);
             updateLocalizedText();
             applyNativeTheme();
             closeMenu();
@@ -1202,52 +1204,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return viewerText.unreadableFile();
     }
 
-    private String darkThemeLabel() {
-        return viewerText.darkTheme();
-    }
-
-    private String lightThemeLabel() {
-        return viewerText.lightTheme();
-    }
-
-    private String amoledThemeLabel() {
-        return viewerText.amoledTheme();
-    }
-
-    private String gradientThemeLabel() {
-        return viewerText.gradientTheme();
-    }
-
-    private String auroraThemeLabel() {
-        return viewerText.auroraTheme();
-    }
-
-    private String mistThemeLabel() {
-        return viewerText.mistTheme();
-    }
-
-    private String duskThemeLabel() {
-        return viewerText.duskTheme();
-    }
-
     private String nextThemeLabel() {
-        ViewerTheme nextTheme = currentTheme.next(featureEntitlement);
-        if (nextTheme.isAurora()) {
-            return auroraThemeLabel();
-        }
-        if (nextTheme.isMist()) {
-            return mistThemeLabel();
-        }
-        if (nextTheme.isDusk()) {
-            return duskThemeLabel();
-        }
-        if (nextTheme.isGradient()) {
-            return gradientThemeLabel();
-        }
-        if (nextTheme.isAmoled()) {
-            return amoledThemeLabel();
-        }
-        return nextTheme.isDark() ? darkThemeLabel() : lightThemeLabel();
+        return viewerText.themeLabel(currentTheme.next(featureEntitlement));
     }
 
     private void applyControlsPlacement() {
@@ -1427,39 +1385,39 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private int backgroundColor() {
-        return ViewerPalette.from(currentTheme).background;
+        return viewerPalette.background;
     }
 
     private int surfaceColor() {
-        return ViewerPalette.from(currentTheme).surface;
+        return viewerPalette.surface;
     }
 
     private int surfaceAltColor() {
-        return ViewerPalette.from(currentTheme).surfaceAlt;
+        return viewerPalette.surfaceAlt;
     }
 
     private int textColor() {
-        return ViewerPalette.from(currentTheme).text;
+        return viewerPalette.text;
     }
 
     private int mutedColor() {
-        return ViewerPalette.from(currentTheme).muted;
+        return viewerPalette.muted;
     }
 
     private int primaryColor() {
-        return ViewerPalette.from(currentTheme).primary;
+        return viewerPalette.primary;
     }
 
     private int primaryStrongColor() {
-        return ViewerPalette.from(currentTheme).primaryStrong;
+        return viewerPalette.primaryStrong;
     }
 
     private int borderColor() {
-        return ViewerPalette.from(currentTheme).border;
+        return viewerPalette.border;
     }
 
     private int messageColor() {
-        return ViewerPalette.from(currentTheme).message;
+        return viewerPalette.message;
     }
 
     private OpenDocumentTabs restoreOpenTabsOrInitial() {
@@ -1856,6 +1814,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         if (action.isNextTheme()) {
             currentTheme = currentTheme.next(featureEntitlement);
+            viewerPalette = ViewerPalette.from(currentTheme);
             updateLocalizedText();
             applyNativeTheme();
             renderTabs();
