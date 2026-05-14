@@ -444,6 +444,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             saveOpenTabs();
         } else if (view instanceof CloseTabText) {
             openTabs = openTabs.closeOrFallback(((CloseTabText) view).tabIndex(), initialTab());
+            clearMessage();
             updateLocalizedText();
             renderTabs();
             renderCurrentDocument();
