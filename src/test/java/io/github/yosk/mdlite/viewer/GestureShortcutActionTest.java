@@ -1,5 +1,6 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.viewer;
 
+import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.testing.TestAssertions;
 
 public final class GestureShortcutActionTest {

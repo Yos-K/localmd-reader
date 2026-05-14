@@ -2,9 +2,9 @@ package io.github.yosk.mdlite.presentation;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import io.github.yosk.mdlite.domain.ControlsPlacement;
+import io.github.yosk.mdlite.viewer.ControlsPlacement;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
-import io.github.yosk.mdlite.domain.GestureShortcutAction;
+import io.github.yosk.mdlite.viewer.GestureShortcutAction;
 import io.github.yosk.mdlite.domain.ViewerFeature;
 import io.github.yosk.mdlite.viewer.ViewerLanguage;
 

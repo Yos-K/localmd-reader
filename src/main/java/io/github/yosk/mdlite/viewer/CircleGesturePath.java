@@ -1,4 +1,4 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.viewer;
 
 public final class CircleGesturePath {
     private static final float MIN_SIZE_PX = 72f;

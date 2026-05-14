@@ -1,4 +1,6 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.viewer;
+
+import io.github.yosk.mdlite.domain.SafeHtml;
 
 public final class OpenDocumentTab {
     private final String title;

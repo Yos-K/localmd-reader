@@ -2,7 +2,7 @@ package io.github.yosk.mdlite.infrastructure;
 
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.viewer.ViewerTheme;
-import io.github.yosk.mdlite.domain.FontSize;
+import io.github.yosk.mdlite.viewer.FontSize;
 import io.github.yosk.mdlite.testing.TestAssertions;
 
 public final class HtmlPageBuilderTest {

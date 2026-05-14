@@ -1,4 +1,4 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.viewer;
 
 import java.util.ArrayList;
 import java.util.Collections;

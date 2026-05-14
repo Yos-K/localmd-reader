@@ -1,4 +1,4 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.viewer;
 
 public final class FontSize {
     public static final int MIN_SP = 12;

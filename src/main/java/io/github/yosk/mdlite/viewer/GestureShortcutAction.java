@@ -1,4 +1,7 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.viewer;
+
+import io.github.yosk.mdlite.domain.FeatureEntitlement;
+import io.github.yosk.mdlite.domain.ViewerFeature;
 
 public final class GestureShortcutAction {
     private static final int OFF = 1;
