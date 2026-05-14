@@ -6,7 +6,7 @@ import io.github.yosk.mdlite.domain.ControlsPlacement;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.GestureShortcutAction;
 import io.github.yosk.mdlite.domain.ViewerFeature;
-import io.github.yosk.mdlite.domain.ViewerLanguage;
+import io.github.yosk.mdlite.viewer.ViewerLanguage;
 
 final class ViewerSettingsStore {
     private static final String SETTINGS_PREFS = "viewer_settings";

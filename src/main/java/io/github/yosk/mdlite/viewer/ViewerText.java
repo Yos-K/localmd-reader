@@ -1,4 +1,4 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.viewer;
 
 public abstract class ViewerText {
     public static ViewerText fromLanguage(ViewerLanguage language) {

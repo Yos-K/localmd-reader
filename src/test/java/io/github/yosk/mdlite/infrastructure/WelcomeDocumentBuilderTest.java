@@ -1,6 +1,6 @@
 package io.github.yosk.mdlite.infrastructure;
 
-import io.github.yosk.mdlite.domain.ViewerLanguage;
+import io.github.yosk.mdlite.viewer.ViewerLanguage;
 import io.github.yosk.mdlite.testing.TestAssertions;
 
 public final class WelcomeDocumentBuilderTest {

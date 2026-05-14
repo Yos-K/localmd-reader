@@ -1,7 +1,7 @@
 package io.github.yosk.mdlite.infrastructure;
 
 import io.github.yosk.mdlite.domain.SafeHtml;
-import io.github.yosk.mdlite.domain.ViewerLanguage;
+import io.github.yosk.mdlite.viewer.ViewerLanguage;
 
 public final class WelcomeDocumentBuilder {
     public static final String OPEN_MARKDOWN_URL = "localmd://open-markdown";

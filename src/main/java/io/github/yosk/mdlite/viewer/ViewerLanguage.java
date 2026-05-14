@@ -1,4 +1,4 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.viewer;
 
 public final class ViewerLanguage {
     public static final String ENGLISH_VALUE = "en";
