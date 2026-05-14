@@ -53,6 +53,7 @@ import io.github.yosk.mdlite.domain.RestorableOpenTabs;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.ViewerLanguage;
 import io.github.yosk.mdlite.domain.ViewerFeature;
+import io.github.yosk.mdlite.domain.ViewerText;
 import io.github.yosk.mdlite.domain.ViewerTheme;
 import io.github.yosk.mdlite.infrastructure.HtmlPageBuilder;
 import io.github.yosk.mdlite.infrastructure.BuildEntitlementSource;
@@ -140,6 +141,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private ViewerTheme currentTheme = ViewerTheme.light();
     private GestureShortcutAction doubleTapShortcut = GestureShortcutAction.off();
     private GestureShortcutAction circleGestureShortcut = GestureShortcutAction.off();
+    private ViewerText viewerText = ViewerText.fromLanguage(ViewerLanguage.english());
     private FontSize currentFontSize = FontSize.defaultSize();
     private FontSize renderedFontSize = FontSize.defaultSize();
     private String pendingSaveMarkdown = "";
@@ -164,6 +166,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         settingsStore = new ViewerSettingsStore(this, featureEntitlement);
         controlsPlacement = settingsStore.loadControlsPlacement();
         currentLanguage = settingsStore.loadViewerLanguage();
+        viewerText = ViewerText.fromLanguage(currentLanguage);
         doubleTapShortcut = settingsStore.loadDoubleTapShortcut();
         circleGestureShortcut = settingsStore.loadCircleGestureShortcut();
 
@@ -403,6 +406,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             renderCurrentDocument();
         } else if (view == languageButton) {
             currentLanguage = currentLanguage.toggled();
+            viewerText = ViewerText.fromLanguage(currentLanguage);
             settingsStore.saveViewerLanguage(currentLanguage);
             updateLocalizedText();
             if (WELCOME_URI.equals(openTabs.activeTab().uri())) {
@@ -624,7 +628,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private String historyClipboardTitle(int index) {
-        return currentLanguage.isJapanese() ? "履歴 " + (index + 1) : "History " + (index + 1);
+        return viewerText.historyClipboardTitle(index);
     }
 
     private void showClipboardItemPicker(List<ClipboardMarkdownItem> items) {
@@ -995,7 +999,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void showGestureShortcutsDialog() {
         new AlertDialog.Builder(this)
-                .setTitle(currentLanguage.isJapanese() ? "ジェスチャー" : "Gestures")
+                .setTitle(viewerText.gestures())
                 .setItems(gestureShortcutLabels(), new GestureShortcutClickListener(this))
                 .setNegativeButton("OK", null)
                 .show();
@@ -1003,8 +1007,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String[] gestureShortcutLabels() {
         return new String[] {
-            shortcutLabel(currentLanguage.isJapanese() ? "ダブルタップ: " : "Double tap: ", doubleTapShortcut),
-            shortcutLabel(currentLanguage.isJapanese() ? "円ジェスチャー: " : "Circle gesture: ", circleGestureShortcut)
+            shortcutLabel(viewerText.doubleTapPrefix(), doubleTapShortcut),
+            shortcutLabel(viewerText.circleGesturePrefix(), circleGestureShortcut)
         };
     }
 
@@ -1027,30 +1031,30 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void updateLocalizedText() {
-        menuButton.setText(currentLanguage.isJapanese() ? "☰ メニュー" : "☰ Menu");
-        menuButton.setContentDescription(currentLanguage.isJapanese() ? "メニューを開く" : "Open menu");
+        menuButton.setText(viewerText.menuButton());
+        menuButton.setContentDescription(viewerText.openMenuDescription());
         appTitle.setText("LocalMD Reader");
-        openButton.setText(currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
-        createFromClipboardButton.setText(currentLanguage.isJapanese() ? "クリップボードから作成" : "Create from clipboard");
-        saveAsButton.setText(currentLanguage.isJapanese() ? "名前を付けて保存" : "Save as...");
+        openButton.setText(viewerText.openFile());
+        createFromClipboardButton.setText(viewerText.createFromClipboard());
+        saveAsButton.setText(viewerText.saveAs());
         saveAsButton.setVisibility(activeTabIsDraft() ? View.VISIBLE : View.GONE);
         recentButton.setText(recentFilesTitle());
         themeButton.setText(nextThemeLabel());
-        languageButton.setText(currentLanguage.isJapanese() ? "Switch to English" : "日本語に切り替え");
+        languageButton.setText(viewerText.switchLanguage());
         menuTitle.setText("LocalMD Reader");
-        filesSection.setText(currentLanguage.isJapanese() ? "ファイル" : "Files");
-        readingSection.setText(currentLanguage.isJapanese() ? "表示" : "Reading");
-        layoutSection.setText(currentLanguage.isJapanese() ? "レイアウト" : "Layout");
-        infoSection.setText(currentLanguage.isJapanese() ? "情報" : "Info");
-        proFeaturesButton.setText(currentLanguage.isJapanese() ? "Pro機能" : "Pro features");
-        clipboardDiagnosticsButton.setText(currentLanguage.isJapanese() ? "クリップボード診断" : "Clipboard diagnostics");
-        privacyButton.setText(currentLanguage.isJapanese() ? "プライバシー" : "Privacy");
+        filesSection.setText(viewerText.filesSection());
+        readingSection.setText(viewerText.readingSection());
+        layoutSection.setText(viewerText.layoutSection());
+        infoSection.setText(viewerText.infoSection());
+        proFeaturesButton.setText(viewerText.proFeatures());
+        clipboardDiagnosticsButton.setText(viewerText.clipboardDiagnostics());
+        privacyButton.setText(viewerText.privacy());
         if (controlsPlacement.isBottom()) {
-            controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを上に移動" : "Move controls to top");
+            controlsPlacementButton.setText(viewerText.moveControlsToTop());
         } else {
-            controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを下に移動" : "Move controls to bottom");
+            controlsPlacementButton.setText(viewerText.moveControlsToBottom());
         }
-        gestureShortcutsButton.setText(currentLanguage.isJapanese() ? "ジェスチャー" : "Gestures");
+        gestureShortcutsButton.setText(viewerText.gestures());
         updateLocalizedMessage();
     }
 
@@ -1066,21 +1070,21 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String shortcutLabel(String prefix, GestureShortcutAction action) {
         if (!featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
-            return prefix + (currentLanguage.isJapanese() ? "Proで利用可能" : "Pro only");
+            return prefix + viewerText.proOnly();
         }
         if (action.isOpenFile()) {
-            return prefix + (currentLanguage.isJapanese() ? "ファイルを開く" : "Open file");
+            return prefix + viewerText.openFile();
         }
         if (action.isOpenMenu()) {
-            return prefix + (currentLanguage.isJapanese() ? "メニューを開く" : "Open menu");
+            return prefix + viewerText.openMenu();
         }
         if (action.isNextTheme()) {
-            return prefix + (currentLanguage.isJapanese() ? "テーマ切り替え" : "Next theme");
+            return prefix + viewerText.nextThemeAction();
         }
         if (action.isMoveControls()) {
-            return prefix + (currentLanguage.isJapanese() ? "操作バー移動" : "Move controls");
+            return prefix + viewerText.moveControlsAction();
         }
-        return prefix + (currentLanguage.isJapanese() ? "オフ" : "Off");
+        return prefix + viewerText.off();
     }
 
     private boolean activeTabIsDraft() {
@@ -1088,93 +1092,75 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private String recentFilesTitle() {
-        return currentLanguage.isJapanese() ? "最近開いたファイル" : "Recent files";
+        return viewerText.recentFiles();
     }
 
     private String openMarkdownTitle() {
-        return currentLanguage.isJapanese() ? "Markdownファイルを開く" : "Open Markdown file";
+        return viewerText.openMarkdownFile();
     }
 
     private String noRecentFilesMessage() {
-        return currentLanguage.isJapanese() ? "最近開いたファイルはまだありません。" : "No recent files yet.";
+        return viewerText.noRecentFiles();
     }
 
     private String clearHistoryLabel() {
-        return currentLanguage.isJapanese() ? "履歴をクリア" : "Clear history";
+        return viewerText.clearHistory();
     }
 
     private String recentFilesClearedMessage() {
-        return currentLanguage.isJapanese() ? "最近開いたファイルをクリアしました。" : "Recent files cleared.";
+        return viewerText.recentFilesCleared();
     }
 
     private String noTextToCreateMessage() {
-        return currentLanguage.isJapanese()
-                ? "Markdownファイルを作成できる選択テキストがありません。"
-                : "There is no selected text to create a Markdown file.";
+        return viewerText.noTextToCreate();
     }
 
     private String noClipboardTextMessage() {
-        return currentLanguage.isJapanese()
-                ? "クリップボードにMarkdownファイルを作成できるテキストがありません。"
-                : "There is no clipboard text to create a Markdown file.";
+        return viewerText.noClipboardText();
     }
 
     private String clipboardItemsTitle() {
-        return currentLanguage.isJapanese()
-                ? "開くクリップボード項目"
-                : "Clipboard items to open";
+        return viewerText.clipboardItemsToOpen();
     }
 
     private String openSelectedClipboardItemsLabel() {
-        return currentLanguage.isJapanese()
-                ? "選択した項目を開く"
-                : "Open selected";
+        return viewerText.openSelected();
     }
 
     private String cancelLabel() {
-        return currentLanguage.isJapanese() ? "キャンセル" : "Cancel";
+        return viewerText.cancel();
     }
 
     private String noClipboardItemSelectedMessage() {
-        return currentLanguage.isJapanese()
-                ? "開くクリップボード項目を選択してください。"
-                : "Select clipboard items to open.";
+        return viewerText.noClipboardItemSelected();
     }
 
     private String noDocumentToSaveMessage() {
-        return currentLanguage.isJapanese()
-                ? "保存できるMarkdown文書がありません。"
-                : "There is no Markdown document to save.";
+        return viewerText.noDocumentToSave();
     }
 
     private String createMarkdownFailedMessage() {
-        return currentLanguage.isJapanese()
-                ? "Markdownファイルを作成できませんでした。"
-                : "The Markdown file could not be created.";
+        return viewerText.createMarkdownFailed();
     }
 
     private String temporaryMarkdownMessage() {
-        return currentLanguage.isJapanese()
-                ? "一時的なMarkdownとして開きました。保存するには「名前を付けて保存」を使ってください。"
-                : "Opened as temporary Markdown. Use Save as... to keep it as a file.";
+        return viewerText.temporaryMarkdown();
     }
 
     private String savedMarkdownMessage() {
-        return currentLanguage.isJapanese()
-                ? "Markdownファイルを保存しました。"
-                : "Saved Markdown file.";
+        return viewerText.savedMarkdown();
     }
 
     private String privacyTitle() {
-        return currentLanguage.isJapanese() ? "プライバシー" : "Privacy";
+        return viewerText.privacy();
     }
 
     private String proFeaturesTitle() {
-        return currentLanguage.isJapanese() ? "Pro機能" : "Pro features";
+        return viewerText.proFeatures();
     }
 
     private String clipboardDiagnosticsTitle() {
-        return currentLanguage.isJapanese() ? "クリップボード診断" : "Clipboard diagnostics";
+        return viewerText.clipboardDiagnostics();
     }
 
     private String proFeaturesMessage() {
@@ -1182,87 +1168,66 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 featureEntitlement,
                 ProFeatureCatalog.initialFeatures());
         StringBuilder message = new StringBuilder();
-        message.append(currentLanguage.isJapanese()
-                ? "現在の状態: " + (featureEntitlement.isPro() ? "Pro有効" : "Free")
-                : "Current status: " + (featureEntitlement.isPro() ? "Pro active" : "Free"));
+        message.append(viewerText.proStatus(featureEntitlement.isPro()));
         for (int i = 0; i < items.length; i++) {
             ProFeaturePresentationItem item = items[i];
             message.append("\n\n")
                     .append(item.isAvailable() ? "[Available] " : "[Locked] ")
                     .append(item.title())
                     .append("\n")
-                    .append(item.isAvailable()
-                            ? (currentLanguage.isJapanese() ? "利用可能" : item.statusLabel())
-                            : (currentLanguage.isJapanese() ? "ロック中" : item.statusLabel()))
+                    .append(item.isAvailable() ? viewerText.featureAvailable() : viewerText.featureLocked())
                     .append(" - ")
                     .append(item.description());
         }
         if (!featureEntitlement.isPro()) {
             message.append("\n\n")
-                    .append(currentLanguage.isJapanese()
-                            ? "購入導線はまだ準備中です。"
-                            : "Purchase flow is not connected yet.");
+                    .append(viewerText.purchaseFlowUnavailable());
         }
         return message.toString();
     }
 
     private String privacyMessage() {
-        if (currentLanguage.isJapanese()) {
-            return "LocalMD Reader は個人情報を収集しません。\n\n"
-                    + "広告、解析SDK、ログイン、自動クラッシュ送信、ネットワーク権限はありません。\n\n"
-                    + "選択したMarkdownは端末上で表示され、アプリによってアップロードされません。\n\n"
-                    + "最近開いたファイルとタブ復元の情報は端末内のアプリ専用領域に保存され、履歴クリアまたはアプリデータ削除で消去できます。";
-        }
-        return "LocalMD Reader does not collect personal information.\n\n"
-                + "There are no ads, analytics SDKs, login, automatic crash reporting, or network permission.\n\n"
-                + "Selected Markdown files are rendered on your device and are not uploaded by the app.\n\n"
-                + "Recent file and tab restoration metadata stays in app-private storage and can be removed by clearing history or app data.";
+        return viewerText.privacyMessage();
     }
 
     private String unsupportedFileMessage() {
-        return currentLanguage.isJapanese()
-                ? ".md と .markdown ファイルのみ対応しています。"
-                : "Only .md and .markdown files are supported.";
+        return viewerText.unsupportedFile();
     }
 
     private String fileTooLargeMessage() {
-        return currentLanguage.isJapanese()
-                ? "10 MB を超えるファイルは開けません。"
-                : "Files larger than 10 MB cannot be opened.";
+        return viewerText.fileTooLarge();
     }
 
     private String unreadableFileMessage() {
-        return currentLanguage.isJapanese()
-                ? "文書を読み取れませんでした。ファイルが移動または削除されたか、継続的な読み取り権限がない可能性があります。"
-                : "The document could not be read. It may have been moved, deleted, or opened without lasting permission.";
+        return viewerText.unreadableFile();
     }
 
     private String darkThemeLabel() {
-        return currentLanguage.isJapanese() ? "ダークテーマ" : "Dark theme";
+        return viewerText.darkTheme();
     }
 
     private String lightThemeLabel() {
-        return currentLanguage.isJapanese() ? "ライトテーマ" : "Light theme";
+        return viewerText.lightTheme();
     }
 
     private String amoledThemeLabel() {
-        return currentLanguage.isJapanese() ? "AMOLEDテーマ" : "AMOLED theme";
+        return viewerText.amoledTheme();
     }
 
     private String gradientThemeLabel() {
-        return currentLanguage.isJapanese() ? "グラデーションテーマ" : "Gradient theme";
+        return viewerText.gradientTheme();
     }
 
     private String auroraThemeLabel() {
-        return currentLanguage.isJapanese() ? "オーロラテーマ" : "Aurora theme";
+        return viewerText.auroraTheme();
     }
 
     private String mistThemeLabel() {
-        return currentLanguage.isJapanese() ? "ミストテーマ" : "Mist theme";
+        return viewerText.mistTheme();
     }
 
     private String duskThemeLabel() {
-        return currentLanguage.isJapanese() ? "夕暮れテーマ" : "Dusk theme";
+        return viewerText.duskTheme();
     }
 
     private String nextThemeLabel() {
@@ -1767,7 +1732,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private OpenDocumentTab initialTab() {
         return OpenDocumentTab.of(
-                currentLanguage.isJapanese() ? "ホーム" : "Welcome",
+                viewerText.welcomeTabTitle(),
                 WELCOME_URI,
                 WelcomeDocumentBuilder.build(currentLanguage));
     }
@@ -1814,9 +1779,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 closeText.setTextColor(mutedColor());
                 closeText.setGravity(Gravity.CENTER);
                 closeText.setPadding(dp(6), 0, dp(14), 0);
-                closeText.setContentDescription(currentLanguage.isJapanese()
-                        ? "タブを閉じる: " + tab.title()
-                        : "Close tab: " + tab.title());
+                closeText.setContentDescription(viewerText.closeTabDescription(tab.title()));
                 closeText.setOnClickListener(this);
                 tabGroup.addView(closeText, new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
