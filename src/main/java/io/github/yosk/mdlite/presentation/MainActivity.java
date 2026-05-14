@@ -93,6 +93,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final String OPEN_TABS_ACTIVE_INDEX = "active_index";
     private static final String WELCOME_URI = "app://welcome";
     private static final String DRAFT_URI_PREFIX = "draft://";
+    private static final String MESSAGE_NONE = "";
+    private static final String MESSAGE_TEMPORARY_MARKDOWN = "temporary_markdown";
+    private static final String MESSAGE_SAVED_MARKDOWN = "saved_markdown";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
     private static final int MENU_SWIPE_MIN_DISTANCE_DP = 72;
@@ -140,6 +143,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private FontSize currentFontSize = FontSize.defaultSize();
     private FontSize renderedFontSize = FontSize.defaultSize();
     private String pendingSaveMarkdown = "";
+    private String currentMessage = MESSAGE_NONE;
     private final Map<String, String> draftMarkdownByUri = new HashMap<String, String>();
     private RecentDocuments displayedRecentDocuments = RecentDocuments.empty(MAX_RECENT_DOCUMENTS);
     private ScaleGestureDetector fontScaleGestureDetector;
@@ -694,7 +698,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         updateLocalizedText();
         renderTabs();
         renderCurrentDocument();
-        showMessage(temporaryMarkdownMessage());
+        showTemporaryMarkdownMessage();
     }
 
     private String nextDraftDisplayName(String title) {
@@ -740,7 +744,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             if (remember) {
                 recordRecentDocument(readableFile.displayName(), uri);
             }
-            showMessage("");
+            clearMessage();
         } catch (IOException e) {
             showFileOpenError(unreadableFileMessage());
         }
@@ -769,7 +773,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         renderTabs();
         renderCurrentDocument();
         saveOpenTabs();
-        showMessage("");
+        clearMessage();
     }
 
     private void saveActiveMarkdownAs() {
@@ -823,7 +827,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             }
             pendingSaveMarkdown = "";
             openUri(uri, true);
-            showMessage(savedMarkdownMessage());
+            showSavedMarkdownMessage();
         } catch (IOException e) {
             showFileOpenError(createMarkdownFailedMessage());
         }
@@ -945,6 +949,21 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return getContentResolver().openInputStream(uri);
     }
 
+    private void showTemporaryMarkdownMessage() {
+        currentMessage = MESSAGE_TEMPORARY_MARKDOWN;
+        showMessage(temporaryMarkdownMessage());
+    }
+
+    private void showSavedMarkdownMessage() {
+        currentMessage = MESSAGE_SAVED_MARKDOWN;
+        showMessage(savedMarkdownMessage());
+    }
+
+    private void clearMessage() {
+        currentMessage = MESSAGE_NONE;
+        showMessage("");
+    }
+
     private void showMessage(String message) {
         messageView.setText(message);
         messageView.setVisibility(message.length() == 0 ? View.GONE : View.VISIBLE);
@@ -1032,6 +1051,17 @@ public final class MainActivity extends Activity implements View.OnClickListener
             controlsPlacementButton.setText(currentLanguage.isJapanese() ? "操作バーを下に移動" : "Move controls to bottom");
         }
         gestureShortcutsButton.setText(currentLanguage.isJapanese() ? "ジェスチャー" : "Gestures");
+        updateLocalizedMessage();
+    }
+
+    private void updateLocalizedMessage() {
+        if (MESSAGE_TEMPORARY_MARKDOWN.equals(currentMessage)) {
+            showMessage(temporaryMarkdownMessage());
+            return;
+        }
+        if (MESSAGE_SAVED_MARKDOWN.equals(currentMessage)) {
+            showMessage(savedMarkdownMessage());
+        }
     }
 
     private String shortcutLabel(String prefix, GestureShortcutAction action) {
