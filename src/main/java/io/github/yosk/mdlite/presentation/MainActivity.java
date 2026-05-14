@@ -96,6 +96,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final String DRAFT_URI_PREFIX = "draft://";
     private static final String MESSAGE_NONE = "";
     private static final String MESSAGE_TEMPORARY_MARKDOWN = "temporary_markdown";
+    private static final String MESSAGE_SELECTED_TEXT_MARKDOWN = "selected_text_markdown";
     private static final String MESSAGE_SAVED_MARKDOWN = "saved_markdown";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
@@ -558,7 +559,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showFileOpenError(noTextToCreateMessage());
             return;
         }
-        openTemporaryMarkdown("Selected text", AndroidStyledTextMarkdown.from(selectedText));
+        openTemporaryMarkdown("Selected text", AndroidStyledTextMarkdown.from(selectedText), MESSAGE_SELECTED_TEXT_MARKDOWN);
     }
 
     private void createMarkdownFromClipboard() {
@@ -688,6 +689,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void openTemporaryMarkdown(String title, String markdown) {
+        openTemporaryMarkdown(title, markdown, MESSAGE_TEMPORARY_MARKDOWN);
+    }
+
+    private void openTemporaryMarkdown(String title, String markdown, String message) {
         String text = markdown == null ? "" : markdown;
         long sizeBytes = text.getBytes(StandardCharsets.UTF_8).length;
         MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(title + ".md", sizeBytes, fileSizePolicy);
@@ -704,7 +709,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         updateLocalizedText();
         renderTabs();
         renderCurrentDocument();
-        showTemporaryMarkdownMessage();
+        showTemporaryMarkdownMessage(message);
     }
 
     private String nextDraftDisplayName(String title) {
@@ -955,9 +960,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return getContentResolver().openInputStream(uri);
     }
 
-    private void showTemporaryMarkdownMessage() {
-        currentMessage = MESSAGE_TEMPORARY_MARKDOWN;
-        showMessage(temporaryMarkdownMessage());
+    private void showTemporaryMarkdownMessage(String message) {
+        currentMessage = message;
+        showMessage(localizedMessage(message));
     }
 
     private void showSavedMarkdownMessage() {
@@ -1061,13 +1066,22 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void updateLocalizedMessage() {
-        if (MESSAGE_TEMPORARY_MARKDOWN.equals(currentMessage)) {
-            showMessage(temporaryMarkdownMessage());
-            return;
+        if (!MESSAGE_NONE.equals(currentMessage)) {
+            showMessage(localizedMessage(currentMessage));
         }
-        if (MESSAGE_SAVED_MARKDOWN.equals(currentMessage)) {
-            showMessage(savedMarkdownMessage());
+    }
+
+    private String localizedMessage(String message) {
+        if (MESSAGE_TEMPORARY_MARKDOWN.equals(message)) {
+            return temporaryMarkdownMessage();
         }
+        if (MESSAGE_SELECTED_TEXT_MARKDOWN.equals(message)) {
+            return selectedTextMarkdownMessage();
+        }
+        if (MESSAGE_SAVED_MARKDOWN.equals(message)) {
+            return savedMarkdownMessage();
+        }
+        return "";
     }
 
     private String shortcutLabel(String prefix, GestureShortcutAction action) {
@@ -1147,6 +1161,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String temporaryMarkdownMessage() {
         return viewerText.temporaryMarkdown();
+    }
+
+    private String selectedTextMarkdownMessage() {
+        return viewerText.selectedTextMarkdown();
     }
 
     private String savedMarkdownMessage() {

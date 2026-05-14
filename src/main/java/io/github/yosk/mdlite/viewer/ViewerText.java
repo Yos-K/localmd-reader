@@ -45,6 +45,7 @@ public abstract class ViewerText {
     public abstract String noDocumentToSave();
     public abstract String createMarkdownFailed();
     public abstract String temporaryMarkdown();
+    public abstract String selectedTextMarkdown();
     public abstract String savedMarkdown();
     public abstract String unsupportedFile();
     public abstract String fileTooLarge();
@@ -70,7 +71,7 @@ public abstract class ViewerText {
         @Override public String menuButton() { return "☰ Menu"; }
         @Override public String openMenuDescription() { return "Open menu"; }
         @Override public String openFile() { return "Open file"; }
-        @Override public String createFromClipboard() { return "Create from clipboard"; }
+        @Override public String createFromClipboard() { return "Create from clipboard (keeps formatting)"; }
         @Override public String saveAs() { return "Save as..."; }
         @Override public String switchLanguage() { return "日本語に切り替え"; }
         @Override public String filesSection() { return "Files"; }
@@ -104,6 +105,7 @@ public abstract class ViewerText {
         @Override public String noDocumentToSave() { return "There is no Markdown document to save."; }
         @Override public String createMarkdownFailed() { return "The Markdown file could not be created."; }
         @Override public String temporaryMarkdown() { return "Opened as temporary Markdown. Use Save as... to keep it as a file."; }
+        @Override public String selectedTextMarkdown() { return "Opened selected text as temporary Markdown. If formatting is missing, copy it first and use Create from clipboard."; }
         @Override public String savedMarkdown() { return "Saved Markdown file."; }
         @Override public String unsupportedFile() { return "Only .md and .markdown files are supported."; }
         @Override public String fileTooLarge() { return "Files larger than 10 MB cannot be opened."; }
@@ -153,7 +155,7 @@ public abstract class ViewerText {
         @Override public String menuButton() { return "☰ メニュー"; }
         @Override public String openMenuDescription() { return "メニューを開く"; }
         @Override public String openFile() { return "ファイルを開く"; }
-        @Override public String createFromClipboard() { return "クリップボードから作成"; }
+        @Override public String createFromClipboard() { return "クリップボードから作成（書式対応）"; }
         @Override public String saveAs() { return "名前を付けて保存"; }
         @Override public String switchLanguage() { return "Switch to English"; }
         @Override public String filesSection() { return "ファイル"; }
@@ -187,6 +189,7 @@ public abstract class ViewerText {
         @Override public String noDocumentToSave() { return "保存できるMarkdown文書がありません。"; }
         @Override public String createMarkdownFailed() { return "Markdownファイルを作成できませんでした。"; }
         @Override public String temporaryMarkdown() { return "一時的なMarkdownとして開きました。保存するには「名前を付けて保存」を使ってください。"; }
+        @Override public String selectedTextMarkdown() { return "選択テキストを一時的なMarkdownとして開きました。書式が崩れる場合は、コピーしてから「クリップボードから作成」を使ってください。"; }
         @Override public String savedMarkdown() { return "Markdownファイルを保存しました。"; }
         @Override public String unsupportedFile() { return ".md と .markdown ファイルのみ対応しています。"; }
         @Override public String fileTooLarge() { return "10 MB を超えるファイルは開けません。"; }

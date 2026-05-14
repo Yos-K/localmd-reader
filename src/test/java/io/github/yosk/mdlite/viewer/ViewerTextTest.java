@@ -10,6 +10,8 @@ public final class ViewerTextTest {
         test.viewerTextFromLanguageUsesLanguageSpecificTextSet();
         test.languageSwitchActionDescribesTargetLanguage();
         test.themeLabelComesFromViewerTextLanguageSet();
+        test.clipboardActionLabelSetsFormattingExpectation();
+        test.selectedTextMessageExplainsClipboardFallback();
     }
 
     public void englishViewerTextProvidesEnglishTemporaryMarkdownMessage() {
@@ -60,5 +62,23 @@ public final class ViewerTextTest {
                 "オーロラテーマ",
                 text.themeLabel(ViewerTheme.aurora()),
                 "Theme label must be selected from the active viewer text set");
+    }
+
+    public void clipboardActionLabelSetsFormattingExpectation() {
+        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.english());
+
+        TestAssertions.assertEquals(
+                "Create from clipboard (keeps formatting)",
+                text.createFromClipboard(),
+                "Clipboard action label must set the formatting expectation");
+    }
+
+    public void selectedTextMessageExplainsClipboardFallback() {
+        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.japanese());
+
+        TestAssertions.assertEquals(
+                "選択テキストを一時的なMarkdownとして開きました。書式が崩れる場合は、コピーしてから「クリップボードから作成」を使ってください。",
+                text.selectedTextMarkdown(),
+                "Selected text message must explain the clipboard fallback when formatting is missing");
     }
 }
