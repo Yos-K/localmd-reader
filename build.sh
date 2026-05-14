@@ -36,6 +36,7 @@ RES_DIR="$BUILD/res"
 cp -R "$ROOT/src/main/res" "$RES_DIR"
 sed \
   -e "s/package=\"io.github.yosk.mdlite\"/package=\"$DEBUG_PACKAGE\"/" \
+  -e "s/android:name=\".presentation.MainActivity\"/android:name=\"io.github.yosk.mdlite.presentation.MainActivity\"/" \
   "$ROOT/src/main/AndroidManifest.xml" > "$MANIFEST"
 sed \
   -e "s/<string name=\"app_name\">[^<]*<\\/string>/<string name=\"app_name\">$DEBUG_APP_NAME<\\/string>/" \
