@@ -26,9 +26,20 @@ OUT_UNSIGNED="$BUILD/app-unsigned.apk"
 OUT_ALIGNED="$BUILD/app-aligned.apk"
 OUT_SIGNED="$ROOT/app-debug.apk"
 KEYSTORE="$ROOT/debug.keystore"
+DEBUG_PACKAGE="${MDLITE_DEBUG_PACKAGE:-io.github.yosk.mdlite.debug}"
+DEBUG_APP_NAME="${MDLITE_DEBUG_APP_NAME:-LocalMD Reader Dev}"
 
 rm -rf "$BUILD"
 mkdir -p "$BUILD/compiled" "$BUILD/generated" "$BUILD/classes" "$BUILD/dex"
+MANIFEST="$BUILD/AndroidManifest.debug.xml"
+RES_DIR="$BUILD/res"
+cp -R "$ROOT/src/main/res" "$RES_DIR"
+sed \
+  -e "s/package=\"io.github.yosk.mdlite\"/package=\"$DEBUG_PACKAGE\"/" \
+  "$ROOT/src/main/AndroidManifest.xml" > "$MANIFEST"
+sed \
+  -e "s/<string name=\"app_name\">[^<]*<\\/string>/<string name=\"app_name\">$DEBUG_APP_NAME<\\/string>/" \
+  "$ROOT/src/main/res/values/strings.xml" > "$RES_DIR/values/strings.xml"
 mkdir -p "$BUILD/generated/io/github/yosk/mdlite/infrastructure"
 cat > "$BUILD/generated/io/github/yosk/mdlite/infrastructure/BuildConfig.java" <<EOF
 package io.github.yosk.mdlite.infrastructure;
@@ -43,10 +54,10 @@ EOF
 find "$ROOT/src/main/java" -name "*.java" > "$BUILD/main-sources.txt"
 find "$BUILD/generated" -name "*.java" >> "$BUILD/main-sources.txt"
 
-"$AAPT2" compile --dir "$ROOT/src/main/res" -o "$BUILD/compiled/resources.zip"
+"$AAPT2" compile --dir "$RES_DIR" -o "$BUILD/compiled/resources.zip"
 "$AAPT2" link \
   -I "$ANDROID_JAR" \
-  --manifest "$ROOT/src/main/AndroidManifest.xml" \
+  --manifest "$MANIFEST" \
   --java "$BUILD/generated" \
   $AAPT_ASSETS_ARGS \
   -o "$OUT_UNSIGNED" \
