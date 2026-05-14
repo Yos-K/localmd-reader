@@ -1,4 +1,4 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.file;
 
 public final class FileSizePolicy {
     public static final long UNKNOWN_SIZE = -1;

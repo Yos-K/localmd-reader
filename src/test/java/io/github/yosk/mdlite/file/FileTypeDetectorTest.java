@@ -1,4 +1,4 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.file;
 
 import io.github.yosk.mdlite.testing.TestAssertions;
 

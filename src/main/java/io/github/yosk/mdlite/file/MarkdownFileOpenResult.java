@@ -1,4 +1,4 @@
-package io.github.yosk.mdlite.domain;
+package io.github.yosk.mdlite.file;
 
 public abstract class MarkdownFileOpenResult {
     private MarkdownFileOpenResult() {
