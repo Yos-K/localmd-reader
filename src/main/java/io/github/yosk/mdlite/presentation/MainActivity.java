@@ -155,6 +155,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private float accumulatedPinchScale = 1f;
     private final List<Float> circleGestureXs = new ArrayList<>();
     private final List<Float> circleGestureYs = new ArrayList<>();
+    private boolean consumingCircleGesture;
     private boolean trackingEdgeSwipe;
     private float edgeSwipeStartX;
     private float menuSwipeStartX;
@@ -1786,18 +1787,20 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             resetCircleGesturePath();
             appendCircleGesturePoint(event);
-            return true;
+            return false;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
             appendCircleGesturePoint(event);
-            return true;
+            consumingCircleGesture = consumingCircleGesture || circleGestureTravelDistance() >= dp(24);
+            return consumingCircleGesture;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
             appendCircleGesturePoint(event);
             boolean handled = CircleGesturePath.fromPoints(circleGestureXs(), circleGestureYs()).isCircleLike()
                     && executeShortcutAction(circleGestureShortcut);
+            boolean consumed = consumingCircleGesture || handled;
             resetCircleGesturePath();
-            return true;
+            return consumed;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
             resetCircleGesturePath();
@@ -1845,6 +1848,20 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private void resetCircleGesturePath() {
         circleGestureXs.clear();
         circleGestureYs.clear();
+        consumingCircleGesture = false;
+    }
+
+    private float circleGestureTravelDistance() {
+        if (circleGestureXs.size() < 2) {
+            return 0f;
+        }
+        float startX = circleGestureXs.get(0).floatValue();
+        float startY = circleGestureYs.get(0).floatValue();
+        float currentX = circleGestureXs.get(circleGestureXs.size() - 1).floatValue();
+        float currentY = circleGestureYs.get(circleGestureYs.size() - 1).floatValue();
+        float dx = currentX - startX;
+        float dy = currentY - startY;
+        return (float) Math.sqrt((dx * dx) + (dy * dy));
     }
 
     private float[] circleGestureXs() {
