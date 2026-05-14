@@ -36,6 +36,23 @@ storage permission.
 
 Detailed setup notes are in `docs/termux-command.md`.
 
+## Create From Clipboard
+
+Use `Menu` -> `Create from clipboard` to open clipboard text as a temporary
+Markdown document.
+
+- If there is one available item, it opens immediately.
+- If there are multiple available items, choose one or more items from the
+  dialog and tap `Open selected`.
+- Previously opened clipboard items are kept in a local in-app history, limited
+  to 10 entries, so they can be opened again later.
+- Temporary Markdown documents are not saved automatically. Use `Save as...` to
+  choose a file name and save them.
+
+Android does not allow LocalMD Reader to read the full system or keyboard
+clipboard history. The history shown by the app contains only clipboard content
+that was previously opened inside LocalMD Reader.
+
 ## Tabs
 
 - Opening another file adds a tab.

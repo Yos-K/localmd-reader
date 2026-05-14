@@ -39,10 +39,15 @@ The app stores small local preferences in app-private storage:
 - Controls placement setting
 - Recently opened file metadata, limited to 5 entries
 - Open tab metadata for tab restoration
+- Clipboard-to-Markdown history, limited to 10 entries
 
 Recent file and tab metadata may include a display name and Android document
 URI. This data stays in app-private storage and can be removed by clearing app
 data. Recent file history can also be cleared from the app.
+
+Clipboard history contains Markdown text that the user opened with `Create from
+clipboard`. It is stored only in app-private storage and is not uploaded by the
+app.
 
 ## Network
 
