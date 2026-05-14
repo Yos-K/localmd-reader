@@ -109,17 +109,18 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private WebView webView;
     private TextView messageView;
     private Button menuButton;
-    private Button openButton;
-    private Button createFromClipboardButton;
-    private Button saveAsButton;
-    private Button recentButton;
-    private Button themeButton;
-    private Button languageButton;
-    private Button controlsPlacementButton;
-    private Button gestureShortcutsButton;
-    private Button proFeaturesButton;
-    private Button clipboardDiagnosticsButton;
-    private Button privacyButton;
+    private MenuActionButton openButton;
+    private MenuActionButton createFromClipboardButton;
+    private MenuActionButton saveAsButton;
+    private MenuActionButton recentButton;
+    private MenuActionButton themeButton;
+    private MenuActionButton languageButton;
+    private MenuActionButton controlsPlacementButton;
+    private MenuActionButton gestureShortcutsButton;
+    private MenuActionButton proFeaturesButton;
+    private MenuActionButton clipboardDiagnosticsButton;
+    private MenuActionButton privacyButton;
+    private MenuActionButton[] menuActionButtons;
     private SwipeMenuLayout menuPanel;
     private LinearLayout root;
     private LinearLayout topBar;
@@ -205,60 +206,30 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 1));
 
-        openButton = new Button(this);
-        openButton.setAllCaps(false);
-        openButton.setOnClickListener(this);
-        styleMenuButton(openButton);
-
-        createFromClipboardButton = new Button(this);
-        createFromClipboardButton.setAllCaps(false);
-        createFromClipboardButton.setOnClickListener(this);
-        styleMenuButton(createFromClipboardButton);
-
-        saveAsButton = new Button(this);
-        saveAsButton.setAllCaps(false);
-        saveAsButton.setOnClickListener(this);
-        styleMenuButton(saveAsButton);
-
-        recentButton = new Button(this);
-        recentButton.setAllCaps(false);
-        recentButton.setOnClickListener(this);
-        styleMenuButton(recentButton);
-
-        themeButton = new Button(this);
-        themeButton.setAllCaps(false);
-        themeButton.setOnClickListener(this);
-        styleMenuButton(themeButton);
-
-        languageButton = new Button(this);
-        languageButton.setAllCaps(false);
-        languageButton.setOnClickListener(this);
-        styleMenuButton(languageButton);
-
-        controlsPlacementButton = new Button(this);
-        controlsPlacementButton.setAllCaps(false);
-        controlsPlacementButton.setOnClickListener(this);
-        styleMenuButton(controlsPlacementButton);
-
-        gestureShortcutsButton = new Button(this);
-        gestureShortcutsButton.setAllCaps(false);
-        gestureShortcutsButton.setOnClickListener(this);
-        styleMenuButton(gestureShortcutsButton);
-
-        proFeaturesButton = new Button(this);
-        proFeaturesButton.setAllCaps(false);
-        proFeaturesButton.setOnClickListener(this);
-        styleMenuButton(proFeaturesButton);
-
-        clipboardDiagnosticsButton = new Button(this);
-        clipboardDiagnosticsButton.setAllCaps(false);
-        clipboardDiagnosticsButton.setOnClickListener(this);
-        styleMenuButton(clipboardDiagnosticsButton);
-
-        privacyButton = new Button(this);
-        privacyButton.setAllCaps(false);
-        privacyButton.setOnClickListener(this);
-        styleMenuButton(privacyButton);
+        openButton = menuActionButton(new OpenFileMenuAction());
+        createFromClipboardButton = menuActionButton(new CreateFromClipboardMenuAction());
+        saveAsButton = menuActionButton(new SaveAsMenuAction());
+        recentButton = menuActionButton(new RecentFilesMenuAction());
+        themeButton = menuActionButton(new ThemeMenuAction());
+        languageButton = menuActionButton(new LanguageMenuAction());
+        controlsPlacementButton = menuActionButton(new ControlsPlacementMenuAction());
+        gestureShortcutsButton = menuActionButton(new GestureShortcutsMenuAction());
+        proFeaturesButton = menuActionButton(new ProFeaturesMenuAction());
+        clipboardDiagnosticsButton = menuActionButton(new ClipboardDiagnosticsMenuAction());
+        privacyButton = menuActionButton(new PrivacyMenuAction());
+        menuActionButtons = new MenuActionButton[] {
+            openButton,
+            createFromClipboardButton,
+            saveAsButton,
+            recentButton,
+            themeButton,
+            languageButton,
+            controlsPlacementButton,
+            gestureShortcutsButton,
+            proFeaturesButton,
+            clipboardDiagnosticsButton,
+            privacyButton
+        };
 
         menuPanel = new SwipeMenuLayout(this);
         menuPanel.setOrientation(LinearLayout.VERTICAL);
@@ -387,50 +358,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (view == menuButton) {
             updateLocalizedText();
             toggleMenu();
-        } else if (view == openButton) {
-            closeMenu();
-            openMarkdownPicker();
-        } else if (view == createFromClipboardButton) {
-            closeMenu();
-            createMarkdownFromClipboard();
-        } else if (view == saveAsButton) {
-            closeMenu();
-            saveActiveMarkdownAs();
-        } else if (view == recentButton) {
-            closeMenu();
-            showRecentDocuments();
-        } else if (view == themeButton) {
-            closeMenu();
-            showThemeDialog();
-        } else if (view == languageButton) {
-            currentLanguage = currentLanguage.toggled();
-            viewerText = ViewerText.fromLanguage(currentLanguage);
-            settingsStore.saveViewerLanguage(currentLanguage);
-            updateLocalizedText();
-            if (WELCOME_URI.equals(openTabs.activeTab().uri())) {
-                openTabs = OpenDocumentTabs.withInitialTab(initialTab());
-                renderTabs();
-                renderCurrentDocument();
-            }
-            closeMenu();
-        } else if (view == controlsPlacementButton) {
-            controlsPlacement = controlsPlacement.toggled();
-            settingsStore.saveControlsPlacement(controlsPlacement);
-            updateLocalizedText();
-            applyControlsPlacement();
-            closeMenu();
-        } else if (view == gestureShortcutsButton) {
-            closeMenu();
-            showGestureShortcutsDialog();
-        } else if (view == proFeaturesButton) {
-            closeMenu();
-            showProFeaturesDialog();
-        } else if (view == clipboardDiagnosticsButton) {
-            closeMenu();
-            showClipboardDiagnosticsDialog();
-        } else if (view == privacyButton) {
-            closeMenu();
-            showPrivacyPolicyDialog();
+        } else if (view instanceof MenuActionButton) {
+            ((MenuActionButton) view).perform(this);
         } else if (view instanceof TabButton) {
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
             clearMessage();
@@ -1094,28 +1023,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuButton.setText(viewerText.menuButton());
         menuButton.setContentDescription(viewerText.openMenuDescription());
         appTitle.setText("LocalMD Reader");
-        openButton.setText(viewerText.openFile());
-        createFromClipboardButton.setText(viewerText.createFromClipboard());
-        saveAsButton.setText(viewerText.saveAs());
-        saveAsButton.setVisibility(activeTabIsDraft() ? View.VISIBLE : View.GONE);
-        recentButton.setText(recentFilesTitle());
-        themeButton.setText(viewerText.themeLabel(currentTheme));
-        languageButton.setText(viewerText.switchLanguage());
+        refreshMenuActionButtons();
         menuTitle.setText("LocalMD Reader");
         filesSection.setText(viewerText.filesSection());
         readingSection.setText(viewerText.readingSection());
         layoutSection.setText(viewerText.layoutSection());
         infoSection.setText(viewerText.infoSection());
-        proFeaturesButton.setText(viewerText.proFeatures());
-        clipboardDiagnosticsButton.setText(viewerText.clipboardDiagnostics());
-        privacyButton.setText(viewerText.privacy());
-        if (controlsPlacement.isBottom()) {
-            controlsPlacementButton.setText(viewerText.moveControlsToTop());
-        } else {
-            controlsPlacementButton.setText(viewerText.moveControlsToBottom());
-        }
-        gestureShortcutsButton.setText(viewerText.gestures());
         updateLocalizedMessage();
+    }
+
+    private void refreshMenuActionButtons() {
+        for (int i = 0; i < menuActionButtons.length; i++) {
+            menuActionButtons[i].refresh(this);
+        }
     }
 
     private void updateLocalizedMessage() {
@@ -1399,6 +1319,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return (int) (value * getResources().getDisplayMetrics().density + 0.5f);
     }
 
+    private MenuActionButton menuActionButton(MenuAction action) {
+        MenuActionButton button = new MenuActionButton(this, action);
+        styleMenuButton(button);
+        return button;
+    }
+
     private TextView menuSection(String label) {
         TextView section = new TextView(this);
         section.setText(label);
@@ -1436,18 +1362,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
         messageView.setTextColor(textColor());
         messageView.setBackgroundColor(messageColor());
         styleToolbarButton(menuButton);
-        styleMenuButton(openButton);
-        styleMenuButton(createFromClipboardButton);
-        styleMenuButton(saveAsButton);
-        styleMenuButton(recentButton);
-        styleMenuButton(themeButton);
-        styleMenuButton(languageButton);
-        styleMenuButton(controlsPlacementButton);
-        styleMenuButton(gestureShortcutsButton);
-        styleMenuButton(proFeaturesButton);
-        styleMenuButton(clipboardDiagnosticsButton);
-        styleMenuButton(privacyButton);
+        applyMenuButtonTheme();
         applyMenuSectionTheme();
+    }
+
+    private void applyMenuButtonTheme() {
+        for (int i = 0; i < menuActionButtons.length; i++) {
+            styleMenuButton(menuActionButtons[i]);
+        }
     }
 
     private void applyMenuSectionTheme() {
@@ -1958,6 +1880,198 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void resetAccumulatedPinchScale() {
         accumulatedPinchScale = 1f;
+    }
+
+    private abstract static class MenuAction {
+        abstract String label(MainActivity activity);
+
+        abstract void perform(MainActivity activity);
+
+        boolean visible(MainActivity activity) {
+            return true;
+        }
+    }
+
+    private static final class OpenFileMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.viewerText.openFile();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.closeMenu();
+            activity.openMarkdownPicker();
+        }
+    }
+
+    private static final class CreateFromClipboardMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.viewerText.createFromClipboard();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.closeMenu();
+            activity.createMarkdownFromClipboard();
+        }
+    }
+
+    private static final class SaveAsMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.viewerText.saveAs();
+        }
+
+        @Override
+        boolean visible(MainActivity activity) {
+            return activity.activeTabIsDraft();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.closeMenu();
+            activity.saveActiveMarkdownAs();
+        }
+    }
+
+    private static final class RecentFilesMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.recentFilesTitle();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.closeMenu();
+            activity.showRecentDocuments();
+        }
+    }
+
+    private static final class ThemeMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.viewerText.themeLabel(activity.currentTheme);
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.closeMenu();
+            activity.showThemeDialog();
+        }
+    }
+
+    private static final class LanguageMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.viewerText.switchLanguage();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.currentLanguage = activity.currentLanguage.toggled();
+            activity.viewerText = ViewerText.fromLanguage(activity.currentLanguage);
+            activity.settingsStore.saveViewerLanguage(activity.currentLanguage);
+            activity.updateLocalizedText();
+            if (WELCOME_URI.equals(activity.openTabs.activeTab().uri())) {
+                activity.openTabs = OpenDocumentTabs.withInitialTab(activity.initialTab());
+                activity.renderTabs();
+                activity.renderCurrentDocument();
+            }
+            activity.closeMenu();
+        }
+    }
+
+    private static final class ControlsPlacementMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            if (activity.controlsPlacement.isBottom()) {
+                return activity.viewerText.moveControlsToTop();
+            }
+            return activity.viewerText.moveControlsToBottom();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.controlsPlacement = activity.controlsPlacement.toggled();
+            activity.settingsStore.saveControlsPlacement(activity.controlsPlacement);
+            activity.updateLocalizedText();
+            activity.applyControlsPlacement();
+            activity.closeMenu();
+        }
+    }
+
+    private static final class GestureShortcutsMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.viewerText.gestures();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.closeMenu();
+            activity.showGestureShortcutsDialog();
+        }
+    }
+
+    private static final class ProFeaturesMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.viewerText.proFeatures();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.closeMenu();
+            activity.showProFeaturesDialog();
+        }
+    }
+
+    private static final class ClipboardDiagnosticsMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.viewerText.clipboardDiagnostics();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.closeMenu();
+            activity.showClipboardDiagnosticsDialog();
+        }
+    }
+
+    private static final class PrivacyMenuAction extends MenuAction {
+        @Override
+        String label(MainActivity activity) {
+            return activity.viewerText.privacy();
+        }
+
+        @Override
+        void perform(MainActivity activity) {
+            activity.closeMenu();
+            activity.showPrivacyPolicyDialog();
+        }
+    }
+
+    private static final class MenuActionButton extends Button {
+        private final MenuAction action;
+
+        private MenuActionButton(MainActivity activity, MenuAction action) {
+            super(activity);
+            this.action = action;
+            setAllCaps(false);
+            setOnClickListener(activity);
+        }
+
+        private void refresh(MainActivity activity) {
+            setText(action.label(activity));
+            setVisibility(action.visible(activity) ? View.VISIBLE : View.GONE);
+        }
+
+        private void perform(MainActivity activity) {
+            action.perform(activity);
+        }
     }
 
     private static final class FileInfo {
