@@ -95,8 +95,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private static final String WELCOME_URI = "app://welcome";
     private static final String DRAFT_URI_PREFIX = "draft://";
     private static final String MESSAGE_NONE = "";
-    private static final String MESSAGE_TEMPORARY_MARKDOWN = "temporary_markdown";
-    private static final String MESSAGE_SELECTED_TEXT_MARKDOWN = "selected_text_markdown";
     private static final String MESSAGE_SAVED_MARKDOWN = "saved_markdown";
     private static final int MENU_WIDTH_DP = 280;
     private static final int EDGE_SWIPE_DP = 24;
@@ -438,6 +436,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showPrivacyPolicyDialog();
         } else if (view instanceof TabButton) {
             openTabs = openTabs.activate(((TabButton) view).tabIndex());
+            clearMessage();
             updateLocalizedText();
             renderTabs();
             renderCurrentDocument();
@@ -560,7 +559,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showFileOpenError(noTextToCreateMessage());
             return;
         }
-        openTemporaryMarkdown("Selected text", AndroidStyledTextMarkdown.from(selectedText), MESSAGE_SELECTED_TEXT_MARKDOWN);
+        openSelectedTextMarkdown("Selected text", AndroidStyledTextMarkdown.from(selectedText));
     }
 
     private void createMarkdownFromClipboard() {
@@ -674,7 +673,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void openClipboardMarkdownItem(ClipboardMarkdownItem item) {
         recordClipboardHistory(item.markdown());
-        openTemporaryMarkdown(item.title(), item.markdown());
+        openClipboardDraftMarkdown(item.title(), item.markdown());
     }
 
     private ClipData clipboardClip() {
@@ -689,28 +688,43 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return clip;
     }
 
-    private void openTemporaryMarkdown(String title, String markdown) {
-        openTemporaryMarkdown(title, markdown, MESSAGE_TEMPORARY_MARKDOWN);
+    private void openClipboardDraftMarkdown(String title, String markdown) {
+        DraftMarkdownDocument draft = draftMarkdownDocument(title, markdown);
+        if (draft == null) {
+            return;
+        }
+        draftMarkdownByUri.put(draft.uri(), draft.markdown());
+        openTabs = openTabs.open(OpenDocumentTab.clipboardDraft(draft.displayName(), draft.uri(), draft.rendered()));
+        updateLocalizedText();
+        renderTabs();
+        renderCurrentDocument();
     }
 
-    private void openTemporaryMarkdown(String title, String markdown, String message) {
+    private void openSelectedTextMarkdown(String title, String markdown) {
+        DraftMarkdownDocument draft = draftMarkdownDocument(title, markdown);
+        if (draft == null) {
+            return;
+        }
+        draftMarkdownByUri.put(draft.uri(), draft.markdown());
+        openTabs = openTabs.open(OpenDocumentTab.selectedTextDraft(draft.displayName(), draft.uri(), draft.rendered()));
+        updateLocalizedText();
+        renderTabs();
+        renderCurrentDocument();
+    }
+
+    private DraftMarkdownDocument draftMarkdownDocument(String title, String markdown) {
         String text = markdown == null ? "" : markdown;
         long sizeBytes = text.getBytes(StandardCharsets.UTF_8).length;
         MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(title + ".md", sizeBytes, fileSizePolicy);
         if (openResult instanceof MarkdownFileOpenResult.OversizedMarkdownFile) {
             showFileOpenError(fileTooLargeMessage());
-            return;
+            return null;
         }
 
         SafeHtml rendered = renderer.render(text, codeHighlighting);
         String displayName = nextDraftDisplayName(title);
         String draftUri = DRAFT_URI_PREFIX + Uri.encode(displayName);
-        draftMarkdownByUri.put(draftUri, text);
-        openTabs = openTabs.open(OpenDocumentTab.of(displayName, draftUri, rendered));
-        updateLocalizedText();
-        renderTabs();
-        renderCurrentDocument();
-        showTemporaryMarkdownMessage(message);
+        return new DraftMarkdownDocument(displayName, draftUri, text, rendered);
     }
 
     private String nextDraftDisplayName(String title) {
@@ -748,7 +762,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         try {
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
             SafeHtml rendered = renderer.render(markdown, codeHighlighting);
-            openTabs = openTabs.open(OpenDocumentTab.of(readableFile.displayName(), uri.toString(), rendered));
+            openTabs = openTabs.open(OpenDocumentTab.fileDocument(readableFile.displayName(), uri.toString(), rendered));
             updateLocalizedText();
             renderTabs();
             renderCurrentDocument();
@@ -780,7 +794,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
         SafeHtml rendered = renderer.render(text, codeHighlighting);
         String uri = "termux://open/" + Uri.encode(sourceId);
-        openTabs = openTabs.open(OpenDocumentTab.of(readableFile.displayName(), uri, rendered));
+        openTabs = openTabs.open(OpenDocumentTab.fileDocument(readableFile.displayName(), uri, rendered));
         updateLocalizedText();
         renderTabs();
         renderCurrentDocument();
@@ -808,7 +822,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private String markdownForSave(OpenDocumentTab tab) {
-        if (tab.uri().startsWith(DRAFT_URI_PREFIX)) {
+        if (tab instanceof OpenDocumentTab.DraftDocumentTab) {
             return draftMarkdownFrom(tab);
         }
         try {
@@ -961,11 +975,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return getContentResolver().openInputStream(uri);
     }
 
-    private void showTemporaryMarkdownMessage(String message) {
-        currentMessage = message;
-        showMessage(localizedMessage(message));
-    }
-
     private void showSavedMarkdownMessage() {
         currentMessage = MESSAGE_SAVED_MARKDOWN;
         showMessage(savedMarkdownMessage());
@@ -973,7 +982,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void clearMessage() {
         currentMessage = MESSAGE_NONE;
-        showMessage("");
+        updateLocalizedMessage();
     }
 
     private void showMessage(String message) {
@@ -1067,22 +1076,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void updateLocalizedMessage() {
-        if (!MESSAGE_NONE.equals(currentMessage)) {
-            showMessage(localizedMessage(currentMessage));
+        if (MESSAGE_SAVED_MARKDOWN.equals(currentMessage)) {
+            showMessage(savedMarkdownMessage());
+            return;
         }
-    }
-
-    private String localizedMessage(String message) {
-        if (MESSAGE_TEMPORARY_MARKDOWN.equals(message)) {
-            return temporaryMarkdownMessage();
+        if (openTabs != null) {
+            showMessage(openTabs.activeTab().statusMessage().localized(viewerText));
+            return;
         }
-        if (MESSAGE_SELECTED_TEXT_MARKDOWN.equals(message)) {
-            return selectedTextMarkdownMessage();
-        }
-        if (MESSAGE_SAVED_MARKDOWN.equals(message)) {
-            return savedMarkdownMessage();
-        }
-        return "";
+        showMessage("");
     }
 
     private String shortcutLabel(String prefix, GestureShortcutAction action) {
@@ -1105,7 +1107,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private boolean activeTabIsDraft() {
-        return openTabs != null && openTabs.activeTab().uri().startsWith(DRAFT_URI_PREFIX);
+        return openTabs != null && openTabs.activeTab() instanceof OpenDocumentTab.DraftDocumentTab;
     }
 
     private String recentFilesTitle() {
@@ -1158,14 +1160,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private String createMarkdownFailedMessage() {
         return viewerText.createMarkdownFailed();
-    }
-
-    private String temporaryMarkdownMessage() {
-        return viewerText.temporaryMarkdown();
-    }
-
-    private String selectedTextMarkdownMessage() {
-        return viewerText.selectedTextMarkdown();
     }
 
     private String savedMarkdownMessage() {
@@ -1483,7 +1477,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
             MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
             String markdown = readText(uri, MAX_FILE_SIZE_BYTES);
             SafeHtml rendered = renderer.render(markdown, codeHighlighting);
-            return OpenDocumentTab.of(readableFile.displayName(), uri.toString(), rendered);
+            return OpenDocumentTab.fileDocument(readableFile.displayName(), uri.toString(), rendered);
         } catch (IllegalArgumentException e) {
             return null;
         } catch (IOException e) {
@@ -1523,7 +1517,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         int savedActiveIndex = 0;
         for (int i = 0; i < openTabs.tabs().size(); i++) {
             OpenDocumentTab tab = openTabs.tabs().get(i);
-            if (WELCOME_URI.equals(tab.uri()) || tab.uri().startsWith(DRAFT_URI_PREFIX)) {
+            if (!(tab instanceof OpenDocumentTab.FileDocumentTab)) {
                 continue;
             }
             if (i == openTabs.activeIndex()) {
@@ -1708,7 +1702,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private OpenDocumentTab initialTab() {
-        return OpenDocumentTab.of(
+        return OpenDocumentTab.welcome(
                 viewerText.welcomeTabTitle(),
                 WELCOME_URI,
                 WelcomeDocumentBuilder.build(currentLanguage));
@@ -2029,6 +2023,36 @@ public final class MainActivity extends Activity implements View.OnClickListener
         @Override
         public void onClick(DialogInterface dialog, int which) {
             activity.openSelectedClipboardItems(items, selected);
+        }
+    }
+
+    private static final class DraftMarkdownDocument {
+        private final String displayName;
+        private final String uri;
+        private final String markdown;
+        private final SafeHtml rendered;
+
+        private DraftMarkdownDocument(String displayName, String uri, String markdown, SafeHtml rendered) {
+            this.displayName = displayName;
+            this.uri = uri;
+            this.markdown = markdown;
+            this.rendered = rendered;
+        }
+
+        private String displayName() {
+            return displayName;
+        }
+
+        private String uri() {
+            return uri;
+        }
+
+        private String markdown() {
+            return markdown;
+        }
+
+        private SafeHtml rendered() {
+            return rendered;
         }
     }
 

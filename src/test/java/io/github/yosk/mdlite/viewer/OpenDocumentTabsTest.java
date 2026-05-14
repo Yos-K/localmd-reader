@@ -97,7 +97,7 @@ public final class OpenDocumentTabsTest {
     }
 
     private static OpenDocumentTab tab(String title, String uri, String document) {
-        return OpenDocumentTab.of(title, uri, SafeHtml.fromTrustedRendererOutput(document));
+        return OpenDocumentTab.fileDocument(title, uri, SafeHtml.fromTrustedRendererOutput(document));
     }
 
 }

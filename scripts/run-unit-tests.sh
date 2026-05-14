@@ -39,6 +39,7 @@ java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.MarkdownDraf
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.domain.StyledMarkdownTextTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.viewer.FontSizeTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.file.RecentDocumentsTest
+java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.viewer.OpenDocumentTabTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.viewer.OpenDocumentTabsTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.file.RestorableOpenTabsTest
 java -cp "$MAIN_CLASSES:$TEST_CLASSES" io.github.yosk.mdlite.viewer.ControlsPlacementTest
