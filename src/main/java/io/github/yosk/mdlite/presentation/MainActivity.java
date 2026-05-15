@@ -412,11 +412,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_OPEN_DOCUMENT && resultCode == RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                persistReadPermission(data, uri);
-                openUri(uri, true);
-            }
+            openSelectedDocuments(data);
             return;
         }
         if (requestCode == REQUEST_SAVE_DOCUMENT && resultCode == RESULT_OK && data != null) {
@@ -432,8 +428,32 @@ public final class MainActivity extends Activity implements View.OnClickListener
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setType("*/*");
         startActivityForResult(intent, REQUEST_OPEN_DOCUMENT);
+    }
+
+    private void openSelectedDocuments(Intent data) {
+        ClipData clipData = data.getClipData();
+        if (clipData != null && clipData.getItemCount() > 0) {
+            openClipDataUris(clipData, true, data);
+            return;
+        }
+        Uri uri = data.getData();
+        if (uri != null) {
+            persistReadPermission(data, uri);
+            openUri(uri, true);
+        }
+    }
+
+    private void openClipDataUris(ClipData clipData, boolean remember, Intent permissionIntent) {
+        for (int i = 0; i < clipData.getItemCount(); i++) {
+            Uri uri = clipData.getItemAt(i).getUri();
+            if (uri != null) {
+                persistReadPermission(permissionIntent, uri);
+                openUri(uri, remember);
+            }
+        }
     }
 
     private void handleIncomingIntent(Intent intent) {
@@ -453,6 +473,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
             if (sharedUri != null) {
                 persistReadPermission(intent, sharedUri);
                 openUri(sharedUri, true);
+                return;
+            }
+            ClipData clipData = intent.getClipData();
+            if (clipData != null) {
+                openClipDataUris(clipData, true, intent);
             }
             return;
         }
@@ -460,6 +485,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
             ArrayList<Uri> sharedUris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
             if (sharedUris != null) {
                 openUris(sharedUris, true, intent);
+                return;
+            }
+            ClipData clipData = intent.getClipData();
+            if (clipData != null) {
+                openClipDataUris(clipData, true, intent);
             }
             return;
         }
