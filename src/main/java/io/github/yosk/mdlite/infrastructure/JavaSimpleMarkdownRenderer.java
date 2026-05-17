@@ -152,6 +152,16 @@ public final class JavaSimpleMarkdownRenderer {
         if ("java".equals(language)) {
             return JavaCodeHighlighter.highlightLine(line);
         }
+        if ("kt".equals(language) || "kotlin".equals(language)) {
+            return KotlinCodeHighlighter.highlightLine(line);
+        }
+        if ("js".equals(language) || "jsx".equals(language) || "javascript".equals(language)
+                || "ts".equals(language) || "tsx".equals(language) || "typescript".equals(language)) {
+            return JavaScriptCodeHighlighter.highlightLine(line);
+        }
+        if ("py".equals(language) || "python".equals(language)) {
+            return PythonCodeHighlighter.highlightLine(line);
+        }
         if ("json".equals(language)) {
             return JsonCodeHighlighter.highlightLine(line);
         }
