@@ -126,12 +126,14 @@ public final class JavaSimpleMarkdownRendererTest {
 
     public void syntaxHighlightedRendererHighlightsJavaKeywordsInFencedCodeBlock() {
         SafeHtml html = renderer.render(
-                "```java\npublic final class Note {\n  return true;\n}\n```",
+                "```java\npublic final class Note {\n  public boolean enabled() {\n    return true;\n  }\n}\n```",
                 CodeHighlighting.syntaxHighlighted());
 
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">public</span>", "Pro highlighting must mark Java access keywords");
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">final</span>", "Pro highlighting must mark Java modifier keywords");
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">class</span>", "Pro highlighting must mark Java declaration keywords");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-type\">Note</span>", "Pro highlighting must mark Java class names");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-function\">enabled</span>", "Pro highlighting must mark Java function names");
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">return</span>", "Pro highlighting must mark Java flow keywords");
         TestAssertions.assertContains(html.value(), "<span class=\"code-literal\">true</span>", "Pro highlighting must mark Java boolean literals");
     }
@@ -143,16 +145,21 @@ public final class JavaSimpleMarkdownRendererTest {
 
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">data</span>", "Pro highlighting must mark Kotlin data keyword");
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">class</span>", "Pro highlighting must mark Kotlin class keyword");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-type\">Note</span>", "Pro highlighting must mark Kotlin class names");
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">val</span>", "Pro highlighting must mark Kotlin val keyword");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-variable\">title</span>", "Pro highlighting must mark Kotlin variable names");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-function\">enabled</span>", "Pro highlighting must mark Kotlin function names");
         TestAssertions.assertContains(html.value(), "<span class=\"code-literal\">true</span>", "Pro highlighting must mark Kotlin boolean literals");
     }
 
     public void syntaxHighlightedRendererHighlightsJavaScriptKeywordsInFencedCodeBlock() {
         SafeHtml html = renderer.render(
-                "```javascript\nconst enabled = true;\nreturn enabled;\n```",
+                "```javascript\nconst note = true;\nfunction openNote(value) {\n  return value;\n}\n```",
                 CodeHighlighting.syntaxHighlighted());
 
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">const</span>", "Pro highlighting must mark JavaScript const keyword");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-variable\">note</span>", "Pro highlighting must mark JavaScript variable names");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-function\">openNote</span>", "Pro highlighting must mark JavaScript function names");
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">return</span>", "Pro highlighting must mark JavaScript return keyword");
         TestAssertions.assertContains(html.value(), "<span class=\"code-literal\">true</span>", "Pro highlighting must mark JavaScript boolean literals");
     }
@@ -164,6 +171,8 @@ public final class JavaSimpleMarkdownRendererTest {
 
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">export</span>", "Pro highlighting must mark TypeScript export keyword");
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">class</span>", "Pro highlighting must mark TypeScript class keyword");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-type\">Note</span>", "Pro highlighting must mark TypeScript class names");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-variable\">title</span>", "Pro highlighting must mark TypeScript readonly field names");
     }
 
     public void syntaxHighlightedRendererHighlightsPythonKeywordsInFencedCodeBlock() {
@@ -172,6 +181,7 @@ public final class JavaSimpleMarkdownRendererTest {
                 CodeHighlighting.syntaxHighlighted());
 
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">def</span>", "Pro highlighting must mark Python def keyword");
+        TestAssertions.assertContains(html.value(), "<span class=\"code-function\">enabled</span>", "Pro highlighting must mark Python function names");
         TestAssertions.assertContains(html.value(), "<span class=\"code-keyword\">return</span>", "Pro highlighting must mark Python return keyword");
         TestAssertions.assertContains(html.value(), "<span class=\"code-literal\">True</span>", "Pro highlighting must mark Python boolean literals");
     }

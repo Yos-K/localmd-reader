@@ -8,11 +8,14 @@ public final class PythonCodeHighlighter {
         "or", "pass", "raise", "return", "try", "while", "with", "yield"
     };
     private static final String[] LITERALS = { "True", "False", "None" };
+    private static final String[] TYPE_INTRODUCERS = { "class" };
+    private static final String[] FUNCTION_INTRODUCERS = { "def" };
+    private static final String[] VARIABLE_INTRODUCERS = new String[0];
 
     private PythonCodeHighlighter() {
     }
 
     public static String highlightLine(String line) {
-        return KeywordCodeHighlighter.highlightLine(line, KEYWORDS, LITERALS);
+        return KeywordCodeHighlighter.highlightLine(line, KEYWORDS, LITERALS, TYPE_INTRODUCERS, FUNCTION_INTRODUCERS, VARIABLE_INTRODUCERS);
     }
 }

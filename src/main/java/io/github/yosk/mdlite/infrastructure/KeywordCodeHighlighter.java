@@ -5,9 +5,20 @@ public final class KeywordCodeHighlighter {
     }
 
     public static String highlightLine(String line, String[] keywords, String[] literals) {
+        return highlightLine(line, keywords, literals, new String[0], new String[0], new String[0]);
+    }
+
+    public static String highlightLine(
+            String line,
+            String[] keywords,
+            String[] literals,
+            String[] typeIntroducers,
+            String[] functionIntroducers,
+            String[] variableIntroducers) {
         String source = line == null ? "" : line;
         StringBuilder html = new StringBuilder();
         int index = 0;
+        String previousToken = "";
         while (index < source.length()) {
             char c = source.charAt(index);
             if (isIdentifierStart(c)) {
@@ -16,7 +27,8 @@ public final class KeywordCodeHighlighter {
                     end++;
                 }
                 String token = source.substring(index, end);
-                appendToken(html, token, keywords, literals);
+                appendToken(html, token, previousToken, keywords, literals, typeIntroducers, functionIntroducers, variableIntroducers);
+                previousToken = token;
                 index = end;
                 continue;
             }
@@ -26,7 +38,27 @@ public final class KeywordCodeHighlighter {
         return html.toString();
     }
 
-    private static void appendToken(StringBuilder html, String token, String[] keywords, String[] literals) {
+    private static void appendToken(
+            StringBuilder html,
+            String token,
+            String previousToken,
+            String[] keywords,
+            String[] literals,
+            String[] typeIntroducers,
+            String[] functionIntroducers,
+            String[] variableIntroducers) {
+        if (contains(typeIntroducers, previousToken)) {
+            html.append("<span class=\"code-type\">").append(token).append("</span>");
+            return;
+        }
+        if (contains(functionIntroducers, previousToken)) {
+            html.append("<span class=\"code-function\">").append(token).append("</span>");
+            return;
+        }
+        if (contains(variableIntroducers, previousToken)) {
+            html.append("<span class=\"code-variable\">").append(token).append("</span>");
+            return;
+        }
         if (contains(keywords, token)) {
             html.append("<span class=\"code-keyword\">").append(token).append("</span>");
             return;

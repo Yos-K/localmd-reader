@@ -8,6 +8,7 @@ public final class JavaCodeHighlighter {
         String source = line == null ? "" : line;
         StringBuilder html = new StringBuilder();
         int index = 0;
+        String previousToken = "";
         while (index < source.length()) {
             char c = source.charAt(index);
             if (isIdentifierStart(c)) {
@@ -16,7 +17,8 @@ public final class JavaCodeHighlighter {
                     end++;
                 }
                 String token = source.substring(index, end);
-                appendToken(html, token);
+                appendToken(html, token, previousToken, nextNonSpaceCharacter(source, end));
+                previousToken = token;
                 index = end;
                 continue;
             }
@@ -26,7 +28,15 @@ public final class JavaCodeHighlighter {
         return html.toString();
     }
 
-    private static void appendToken(StringBuilder html, String token) {
+    private static void appendToken(StringBuilder html, String token, String previousToken, char nextNonSpaceCharacter) {
+        if (isTypeIntroducer(previousToken)) {
+            html.append("<span class=\"code-type\">").append(token).append("</span>");
+            return;
+        }
+        if (nextNonSpaceCharacter == '(' && !isControlKeyword(token)) {
+            html.append("<span class=\"code-function\">").append(token).append("</span>");
+            return;
+        }
         if (isKeyword(token)) {
             html.append("<span class=\"code-keyword\">").append(token).append("</span>");
             return;
@@ -36,6 +46,24 @@ public final class JavaCodeHighlighter {
             return;
         }
         html.append(token);
+    }
+
+    private static char nextNonSpaceCharacter(String source, int index) {
+        while (index < source.length() && source.charAt(index) == ' ') {
+            index++;
+        }
+        if (index >= source.length()) {
+            return '\0';
+        }
+        return source.charAt(index);
+    }
+
+    private static boolean isTypeIntroducer(String token) {
+        return "class".equals(token) || "interface".equals(token) || "enum".equals(token);
+    }
+
+    private static boolean isControlKeyword(String token) {
+        return "if".equals(token) || "for".equals(token) || "while".equals(token) || "switch".equals(token) || "catch".equals(token);
     }
 
     private static boolean isIdentifierStart(char c) {
