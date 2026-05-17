@@ -1821,7 +1821,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
             appendCircleGesturePoint(event);
-            consumingCircleGesture = consumingCircleGesture || circleGestureTravelDistance() >= dp(24);
+            consumingCircleGesture = consumingCircleGesture || circleGestureLooksIntentional();
             return consumingCircleGesture;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
@@ -1881,17 +1881,27 @@ public final class MainActivity extends Activity implements View.OnClickListener
         consumingCircleGesture = false;
     }
 
-    private float circleGestureTravelDistance() {
-        if (circleGestureXs.size() < 2) {
-            return 0f;
+    private boolean circleGestureLooksIntentional() {
+        if (circleGestureXs.size() < 5) {
+            return false;
         }
-        float startX = circleGestureXs.get(0).floatValue();
-        float startY = circleGestureYs.get(0).floatValue();
-        float currentX = circleGestureXs.get(circleGestureXs.size() - 1).floatValue();
-        float currentY = circleGestureYs.get(circleGestureYs.size() - 1).floatValue();
-        float dx = currentX - startX;
-        float dy = currentY - startY;
-        return (float) Math.sqrt((dx * dx) + (dy * dy));
+        float minX = circleGestureXs.get(0).floatValue();
+        float maxX = minX;
+        float minY = circleGestureYs.get(0).floatValue();
+        float maxY = minY;
+        for (int i = 1; i < circleGestureXs.size(); i++) {
+            minX = Math.min(minX, circleGestureXs.get(i).floatValue());
+            maxX = Math.max(maxX, circleGestureXs.get(i).floatValue());
+            minY = Math.min(minY, circleGestureYs.get(i).floatValue());
+            maxY = Math.max(maxY, circleGestureYs.get(i).floatValue());
+        }
+        float width = maxX - minX;
+        float height = maxY - minY;
+        if (width < dp(40) || height < dp(40)) {
+            return false;
+        }
+        float aspectRatio = Math.max(width, height) / Math.max(1f, Math.min(width, height));
+        return aspectRatio <= 1.8f;
     }
 
     private float[] circleGestureXs() {
