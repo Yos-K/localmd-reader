@@ -9,6 +9,7 @@ public final class CircleGesturePathTest {
         tinyClosedPathIsNotRecognizedAsCircleGesture();
         flatClosedPathIsNotRecognizedAsCircleGesture();
         imperfectClosedPathIsRecognizedAsCircleGesture();
+        nearlyClosedFastReleasePathIsRecognizedAsCircleGesture();
     }
 
     private static void closedRoundPathIsRecognizedAsCircleGesture() {
@@ -49,5 +50,13 @@ public final class CircleGesturePathTest {
                 new float[] { 42f, 60f, 104f, 148f, 166f, 141f, 95f, 54f, 51f });
 
         TestAssertions.assertTrue(path.isCircleLike(), "imperfect one-finger circle path must still trigger the circle shortcut");
+    }
+
+    private static void nearlyClosedFastReleasePathIsRecognizedAsCircleGesture() {
+        CircleGesturePath path = CircleGesturePath.fromPoints(
+                new float[] { 100f, 150f, 178f, 156f, 104f, 55f, 28f, 48f, 62f },
+                new float[] { 42f, 58f, 101f, 149f, 164f, 144f, 99f, 58f, 62f });
+
+        TestAssertions.assertTrue(path.isCircleLike(), "nearly closed circle path must trigger when the finger is released quickly");
     }
 }

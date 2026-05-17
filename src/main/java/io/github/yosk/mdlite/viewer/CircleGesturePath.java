@@ -3,7 +3,7 @@ package io.github.yosk.mdlite.viewer;
 public final class CircleGesturePath {
     private static final float MIN_SIZE_PX = 72f;
     private static final float MAX_ASPECT_RATIO = 1.8f;
-    private static final float MAX_CLOSE_DISTANCE_RATIO = 0.55f;
+    private static final float MAX_CLOSE_DISTANCE_RATIO = 0.75f;
     private static final float MIN_TRAVEL_RATIO = 2.0f;
 
     private final float firstX;
