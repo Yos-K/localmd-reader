@@ -58,6 +58,13 @@ flowchart TD
 - **DocumentRenderingProfile**（`domain/DocumentRenderingProfile.java`）: 1回の文書描画で必ず揃う
   `CodeHighlighting`、`MermaidRendering`、`RelativeLinkRendering`、`RelativeImageRendering` の不変な組。
   `fromEntitlement` が各ポリシーを通じて常に有効な組を生成する。規則→R1 / R2 / R4 / R5。
+- **DocumentRenderInput**（`domain/DocumentRenderInput.java`）: 1文書を描画するための、URI、nullでないMarkdown本文、
+  文書内インデックス別の完成済みMermaid図をまとめた不変入力。規則→R7。
+- **DocumentRenderingPlan**（`domain/DocumentRenderingPlan.java`）: 次の `DocumentRenderingSession`、再描画対象の
+  `DocumentRenderInput[]`、実行対象の `MermaidRenderJob[]` を不可分に返す遷移結果。規則→R7。
+- **DocumentRenderingSession**（`domain/DocumentRenderingSession.java`）: 文書URI別のMarkdown本文と
+  `MermaidRenderSessions` を同じライフサイクルで保持する不変セッション。操作 `open` / `complete` /
+  `resetForTheme` / `markdownFor`。規則→R6 / R7。
 - **RelativeLinkRendering**（`domain/RelativeLinkRendering.java`）: 相対 Markdown リンクのアンカー化設定。構成要素
   `enabled: boolean`（`disabled()` / `enabled()`）。 規則→R4。
 - **RelativeLinkRenderingPolicy**（`domain/RelativeLinkRenderingPolicy.java`）: 権限から `RelativeLinkRendering` を導く（静的）。 規則→R4。
@@ -128,6 +135,12 @@ flowchart TD
 - なぜ: 文書の再読込やテーマ変更より前に開始した描画が後から完了しても、現在の表示結果を古いSVGで上書きさせない。
 - 破ると: 現在のMarkdownやテーマと異なる図が表示され、別ジョブの完了通知でpending状態も崩れる。
 
+**R7: 文書描画の状態遷移は次状態・再描画入力・非同期ジョブを同時に決定する**
+- 関係する語: DocumentRenderingSession → DocumentRenderingPlan
+- 分類: process ／ 支える判断: 本文、Mermaid状態、画面更新の進行を食い違わせない判断。
+- なぜ: 本文登録だけ、pending登録だけ、画面再描画だけが行われる部分的な完了を呼び出し側に許さない。
+- 破ると: 古い本文の再描画、ジョブの重複投入、完了した図が画面へ反映されない状態が生じる。
+
 ---
 
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
@@ -135,6 +148,8 @@ flowchart TD
 - `CodeHighlightingPolicy.fromEntitlement(e)` / `MermaidRenderingPolicy.fromEntitlement(e)`: R1 / R2 を実現。`e == null` は Free 扱い。
 - `DocumentRenderingProfile.fromEntitlement(e)`: R1 / R2 / R4 / R5 の結果を不可分な描画入力へまとめる。
   なぜ: 呼び出し側が設定の一部を更新し忘れた状態や、同じ4引数のスタンプ結合を作らない。
+- `DocumentRenderingSession.open` / `complete` / `resetForTheme`: R6 / R7 を実現し、各操作を
+  `DocumentRenderingPlan` として完了させる。未知文書の `markdownFor` はnullではなく空文字を返す。
 - `RelativeLinkRenderingPolicy.fromEntitlement(e)` / `RelativeImageRenderingPolicy.fromEntitlement(e)`: R4 / R5 を実現。`e == null` は Free 扱い。
   なぜ: 権限が不明なときは安全側の Free に倒す（fail-closed）。
 - `LocalRelativeMarkdownLink.resolve(documentUri, requestUrl, allowedRootPath)`: R4 を WebView 側で実現。

@@ -83,6 +83,9 @@ models:
 - `DocumentRenderingProfile` keeps all entitlement-derived Markdown rendering
   decisions together, so Android orchestration cannot update only part of the
   renderer configuration.
+- `DocumentRenderingSession` owns Markdown sources together with Mermaid state.
+  Every transition returns a `DocumentRenderingPlan` containing the next session,
+  render inputs, and background jobs, leaving `MainActivity` to execute and display them.
 
 Future package moves should preserve that direction.
 
