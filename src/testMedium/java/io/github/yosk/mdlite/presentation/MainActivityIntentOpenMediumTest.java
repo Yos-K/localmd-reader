@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.webkit.WebResourceResponse;
 
-import io.github.yosk.mdlite.domain.RelativeImageRendering;
-import io.github.yosk.mdlite.domain.RelativeLinkRendering;
+import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
+import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
 
@@ -96,7 +96,7 @@ public class MainActivityIntentOpenMediumTest {
         Files.write(target.toPath(), "# Intro\n".getBytes(StandardCharsets.UTF_8));
         MainActivity activity = Robolectric.buildActivity(
                 MainActivity.class, viewIntent(Uri.fromFile(markdown))).setup().get();
-        activity.relativeLinkRendering = RelativeLinkRendering.enabled();
+        activity.documentRenderingProfile = DocumentRenderingProfile.fromEntitlement(FeatureEntitlement.pro());
         int tabsBeforeLink = activity.openTabs.tabs().size();
 
         boolean opened = activity.openActiveRelativeMarkdownLink(
@@ -120,7 +120,7 @@ public class MainActivityIntentOpenMediumTest {
         Files.write(image.toPath(), new byte[] {(byte) 0x89, 'P', 'N', 'G'});
         MainActivity activity = Robolectric.buildActivity(
                 MainActivity.class, viewIntent(Uri.fromFile(markdown))).setup().get();
-        activity.relativeImageRendering = RelativeImageRendering.enabled();
+        activity.documentRenderingProfile = DocumentRenderingProfile.fromEntitlement(FeatureEntitlement.pro());
 
         WebResourceResponse response = activity.openActiveRelativeImage(
                 "https://localmd.local/__relative_image__?path=images%2Ficon.png");
