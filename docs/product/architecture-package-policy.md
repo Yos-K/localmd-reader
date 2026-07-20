@@ -80,6 +80,9 @@ models:
 - `MermaidRenderSessions` owns extracted blocks, pending jobs, render generations,
   and completed SVG by document. Android orchestration only executes the typed
   `MermaidRenderJob` values produced by a schedule.
+- `DocumentRenderingProfile` keeps all entitlement-derived Markdown rendering
+  decisions together, so Android orchestration cannot update only part of the
+  renderer configuration.
 
 Future package moves should preserve that direction.
 

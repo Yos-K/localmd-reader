@@ -2,6 +2,8 @@ package io.github.yosk.mdlite.infrastructure;
 
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.CodeHighlighting;
+import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
+import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.MermaidRendering;
 import io.github.yosk.mdlite.domain.RelativeImageRendering;
 import io.github.yosk.mdlite.domain.RelativeLinkRendering;
@@ -355,6 +357,19 @@ public final class JavaSimpleMarkdownRendererTest {
                 html.value(),
                 "Open <a href=\"https://localmd.local/__relative_markdown__?path=..%2Fdocs%2Fnext+file.md%23intro\">next</a>",
                 "Enabled relative link rendering must preserve the original relative Markdown path for WebView interception");
+    }
+
+    @Test
+    void renderingProfileAppliesEntitlementDerivedRelativeLinkRendering() {
+        SafeHtml html = renderer.render(
+                "Open [next](./next.md)",
+                DocumentRenderingProfile.fromEntitlement(FeatureEntitlement.pro()),
+                null);
+
+        TestAssertions.assertContains(
+                html.value(),
+                "href=\"https://localmd.local/__relative_markdown__?path=.%2Fnext.md\"",
+                "rendering profile must apply its relative-link decision");
     }
 
     @Test
