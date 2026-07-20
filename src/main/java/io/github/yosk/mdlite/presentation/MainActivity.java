@@ -1515,21 +1515,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 relativeLinkRendering,
                 relativeImageRendering,
                 mermaidSvgByUri.get(documentUri));
-        openTabs = replaceTabDocument(documentUri, tabWithDocument(tab, rendered));
+        openTabs = openTabs.replaceRenderedDocument(documentUri, rendered);
         renderTabs();
         if (openTabs.activeTab().uri().equals(documentUri)) { renderCurrentDocument(); }
-    }
-
-    private OpenDocumentTabs replaceTabDocument(String documentUri, OpenDocumentTab replacement) {
-        ArrayList<OpenDocumentTab> tabs = new ArrayList<OpenDocumentTab>(openTabs.tabs());
-        int activeIndex = openTabs.activeIndex();
-        for (int i = 0; i < tabs.size(); i++) {
-            if (tabs.get(i).uri().equals(documentUri)) {
-                tabs.set(i, replacement);
-                return openTabsFrom(tabs, activeIndex);
-            }
-        }
-        return openTabs;
     }
 
     private OpenDocumentTab tabByUri(String documentUri) {
@@ -1540,18 +1528,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return null;
     }
 
-    private static OpenDocumentTab tabWithDocument(OpenDocumentTab tab, SafeHtml rendered) {
-        if (tab instanceof OpenDocumentTab.ClipboardDraftTab) {
-            return OpenDocumentTab.clipboardDraft(tab.title(), tab.uri(), rendered);
-        }
-        if (tab instanceof OpenDocumentTab.SelectedTextDraftTab) {
-            return OpenDocumentTab.selectedTextDraft(tab.title(), tab.uri(), rendered);
-        }
-        if (tab instanceof OpenDocumentTab.WelcomeTab) {
-            return OpenDocumentTab.welcome(tab.title(), tab.uri(), rendered);
-        }
-        return OpenDocumentTab.fileDocument(tab.title(), tab.uri(), rendered);
-    }
 
     private void restorePendingScrollAfterPageLoad() {
         if (pendingScrollRestoreY < 0) { return; }

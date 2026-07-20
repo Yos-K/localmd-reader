@@ -1,5 +1,6 @@
 package io.github.yosk.mdlite.viewer;
 
+import io.github.yosk.mdlite.domain.SafeHtml;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +48,18 @@ public final class OpenDocumentTabs {
 
     public OpenDocumentTabs activateNext() {
         return activate(wrappedIndex(activeIndex + 1));
+    }
+
+    public OpenDocumentTabs replaceRenderedDocument(String uri, SafeHtml document) {
+        ArrayList<OpenDocumentTab> next = new ArrayList<OpenDocumentTab>(tabs);
+        for (int i = 0; i < next.size(); i++) {
+            OpenDocumentTab tab = next.get(i);
+            if (tab.uri().equals(uri)) {
+                next.set(i, tab.withDocument(document));
+                return new OpenDocumentTabs(next, activeIndex);
+            }
+        }
+        return this;
     }
 
     public OpenDocumentTabs close(int index) {

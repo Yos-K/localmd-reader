@@ -74,6 +74,28 @@ public final class OpenDocumentTabsTest {
     }
 
     @Test
+    void replaceRenderedDocumentKeepsTheCurrentlyActiveTab() {
+        OpenDocumentTabs tabs = threeTabs().activate(2)
+                .replaceRenderedDocument(
+                        "content://first",
+                        SafeHtml.fromTrustedRendererOutput("updated"));
+
+        TestAssertions.assertEquals("Second", tabs.activeTab().title(), "re-rendering an inactive tab must preserve the active tab");
+        TestAssertions.assertEquals("updated", tabs.tabs().get(1).document().value(), "re-rendering must replace the targeted tab document");
+    }
+
+    @Test
+    void replaceRenderedDocumentForUnknownUriKeepsTheTabSessionUnchanged() {
+        OpenDocumentTabs tabs = threeTabs().activate(1);
+
+        OpenDocumentTabs unchanged = tabs.replaceRenderedDocument(
+                "content://missing",
+                SafeHtml.fromTrustedRendererOutput("unused"));
+
+        TestAssertions.assertSame(tabs, unchanged, "an unknown URI must keep the existing tab session");
+    }
+
+    @Test
     void closeInactiveTabKeepsCurrentActiveDocument() {
         OpenDocumentTabs tabs = threeTabs().activate(2).close(1);
 
