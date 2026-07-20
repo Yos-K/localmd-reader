@@ -107,6 +107,11 @@ dependencies {
 }
 
 tasks.withType(Test).configureEach {
+    // Robolectric retains Android framework state across classes. Bound each
+    // worker and recycle it before that retained state exhausts CI memory.
+    maxHeapSize = "1536m"
+    maxParallelForks = 1
+    forkEvery = 20
     testLogging {
         events "passed", "failed", "skipped"
         showStandardStreams true

@@ -59,6 +59,12 @@ The `gradle-build` job also verifies:
 - Free / Pro Preview debug APK builds
 - Free release AAB build
 
+Free and Pro Preview tests run in separate Gradle invocations so one flavor's
+Robolectric state cannot consume the next flavor's test-worker memory. Every
+Gradle `Test` task uses one worker at a time, a 1536 MB maximum heap, and recycles
+the worker after 20 test classes. `scripts/test-gradle-test-memory-policy.sh`
+guards these limits and the separated CI steps against accidental removal.
+
 ### Gradle wrapper
 
 `gradle-build` invokes Gradle through the committed wrapper (`./gradlew`), pinned
