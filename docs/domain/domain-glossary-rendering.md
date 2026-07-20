@@ -55,6 +55,9 @@ flowchart TD
 - **CodeHighlightingPolicy**（`domain/CodeHighlightingPolicy.java`）: 権限から `CodeHighlighting` を導く（静的）。 規則→R1。
 - **MermaidRendering**（`domain/MermaidRendering.java`）: Mermaid 描画設定。構成要素 `enabled: boolean`（`plainCode()` / `diagrams()`）。 規則→R2。
 - **MermaidRenderingPolicy**（`domain/MermaidRenderingPolicy.java`）: 権限から `MermaidRendering` を導く（静的）。 規則→R2。
+- **DocumentRenderingProfile**（`domain/DocumentRenderingProfile.java`）: 1回の文書描画で必ず揃う
+  `CodeHighlighting`、`MermaidRendering`、`RelativeLinkRendering`、`RelativeImageRendering` の不変な組。
+  `fromEntitlement` が各ポリシーを通じて常に有効な組を生成する。規則→R1 / R2 / R4 / R5。
 - **RelativeLinkRendering**（`domain/RelativeLinkRendering.java`）: 相対 Markdown リンクのアンカー化設定。構成要素
   `enabled: boolean`（`disabled()` / `enabled()`）。 規則→R4。
 - **RelativeLinkRenderingPolicy**（`domain/RelativeLinkRenderingPolicy.java`）: 権限から `RelativeLinkRendering` を導く（静的）。 規則→R4。
@@ -130,6 +133,8 @@ flowchart TD
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
 
 - `CodeHighlightingPolicy.fromEntitlement(e)` / `MermaidRenderingPolicy.fromEntitlement(e)`: R1 / R2 を実現。`e == null` は Free 扱い。
+- `DocumentRenderingProfile.fromEntitlement(e)`: R1 / R2 / R4 / R5 の結果を不可分な描画入力へまとめる。
+  なぜ: 呼び出し側が設定の一部を更新し忘れた状態や、同じ4引数のスタンプ結合を作らない。
 - `RelativeLinkRenderingPolicy.fromEntitlement(e)` / `RelativeImageRenderingPolicy.fromEntitlement(e)`: R4 / R5 を実現。`e == null` は Free 扱い。
   なぜ: 権限が不明なときは安全側の Free に倒す（fail-closed）。
 - `LocalRelativeMarkdownLink.resolve(documentUri, requestUrl, allowedRootPath)`: R4 を WebView 側で実現。

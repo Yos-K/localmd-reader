@@ -1,6 +1,7 @@
 package io.github.yosk.mdlite.infrastructure;
 
 import io.github.yosk.mdlite.domain.CodeHighlighting;
+import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
 import io.github.yosk.mdlite.domain.MarkdownHeadingAnchors;
 import io.github.yosk.mdlite.domain.MermaidRendering;
 import io.github.yosk.mdlite.domain.RelativeImageRendering;
@@ -41,6 +42,22 @@ public final class JavaSimpleMarkdownRenderer {
             Map<Integer, SafeHtml> renderedMermaidDiagrams) {
         return render(markdown, codeHighlighting, mermaidRendering,
                 relativeLinkRendering, RelativeImageRendering.disabled(), renderedMermaidDiagrams);
+    }
+
+    public SafeHtml render(
+            String markdown,
+            DocumentRenderingProfile profile,
+            Map<Integer, SafeHtml> renderedMermaidDiagrams) {
+        DocumentRenderingProfile safeProfile = profile == null
+                ? DocumentRenderingProfile.fromEntitlement(null)
+                : profile;
+        return render(
+                markdown,
+                safeProfile.codeHighlighting(),
+                safeProfile.mermaidRendering(),
+                safeProfile.relativeLinkRendering(),
+                safeProfile.relativeImageRendering(),
+                renderedMermaidDiagrams);
     }
 
     public SafeHtml render(

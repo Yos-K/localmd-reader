@@ -28,10 +28,9 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import io.github.yosk.mdlite.domain.CodeHighlighting;
 import io.github.yosk.mdlite.R;
-import io.github.yosk.mdlite.domain.CodeHighlightingPolicy;
 import io.github.yosk.mdlite.domain.CompositeEntitlementSource;
+import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
 import io.github.yosk.mdlite.domain.FolderBrowsingAction;
@@ -44,15 +43,9 @@ import io.github.yosk.mdlite.domain.MermaidDiagramBlocks;
 import io.github.yosk.mdlite.domain.MermaidRenderJob;
 import io.github.yosk.mdlite.domain.MermaidRenderSchedule;
 import io.github.yosk.mdlite.domain.MermaidRenderSessions;
-import io.github.yosk.mdlite.domain.MermaidRendering;
-import io.github.yosk.mdlite.domain.MermaidRenderingPolicy;
 import io.github.yosk.mdlite.domain.ProPurchaseFlow;
 import io.github.yosk.mdlite.domain.ProPurchaseUiState;
 import io.github.yosk.mdlite.domain.RecentDocumentLimit;
-import io.github.yosk.mdlite.domain.RelativeImageRendering;
-import io.github.yosk.mdlite.domain.RelativeImageRenderingPolicy;
-import io.github.yosk.mdlite.domain.RelativeLinkRendering;
-import io.github.yosk.mdlite.domain.RelativeLinkRenderingPolicy;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.TableOfContentsItem;
 import io.github.yosk.mdlite.domain.TableOfContentsItems;
@@ -124,10 +117,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
     final FileSizePolicy fileSizePolicy = new FileSizePolicy(MAX_FILE_SIZE_BYTES);
     FeatureEntitlement featureEntitlement;
-    CodeHighlighting codeHighlighting;
-    MermaidRendering mermaidRendering;
-    RelativeLinkRendering relativeLinkRendering;
-    RelativeImageRendering relativeImageRendering;
+    DocumentRenderingProfile documentRenderingProfile = DocumentRenderingProfile.fromEntitlement(null);
     ProPurchaseUiState proPurchaseUiState = ProPurchaseUiState.unavailable();
     ProPurchaseFlow proPurchaseFlow = UnavailableProPurchaseFlow.instance();
     ProPurchaseCacheStore purchaseCacheStore;
@@ -236,10 +226,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     void reloadFeatureEntitlement() {
         featureEntitlement = loadFeatureEntitlement(purchaseCacheStore);
-        codeHighlighting = CodeHighlightingPolicy.fromEntitlement(featureEntitlement);
-        mermaidRendering = MermaidRenderingPolicy.fromEntitlement(featureEntitlement);
-        relativeLinkRendering = RelativeLinkRenderingPolicy.fromEntitlement(featureEntitlement);
-        relativeImageRendering = RelativeImageRenderingPolicy.fromEntitlement(featureEntitlement);
+        documentRenderingProfile = DocumentRenderingProfile.fromEntitlement(featureEntitlement);
         reclampCurrentThemeForEntitlement();
     }
 
@@ -510,7 +497,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
         webView.setWebViewClient(new AppLinkClient(this));
-        if (mermaidRendering.isEnabled()) {
+        if (documentRenderingProfile.mermaidRendering().isEnabled()) {
             mermaidRenderEngine = new MermaidJsRenderEngine(this, this);
         }
     }
@@ -726,7 +713,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     WebResourceResponse openActiveRelativeImage(String requestUrl) {
-        if (relativeImageRendering == null || !relativeImageRendering.isEnabled()) {
+        if (!documentRenderingProfile.relativeImageRendering().isEnabled()) {
             return null;
         }
         if (openTabs == null || !(openTabs.activeTab() instanceof OpenDocumentTab.FileDocumentTab)) {
@@ -751,7 +738,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     boolean openActiveRelativeMarkdownLink(String requestUrl) {
-        if (relativeLinkRendering == null || !relativeLinkRendering.isEnabled()) {
+        if (!documentRenderingProfile.relativeLinkRendering().isEnabled()) {
             return false;
         }
         if (openTabs == null || !(openTabs.activeTab() instanceof OpenDocumentTab.FileDocumentTab)) {
@@ -882,10 +869,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         enqueueMermaidRenderJobs(documentUri);
         return renderer.render(
                 markdown,
-                codeHighlighting,
-                mermaidRendering,
-                relativeLinkRendering,
-                relativeImageRendering,
+                documentRenderingProfile,
                 mermaidRenderSessions.renderedFor(documentUri));
     }
 
@@ -1280,7 +1264,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void rerenderMermaidDiagramsForCurrentTheme() {
-        if (!mermaidRendering.isEnabled()) { return; }
+        if (!documentRenderingProfile.mermaidRendering().isEnabled()) { return; }
         mermaidRenderSessions = mermaidRenderSessions.resetRendered();
         List<String> documentUris = mermaidRenderSessions.documentUris();
         for (int i = 0; i < documentUris.size(); i++) {
@@ -1462,7 +1446,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void enqueueMermaidRenderJobs(String documentUri) {
-        if (!mermaidRendering.isEnabled() || mermaidRenderEngine == null) { return; }
+        if (!documentRenderingProfile.mermaidRendering().isEnabled() || mermaidRenderEngine == null) { return; }
         MermaidRenderSchedule schedule = mermaidRenderSessions.schedule(documentUri);
         mermaidRenderSessions = schedule.session();
         MermaidRenderJob[] jobs = schedule.jobs();
@@ -1478,10 +1462,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (tab == null) { return; }
         SafeHtml rendered = renderer.render(
                 markdown,
-                codeHighlighting,
-                mermaidRendering,
-                relativeLinkRendering,
-                relativeImageRendering,
+                documentRenderingProfile,
                 mermaidRenderSessions.renderedFor(documentUri));
         openTabs = openTabs.replaceRenderedDocument(documentUri, rendered);
         renderTabs();
