@@ -5,7 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import io.github.yosk.mdlite.domain.MermaidDiagramBlock;
+import io.github.yosk.mdlite.domain.MermaidRenderJob;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.viewer.ViewerTheme;
 import java.io.ByteArrayOutputStream;
@@ -17,15 +17,16 @@ import java.util.Queue;
 
 final class MermaidJsRenderEngine {
     interface Listener {
-        void onMermaidRendered(String documentUri, int diagramIndex, SafeHtml svg);
+        void onMermaidRendered(MermaidRenderJob job, SafeHtml svg);
 
-        void onMermaidRenderFailed(String documentUri, int diagramIndex, String reason);
+        void onMermaidRenderFailed(MermaidRenderJob job, String reason);
     }
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private final WebView webView;
     private final Listener listener;
     private final Queue<RenderJob> jobs = new ArrayDeque<RenderJob>();
+    private RenderJob activeJob;
     private boolean pageReady;
     private boolean rendering;
 
@@ -43,8 +44,8 @@ final class MermaidJsRenderEngine {
         webView.loadDataWithBaseURL(null, renderPage(context), "text/html", "UTF-8", null);
     }
 
-    void enqueue(String documentUri, int diagramIndex, MermaidDiagramBlock block, MermaidDiagramTheme theme) {
-        jobs.add(new RenderJob(documentUri, diagramIndex, block.source(), theme));
+    void enqueue(MermaidRenderJob job, MermaidDiagramTheme theme) {
+        jobs.add(new RenderJob(job, theme));
         drain();
     }
 
@@ -54,10 +55,11 @@ final class MermaidJsRenderEngine {
         }
         rendering = true;
         RenderJob job = jobs.remove();
+        activeJob = job;
         String script = "window.renderLocalMdMermaid("
-                + quote(job.documentUri) + ","
-                + job.diagramIndex + ","
-                + quote(job.source) + ","
+                + quote(job.job.documentUri()) + ","
+                + job.job.diagramIndex() + ","
+                + quote(job.job.block().source()) + ","
                 + quote(job.theme.background) + ","
                 + quote(job.theme.text) + ","
                 + quote(job.theme.line) + ","
@@ -67,14 +69,20 @@ final class MermaidJsRenderEngine {
     }
 
     private void completeSuccess(String documentUri, int diagramIndex, String svg) {
+        RenderJob completed = activeJob;
+        if (completed == null || !completed.job.matches(documentUri, diagramIndex)) { return; }
+        activeJob = null;
         rendering = false;
-        listener.onMermaidRendered(documentUri, diagramIndex, SafeHtml.fromTrustedRendererOutput(svg));
+        listener.onMermaidRendered(completed.job, SafeHtml.fromTrustedRendererOutput(svg));
         drain();
     }
 
     private void completeFailure(String documentUri, int diagramIndex, String reason) {
+        RenderJob completed = activeJob;
+        if (completed == null || !completed.job.matches(documentUri, diagramIndex)) { return; }
+        activeJob = null;
         rendering = false;
-        listener.onMermaidRenderFailed(documentUri, diagramIndex, reason);
+        listener.onMermaidRenderFailed(completed.job, reason);
         drain();
     }
 
@@ -265,15 +273,11 @@ final class MermaidJsRenderEngine {
     }
 
     private static final class RenderJob {
-        private final String documentUri;
-        private final int diagramIndex;
-        private final String source;
+        private final MermaidRenderJob job;
         private final MermaidDiagramTheme theme;
 
-        private RenderJob(String documentUri, int diagramIndex, String source, MermaidDiagramTheme theme) {
-            this.documentUri = documentUri;
-            this.diagramIndex = diagramIndex;
-            this.source = source;
+        private RenderJob(MermaidRenderJob job, MermaidDiagramTheme theme) {
+            this.job = job;
             this.theme = theme;
         }
     }

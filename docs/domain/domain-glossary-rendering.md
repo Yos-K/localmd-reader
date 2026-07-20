@@ -23,18 +23,24 @@ flowchart TD
     Text -->|"append: エスケープして整形 (R3)"| Styled["StyledMarkdownText<br/>(可変ビルダー)"]
     Styled --> MdOut["Markdown 文字列"]
     Md["Markdown 本文"] --> Blocks["MermaidDiagramBlocks<br/>図ブロックを抽出"]
+    Blocks --> Sessions["MermaidRenderSessions<br/>世代 / pending / 結果"]
+    Sessions --> Schedule["MermaidRenderSchedule"]
+    Schedule --> Job["MermaidRenderJob"]
+    Job --> Isolated["分離JSレンダラ"]
+    Isolated -->|"現在世代だけ完了 (R6)"| Sessions
 
     MdOut --> Render["レンダラ (infra)"]
     Code -.-> Render
     Mer -.-> Render
     Rel -.-> Render
-    Blocks -.-> Render
+    Sessions -.->|"完成SVG"| Render
     Render --> Safe["SafeHtml<br/>(ビューアクラスタ)"]
 ```
 
 **読み方**: 権限から `CodeHighlightingPolicy` / `MermaidRenderingPolicy` / `RelativeLinkRenderingPolicy` が描画設定（オン/オフ）を導く。
-本文の各断片は `StyledMarkdownText` が**エスケープしつつ** Markdown に整形する。これらと抽出した図ブロックを
-レンダラ（infra層）が組み立て、最終的に `SafeHtml`（ビューアクラスタ）になって reader WebView に渡る。
+本文の各断片は `StyledMarkdownText` が**エスケープしつつ** Markdown に整形する。抽出した図ブロックは
+`MermaidRenderSessions` が非同期ジョブと結果へ遷移させ、現在世代の完成SVGだけをレンダラへ渡す。最終的な
+`SafeHtml`（ビューアクラスタ）が reader WebView に渡る。
 
 ---
 
@@ -61,6 +67,12 @@ flowchart TD
   - L1: `source` 非空（違反で例外）。 なぜ: 空の図ソースは描画対象にならない。
 - **MermaidDiagramBlocks**（`domain/MermaidDiagramBlocks.java`）: 本文から抽出した図ブロック群。構成要素 `MermaidDiagramBlock[]`。
   操作 `fromMarkdown(md)`/`isEmpty()`。 規則なし（抽出した図ブロックの集合）。
+- **MermaidRenderJob**（`domain/MermaidRenderJob.java`）: 非同期描画へ渡す1図分の仕事。構成要素
+  `documentUri`、`diagramIndex`、`generation`、`block`。規則→R6。
+- **MermaidRenderSchedule**（`domain/MermaidRenderSchedule.java`）: pending登録後のセッションと、新たに開始する
+  `MermaidRenderJob[]` を不可分に返す遷移結果。なぜ: 開始判定とpending登録の分離を防ぐ。
+- **MermaidRenderSessions**（`domain/MermaidRenderSessions.java`）: 文書ごとの図ブロック、描画世代、pending、
+  `SafeHtml`結果を一貫して保持する不変セッション。操作 `register` / `schedule` / `complete` / `resetRendered`。規則→R6。
 
 ---
 
@@ -107,6 +119,12 @@ flowchart TD
 - 分類: safety ／ 支える判断: Pro のローカル画像表示価値を提供しつつ、危険なURLスキームを出力しない判断。
 - 破ると: Free/Pro 境界と画像読み込みの安全性が食い違う。
 
+**R6: Mermaidの完了通知は現在世代のpendingジョブだけを完了する**
+- 関係する語: MermaidRenderSessions × MermaidRenderJob × SafeHtml ／ どこで: `MermaidRenderSessions.complete`
+- 分類: safety ／ 支える判断: 非同期結果と現在の文書・テーマを取り違えない判断。
+- なぜ: 文書の再読込やテーマ変更より前に開始した描画が後から完了しても、現在の表示結果を古いSVGで上書きさせない。
+- 破ると: 現在のMarkdownやテーマと異なる図が表示され、別ジョブの完了通知でpending状態も崩れる。
+
 ---
 
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
@@ -137,6 +155,9 @@ flowchart TD
   タブ区切り表へ整形して追記する。 なぜ: 未信頼テキストの注入を防ぎつつ、意図した書式だけを与える。
 - `MermaidDiagramBlocks.fromMarkdown(md)`: 本文から Mermaid コードブロックを抽出する。 なぜ: 図の描画可否（R2）と
   描画対象（抽出結果）を分けて扱えるようにする。
+- `MermaidRenderSessions.schedule(uri)`: 未完了の図をpendingにしたセッションとジョブ群を同時に返し、重複投入を防ぐ。
+  `resetRendered()` と同一URIへの `register` は世代を進め、`complete(job, html)` は世代とpendingが一致する結果だけを受理する。
+  なぜ: Androidのコールバック順序に依存せずR6を保つ。
 
 ---
 
