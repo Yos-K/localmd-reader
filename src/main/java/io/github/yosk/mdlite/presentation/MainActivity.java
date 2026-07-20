@@ -30,7 +30,10 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import io.github.yosk.mdlite.R;
 import io.github.yosk.mdlite.domain.CompositeEntitlementSource;
+import io.github.yosk.mdlite.domain.DocumentRenderInput;
 import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
+import io.github.yosk.mdlite.domain.DocumentRenderingPlan;
+import io.github.yosk.mdlite.domain.DocumentRenderingSession;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
 import io.github.yosk.mdlite.domain.FolderBrowsingAction;
@@ -39,10 +42,7 @@ import io.github.yosk.mdlite.domain.HeadingNavigation;
 import io.github.yosk.mdlite.domain.HeadingScrollPosition;
 import io.github.yosk.mdlite.domain.MarkdownHeading;
 import io.github.yosk.mdlite.domain.MarkdownHeadings;
-import io.github.yosk.mdlite.domain.MermaidDiagramBlocks;
 import io.github.yosk.mdlite.domain.MermaidRenderJob;
-import io.github.yosk.mdlite.domain.MermaidRenderSchedule;
-import io.github.yosk.mdlite.domain.MermaidRenderSessions;
 import io.github.yosk.mdlite.domain.ProPurchaseFlow;
 import io.github.yosk.mdlite.domain.ProPurchaseUiState;
 import io.github.yosk.mdlite.domain.RecentDocumentLimit;
@@ -139,8 +139,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     String pendingSaveMarkdown = "";
     String pendingExportHtml = "";
     final Map<String, String> draftMarkdownByUri = new HashMap<String, String>();
-    final Map<String, String> markdownSourceByUri = new HashMap<String, String>();
-    MermaidRenderSessions mermaidRenderSessions = MermaidRenderSessions.empty();
+    DocumentRenderingSession documentRenderingSession = DocumentRenderingSession.empty();
     CircleGestureTrace circleGestureTrace;
     ScaleGestureDetector fontScaleGestureDetector;
     GestureDetector shortcutGestureDetector;
@@ -585,19 +584,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     @Override
     public void onMermaidRendered(MermaidRenderJob job, SafeHtml svg) {
-        MermaidRenderSessions completed = mermaidRenderSessions.complete(job, svg);
-        if (completed == mermaidRenderSessions) { return; }
-        mermaidRenderSessions = completed;
-        refreshRenderedTab(job.documentUri());
+        applyCompletedRendering(documentRenderingSession.complete(job, svg));
     }
 
     @Override
     public void onMermaidRenderFailed(MermaidRenderJob job, String reason) {
         SafeHtml errorHtml = MermaidRenderErrorHtml.from(job.block(), reason);
-        MermaidRenderSessions completed = mermaidRenderSessions.complete(job, errorHtml);
-        if (completed == mermaidRenderSessions) { return; }
-        mermaidRenderSessions = completed;
-        refreshRenderedTab(job.documentUri());
+        applyCompletedRendering(documentRenderingSession.complete(job, errorHtml));
     }
 
     void switchLanguage() {
@@ -825,7 +818,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (openTabs == null) {
             return MarkdownHeadings.fromMarkdown("");
         }
-        String markdown = markdownSourceByUri.get(openTabs.activeTab().uri());
+        String markdown = documentRenderingSession.markdownFor(openTabs.activeTab().uri());
         return MarkdownHeadings.fromMarkdown(markdown);
     }
 
@@ -863,14 +856,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     SafeHtml renderMarkdownForUri(String documentUri, String markdown) {
-        markdownSourceByUri.put(documentUri, markdown == null ? "" : markdown);
-        MermaidDiagramBlocks blocks = MermaidDiagramBlocks.fromMarkdown(markdown);
-        mermaidRenderSessions = mermaidRenderSessions.register(documentUri, blocks);
-        enqueueMermaidRenderJobs(documentUri);
-        return renderer.render(
+        DocumentRenderingPlan plan = documentRenderingSession.open(
+                documentUri,
                 markdown,
-                documentRenderingProfile,
-                mermaidRenderSessions.renderedFor(documentUri));
+                documentRenderingProfile);
+        documentRenderingSession = plan.session();
+        enqueueMermaidRenderJobs(plan.jobs());
+        return renderInput(plan.renderInputs()[0]);
     }
 
     void saveOpenTabs() {
@@ -1265,12 +1257,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     void rerenderMermaidDiagramsForCurrentTheme() {
         if (!documentRenderingProfile.mermaidRendering().isEnabled()) { return; }
-        mermaidRenderSessions = mermaidRenderSessions.resetRendered();
-        List<String> documentUris = mermaidRenderSessions.documentUris();
-        for (int i = 0; i < documentUris.size(); i++) {
-            String documentUri = documentUris.get(i);
-            enqueueMermaidRenderJobs(documentUri);
-            refreshRenderedTab(documentUri);
+        DocumentRenderingPlan plan = documentRenderingSession.resetForTheme(documentRenderingProfile);
+        documentRenderingSession = plan.session();
+        enqueueMermaidRenderJobs(plan.jobs());
+        DocumentRenderInput[] inputs = plan.renderInputs();
+        for (int i = 0; i < inputs.length; i++) {
+            refreshRenderedTab(inputs[i]);
         }
     }
 
@@ -1445,25 +1437,32 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return tabs.activate(activeIndex);
     }
 
-    private void enqueueMermaidRenderJobs(String documentUri) {
+    private void enqueueMermaidRenderJobs(MermaidRenderJob[] jobs) {
         if (!documentRenderingProfile.mermaidRendering().isEnabled() || mermaidRenderEngine == null) { return; }
-        MermaidRenderSchedule schedule = mermaidRenderSessions.schedule(documentUri);
-        mermaidRenderSessions = schedule.session();
-        MermaidRenderJob[] jobs = schedule.jobs();
         for (int i = 0; i < jobs.length; i++) {
             mermaidRenderEngine.enqueue(jobs[i], MermaidDiagramTheme.from(currentTheme));
         }
     }
 
-    private void refreshRenderedTab(String documentUri) {
-        String markdown = markdownSourceByUri.get(documentUri);
-        if (markdown == null) { return; }
+    private void applyCompletedRendering(DocumentRenderingPlan plan) {
+        documentRenderingSession = plan.session();
+        DocumentRenderInput[] inputs = plan.renderInputs();
+        if (inputs.length == 0) { return; }
+        refreshRenderedTab(inputs[0]);
+    }
+
+    private SafeHtml renderInput(DocumentRenderInput input) {
+        return renderer.render(
+                input.markdown(),
+                documentRenderingProfile,
+                input.renderedMermaidDiagrams());
+    }
+
+    private void refreshRenderedTab(DocumentRenderInput input) {
+        String documentUri = input.documentUri();
         OpenDocumentTab tab = tabByUri(documentUri);
         if (tab == null) { return; }
-        SafeHtml rendered = renderer.render(
-                markdown,
-                documentRenderingProfile,
-                mermaidRenderSessions.renderedFor(documentUri));
+        SafeHtml rendered = renderInput(input);
         openTabs = openTabs.replaceRenderedDocument(documentUri, rendered);
         renderTabs();
         if (openTabs.activeTab().uri().equals(documentUri)) { renderCurrentDocument(); }
