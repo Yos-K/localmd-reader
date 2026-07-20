@@ -192,11 +192,15 @@ jobs:
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
+      - name: Run Free Gradle unit tests
+        run: ./gradlew --no-daemon :app:testFreeDebugUnitTest
+
+      - name: Run Pro Preview Gradle unit tests
+        run: ./gradlew --no-daemon :app:testProPreviewDebugUnitTest
+
       - name: Build Gradle debug variants and release bundle
         run: |
           ./gradlew --no-daemon \
-            :app:testFreeDebugUnitTest \
-            :app:testProPreviewDebugUnitTest \
             :app:lintFreeDebug \
             :app:assembleFreeDebug \
             :app:assembleProPreviewDebug \

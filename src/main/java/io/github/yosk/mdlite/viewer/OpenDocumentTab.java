@@ -61,11 +61,18 @@ public abstract class OpenDocumentTab {
         return document;
     }
 
+    public abstract OpenDocumentTab withDocument(SafeHtml document);
+
     public abstract TabStatusMessage statusMessage();
 
     public static final class WelcomeTab extends OpenDocumentTab {
         private WelcomeTab(String title, String uri, SafeHtml document) {
             super(title, uri, document);
+        }
+
+        @Override
+        public OpenDocumentTab withDocument(SafeHtml document) {
+            return welcome(title(), uri(), document);
         }
 
         @Override
@@ -86,6 +93,11 @@ public abstract class OpenDocumentTab {
         }
 
         @Override
+        public OpenDocumentTab withDocument(SafeHtml document) {
+            return fileDocument(title(), uri(), document);
+        }
+
+        @Override
         public TabStatusMessage statusMessage() {
             return TabStatusMessage.none();
         }
@@ -103,6 +115,11 @@ public abstract class OpenDocumentTab {
         }
 
         @Override
+        public OpenDocumentTab withDocument(SafeHtml document) {
+            return clipboardDraft(title(), uri(), document);
+        }
+
+        @Override
         public TabStatusMessage statusMessage() {
             return TabStatusMessage.temporaryMarkdown();
         }
@@ -111,6 +128,11 @@ public abstract class OpenDocumentTab {
     public static final class SelectedTextDraftTab extends DraftDocumentTab {
         private SelectedTextDraftTab(String title, String uri, SafeHtml document) {
             super(title, uri, document);
+        }
+
+        @Override
+        public OpenDocumentTab withDocument(SafeHtml document) {
+            return selectedTextDraft(title(), uri(), document);
         }
 
         @Override

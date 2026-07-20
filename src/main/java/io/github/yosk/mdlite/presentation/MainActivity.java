@@ -40,8 +40,10 @@ import io.github.yosk.mdlite.domain.HeadingNavigation;
 import io.github.yosk.mdlite.domain.HeadingScrollPosition;
 import io.github.yosk.mdlite.domain.MarkdownHeading;
 import io.github.yosk.mdlite.domain.MarkdownHeadings;
-import io.github.yosk.mdlite.domain.MermaidDiagramBlock;
 import io.github.yosk.mdlite.domain.MermaidDiagramBlocks;
+import io.github.yosk.mdlite.domain.MermaidRenderJob;
+import io.github.yosk.mdlite.domain.MermaidRenderSchedule;
+import io.github.yosk.mdlite.domain.MermaidRenderSessions;
 import io.github.yosk.mdlite.domain.MermaidRendering;
 import io.github.yosk.mdlite.domain.MermaidRenderingPolicy;
 import io.github.yosk.mdlite.domain.ProPurchaseFlow;
@@ -88,10 +90,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public final class MainActivity extends Activity implements View.OnClickListener,
         View.OnApplyWindowInsetsListener,
@@ -150,9 +150,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     String pendingExportHtml = "";
     final Map<String, String> draftMarkdownByUri = new HashMap<String, String>();
     final Map<String, String> markdownSourceByUri = new HashMap<String, String>();
-    final Map<String, MermaidDiagramBlocks> mermaidBlocksByUri = new HashMap<String, MermaidDiagramBlocks>();
-    final Map<String, Map<Integer, SafeHtml>> mermaidSvgByUri = new HashMap<String, Map<Integer, SafeHtml>>();
-    final Set<String> pendingMermaidRenderJobs = new HashSet<String>();
+    MermaidRenderSessions mermaidRenderSessions = MermaidRenderSessions.empty();
     CircleGestureTrace circleGestureTrace;
     ScaleGestureDetector fontScaleGestureDetector;
     GestureDetector shortcutGestureDetector;
@@ -599,35 +597,20 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     @Override
-    public void onMermaidRendered(String documentUri, int diagramIndex, SafeHtml svg) {
-        pendingMermaidRenderJobs.remove(mermaidJobKey(documentUri, diagramIndex));
-        Map<Integer, SafeHtml> rendered = mermaidSvgByUri.get(documentUri);
-        if (rendered == null) {
-            rendered = new HashMap<Integer, SafeHtml>();
-            mermaidSvgByUri.put(documentUri, rendered);
-        }
-        rendered.put(Integer.valueOf(diagramIndex), svg);
-        refreshRenderedTab(documentUri);
+    public void onMermaidRendered(MermaidRenderJob job, SafeHtml svg) {
+        MermaidRenderSessions completed = mermaidRenderSessions.complete(job, svg);
+        if (completed == mermaidRenderSessions) { return; }
+        mermaidRenderSessions = completed;
+        refreshRenderedTab(job.documentUri());
     }
 
     @Override
-    public void onMermaidRenderFailed(String documentUri, int diagramIndex, String reason) {
-        pendingMermaidRenderJobs.remove(mermaidJobKey(documentUri, diagramIndex));
-        Map<Integer, SafeHtml> rendered = mermaidSvgByUri.get(documentUri);
-        if (rendered == null) {
-            rendered = new HashMap<Integer, SafeHtml>();
-            mermaidSvgByUri.put(documentUri, rendered);
-        }
-        MermaidDiagramBlocks blocks = mermaidBlocksByUri.get(documentUri);
-        SafeHtml errorHtml;
-        if (blocks == null || diagramIndex < 0 || diagramIndex >= blocks.items().length) {
-            errorHtml = SafeHtml.fromTrustedRendererOutput(
-                    "<div class=\"mermaid-error\"><strong>Unable to render this Mermaid diagram.</strong></div>");
-        } else {
-            errorHtml = MermaidRenderErrorHtml.from(blocks.items()[diagramIndex], reason);
-        }
-        rendered.put(Integer.valueOf(diagramIndex), errorHtml);
-        refreshRenderedTab(documentUri);
+    public void onMermaidRenderFailed(MermaidRenderJob job, String reason) {
+        SafeHtml errorHtml = MermaidRenderErrorHtml.from(job.block(), reason);
+        MermaidRenderSessions completed = mermaidRenderSessions.complete(job, errorHtml);
+        if (completed == mermaidRenderSessions) { return; }
+        mermaidRenderSessions = completed;
+        refreshRenderedTab(job.documentUri());
     }
 
     void switchLanguage() {
@@ -895,15 +878,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
     SafeHtml renderMarkdownForUri(String documentUri, String markdown) {
         markdownSourceByUri.put(documentUri, markdown == null ? "" : markdown);
         MermaidDiagramBlocks blocks = MermaidDiagramBlocks.fromMarkdown(markdown);
-        mermaidBlocksByUri.put(documentUri, blocks);
-        enqueueMermaidRenderJobs(documentUri, blocks);
+        mermaidRenderSessions = mermaidRenderSessions.register(documentUri, blocks);
+        enqueueMermaidRenderJobs(documentUri);
         return renderer.render(
                 markdown,
                 codeHighlighting,
                 mermaidRendering,
                 relativeLinkRendering,
                 relativeImageRendering,
-                mermaidSvgByUri.get(documentUri));
+                mermaidRenderSessions.renderedFor(documentUri));
     }
 
     void saveOpenTabs() {
@@ -1298,16 +1281,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     void rerenderMermaidDiagramsForCurrentTheme() {
         if (!mermaidRendering.isEnabled()) { return; }
-        mermaidSvgByUri.clear();
-        pendingMermaidRenderJobs.clear();
-        List<String> documentUris = new ArrayList<String>(mermaidBlocksByUri.keySet());
+        mermaidRenderSessions = mermaidRenderSessions.resetRendered();
+        List<String> documentUris = mermaidRenderSessions.documentUris();
         for (int i = 0; i < documentUris.size(); i++) {
             String documentUri = documentUris.get(i);
-            MermaidDiagramBlocks blocks = mermaidBlocksByUri.get(documentUri);
-            if (blocks != null) {
-                enqueueMermaidRenderJobs(documentUri, blocks);
-                refreshRenderedTab(documentUri);
-            }
+            enqueueMermaidRenderJobs(documentUri);
+            refreshRenderedTab(documentUri);
         }
     }
 
@@ -1482,25 +1461,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return tabs.activate(activeIndex);
     }
 
-    private void enqueueMermaidRenderJobs(String documentUri, MermaidDiagramBlocks blocks) {
-        if (!mermaidRendering.isEnabled() || mermaidRenderEngine == null || blocks.isEmpty()) { return; }
-        MermaidDiagramBlock[] items = blocks.items();
-        for (int i = 0; i < items.length; i++) {
-            if (mermaidDiagramNeedsRendering(documentUri, i)) {
-                pendingMermaidRenderJobs.add(mermaidJobKey(documentUri, i));
-                mermaidRenderEngine.enqueue(documentUri, i, items[i], MermaidDiagramTheme.from(currentTheme));
-            }
+    private void enqueueMermaidRenderJobs(String documentUri) {
+        if (!mermaidRendering.isEnabled() || mermaidRenderEngine == null) { return; }
+        MermaidRenderSchedule schedule = mermaidRenderSessions.schedule(documentUri);
+        mermaidRenderSessions = schedule.session();
+        MermaidRenderJob[] jobs = schedule.jobs();
+        for (int i = 0; i < jobs.length; i++) {
+            mermaidRenderEngine.enqueue(jobs[i], MermaidDiagramTheme.from(currentTheme));
         }
-    }
-
-    private boolean mermaidDiagramNeedsRendering(String documentUri, int diagramIndex) {
-        Map<Integer, SafeHtml> rendered = mermaidSvgByUri.get(documentUri);
-        return (rendered == null || !rendered.containsKey(Integer.valueOf(diagramIndex)))
-                && !pendingMermaidRenderJobs.contains(mermaidJobKey(documentUri, diagramIndex));
-    }
-
-    private static String mermaidJobKey(String documentUri, int diagramIndex) {
-        return documentUri + "#" + diagramIndex;
     }
 
     private void refreshRenderedTab(String documentUri) {
@@ -1514,22 +1482,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 mermaidRendering,
                 relativeLinkRendering,
                 relativeImageRendering,
-                mermaidSvgByUri.get(documentUri));
-        openTabs = replaceTabDocument(documentUri, tabWithDocument(tab, rendered));
+                mermaidRenderSessions.renderedFor(documentUri));
+        openTabs = openTabs.replaceRenderedDocument(documentUri, rendered);
         renderTabs();
         if (openTabs.activeTab().uri().equals(documentUri)) { renderCurrentDocument(); }
-    }
-
-    private OpenDocumentTabs replaceTabDocument(String documentUri, OpenDocumentTab replacement) {
-        ArrayList<OpenDocumentTab> tabs = new ArrayList<OpenDocumentTab>(openTabs.tabs());
-        int activeIndex = openTabs.activeIndex();
-        for (int i = 0; i < tabs.size(); i++) {
-            if (tabs.get(i).uri().equals(documentUri)) {
-                tabs.set(i, replacement);
-                return openTabsFrom(tabs, activeIndex);
-            }
-        }
-        return openTabs;
     }
 
     private OpenDocumentTab tabByUri(String documentUri) {
@@ -1540,18 +1496,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return null;
     }
 
-    private static OpenDocumentTab tabWithDocument(OpenDocumentTab tab, SafeHtml rendered) {
-        if (tab instanceof OpenDocumentTab.ClipboardDraftTab) {
-            return OpenDocumentTab.clipboardDraft(tab.title(), tab.uri(), rendered);
-        }
-        if (tab instanceof OpenDocumentTab.SelectedTextDraftTab) {
-            return OpenDocumentTab.selectedTextDraft(tab.title(), tab.uri(), rendered);
-        }
-        if (tab instanceof OpenDocumentTab.WelcomeTab) {
-            return OpenDocumentTab.welcome(tab.title(), tab.uri(), rendered);
-        }
-        return OpenDocumentTab.fileDocument(tab.title(), tab.uri(), rendered);
-    }
 
     private void restorePendingScrollAfterPageLoad() {
         if (pendingScrollRestoreY < 0) { return; }

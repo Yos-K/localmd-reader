@@ -73,6 +73,13 @@ models:
 - `DocumentTabSessionController` completes equivalent tab selection and closing
   transitions across click and gesture entry points while `OpenDocumentTabs`
   remains the platform-independent authoritative state.
+- Each `OpenDocumentTab` subtype replaces rendered content polymorphically, so
+  Android orchestration does not reconstruct tab types with `instanceof`.
+  `OpenDocumentTabs` owns replacement within the session and preserves the
+  active tab while inactive content is re-rendered.
+- `MermaidRenderSessions` owns extracted blocks, pending jobs, render generations,
+  and completed SVG by document. Android orchestration only executes the typed
+  `MermaidRenderJob` values produced by a schedule.
 
 Future package moves should preserve that direction.
 

@@ -51,6 +51,11 @@ CI 実行ページの **Summary** タブ → **Artifacts** からDLします。P
 - Free / Pro Preview の debug APK build
 - Free release AAB build
 
+Free と Pro Preview のテストは別々の Gradle 呼び出しで実行し、一方の flavor で蓄積した
+Robolectric の状態が次の flavor のテストワーカーメモリを消費しないようにします。各 Gradle
+`Test` task は同時ワーカー数1、最大ヒープ1536 MB、20テストクラスごとのワーカー再起動を
+適用します。`scripts/test-gradle-test-memory-policy.sh` がこの上限とCIステップの分離を検査します。
+
 ### Gradle wrapper
 
 `gradle-build` は system の `gradle` ではなく、リポジトリに同梱した wrapper
