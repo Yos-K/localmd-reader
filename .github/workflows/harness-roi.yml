@@ -1,0 +1,84 @@
+name: Harness ROI
+
+on:
+  schedule:
+    # Weekly advisory measurement: Monday 09:30 JST.
+    - cron: '30 0 * * 1'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Number of recent workflow runs to inspect'
+        required: false
+        default: '50'
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Prepare report directory
+        run: mkdir -p build/harness-roi
+
+      - name: Collect logical gate history
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LIMIT: ${{ inputs.limit || '50' }}
+        run: |
+          sh scripts/collect-gate-history.sh \
+            --repo "$GITHUB_REPOSITORY" \
+            --limit "$LIMIT" \
+            --group-map scripts/gate-groups.tsv \
+            > build/harness-roi/gate-history.tsv
+          cat build/harness-roi/gate-history.tsv
+
+      - name: Measure test balance
+        run: |
+          sh scripts/test-balance-report.sh > build/harness-roi/test-balance.txt
+          cat build/harness-roi/test-balance.txt
+
+      - name: Measure code complexity
+        run: |
+          sh scripts/measure-complexity.sh > build/harness-roi/complexity.txt
+          cat build/harness-roi/complexity.txt
+
+      - name: Summarize harness ROI signals
+        run: |
+          {
+            echo "## Harness ROI"
+            echo ""
+            echo "This scheduled advisory job measures whether the harness is still earning its cost."
+            echo "It does not remove tests or gates automatically."
+            echo ""
+            echo "### Gate history"
+            echo ""
+            echo '```tsv'
+            cat build/harness-roi/gate-history.tsv
+            echo '```'
+            echo ""
+            echo "### Test balance"
+            echo ""
+            echo '```'
+            cat build/harness-roi/test-balance.txt
+            echo '```'
+            echo ""
+            echo "### Complexity"
+            echo ""
+            echo '```'
+            cat build/harness-roi/complexity.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload harness ROI report
+        uses: actions/upload-artifact@v5
+        with:
+          name: harness-roi-report
+          path: build/harness-roi
+          retention-days: 7

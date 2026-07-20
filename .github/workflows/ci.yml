@@ -1,0 +1,203 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fitness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate pull request title
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$PR_TITLE" | sh scripts/check-conventional-title.sh
+
+      - name: Enforce per-file line count limit
+        run: sh scripts/check-file-sizes.sh
+
+      - name: Enforce harness hard constraints
+        run: sh scripts/check-hard-constraints.sh
+
+      - name: Scan for committed secrets
+        run: sh scripts/check-no-committed-secrets.sh
+
+      - name: Check documentation currency (glossary + rule docs)
+        if: github.event_name == 'pull_request'
+        run: sh scripts/check-docs-currency.sh "${{ github.event.pull_request.base.sha }}"
+
+      - name: Require ADR review for feature and fix commits
+        if: github.event_name == 'pull_request'
+        run: |
+          sh scripts/test-adr-commit-msg-hook.sh
+          sh scripts/test-adr-review-guard.sh
+          sh scripts/check-adr-review.sh "${{ github.event.pull_request.base.sha }}"
+
+      - name: Check unit test dependency download guard
+        run: sh scripts/check-unit-test-dependency-downloads.sh
+
+      - name: Check artifact storage policy
+        run: sh scripts/check-artifact-storage-policy.sh
+
+      - name: Check interaction storming flow completeness
+        run: sh scripts/check-interaction-storming.sh
+
+      - name: Check interaction model reachability
+        run: sh scripts/check-interaction-model.sh
+
+      - name: Check interaction command traceability
+        run: |
+          sh scripts/test-interaction-command-traceability.sh
+          sh scripts/check-interaction-command-traceability.sh
+
+      - name: Check interaction surface registration
+        run: sh scripts/check-interaction-surface-registration.sh
+      - name: Check public/private repository boundary
+        run: sh scripts/test-release-repository-boundary.sh
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android build tools
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Cache Android dependencies
+        uses: actions/cache@v4
+        with:
+          path: .android-deps
+          key: android-deps-${{ hashFiles('scripts/prepare-android-dependencies.sh', 'scripts/prepare_android_dependencies.py') }}
+
+      - name: Prepare Android dependencies
+        run: sh scripts/prepare-android-dependencies.sh
+
+      - name: Resolve build metadata
+        if: github.event_name == 'pull_request'
+        id: meta
+        run: |
+          ROOT="$GITHUB_WORKSPACE" . scripts/version-env.sh
+          {
+            echo "version_name=$VERSION_NAME"
+            echo "version_code=$VERSION_CODE"
+            echo "short_sha=$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run tests and debug build
+        env:
+          ANDROID_PLATFORM: android-35
+          ANDROID_BUILD_TOOLS: 35.0.0
+        run: sh test.sh
+
+      - name: Build Free debug APK
+        if: github.event_name == 'pull_request'
+        env:
+          ANDROID_PLATFORM: android-35
+          ANDROID_BUILD_TOOLS: 35.0.0
+          MDLITE_DEBUG_PRO_FEATURES: false
+          MDLITE_DEBUG_ENABLE_PLAY_BILLING: false
+          MDLITE_INCLUDE_ANDROID_DEPS: false
+          MDLITE_DEBUG_PACKAGE: io.github.yosk.mdlite.free.debug
+          MDLITE_DEBUG_APP_NAME: LocalMD Reader Free Dev
+        run: |
+          sh build.sh
+          mkdir -p ci-artifacts
+          cp app-debug.apk "ci-artifacts/localmd-reader-free-debug-v${{ steps.meta.outputs.version_name }}-${{ steps.meta.outputs.version_code }}-${{ steps.meta.outputs.short_sha }}.apk"
+
+      - name: Build Pro preview debug APK
+        if: github.event_name == 'pull_request'
+        env:
+          ANDROID_PLATFORM: android-35
+          ANDROID_BUILD_TOOLS: 35.0.0
+          MDLITE_DEBUG_PRO_FEATURES: true
+          MDLITE_DEBUG_ENABLE_PLAY_BILLING: true
+          MDLITE_INCLUDE_ANDROID_DEPS: true
+          MDLITE_DEBUG_PACKAGE: io.github.yosk.mdlite.pro.debug
+          MDLITE_DEBUG_APP_NAME: LocalMD Reader Pro Preview
+        run: |
+          sh build.sh
+          mkdir -p ci-artifacts
+          cp app-debug.apk "ci-artifacts/localmd-reader-pro-preview-debug-v${{ steps.meta.outputs.version_name }}-${{ steps.meta.outputs.version_code }}-${{ steps.meta.outputs.short_sha }}.apk"
+
+      - name: Upload Free debug APK artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v5
+        with:
+          name: localmd-reader-free-debug-v${{ steps.meta.outputs.version_name }}-${{ steps.meta.outputs.version_code }}-${{ steps.meta.outputs.short_sha }}
+          path: ci-artifacts/localmd-reader-free-debug-*.apk
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Upload Pro preview debug APK artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v5
+        with:
+          name: localmd-reader-pro-preview-debug-v${{ steps.meta.outputs.version_name }}-${{ steps.meta.outputs.version_code }}-${{ steps.meta.outputs.short_sha }}
+          path: ci-artifacts/localmd-reader-pro-preview-debug-*.apk
+          if-no-files-found: error
+          retention-days: 3
+
+  gradle-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Install Android build tools
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Build Gradle debug variants and release bundle
+        run: |
+          ./gradlew --no-daemon \
+            :app:testFreeDebugUnitTest \
+            :app:testProPreviewDebugUnitTest \
+            :app:lintFreeDebug \
+            :app:assembleFreeDebug \
+            :app:assembleProPreviewDebug \
+            :app:bundleFreeRelease

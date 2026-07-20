@@ -1,0 +1,1 @@
+Improves file selection in the free reader. You can now choose a folder and pick Markdown files from it.

@@ -1,0 +1,14 @@
+# 例: メニューとタブ切替の往復を織り交ぜた UI 散策（チャーターに応じて書き換える）
+# 各ステップ後に自動でスクリーンショット + UI ダンプが採取される
+fixture scripts/smoke-fixtures/smoke-render.md
+shot opened
+swipe 15 1200 500 1200 150
+shot menu-open
+key BACK
+swipe 600 1200 200 1200 150
+shot menu-closed
+chevron-left 540 1300 400
+shot after-chevron
+tap 540 2300
+key BACK
+shot final

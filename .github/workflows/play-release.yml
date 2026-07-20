@@ -1,0 +1,237 @@
+name: Play Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Release channel
+        required: true
+        default: free-play
+        type: choice
+        options:
+          - free-play
+          - pro-preview-artifact
+      track:
+        description: Google Play track name
+        required: true
+        default: alpha
+      status:
+        description: Release status
+        required: true
+        default: completed
+        type: choice
+        options:
+          - completed
+          - draft
+      build_system:
+        description: AAB build system
+        required: true
+        default: script
+        type: choice
+        options:
+          - script
+          - gradle
+      upload_to_play:
+        description: Upload the built AAB to Google Play
+        required: true
+        default: false
+        type: boolean
+      changes_not_sent_for_review:
+        description: Keep changes out of review until submitted in Play Console
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: play-release-${{ inputs.track }}
+  cancel-in-progress: false
+
+jobs:
+  build-release-aab:
+    if: github.repository == 'Yos-K/localmd-reader-release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.upload_to_play && 'play-console' || 'release-build' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Resolve build metadata
+        id: meta
+        run: |
+          ROOT="$GITHUB_WORKSPACE" . scripts/version-env.sh
+          {
+            echo "version_name=$VERSION_NAME"
+            echo "version_code=$VERSION_CODE"
+            echo "short_sha=$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Release preflight
+        run: sh scripts/release-preflight.sh
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android build tools
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Reject Pro preview Play upload
+        if: ${{ inputs.upload_to_play && inputs.channel != 'free-play' }}
+        run: |
+          echo "Only the free-play channel can be uploaded to Google Play." >&2
+          exit 1
+
+      - name: Reject Gradle Play upload
+        if: ${{ inputs.upload_to_play && inputs.build_system == 'gradle' }}
+        run: |
+          echo "Gradle AAB upload is not enabled yet. Build it as an artifact first and compare it with the script-built AAB." >&2
+          exit 1
+
+      - name: Play upload preflight
+        if: ${{ inputs.upload_to_play && inputs.channel == 'free-play' }}
+        env:
+          GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          MDLITE_RELEASE_KEYSTORE_BASE64: ${{ secrets.MDLITE_RELEASE_KEYSTORE_BASE64 }}
+          MDLITE_RELEASE_KEY_ALIAS: ${{ secrets.MDLITE_RELEASE_KEY_ALIAS }}
+          MDLITE_RELEASE_STORE_PASS: ${{ secrets.MDLITE_RELEASE_STORE_PASS }}
+          MDLITE_RELEASE_KEY_PASS: ${{ secrets.MDLITE_RELEASE_KEY_PASS }}
+        run: sh scripts/play-upload-preflight.sh
+
+      - name: Download bundletool
+        if: ${{ inputs.build_system == 'script' }}
+        env:
+          BUNDLETOOL_VERSION: 1.18.3
+        run: |
+          mkdir -p "$RUNNER_TEMP/tools"
+          curl -L \
+            "https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar" \
+            -o "$RUNNER_TEMP/tools/bundletool.jar"
+
+      - name: Prepare Android dependencies
+        if: ${{ inputs.build_system == 'script' }}
+        run: sh scripts/prepare-android-dependencies.sh
+
+      - name: Decode release keystore
+        env:
+          MDLITE_RELEASE_KEYSTORE_BASE64: ${{ secrets.MDLITE_RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$MDLITE_RELEASE_KEYSTORE_BASE64"
+          printf '%s' "$MDLITE_RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/mdlite-release.jks"
+
+      - name: Build signed release AAB
+        if: ${{ inputs.build_system == 'script' }}
+        env:
+          ANDROID_PLATFORM: android-35
+          ANDROID_BUILD_TOOLS: 35.0.0
+          BUNDLETOOL_JAR: ${{ runner.temp }}/tools/bundletool.jar
+          MDLITE_RELEASE_KEYSTORE: ${{ runner.temp }}/mdlite-release.jks
+          MDLITE_RELEASE_KEY_ALIAS: ${{ secrets.MDLITE_RELEASE_KEY_ALIAS }}
+          MDLITE_RELEASE_STORE_PASS: ${{ secrets.MDLITE_RELEASE_STORE_PASS }}
+          MDLITE_RELEASE_KEY_PASS: ${{ secrets.MDLITE_RELEASE_KEY_PASS }}
+          MDLITE_RELEASE_PRO_FEATURES: ${{ inputs.channel == 'pro-preview-artifact' }}
+          MDLITE_RELEASE_ENABLE_PLAY_BILLING: ${{ inputs.channel == 'pro-preview-artifact' }}
+          MDLITE_INCLUDE_ANDROID_DEPS: ${{ inputs.channel == 'pro-preview-artifact' }}
+        run: sh scripts/build-release-aab.sh
+
+      - name: Set up Gradle
+        if: ${{ inputs.build_system == 'gradle' }}
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build Gradle release AAB
+        if: ${{ inputs.build_system == 'gradle' }}
+        env:
+          MDLITE_RELEASE_KEYSTORE: ${{ runner.temp }}/mdlite-release.jks
+          MDLITE_RELEASE_KEY_ALIAS: ${{ secrets.MDLITE_RELEASE_KEY_ALIAS }}
+          MDLITE_RELEASE_STORE_PASS: ${{ secrets.MDLITE_RELEASE_STORE_PASS }}
+          MDLITE_RELEASE_KEY_PASS: ${{ secrets.MDLITE_RELEASE_KEY_PASS }}
+        run: |
+          if [ "${{ inputs.channel }}" = "free-play" ]; then
+            ./gradlew --no-daemon :app:bundleFreeRelease
+            mkdir -p build/release
+            cp app/build/outputs/bundle/freeRelease/app-free-release.aab build/release/localmd-reader-gradle-free-release.aab
+          else
+            ./gradlew --no-daemon :app:bundleProPreviewRelease
+            mkdir -p build/release
+            cp app/build/outputs/bundle/proPreviewRelease/app-proPreview-release.aab build/release/localmd-reader-gradle-pro-preview-release.aab
+          fi
+
+      - name: Set up Python
+        if: ${{ inputs.upload_to_play && inputs.channel == 'free-play' }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install Play API dependencies
+        if: ${{ inputs.upload_to_play && inputs.channel == 'free-play' }}
+        run: python -m pip install -r requirements-play-api.txt
+
+      - name: Authenticate to Google Cloud
+        if: ${{ inputs.upload_to_play && inputs.channel == 'free-play' }}
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Upload release AAB artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: localmd-reader-${{ inputs.channel }}-aab-v${{ steps.meta.outputs.version_name }}-${{ steps.meta.outputs.version_code }}-${{ steps.meta.outputs.short_sha }}
+          path: build/release/*-release.aab
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload AAB to Google Play
+        id: play_upload
+        if: ${{ inputs.upload_to_play && inputs.channel == 'free-play' }}
+        env:
+          CHANGES_NOT_SENT_FOR_REVIEW: ${{ inputs.changes_not_sent_for_review }}
+        run: |
+          REVIEW_ARGS=""
+          RELEASE_NAME="LocalMD ${GITHUB_SHA:0:7}"
+          if [ "$CHANGES_NOT_SENT_FOR_REVIEW" = "true" ]; then
+            REVIEW_ARGS="--changes-not-sent-for-review"
+          fi
+          python scripts/play-upload-closed-test.py \
+            --aab build/release/*-release.aab \
+            --track "${{ inputs.track }}" \
+            --status "${{ inputs.status }}" \
+            --name "$RELEASE_NAME" \
+            $REVIEW_ARGS
+          echo "executed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Release run summary
+        if: always()
+        run: |
+          {
+            echo "## Play release summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Package | io.github.yosk.mdlite${{ inputs.channel == 'pro-preview-artifact' && '.pro' || '' }} |"
+            echo "| Channel | ${{ inputs.channel }} |"
+            echo "| Build system | ${{ inputs.build_system }} |"
+            echo "| Version | ${{ steps.meta.outputs.version_name }} (${{ steps.meta.outputs.version_code }}) |"
+            echo "| Commit | ${{ steps.meta.outputs.short_sha }} |"
+            echo "| Track | ${{ inputs.track }} |"
+            echo "| Play upload requested | ${{ (inputs.upload_to_play && inputs.channel == 'free-play') && 'yes' || 'no' }} |"
+            echo "| Play upload result | ${{ steps.play_upload.outputs.executed == 'true' && 'executed' || steps.play_upload.outcome }} |"
+            echo "| Result | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

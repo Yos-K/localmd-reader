@@ -1,0 +1,50 @@
+#!/bin/sh
+set -eu
+
+MESSAGE_FILE="${1:?commit message file is required}"
+SUBJECT="$(sed -n '1p' "$MESSAGE_FILE")"
+
+if ! printf '%s\n' "$SUBJECT" | grep -Eq '^(feat|fix)(\([^)]*\))?!?: '; then
+  exit 0
+fi
+
+REVIEWS="$(sed -n 's/^ADR-Review:[[:space:]]*//p' "$MESSAGE_FILE")"
+COUNT="$(printf '%s\n' "$REVIEWS" | sed '/^$/d' | wc -l | tr -d ' ')"
+if [ "$COUNT" -ne 1 ]; then
+  echo "feat/fix commits require exactly one ADR-Review trailer." >&2
+  exit 1
+fi
+
+REVIEW="$(printf '%s\n' "$REVIEWS" | sed -n '1p')"
+if printf '%s\n' "$REVIEW" | grep -Eq '^none \(.+\)$'; then
+  exit 0
+fi
+if printf '%s\n' "$REVIEW" | grep -Eq '^none([[:space:]]*)$'; then
+  echo "ADR-Review: none requires a reason in parentheses." >&2
+  exit 1
+fi
+
+ROOT="$(git rev-parse --show-toplevel)"
+OLD_IFS="$IFS"
+IFS=','
+for RAW_PATH in $REVIEW; do
+  PATH_VALUE="$(printf '%s' "$RAW_PATH" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')"
+  case "$PATH_VALUE" in
+    docs/adr/[0-9][0-9][0-9][0-9]-*.md) ;;
+    *)
+      echo "Invalid ADR-Review path: $PATH_VALUE" >&2
+      exit 1
+      ;;
+  esac
+  case "$PATH_VALUE" in
+    *.ja.md)
+      echo "Reference the canonical English ADR, not: $PATH_VALUE" >&2
+      exit 1
+      ;;
+  esac
+  if [ ! -f "$ROOT/$PATH_VALUE" ]; then
+    echo "Referenced ADR does not exist: $PATH_VALUE" >&2
+    exit 1
+  fi
+done
+IFS="$OLD_IFS"

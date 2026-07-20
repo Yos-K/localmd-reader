@@ -1,0 +1,38 @@
+# sync-manifest.yaml — tracks which harness-kit version this project consumes.
+#
+# Read by harness-kit's sync-propose workflow to detect when a newer kit release is
+# available and open a sync PR (gated by this project's own CI). Project-specific
+# config (harness.config.sh) is never touched by sync — only the kit-managed scripts are.
+#
+# Pinned version is bumped when a kit sync PR is merged.
+
+harness_kit_version: "v0.10.1"
+adapter: android-jvm
+
+# Scripts consumed from harness-kit in their consumable (git-root + harness.config.sh) form.
+# This list grows as more adapter scripts adopt the consumable model (ROADMAP P2).
+#
+# The core hygiene + version scripts below are byte-identical to harness-kit's core/scripts/
+# (verified with diff), so declaring them here is diff-zero and CI-gated — no behaviour change,
+# and future kit releases now sync to them. Adopting them is the safe first half of P2.
+consumed_scripts:
+  - scripts/check-conventional-title.sh   # kit: core/scripts/check-conventional-title.sh
+  - scripts/check-no-committed-secrets.sh # kit: core/scripts/check-no-committed-secrets.sh
+  - scripts/version-env.sh                # kit: core/scripts/version-env.sh
+  - scripts/version-show.sh               # kit: core/scripts/version-show.sh
+  - scripts/version-check.sh              # kit: core/scripts/version-check.sh
+  - scripts/check-file-sizes.sh           # kit: adapters/android-jvm/scripts/check-file-sizes.sh
+  - scripts/run-mutation-tests.sh         # kit: adapters/android-jvm/scripts/run-mutation-tests.sh
+  # v0.8.0 で run-mutation-tests.sh が混在コンパイルを共通ヘルパーに委譲（Kotlin 対応）。
+  # 純 Java プロジェクトでもコンパイルは ak_compile 経由なので、本ヘルパーは必須の co-dependency。
+  - scripts/android-kotlin-compile.sh     # kit: adapters/android-jvm/scripts/android-kotlin-compile.sh
+
+# Remaining P2 — adapter scripts still on this project's own (diverged) versions. These are NOT
+# yet consumed because the divergence is more than declaration: localmd's copies carry consumer
+# drift (Termux shebang, relative ROOT) and hardcoded values the kit parameterizes. Reconcile by
+# RISK TIER, verifying behaviour parity per script before declaring consumed:
+#   - low risk (non-release, CI-adjacent): check-test-smells, android-dependency-env,
+#     run-unit-tests, test-balance-report — swap to the kit form + add config vars (APP_*, TEST_ROOT).
+#   - HIGH risk (release/signing/billing/Play — do NOT blind-overwrite; needs a real release test
+#     + human review): build-release-aab, build-release-apk, build-signed-release,
+#     create-release-keystore, prepare-android-dependencies, capture/export-play-store-*.

@@ -1,0 +1,63 @@
+name: Visual Regression Check (Limited)
+
+# C-7 縮小導入: uiautomator dump 方式の領域限定視覚退行検査 (cmd_025).
+#
+# For each of the 7 viewer themes, asserts that theme-critical UI elements
+# (menu structure, Unpin action) are present/absent after theme switch.
+# Complements capture-theme-screenshots.sh (screenshot evidence) with
+# structural assertions — no pixel comparison, no baseline image management.
+#
+# Manual dispatch only. NOT a merge gate (large/flaky-tolerant by design).
+# See docs/harness/test-strategy.md and queue/tmp/020b_screenshot_roi_recommendation.md.
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: vr-check-limited-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build setup
+        id: setup
+        uses: ./.github/actions/emulator-build-setup
+        with:
+          flavor: ProPreview
+
+      - name: Run limited visual regression check on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: |
+            adb shell settings put global hide_error_dialogs 1
+            adb install -r app/build/outputs/apk/proPreview/debug/app-proPreview-debug.apk
+            VR_ARTIFACT_DIR="$GITHUB_WORKSPACE/vr-check-artifacts" sh scripts/visual-regression-check-limited.sh io.github.yosk.mdlite.pro.debug
+
+      - name: Upload check artifacts
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: vr-check-artifacts-${{ steps.setup.outputs.short_sha }}
+          path: vr-check-artifacts/
+          if-no-files-found: warn
+          retention-days: 3

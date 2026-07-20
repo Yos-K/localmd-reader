@@ -1,0 +1,72 @@
+# from_state|command|to_state|event
+welcome|open_file|document-opened|Markdown file opened
+welcome|open_recent_files|recent-files-dialog|Recent files requested
+document-opened|open_recent_files|recent-files-dialog|Recent files requested
+recent-files-dialog|open_recent_file|document-opened|Recent file selected
+recent-files-dialog|close_dialog|document-opened|Recent files dismissed
+recent-files-dialog|clear_recent_files|document-opened|Recent files cleared and dialog dismissed
+document-opened|open_markdown_library|library-tree-visible|Markdown library opened
+library-tree-visible|open_markdown_file|document-opened|Library file selected
+library-tree-visible|filter_library_items|library-tree-visible|Library items filtered by name
+library-tree-visible|enter_child_folder|library-tree-visible|Child folder entered
+library-tree-visible|go_to_parent_folder|library-tree-visible|Parent folder restored
+library-tree-visible|choose_another_folder|library-tree-visible|Library folder reselected
+library-tree-visible|scroll_menu|library-tree-visible|Lower library actions reached
+library-tree-visible|collapse_library_tree|library-tree-collapsed|Library tree collapsed
+library-tree-visible|close_menu|document-opened|Library menu dismissed
+library-tree-collapsed|expand_library_tree|library-tree-visible|Library tree expanded
+library-tree-collapsed|close_menu|document-opened|Collapsed library menu dismissed
+document-opened|open_pinned_files|pinned-file-list-visible|Pinned files requested
+pinned-file-list-visible|open_pinned_file|document-opened|Pinned file selected
+pinned-file-list-visible|clear_all_pins|document-opened|Pinned files cleared and dialog dismissed
+pinned-file-list-visible|close_dialog|document-opened|Pinned files dismissed
+welcome|open_folder_files|folder-file-list-visible|Folder files requested
+document-opened|open_folder_files|folder-file-list-visible|Folder files requested
+folder-file-list-visible|open_folder_file|document-opened|Folder file selected
+folder-file-list-visible|choose_another_folder|folder-file-list-visible|Folder selection reopened
+folder-file-list-visible|close_dialog|document-opened|Folder files dismissed
+temporary-document-tab-active|save_as|document-opened|Temporary document saved as file
+temporary-document-tab-active|close_temporary_tab|welcome|Temporary document discarded
+temporary-document-tab-active|switch_tab|document-opened|Existing file tab selected
+external-file-opened|open_as_tab|document-opened|External file retained as tab
+external-file-opened|return_to_source_app|welcome|Source app resumed
+external-file-opened|open_next_external_file|external-file-opened|Another external file opened
+unsupported-file-dialog|choose_another_file|document-opened|Supported file selected
+unsupported-file-dialog|close_dialog|welcome|Unsupported file dismissed
+unsupported-file-dialog|view_reason|unsupported-file-dialog|Unsupported reason reviewed
+document-opened|expand_settings_section|settings-section-expanded|Inline settings expanded
+settings-section-collapsed|expand_settings_section|settings-section-expanded|Inline settings reopened
+settings-section-collapsed|close_menu|document-opened|Menu dismissed
+settings-section-expanded|collapse_settings_section|settings-section-collapsed|Inline settings collapsed
+settings-section-expanded|open_theme_dialog|theme-dialog|Theme selection requested
+settings-section-expanded|toggle_language|document-opened|Language toggled and menu dismissed
+settings-section-expanded|toggle_controls_placement|document-opened|Controls placement toggled and menu dismissed
+settings-section-expanded|open_gesture_shortcuts|gesture-shortcuts-dialog|Gesture shortcuts requested
+settings-section-expanded|open_pro_features|pro-features-dialog|Pro features requested
+settings-section-expanded|open_clipboard_diagnostics|clipboard-diagnostics-dialog|Clipboard diagnostics requested
+settings-section-expanded|open_privacy_policy|privacy-policy-dialog|Privacy policy requested
+settings-section-expanded|close_menu|document-opened|Menu dismissed
+document-opened|expand_table_of_contents|table-of-contents-expanded|Table of contents expanded
+table-of-contents-collapsed|expand_table_of_contents|table-of-contents-expanded|Table of contents reopened
+table-of-contents-collapsed|close_menu|document-opened|Menu dismissed
+table-of-contents-expanded|collapse_table_of_contents|table-of-contents-collapsed|Table of contents collapsed
+table-of-contents-expanded|jump_to_heading|document-opened|Heading selected
+table-of-contents-expanded|close_menu|document-opened|Menu dismissed
+theme-dialog|select_theme|document-opened|Theme selected
+theme-dialog|close_dialog|document-opened|Theme selection dismissed
+gesture-shortcuts-dialog|select_shortcut_action|gesture-shortcuts-dialog|Shortcut action changed
+gesture-shortcuts-dialog|close_dialog|document-opened|Gesture shortcuts dismissed
+pro-features-dialog|start_purchase|pro-features-dialog|Purchase requested
+pro-features-dialog|restore_purchase|pro-features-dialog|Purchase restore requested
+pro-features-dialog|close_dialog|document-opened|Pro features dismissed
+clipboard-diagnostics-dialog|close_dialog|document-opened|Clipboard diagnostics dismissed
+privacy-policy-dialog|close_dialog|document-opened|Privacy policy dismissed
+document-opened|show_search_bar|document-search-bar-visible|Search requested
+document-search-bar-visible|find_next|document-search-bar-visible|Next match selected
+document-search-bar-visible|find_previous|document-search-bar-visible|Previous match selected
+document-search-bar-visible|close_search_bar|document-opened|Search bar dismissed
+welcome|open_clipboard_picker|clipboard-item-picker|Clipboard items requested
+document-opened|open_clipboard_picker|clipboard-item-picker|Clipboard items requested
+clipboard-item-picker|open_selected_items|temporary-document-tab-active|Selected clipboard items opened
+clipboard-item-picker|cancel|document-opened|Clipboard item selection dismissed
+clipboard-item-picker|adjust_selection|clipboard-item-picker|Clipboard item selection changed

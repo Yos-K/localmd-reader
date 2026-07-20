@@ -1,0 +1,79 @@
+name: Smoke Render L5
+
+# L5 render-assert smoke: opens smoke-render.md and asserts that table /
+# code-block / Mermaid visible text is present via UIAutomator UI dump.
+# Manual dispatch only — this check is flaky-tolerant and is NOT a required
+# PR check (it must not be added to branch protection rules).
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: smoke-render-l5-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render-assert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build setup
+        id: setup
+        uses: ./.github/actions/emulator-build-setup
+        with:
+          flavor: Free
+
+      - name: Run L5 render-assert on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # NOTE: emulator-runner executes each script line in a SEPARATE
+          # `sh -c`, so shell variables do NOT persist across lines (observed
+          # on gesture-smoke run 27285682358). Keep every line self-contained.
+          # hide_error_dialogs suppresses ANR dialogs (run 27057683831).
+          script: |
+            mkdir -p "$GITHUB_WORKSPACE/smoke-artifacts"
+            adb install -r app/build/outputs/apk/free/debug/app-free-debug.apk || { adb logcat -d -v time > "$GITHUB_WORKSPACE/smoke-artifacts/install-fail-logcat.txt" 2>/dev/null; exit 1; }
+            adb shell settings put global hide_error_dialogs 1
+            SMOKE_ARTIFACT_DIR="$GITHUB_WORKSPACE/smoke-artifacts" sh scripts/smoke-render-assert-l5.sh io.github.yosk.mdlite.debug
+
+      - name: Upload render-assert evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: smoke-render-l5-evidence-v${{ steps.setup.outputs.version_name }}-${{ steps.setup.outputs.version_code }}-${{ steps.setup.outputs.short_sha }}
+          path: smoke-artifacts/
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Render-assert summary
+        if: always()
+        run: |
+          {
+            echo "## Smoke Render L5 summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Package | io.github.yosk.mdlite.debug |"
+            echo "| Channel | free debug |"
+            echo "| Version | ${{ steps.setup.outputs.version_name }} (${{ steps.setup.outputs.version_code }}) |"
+            echo "| Commit | ${{ steps.setup.outputs.short_sha }} |"
+            echo "| Result | ${{ job.status }} |"
+            echo ""
+            echo "> This workflow is manual dispatch only and is not a required PR check."
+          } >> "$GITHUB_STEP_SUMMARY"

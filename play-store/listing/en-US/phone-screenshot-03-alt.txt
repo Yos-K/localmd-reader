@@ -1,0 +1,1 @@
+Dark theme Markdown view showing a table with horizontal scrolling.

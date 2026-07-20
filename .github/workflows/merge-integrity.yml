@@ -1,0 +1,63 @@
+name: Merge Integrity
+
+# auto-merge レースの機械検知。PR #80 で実発生した事故を再発時に即検知する:
+# 全チェック緑+未解決スレッドのみのPRに対応コミットを push し、直後にスレッドを
+# 解決すると、新コミットの CI 完了を待たず「旧 head」でマージが発火し、
+# 最後のコミットが main から漏れる（GitHub の仕様上ブランチ保護では防げない）。
+#
+# これまでの防御は「マージ後に内容を手で検証する」という運用ルールのみだった。
+# 本ワークフローはマージ直後に「PR の最終 head がマージ結果に含まれているか」を
+# 機械検証し、漏れがあれば issue を起票して赤で知らせる（検知層。予防は不可能な
+# ため、復旧手順 = 漏れコミットの cherry-pick 再提出を issue に案内する）。
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  verify-merged-content:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+
+      - name: Verify PR head is contained in the merge result
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # ブランチは auto-delete されうるので PR ref から head を取得する
+          git fetch origin "pull/${PR_NUMBER}/head" || true
+
+          PARENT_COUNT="$(git cat-file -p "$MERGE_SHA" | grep -c '^parent ' || true)"
+          if [ "$PARENT_COUNT" -lt 2 ]; then
+            # squash / rebase マージでは head SHA は履歴に残らず ancestor 検証が
+            # 構造上できない。誤検知を出さないため警告のみで素通りさせる。
+            echo "::warning::squash/rebase merge detected (parents=$PARENT_COUNT); ancestor check skipped"
+            exit 0
+          fi
+
+          if git merge-base --is-ancestor "$HEAD_SHA" "$MERGE_SHA"; then
+            echo "merge-integrity ok: PR head $HEAD_SHA is contained in merge $MERGE_SHA"
+            exit 0
+          fi
+
+          echo "::error::auto-merge race detected: PR #${PR_NUMBER} merged at an older head. Final head $HEAD_SHA is NOT in merge $MERGE_SHA"
+          MISSING="$(git log --oneline "$MERGE_SHA..$HEAD_SHA" | head -20)"
+          gh issue create \
+            --title "auto-merge race: PR #${PR_NUMBER} のコミットが main から漏れた" \
+            --label bug \
+            --body "$(printf 'Merge Integrity ワークフローがレースを検知しました（PR #80 と同型）。\n\n- PR: #%s\n- マージコミット: %s\n- PR 最終 head: %s\n\n漏れたコミット:\n```\n%s\n```\n\n復旧手順（#81 の前例）: 漏れたコミットを新ブランチに cherry-pick して PR を再提出する。\n再発防止の運用ルール: レビュー対応コミットの push 後、スレッド解決は新コミットの CI 完了後に行う。' "$PR_NUMBER" "$MERGE_SHA" "$HEAD_SHA" "$MISSING")"
+          exit 1

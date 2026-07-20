@@ -1,0 +1,35 @@
+LocalMD Reader Closed Test Feedback
+
+Device:
+Android version:
+App version:
+
+Checks:
+- Installed from Google Play:
+- App launched:
+- Opened a .md or .markdown file from inside the app:
+- Opened a Markdown file from another app:
+- Opened multiple files as tabs:
+- Used tabs:
+- Closed tabs and returned to the welcome screen:
+- Restarted the app and restored readable tabs:
+- Used recent files:
+- Created a temporary Markdown document from clipboard text:
+- Saved a temporary Markdown document with Save as...:
+- Searched within a document:
+- Switched light/dark theme:
+- Changed font size with pinch:
+- Checked code block highlighting:
+- Checked basic Mermaid diagram rendering:
+- Opened the privacy dialog:
+
+Concern:
+
+Steps to reproduce:
+
+Expected behavior:
+
+Actual behavior:
+
+Screenshot:
+Attach only if it does not include personal information or private file content.

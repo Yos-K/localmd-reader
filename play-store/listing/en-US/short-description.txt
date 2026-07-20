@@ -1,0 +1,1 @@
+Local Markdown reader with tabs, dark mode, and offline rendering

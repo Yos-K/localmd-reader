@@ -1,0 +1,1 @@
+Tabs and menu controls for theme, language, placement, and recent files.

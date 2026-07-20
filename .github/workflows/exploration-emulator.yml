@@ -1,0 +1,99 @@
+name: Exploration Emulator
+
+# UI 探索セッションの実行装置。チャーター駆動の手動 dispatch 専用で、
+# マージゲートではない（探索は再現性のない発見活動——exploratory-testing.md）。
+# run は足場（使い捨て）。証跡 artifact を分析して発見だけを蒸留する。
+#
+# モード:
+#   monkey — シード付きランダムUIイベント（crash/ANR 検出・シードで再現可能）
+#   ops    — scripts/exploration-ops/ の操作列を実行し各ステップの証跡を採取
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "monkey | ops"
+        required: true
+        default: "monkey"
+      seed:
+        description: "monkey: 乱数シード（再現用に必ず記録される）"
+        required: false
+        default: "20260612"
+      events:
+        description: "monkey: イベント数"
+        required: false
+        default: "2000"
+      ops_file:
+        description: "ops: 操作列ファイル（リポジトリ相対パス）"
+        required: false
+        default: "scripts/exploration-ops/example.ops"
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  # Key by mode so monkey and ops can run concurrently on the same ref; a re-dispatch
+  # of the SAME mode still supersedes the older run (cancel-in-progress). Keying by ref
+  # alone made a later ops dispatch cancel an in-flight monkey run (observed in #161).
+  group: exploration-emulator-${{ github.ref }}-${{ inputs.mode }}
+  cancel-in-progress: true
+
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build setup
+        uses: ./.github/actions/emulator-build-setup
+        with:
+          flavor: ProPreview
+
+      - name: Run exploration on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # NOTE: emulator-runner runs each script line in a SEPARATE `sh -c`;
+          # keep every line self-contained (docs/harness/github-actions-cicd.md).
+          script: |
+            mkdir -p "$GITHUB_WORKSPACE/exploration-artifacts"
+            adb shell settings put global hide_error_dialogs 1
+            adb shell cmd overlay enable com.android.internal.systemui.navbar.threebutton
+            adb install -r app/build/outputs/apk/proPreview/debug/app-proPreview-debug.apk || { adb logcat -d -v time > "$GITHUB_WORKSPACE/exploration-artifacts/install-fail-logcat.txt" 2>/dev/null; exit 1; }
+            SMOKE_ARTIFACT_DIR="$GITHUB_WORKSPACE/exploration-artifacts" sh scripts/explore-emulator.sh "${{ inputs.mode }}" "$([ "${{ inputs.mode }}" = "monkey" ] && echo "${{ inputs.seed }}" || echo "${{ inputs.ops_file }}")" "$([ "${{ inputs.mode }}" = "monkey" ] && echo "${{ inputs.events }}" || echo "io.github.yosk.mdlite.pro.debug")"
+
+      - name: Upload exploration evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: exploration-evidence-${{ inputs.mode }}-${{ github.run_id }}
+          path: exploration-artifacts/
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Exploration summary
+        if: always()
+        run: |
+          {
+            echo "## Exploration Emulator summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Mode | ${{ inputs.mode }} |"
+            echo "| Seed / Ops | ${{ inputs.mode == 'monkey' && inputs.seed || inputs.ops_file }} |"
+            echo "| Events | ${{ inputs.events }} |"
+            echo "| Result | ${{ job.status }} |"
+            echo ""
+            echo "> 探索は非ゲート。findings があれば artifact を分析し、セッションログに記録して振り分ける。"
+            echo "> monkey の失敗は seed で再現可能（蒸留＝最小再現を例テスト/medium に落とす）。"
+          } >> "$GITHUB_STEP_SUMMARY"

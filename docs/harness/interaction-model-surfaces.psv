@@ -1,0 +1,22 @@
+# surface_id|state_id|evidence|locator
+welcome-screen|welcome|src/main/java/io/github/yosk/mdlite/infrastructure/WelcomeDocumentBuilder.java|WelcomeDocumentBuilder
+document-viewer|document-opened|src/main/java/io/github/yosk/mdlite/viewer/OpenDocumentTab.java|FileDocumentTab
+recent-files-dialog|recent-files-dialog|src/main/java/io/github/yosk/mdlite/presentation/DocumentListDialogController.java|showRecentDocuments
+markdown-library-tree|library-tree-visible|src/main/java/io/github/yosk/mdlite/presentation/MarkdownLibraryMenuTree.java|show
+folder-files-dialog|folder-file-list-visible|src/main/java/io/github/yosk/mdlite/presentation/DocumentListDialogController.java|showFolderDocuments
+markdown-library-collapsed-row|library-tree-collapsed|src/main/java/io/github/yosk/mdlite/presentation/MarkdownLibraryMenuTree.java|toggleLoadedTree
+pinned-files-dialog|pinned-file-list-visible|src/main/java/io/github/yosk/mdlite/presentation/DocumentListDialogController.java|showPinnedDocuments
+temporary-document-tab|temporary-document-tab-active|src/main/java/io/github/yosk/mdlite/viewer/OpenDocumentTab.java|ClipboardDraftTab
+external-open-entry|external-file-opened|src/main/java/io/github/yosk/mdlite/presentation/DocumentOpener.java|handleIncomingIntent
+unsupported-file-dialog|unsupported-file-dialog|src/main/java/io/github/yosk/mdlite/presentation/DocumentOpener.java|showFileOpenError
+settings-collapsed-row|settings-section-collapsed|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java|toggleSettingsPanel
+settings-inline-section|settings-section-expanded|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java|toggleSettingsPanel
+table-of-contents-collapsed-row|table-of-contents-collapsed|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java|toggleTableOfContentsPanel
+table-of-contents-inline-section|table-of-contents-expanded|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java|toggleTableOfContentsPanel
+theme-dialog|theme-dialog|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java|showThemeDialog
+gesture-shortcuts-dialog|gesture-shortcuts-dialog|src/main/java/io/github/yosk/mdlite/presentation/GestureShortcutDialogs.java|showGestureShortcutsDialog
+pro-features-dialog|pro-features-dialog|src/main/java/io/github/yosk/mdlite/presentation/ProFeaturesDialog.java|void show()
+clipboard-diagnostics-dialog|clipboard-diagnostics-dialog|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java|showClipboardDiagnosticsDialog
+privacy-policy-dialog|privacy-policy-dialog|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java|showPrivacyPolicyDialog
+document-search-bar|document-search-bar-visible|src/main/java/io/github/yosk/mdlite/presentation/DocumentSearchBar.java|void showBar()
+clipboard-item-picker|clipboard-item-picker|src/main/java/io/github/yosk/mdlite/presentation/ClipboardDocumentCreator.java|showClipboardItemPicker

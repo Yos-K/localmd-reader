@@ -1,0 +1,6 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp" android:height="20dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <!-- Hamburger: three bars. Tinted at runtime to follow the theme. -->
+    <path android:fillColor="#FF000000" android:pathData="M3,6h18v2H3z M3,11h18v2H3z M3,16h18v2H3z"/>
+</vector>

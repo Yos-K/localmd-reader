@@ -1,0 +1,96 @@
+name: Mutation
+
+# Mutation testing gate for the Android-free logic layers (PITest, pure JVM).
+#
+# Why a separate workflow: mutation analysis is slow, so it must not sit on the
+# every-PR fast path (fitness/unit). It runs on every PR as a single required
+# job, but only does the heavy analysis when the logic layers (or their tests /
+# the runner) actually change. PRs that touch nothing relevant report success
+# immediately, so the required check never gets stuck pending.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Detect logic-layer changes
+        id: changed
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$BASE" ]; then
+            # Manual dispatch (no PR base): always run.
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          CHANGED="$(git diff --name-only "$BASE...HEAD")"
+          PATTERN='^src/main/java/io/github/yosk/mdlite/(domain|viewer|file|infrastructure)/.*\.java$'
+          PATTERN="$PATTERN"'|^src/test/java/.*\.java$'
+          PATTERN="$PATTERN"'|^scripts/run-mutation-tests\.sh$'
+          PATTERN="$PATTERN"'|^\.github/workflows/mutation\.yml$'
+          # The mutation floor/exclusions live in harness.config.sh, so a change there must
+          # re-run mutation — otherwise the ratchet could be loosened without verification.
+          PATTERN="$PATTERN"'|^harness\.config\.sh$'
+          if printf '%s\n' "$CHANGED" | grep -qE "$PATTERN"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Logic-layer changes detected; running mutation analysis."
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "No logic-layer changes; skipping mutation analysis."
+          fi
+
+      - name: Cache mutation tool jars
+        if: steps.changed.outputs.run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: build/mutation/lib
+          key: mutation-jars-${{ hashFiles('scripts/run-mutation-tests.sh') }}
+
+      - name: Run mutation tests
+        if: steps.changed.outputs.run == 'true'
+        run: sh scripts/run-mutation-tests.sh
+
+      - name: Publish triage to job summary
+        if: always() && steps.changed.outputs.run == 'true'
+        run: |
+          TRIAGE=build/mutation/report/triage.txt
+          if [ -f "$TRIAGE" ]; then
+            {
+              echo "## Mutation triage"
+              echo "Analyse per docs/harness/mutation-analysis-rule.md: fix SURVIVED first; never lower the floor."
+              echo '```'
+              cat "$TRIAGE"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload mutation report
+        if: always() && steps.changed.outputs.run == 'true'
+        uses: actions/upload-artifact@v5
+        with:
+          name: mutation-report
+          path: build/mutation/report
+          if-no-files-found: ignore
+          retention-days: 3

@@ -1,0 +1,15 @@
+<resources>
+    <!-- Night-mode launch window (#70): only the launch-window attributes go
+         dark (background #141a1f = ViewerThemeStyle.dark(), light status bar
+         off) to avoid the white flash before onCreate. The parent stays the
+         same Light platform theme as values/styles.xml on purpose: dialogs
+         inherit the platform theme and must follow the SAVED viewer theme
+         (a user can save Light while the system is in night mode), so the
+         platform parent must not flip with the system setting. -->
+    <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:colorAccent">#006D77</item>
+        <item name="android:windowBackground">#141A1F</item>
+    </style>
+</resources>

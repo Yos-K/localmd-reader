@@ -1,0 +1,74 @@
+name: Device Smoke
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  schedule:
+    # Weekly representative L1-L4 flow: Sunday 03:00 JST.
+    - cron: '0 18 * * 6'
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: device-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  launch-free-debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build setup
+        id: setup
+        uses: ./.github/actions/emulator-build-setup
+        with:
+          flavor: Free
+
+      - name: Launch app on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # NOTE: emulator-runner executes each script line in a SEPARATE
+          # `sh -c`, so shell variables and function definitions do NOT
+          # persist across lines (observed on gesture-smoke run 27285682358).
+          # Keep every line self-contained.
+          script: |
+            mkdir -p "$GITHUB_WORKSPACE/smoke-artifacts"
+            adb install -r app/build/outputs/apk/free/debug/app-free-debug.apk || { adb logcat -d -v time > "$GITHUB_WORKSPACE/smoke-artifacts/logcat.txt" 2>/dev/null; adb exec-out screencap -p > "$GITHUB_WORKSPACE/smoke-artifacts/screen.png" 2>/dev/null; exit 1; }
+            SMOKE_ARTIFACT_DIR="$GITHUB_WORKSPACE/smoke-artifacts" sh scripts/emulator-smoke.sh io.github.yosk.mdlite.debug
+
+      - name: Upload smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: device-smoke-evidence-v${{ steps.setup.outputs.version_name }}-${{ steps.setup.outputs.version_code }}-${{ steps.setup.outputs.short_sha }}
+          path: smoke-artifacts/
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Smoke run summary
+        if: always()
+        run: |
+          {
+            echo "## Device smoke summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Package | io.github.yosk.mdlite.debug |"
+            echo "| Channel | free debug |"
+            echo "| Version | ${{ steps.setup.outputs.version_name }} (${{ steps.setup.outputs.version_code }}) |"
+            echo "| Commit | ${{ steps.setup.outputs.short_sha }} |"
+            echo "| Result | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

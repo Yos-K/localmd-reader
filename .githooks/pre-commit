@@ -1,0 +1,19 @@
+#!/bin/sh
+# Pre-commit fitness hook (owner-approved 2026-06-11; design rationale in
+# docs/harness/ecc-reference-evaluation.md).
+#
+# Runs ONLY the fast, deterministic, zero-false-positive guards so the commit
+# stays snappy (~1s). Anything slower or diff-context-dependent (glossary /
+# rule-doc currency, tests) stays in pr-preflight.sh and CI.
+#
+# Agent-neutral by design: lives in git itself (core.hooksPath .githooks),
+# so it guards Claude Code, Codex, and human commits alike.
+# The companion commit-msg hook enforces ADR review declarations. Both are
+# enabled automatically by scripts/start-work.sh; manual setup:
+#   git config core.hooksPath .githooks
+set -eu
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+sh "$ROOT/scripts/check-no-committed-secrets.sh"
+sh "$ROOT/scripts/check-file-sizes.sh"

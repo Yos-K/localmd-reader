@@ -1,0 +1,57 @@
+name: Emulator build setup
+description: >-
+  Shared setup for the emulator harness workflows: resolve build metadata,
+  set up Java and Gradle, enable KVM, and build the debug APK for the given
+  product flavor. Extracted so a setup fix lands in one place instead of six
+  near-identical workflows (device-smoke / gesture-smoke / smoke-render-l5 /
+  theme-screenshots / visual-regression-check-limited / exploration-emulator).
+
+inputs:
+  flavor:
+    description: 'Gradle product flavor in camelCase (Free or ProPreview).'
+    required: true
+
+outputs:
+  version_name:
+    description: 'VERSION_NAME resolved from scripts/version-env.sh'
+    value: ${{ steps.meta.outputs.version_name }}
+  version_code:
+    description: 'VERSION_CODE resolved from scripts/version-env.sh'
+    value: ${{ steps.meta.outputs.version_code }}
+  short_sha:
+    description: 'First 7 characters of the commit SHA'
+    value: ${{ steps.meta.outputs.short_sha }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve build metadata
+      id: meta
+      shell: sh
+      run: |
+        ROOT="$GITHUB_WORKSPACE" . scripts/version-env.sh
+        {
+          echo "version_name=$VERSION_NAME"
+          echo "version_code=$VERSION_CODE"
+          echo "short_sha=$(printf '%s' "$GITHUB_SHA" | cut -c1-7)"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v5
+
+    - name: Enable KVM
+      shell: bash
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: Build ${{ inputs.flavor }} debug APK
+      shell: sh
+      run: ./gradlew --no-daemon :app:assemble${{ inputs.flavor }}Debug

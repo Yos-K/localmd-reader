@@ -1,0 +1,26 @@
+# Fitness Function Exceptions
+# Files listed here are exempt from the 300-line limit enforced by
+# scripts/check-file-sizes.sh. Each entry MUST include a justification
+# comment above it. Exceptions should be removed as files are refactored.
+#
+# Format: one path per line, relative to repository root.
+
+# MainActivity God Class split is in progress.
+# See PR #12 (2,776 -> 1,088 lines) and follow-up issues for further extraction
+# (target: under 300 lines once Mermaid coordination, tab rendering, and onCreate
+# initialization are extracted into dedicated classes).
+src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java
+
+# Custom Markdown parser. Bounded growth: existing scope covers GFM essentials.
+# If new syntax requirements push this past 600 lines, evaluate migrating to
+# commonmark-java instead of splitting (see Issue #15 section 3).
+src/main/java/io/github/yosk/mdlite/infrastructure/JavaSimpleMarkdownRenderer.java
+
+# Test mirrors the parser's surface area. Acceptable as long as the parser
+# itself stays single-file. Revisit when JavaSimpleMarkdownRenderer is split.
+src/test/java/io/github/yosk/mdlite/infrastructure/JavaSimpleMarkdownRendererTest.java
+
+# Localized string bundle. Will grow proportionally with supported languages and
+# UI strings. Splitting by category (menu/dialog/message) is the next step when
+# this exceeds 400 lines.
+src/main/java/io/github/yosk/mdlite/viewer/ViewerText.java

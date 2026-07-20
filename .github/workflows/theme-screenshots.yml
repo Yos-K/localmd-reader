@@ -1,0 +1,67 @@
+name: Theme Screenshots
+
+# Review evidence for visual PRs (issue #77 family): boots an emulator,
+# walks all 7 viewer themes (proPreview debug so Pro themes render) and
+# uploads document + menu screenshots as an artifact. Manual dispatch only —
+# screenshots are review material, not a merge gate, and the emulator is
+# too slow/flaky for the every-PR fast path.
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: theme-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build setup
+        id: setup
+        uses: ./.github/actions/emulator-build-setup
+        with:
+          flavor: ProPreview
+
+      - name: Capture theme screenshots on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # The runner disables animation scales by default, which froze the
+          # menu-animation recording into discrete frames (and incidentally
+          # proved the animations-off instant fallback). This workflow exists
+          # to capture visual evidence, so keep animations on.
+          disable-animations: false
+          script: |
+            # Suppress ANR/crash dialogs (run 27057683831: a "Pixel Launcher
+            # isn't responding" dialog covered the app and ate the menu tap).
+            # CI-only on purpose - the capture script also runs against real
+            # devices where flipping a global setting would be intrusive.
+            adb shell settings put global hide_error_dialogs 1
+            adb install -r app/build/outputs/apk/proPreview/debug/app-proPreview-debug.apk
+            THEME_SHOT_DIR="$GITHUB_WORKSPACE/theme-screenshots" sh scripts/capture-theme-screenshots.sh io.github.yosk.mdlite.pro.debug
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: theme-screenshots-${{ steps.setup.outputs.short_sha }}
+          path: theme-screenshots/
+          if-no-files-found: error
+          retention-days: 3

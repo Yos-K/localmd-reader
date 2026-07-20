@@ -1,0 +1,92 @@
+name: Gesture Smoke L5
+
+# L5 gesture smoke: drives the real touch pipeline (edge swipe / menu swipe /
+# double tap / chevron shortcut) on an emulator and asserts outcomes via
+# UIAutomator dump. Gestures share touch-dispatch state in MainActivity and
+# historically break when unrelated features land there, so this fires
+# automatically on PRs that touch gesture-related sources — but it is
+# flaky-tolerant and must NOT be added to branch protection required checks.
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  pull_request:
+    paths:
+      - 'src/main/java/io/github/yosk/mdlite/viewer/*Gesture*.java'
+      - 'src/main/java/io/github/yosk/mdlite/presentation/*Gesture*.java'
+      - 'src/main/java/io/github/yosk/mdlite/presentation/SwipeMenuLayout.java'
+      - 'src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java'
+      - 'scripts/smoke-gesture-l5.sh'
+      - '.github/workflows/gesture-smoke.yml'
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: gesture-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gesture-assert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build setup
+        id: setup
+        uses: ./.github/actions/emulator-build-setup
+        with:
+          flavor: ProPreview
+
+      - name: Run gesture smoke on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          # NOTE: emulator-runner runs each script line in a SEPARATE `sh -c`,
+          # so shell variables do NOT persist across lines (observed on run
+          # 27285682358: ART_DIR was empty on the next line). Keep every line
+          # self-contained.
+          script: |
+            mkdir -p "$GITHUB_WORKSPACE/smoke-artifacts"
+            adb shell settings put global hide_error_dialogs 1
+            adb shell cmd overlay enable com.android.internal.systemui.navbar.threebutton
+            adb install -r app/build/outputs/apk/proPreview/debug/app-proPreview-debug.apk || { adb logcat -d -v time > "$GITHUB_WORKSPACE/smoke-artifacts/install-fail-logcat.txt" 2>/dev/null; exit 1; }
+            SMOKE_ARTIFACT_DIR="$GITHUB_WORKSPACE/smoke-artifacts" sh scripts/smoke-gesture-l5.sh io.github.yosk.mdlite.pro.debug
+
+      - name: Upload gesture smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: gesture-smoke-evidence-v${{ steps.setup.outputs.version_name }}-${{ steps.setup.outputs.version_code }}-${{ steps.setup.outputs.short_sha }}
+          path: smoke-artifacts/
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Gesture smoke summary
+        if: always()
+        run: |
+          {
+            echo "## Gesture Smoke L5 summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Package | io.github.yosk.mdlite.pro.debug |"
+            echo "| Channel | proPreview debug |"
+            echo "| Version | ${{ steps.setup.outputs.version_name }} (${{ steps.setup.outputs.version_code }}) |"
+            echo "| Commit | ${{ steps.setup.outputs.short_sha }} |"
+            echo "| Probes | G1 edge-open / G2 swipe-close / G3 double-tap / G4 chevron next_tab |"
+            echo "| Result | ${{ job.status }} |"
+            echo ""
+            echo "> Fires on gesture-touching PRs but is flaky-tolerant: NOT a required check."
+            echo "> On failure, read smoke-artifacts (screen.png / ui-dump.xml) before assuming an app regression."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,40 @@
+name: Emulator Harness
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Emulator check to run
+        required: true
+        default: smoke
+        type: choice
+        options:
+          - smoke
+          - render
+          - gesture
+          - theme
+          - visual
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    if: inputs.mode == 'smoke'
+    uses: ./.github/workflows/device-smoke.yml
+
+  render:
+    if: inputs.mode == 'render'
+    uses: ./.github/workflows/smoke-render-l5.yml
+
+  gesture:
+    if: inputs.mode == 'gesture'
+    uses: ./.github/workflows/gesture-smoke.yml
+
+  theme:
+    if: inputs.mode == 'theme'
+    uses: ./.github/workflows/theme-screenshots.yml
+
+  visual:
+    if: inputs.mode == 'visual'
+    uses: ./.github/workflows/visual-regression-check-limited.yml

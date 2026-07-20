@@ -1,0 +1,46 @@
+# gate-groups.tsv — localmd-reader logical-gate map for collect-gate-history.sh --group-map
+#
+# WHY: collect-gate-history.sh の既定レポートは生の CIステップ名でグルーピングされるため、
+# 本物の品質ゲート（Run mutation tests …）とセットアップ手順（Checkout / Set up Java …）が
+# 同じ表に混在し、二階ループの ROI 判断のシグナルが薄まる（gatecrate Issue #56）。このマップで
+# step名を論理ゲート（mutation / gradle-build / pr-title …）に集計前 relabel し、評価対象を絞る。
+#
+# 形式: <step_pattern>\t<logical_gate>   区切りはタブ1個（スペースではない）。
+#   - step_pattern はグロブ（ワイルドカードは `*` のみ・step名全体に一致）
+#   - `#` 始まりの行と空行は無視 / 規則は上から順に適用し FIRST match wins
+#   - 未マップの step は生の行のまま残る（隠れない）ので、必要に応じて漸進的に増やせばよい
+#
+# 使い方（このマップは複数ワークフローを跨ぐので --workflow で絞らない。絞ると ci.yml 以外の
+# 論理ゲート＝mutation/domain-model/merge-integrity/emulator 系が黙って欠落する）:
+#   sh scripts/collect-gate-history.sh --limit 50 --group-map scripts/gate-groups.tsv
+#
+# 対象ワークフロー: ci.yml / mutation.yml / domain-model-check.yml / merge-integrity.yml /
+#                   device-smoke.yml / exploration-emulator.yml / gesture-smoke.yml
+
+# --- CI: fitness ジョブ（PR 衛生・予防ゲート） ---
+Validate pull request title	pr-title
+Enforce per-file line count limit	line-limit
+Enforce harness hard constraints	harness-constraints
+Scan for committed secrets	secrets
+Check documentation currency*	docs-currency
+Check interaction storming*	interaction-flow
+Check interaction model*	interaction-model
+Check interaction command*	interaction-traceability
+Check interaction surface*	interaction-surface
+
+# --- CI: build/test ジョブ ---
+# 「Run tests and debug build」は test.sh（version-check / test-smell / third-party-notice /
+# build.sh / release-basics）+ デバッグビルドを束ねる複合ステップ。unit-test 単体ではないので
+# test-bundle と総称する（発火＝どれか1チェックの失敗。内訳は CI ログで切り分ける）。
+Run tests and debug build	test-bundle
+Build Free debug APK	apk-build
+Build Pro preview debug APK	apk-build
+Build Gradle debug variants*	gradle-build
+
+# --- 専用ワークフロー（検出ゲート） ---
+Run mutation tests	mutation
+Model-check domain specs*	domain-model
+Verify PR head is contained*	merge-integrity
+Launch app on emulator	device-smoke
+Run exploration on emulator	exploration-smoke
+Run gesture smoke on emulator	gesture-smoke
