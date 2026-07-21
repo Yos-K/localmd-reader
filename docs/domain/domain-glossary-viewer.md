@@ -120,13 +120,17 @@ flowchart TD
 
 ### 語の定義（構成要素 と L1）
 
+- **DocumentUri**（`domain/DocumentUri.java`）: 文書をタブ・描画・非同期ジョブの間で同定する値オブジェクト。
+  構成要素 `value: String`。操作 `from(String)` / `value()`。
+  - L1: 生成時に前後空白を除去し、nullまたは空文字を拒否する。同一性とハッシュ値は正規化済み値に基づく。
+    なぜ: 生文字列では各モデルが非空確認と同一性判断を重複し、空URIや正規化前後の不一致を内部へ持ち込めるため。
 - **SafeHtml**（`domain/SafeHtml.java`）: 表示して安全な、描画済みHTML。構成要素 `value: String`。
   - L1: 非null。生成は `fromTrustedRendererOutput(String)` のみ。
     なぜ: reader WebView は JavaScript 無効（Hard Constraint・XSS対策）。信頼できるレンダラ出力だけを
     「安全HTML」とし、未信頼Markdown由来の生HTMLを混ぜない境界を型で示す。
 - **OpenDocumentTab**（`viewer/OpenDocumentTab.java`）: 開いている1タブ（抽象基底＋種別サブタイプ）。
-  構成要素 `title: String`、`uri: String`、`document: SafeHtml`、種別（Welcome / FileDocument / ClipboardDraft / SelectedTextDraft）。
-  - L1: `uri` 非空必須、`title` 空は "Untitled Markdown" に正規化、`document` 非null。
+  構成要素 `title: String`、`uri: DocumentUri`、`document: SafeHtml`、種別（Welcome / FileDocument / ClipboardDraft / SelectedTextDraft）。
+  - L1: `uri` は常に有効な`DocumentUri`、`title` 空は "Untitled Markdown" に正規化、`document` 非null。
     なぜ（uri必須）: `uri` が識別子で、空だと同一性・復元が壊れる。 なぜ（title正規化）: タブには常に表示ラベルが要る。
   - `UserDocumentTab = FileDocumentTab OR DraftDocumentTab`。ユーザーが開いた・作った文書だけを表し、
     `WelcomeTab`を含めない。なぜ: ProのHTML出力・印刷対象をURI判定ではなく型で限定する。

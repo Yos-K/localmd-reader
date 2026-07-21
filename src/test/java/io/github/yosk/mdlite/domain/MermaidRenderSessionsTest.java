@@ -4,7 +4,7 @@ import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
 
 public final class MermaidRenderSessionsTest {
-    private static final String DOCUMENT_URI = "content://guide";
+    private static final DocumentUri DOCUMENT_URI = DocumentUri.from("content://guide");
 
     @Test
     void registeredDocumentSchedulesEveryDiagramForBackgroundRendering() {
@@ -26,14 +26,14 @@ public final class MermaidRenderSessionsTest {
     void scheduledJobMatchesOnlyItsOwnCallbackCoordinates() {
         MermaidRenderJob job = registeredSession().schedule(DOCUMENT_URI).jobs()[0];
 
-        TestAssertions.assertFalse(job.matches(DOCUMENT_URI, 1), "a callback for another diagram must not complete the active job");
+        TestAssertions.assertFalse(job.matches(DOCUMENT_URI.value(), 1), "a callback for another diagram must not complete the active job");
     }
 
     @Test
     void scheduledJobAcceptsItsOwnCallbackCoordinates() {
         MermaidRenderJob job = registeredSession().schedule(DOCUMENT_URI).jobs()[0];
 
-        TestAssertions.assertTrue(job.matches(DOCUMENT_URI, 0), "the matching callback must complete the active job");
+        TestAssertions.assertTrue(job.matches(DOCUMENT_URI.value(), 0), "the matching callback must complete the active job");
     }
 
     @Test

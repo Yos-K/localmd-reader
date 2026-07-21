@@ -1,15 +1,16 @@
 package io.github.yosk.mdlite.viewer;
 
 import io.github.yosk.mdlite.domain.SafeHtml;
+import io.github.yosk.mdlite.domain.DocumentUri;
 
 public abstract class OpenDocumentTab {
     private final String title;
-    private final String uri;
+    private final DocumentUri uri;
     private final SafeHtml document;
 
     private OpenDocumentTab(String title, String uri, SafeHtml document) {
         this.title = normalizedTitle(title);
-        this.uri = normalizedUri(uri);
+        this.uri = DocumentUri.from(uri);
         if (document == null) {
             throw new IllegalArgumentException("open tab document must not be null");
         }
@@ -41,19 +42,15 @@ public abstract class OpenDocumentTab {
         return safeTitle.length() == 0 ? "Untitled Markdown" : safeTitle;
     }
 
-    private static String normalizedUri(String uri) {
-        String safeUri = uri == null ? "" : uri.trim();
-        if (safeUri.length() == 0) {
-            throw new IllegalArgumentException("open tab URI must not be empty");
-        }
-        return safeUri;
-    }
-
     public String title() {
         return title;
     }
 
     public String uri() {
+        return uri.value();
+    }
+
+    public DocumentUri documentUri() {
         return uri;
     }
 

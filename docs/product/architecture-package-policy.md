@@ -76,6 +76,9 @@ models:
 - `DocumentTabCloseResult` represents successful and unchanged close outcomes
   polymorphically, so Android orchestration never infers success from a raw index
   and cannot close a tab without applying the same transition to rendering state.
+- `DocumentUri` is the shared always-valid identity used by tabs, rendering
+  sessions, render inputs, and Mermaid jobs. Android and JavaScript adapters
+  convert boundary strings instead of passing raw identifiers through models.
 - Each `OpenDocumentTab` subtype replaces rendered content polymorphically, so
   Android orchestration does not reconstruct tab types with `instanceof`.
   `OpenDocumentTabs` owns replacement within the session and preserves the

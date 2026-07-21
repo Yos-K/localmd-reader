@@ -4,6 +4,7 @@ import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.DocumentRenderingPlan;
 import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
 import io.github.yosk.mdlite.domain.DocumentRenderingSession;
+import io.github.yosk.mdlite.domain.DocumentUri;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
@@ -145,13 +146,13 @@ public final class OpenDocumentTabsTest {
     void closeResultRemovesClosedDocumentFromItsRenderingSession() {
         OpenDocumentTabs tabs = OpenDocumentTabs.withInitialTab(tab("First", "content://first", "first"));
         DocumentRenderingPlan opened = DocumentRenderingSession.empty().open(
-                "content://first", "# First", freeProfile());
+                DocumentUri.from("content://first"), "# First", freeProfile());
 
         DocumentRenderingSession rendering = tabs
                 .closeOrFallback(0, tab("Welcome", "app://welcome", "welcome"))
                 .renderingSessionAfter(opened.session());
 
-        TestAssertions.assertEquals("", rendering.markdownFor("content://first"),
+        TestAssertions.assertEquals("", rendering.markdownFor(DocumentUri.from("content://first")),
                 "a completed tab close must close the matching rendering session");
     }
 
@@ -171,7 +172,7 @@ public final class OpenDocumentTabsTest {
     void invalidCloseResultKeepsTheRenderingSessionUnchanged() {
         OpenDocumentTabs tabs = threeTabs();
         DocumentRenderingSession rendering = DocumentRenderingSession.empty().open(
-                "content://first", "# First", freeProfile()).session();
+                DocumentUri.from("content://first"), "# First", freeProfile()).session();
 
         DocumentRenderingSession unchanged = tabs
                 .closeOrFallback(99, tab("Welcome", "app://welcome", "welcome"))

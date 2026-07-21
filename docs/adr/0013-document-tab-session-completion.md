@@ -8,6 +8,8 @@ Keep `OpenDocumentTabs` as the always-valid tab state and route tab activation,
 closing, previous, and next commands through `DocumentTabSessionController`.
 `OpenDocumentTabs.closeOrFallback` returns a `DocumentTabCloseResult` whose
 closed and unchanged variants own the corresponding rendering-session transition.
+Tabs, rendering sessions, and Mermaid jobs share the always-valid `DocumentUri`
+identity; raw Android and JavaScript URI text is parsed only at their boundaries.
 The controller completes each transition by updating the authoritative state,
 clearing stale status, refreshing localized controls and tab views, rendering
 the active document, and persisting restorable tabs. Closing also removes the

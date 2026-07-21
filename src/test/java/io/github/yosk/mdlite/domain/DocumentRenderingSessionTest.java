@@ -4,7 +4,7 @@ import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
 
 public final class DocumentRenderingSessionTest {
-    private static final String DOCUMENT_URI = "content://guide";
+    private static final DocumentUri DOCUMENT_URI = DocumentUri.from("content://guide");
     private static final String MARKDOWN = "# Guide\n\n```mermaid\ngraph TD\nA-->B\n```";
 
     @Test
@@ -46,7 +46,7 @@ public final class DocumentRenderingSessionTest {
     void unknownDocumentHasSafeEmptyMarkdown() {
         DocumentRenderingSession session = DocumentRenderingSession.empty();
 
-        TestAssertions.assertEquals("", session.markdownFor("content://missing"),
+        TestAssertions.assertEquals("", session.markdownFor(DocumentUri.from("content://missing")),
                 "unknown document must not expose a nullable Markdown source");
     }
 
@@ -88,7 +88,7 @@ public final class DocumentRenderingSessionTest {
     void themeResetProducesRenderInputForEveryKnownDocument() {
         DocumentRenderingPlan first = openMermaidDocument();
         DocumentRenderingPlan second = first.session().open(
-                "content://notes",
+                DocumentUri.from("content://notes"),
                 "# Notes",
                 freeProfile());
 
@@ -135,7 +135,7 @@ public final class DocumentRenderingSessionTest {
     void closingUnknownDocumentKeepsTheRenderingSessionUnchanged() {
         DocumentRenderingPlan opened = openMermaidDocument();
 
-        DocumentRenderingSession unchanged = opened.session().close("content://missing");
+        DocumentRenderingSession unchanged = opened.session().close(DocumentUri.from("content://missing"));
 
         TestAssertions.assertSame(opened.session(), unchanged,
                 "closing an unknown document must preserve the existing rendering session");

@@ -1,19 +1,19 @@
 package io.github.yosk.mdlite.domain;
 
 public final class MermaidRenderJob {
-    private final String documentUri;
+    private final DocumentUri documentUri;
     private final int diagramIndex;
     private final long generation;
     private final MermaidDiagramBlock block;
 
-    MermaidRenderJob(String documentUri, int diagramIndex, long generation, MermaidDiagramBlock block) {
+    MermaidRenderJob(DocumentUri documentUri, int diagramIndex, long generation, MermaidDiagramBlock block) {
         this.documentUri = documentUri;
         this.diagramIndex = diagramIndex;
         this.generation = generation;
         this.block = block;
     }
 
-    public String documentUri() {
+    public DocumentUri documentUri() {
         return documentUri;
     }
 
@@ -26,7 +26,7 @@ public final class MermaidRenderJob {
     }
 
     public boolean matches(String callbackDocumentUri, int callbackDiagramIndex) {
-        return documentUri.equals(callbackDocumentUri) && diagramIndex == callbackDiagramIndex;
+        return documentUri.value().equals(callbackDocumentUri) && diagramIndex == callbackDiagramIndex;
     }
 
     long generation() {

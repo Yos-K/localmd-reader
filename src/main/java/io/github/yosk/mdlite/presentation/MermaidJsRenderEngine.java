@@ -57,7 +57,7 @@ final class MermaidJsRenderEngine {
         RenderJob job = jobs.remove();
         activeJob = job;
         String script = "window.renderLocalMdMermaid("
-                + quote(job.job.documentUri()) + ","
+                + quote(job.job.documentUri().value()) + ","
                 + job.job.diagramIndex() + ","
                 + quote(job.job.block().source()) + ","
                 + quote(job.theme.background) + ","

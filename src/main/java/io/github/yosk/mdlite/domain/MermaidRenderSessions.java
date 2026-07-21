@@ -10,37 +10,37 @@ import java.util.Set;
 
 public final class MermaidRenderSessions {
     private static final MermaidRenderSessions EMPTY = new MermaidRenderSessions(
-            Collections.<String, DocumentState>emptyMap());
+            Collections.<DocumentUri, DocumentState>emptyMap());
 
-    private final Map<String, DocumentState> documents;
+    private final Map<DocumentUri, DocumentState> documents;
 
-    private MermaidRenderSessions(Map<String, DocumentState> documents) {
-        this.documents = Collections.unmodifiableMap(new HashMap<String, DocumentState>(documents));
+    private MermaidRenderSessions(Map<DocumentUri, DocumentState> documents) {
+        this.documents = Collections.unmodifiableMap(new HashMap<DocumentUri, DocumentState>(documents));
     }
 
     public static MermaidRenderSessions empty() {
         return EMPTY;
     }
 
-    public MermaidRenderSessions register(String documentUri, MermaidDiagramBlocks blocks) {
+    public MermaidRenderSessions register(DocumentUri documentUri, MermaidDiagramBlocks blocks) {
         requireDocument(documentUri, blocks);
         DocumentState previous = documents.get(documentUri);
         long generation = previous == null ? 0L : nextGeneration(previous.generation);
-        Map<String, DocumentState> next = mutableDocuments();
+        Map<DocumentUri, DocumentState> next = mutableDocuments();
         next.put(documentUri, DocumentState.initial(blocks, generation));
         return new MermaidRenderSessions(next);
     }
 
-    public MermaidRenderSessions close(String documentUri) {
+    public MermaidRenderSessions close(DocumentUri documentUri) {
         if (!documents.containsKey(documentUri)) {
             return this;
         }
-        Map<String, DocumentState> next = mutableDocuments();
+        Map<DocumentUri, DocumentState> next = mutableDocuments();
         next.remove(documentUri);
         return next.isEmpty() ? EMPTY : new MermaidRenderSessions(next);
     }
 
-    public MermaidRenderSchedule schedule(String documentUri) {
+    public MermaidRenderSchedule schedule(DocumentUri documentUri) {
         DocumentState document = documents.get(documentUri);
         if (document == null) {
             return new MermaidRenderSchedule(this, new MermaidRenderJob[0]);
@@ -58,7 +58,7 @@ public final class MermaidRenderSessions {
         if (jobs.isEmpty()) {
             return new MermaidRenderSchedule(this, new MermaidRenderJob[0]);
         }
-        Map<String, DocumentState> next = mutableDocuments();
+        Map<DocumentUri, DocumentState> next = mutableDocuments();
         next.put(documentUri, document.withPending(pending));
         return new MermaidRenderSchedule(
                 new MermaidRenderSessions(next),
@@ -80,7 +80,7 @@ public final class MermaidRenderSessions {
         pending.remove(index);
         HashMap<Integer, SafeHtml> rendered = new HashMap<Integer, SafeHtml>(document.rendered);
         rendered.put(index, renderedDiagram);
-        Map<String, DocumentState> next = mutableDocuments();
+        Map<DocumentUri, DocumentState> next = mutableDocuments();
         next.put(job.documentUri(), document.withResults(pending, rendered));
         return new MermaidRenderSessions(next);
     }
@@ -89,8 +89,8 @@ public final class MermaidRenderSessions {
         if (documents.isEmpty()) {
             return this;
         }
-        HashMap<String, DocumentState> next = new HashMap<String, DocumentState>();
-        for (Map.Entry<String, DocumentState> entry : documents.entrySet()) {
+        HashMap<DocumentUri, DocumentState> next = new HashMap<DocumentUri, DocumentState>();
+        for (Map.Entry<DocumentUri, DocumentState> entry : documents.entrySet()) {
             DocumentState document = entry.getValue();
             next.put(entry.getKey(), DocumentState.initial(
                     document.blocks,
@@ -99,21 +99,21 @@ public final class MermaidRenderSessions {
         return new MermaidRenderSessions(next);
     }
 
-    public Map<Integer, SafeHtml> renderedFor(String documentUri) {
+    public Map<Integer, SafeHtml> renderedFor(DocumentUri documentUri) {
         DocumentState document = documents.get(documentUri);
         return document == null ? Collections.<Integer, SafeHtml>emptyMap() : document.rendered;
     }
 
-    public List<String> documentUris() {
-        return Collections.unmodifiableList(new ArrayList<String>(documents.keySet()));
+    public List<DocumentUri> documentUris() {
+        return Collections.unmodifiableList(new ArrayList<DocumentUri>(documents.keySet()));
     }
 
-    private Map<String, DocumentState> mutableDocuments() {
-        return new HashMap<String, DocumentState>(documents);
+    private Map<DocumentUri, DocumentState> mutableDocuments() {
+        return new HashMap<DocumentUri, DocumentState>(documents);
     }
 
-    private static void requireDocument(String documentUri, MermaidDiagramBlocks blocks) {
-        if (documentUri == null || documentUri.trim().length() == 0 || blocks == null) {
+    private static void requireDocument(DocumentUri documentUri, MermaidDiagramBlocks blocks) {
+        if (documentUri == null || blocks == null) {
             throw new IllegalArgumentException("Mermaid document requires a URI and extracted blocks.");
         }
     }

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
 import io.github.yosk.mdlite.domain.DocumentRenderingSession;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
+import io.github.yosk.mdlite.domain.DocumentUri;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.file.RestorableOpenTabs;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
@@ -66,7 +67,7 @@ public final class DocumentTabSessionControllerMediumTest {
     public void closingATabAlsoClosesItsDocumentRenderingSession() {
         MainActivity activity = activityWithTwoFiles();
         activity.documentRenderingSession = DocumentRenderingSession.empty().open(
-                "file:///second.md",
+                DocumentUri.from("file:///second.md"),
                 "# Second",
                 DocumentRenderingProfile.fromEntitlement(FeatureEntitlement.free()))
                 .session();
@@ -75,7 +76,7 @@ public final class DocumentTabSessionControllerMediumTest {
         controller.close(1);
 
         assertEquals("closing a tab must release its Markdown rendering state",
-                "", activity.documentRenderingSession.markdownFor("file:///second.md"));
+                "", activity.documentRenderingSession.markdownFor(DocumentUri.from("file:///second.md")));
     }
 
     private static MainActivity activityWithTwoFiles() {
