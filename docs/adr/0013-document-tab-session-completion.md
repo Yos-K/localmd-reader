@@ -6,6 +6,8 @@ Status: Accepted
 
 Keep `OpenDocumentTabs` as the always-valid tab state and route tab activation,
 closing, previous, and next commands through `DocumentTabSessionController`.
+`OpenDocumentTabs.closeOrFallback` returns a `DocumentTabCloseResult` whose
+closed and unchanged variants own the corresponding rendering-session transition.
 The controller completes each transition by updating the authoritative state,
 clearing stale status, refreshing localized controls and tab views, rendering
 the active document, and persisting restorable tabs. Closing also removes the
@@ -34,7 +36,9 @@ to the immutable viewer model.
 
 ## Why Alternatives Were Rejected
 
-Duplicated orchestration permits entry-point-specific regressions. Putting
+Duplicated orchestration permits entry-point-specific regressions. A raw tab
+collection result cannot say whether closing succeeded and forces callers to
+re-read an index or URI; the typed result keeps that distinction. Putting
 Android views or persistence in `OpenDocumentTabs` reverses the dependency
 direction. Moving all open flows at once would hide meaningful differences such
 as recent-file recording, temporary-document persistence, and target anchors.

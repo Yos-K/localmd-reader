@@ -1,6 +1,10 @@
 package io.github.yosk.mdlite.viewer;
 
 import io.github.yosk.mdlite.domain.SafeHtml;
+import io.github.yosk.mdlite.domain.DocumentRenderingPlan;
+import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
+import io.github.yosk.mdlite.domain.DocumentRenderingSession;
+import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -97,7 +101,9 @@ public final class OpenDocumentTabsTest {
 
     @Test
     void closeInactiveTabKeepsCurrentActiveDocument() {
-        OpenDocumentTabs tabs = threeTabs().activate(2).close(1);
+        OpenDocumentTabs tabs = threeTabs().activate(2)
+                .closeOrFallback(1, tab("Welcome", "app://welcome", "welcome"))
+                .tabs();
 
         TestAssertions.assertEquals(2, tabs.tabs().size(), "closing an inactive tab must remove one tab");
         TestAssertions.assertEquals("Second", tabs.activeTab().title(), "closing an inactive tab before the active tab must keep the same active document");
@@ -105,7 +111,9 @@ public final class OpenDocumentTabsTest {
 
     @Test
     void closeActiveMiddleTabActivatesTheNextDocument() {
-        OpenDocumentTabs tabs = threeTabs().activate(1).close(1);
+        OpenDocumentTabs tabs = threeTabs().activate(1)
+                .closeOrFallback(1, tab("Welcome", "app://welcome", "welcome"))
+                .tabs();
 
         TestAssertions.assertEquals(2, tabs.tabs().size(), "closing the active middle tab must remove one tab");
         TestAssertions.assertEquals("Second", tabs.activeTab().title(), "closing the active middle tab must activate the next document");
@@ -113,29 +121,64 @@ public final class OpenDocumentTabsTest {
 
     @Test
     void closeActiveLastTabActivatesThePreviousDocument() {
-        OpenDocumentTabs tabs = threeTabs().activate(2).close(2);
+        OpenDocumentTabs tabs = threeTabs().activate(2)
+                .closeOrFallback(2, tab("Welcome", "app://welcome", "welcome"))
+                .tabs();
 
         TestAssertions.assertEquals(2, tabs.tabs().size(), "closing the active last tab must remove one tab");
         TestAssertions.assertEquals("First", tabs.activeTab().title(), "closing the active last tab must activate the previous document");
     }
 
     @Test
-    void closeOnlyTabKeepsTheLastDocumentOpen() {
-        OpenDocumentTabs tabs = OpenDocumentTabs.withInitialTab(tab("Welcome", "app://welcome", "welcome")).close(0);
-
-        TestAssertions.assertEquals(1, tabs.tabs().size(), "closing the only tab must keep one document open");
-        TestAssertions.assertEquals("Welcome", tabs.activeTab().title(), "closing the only tab must keep the same document active");
-    }
-
-    @Test
     void closeOrFallbackReplacesTheOnlyOpenDocumentWithTheFallbackTab() {
         OpenDocumentTabs tabs = OpenDocumentTabs
                 .withInitialTab(tab("First", "content://first", "first"))
-                .closeOrFallback(0, tab("Welcome", "app://welcome", "welcome"));
+                .closeOrFallback(0, tab("Welcome", "app://welcome", "welcome"))
+                .tabs();
 
         TestAssertions.assertEquals(1, tabs.tabs().size(), "closing the only document with fallback must keep one tab open");
         TestAssertions.assertEquals("Welcome", tabs.activeTab().title(), "closing the only document with fallback must show the fallback tab");
         TestAssertions.assertEquals("app://welcome", tabs.activeTab().uri(), "fallback tab must become the only active tab");
+    }
+
+    @Test
+    void closeResultRemovesClosedDocumentFromItsRenderingSession() {
+        OpenDocumentTabs tabs = OpenDocumentTabs.withInitialTab(tab("First", "content://first", "first"));
+        DocumentRenderingPlan opened = DocumentRenderingSession.empty().open(
+                "content://first", "# First", freeProfile());
+
+        DocumentRenderingSession rendering = tabs
+                .closeOrFallback(0, tab("Welcome", "app://welcome", "welcome"))
+                .renderingSessionAfter(opened.session());
+
+        TestAssertions.assertEquals("", rendering.markdownFor("content://first"),
+                "a completed tab close must close the matching rendering session");
+    }
+
+    @Test
+    void invalidCloseResultKeepsTheTabSessionUnchanged() {
+        OpenDocumentTabs tabs = threeTabs();
+
+        OpenDocumentTabs unchanged = tabs
+                .closeOrFallback(99, tab("Welcome", "app://welcome", "welcome"))
+                .tabs();
+
+        TestAssertions.assertSame(tabs, unchanged,
+                "an invalid close position must preserve the existing tab session");
+    }
+
+    @Test
+    void invalidCloseResultKeepsTheRenderingSessionUnchanged() {
+        OpenDocumentTabs tabs = threeTabs();
+        DocumentRenderingSession rendering = DocumentRenderingSession.empty().open(
+                "content://first", "# First", freeProfile()).session();
+
+        DocumentRenderingSession unchanged = tabs
+                .closeOrFallback(99, tab("Welcome", "app://welcome", "welcome"))
+                .renderingSessionAfter(rendering);
+
+        TestAssertions.assertSame(rendering, unchanged,
+                "an invalid close position must preserve the existing rendering session");
     }
 
     private static OpenDocumentTabs threeTabs() {
@@ -146,6 +189,10 @@ public final class OpenDocumentTabsTest {
 
     private static OpenDocumentTab tab(String title, String uri, String document) {
         return OpenDocumentTab.fileDocument(title, uri, SafeHtml.fromTrustedRendererOutput(document));
+    }
+
+    private static DocumentRenderingProfile freeProfile() {
+        return DocumentRenderingProfile.fromEntitlement(FeatureEntitlement.free());
     }
 
 }
