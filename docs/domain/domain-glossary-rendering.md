@@ -69,6 +69,9 @@ flowchart TD
 - **DocumentRenderingSession**（`domain/DocumentRenderingSession.java`）: 文書URI別のMarkdown本文と
   `MermaidRenderSessions` を`DocumentUri`キーで同じライフサイクルに保持する不変セッション。操作 `open` / `complete` /
   `resetForTheme` / `close` / `markdownFor`。規則→R6 / R7 / R8。
+- **DocumentRenderingCoordinator**（`viewer/DocumentRenderingCoordinator.java`）: `DocumentRenderingSession`の唯一の所有者。
+  操作`open` / `complete` / `resetForTheme` / `close` / `markdownFor`を持ち、次状態の確定後に`Output`へ描画・ジョブ投入・更新を依頼する。
+  Android型を含まない。規則→R6 / R7 / R8。決定理由はADR-0015。
 - **RelativeLinkRendering**（`domain/RelativeLinkRendering.java`）: 相対 Markdown リンクのアンカー化設定。構成要素
   `enabled: boolean`（`disabled()` / `enabled()`）。 規則→R4。
 - **RelativeLinkRenderingPolicy**（`domain/RelativeLinkRenderingPolicy.java`）: 権限から `RelativeLinkRendering` を導く（静的）。 規則→R4。
