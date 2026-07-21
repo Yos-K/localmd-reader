@@ -90,8 +90,10 @@ models:
   decisions together, so Android orchestration cannot update only part of the
   renderer configuration.
 - `DocumentRenderingSession` owns Markdown sources together with Mermaid state.
-  Every transition returns a `DocumentRenderingPlan` containing the next session,
-  render inputs, and background jobs, leaving `MainActivity` to execute and display them.
+  Opening returns one required input through `DocumentOpeningPlan`, asynchronous
+  completion dispatches `Rendered` or `Unchanged` through `DocumentRenderingCompletion`,
+  and theme refresh returns zero or more inputs through `DocumentRenderingBatchPlan`.
+  `MainActivity` executes these typed outcomes without array-index or length inference.
   Closing a tab also closes its rendering session entry, so source and pending
   diagram work cannot outlive the document visible in `OpenDocumentTabs`.
 

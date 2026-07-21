@@ -29,7 +29,7 @@ public final class DocumentRenderingSession {
         return markdown == null ? "" : markdown;
     }
 
-    public DocumentRenderingPlan open(
+    public DocumentOpeningPlan open(
             DocumentUri documentUri,
             String markdown,
             DocumentRenderingProfile profile) {
@@ -48,9 +48,9 @@ public final class DocumentRenderingSession {
             jobs = schedule.jobs();
         }
         DocumentRenderingSession next = new DocumentRenderingSession(nextMarkdown, registered);
-        return new DocumentRenderingPlan(
+        return new DocumentOpeningPlan(
                 next,
-                new DocumentRenderInput[] {next.renderInput(documentUri)},
+                next.renderInput(documentUri),
                 jobs);
     }
 
@@ -67,19 +67,18 @@ public final class DocumentRenderingSession {
         return new DocumentRenderingSession(nextMarkdown, mermaidSessions.close(documentUri));
     }
 
-    public DocumentRenderingPlan complete(MermaidRenderJob job, SafeHtml renderedDiagram) {
+    public DocumentRenderingCompletion complete(MermaidRenderJob job, SafeHtml renderedDiagram) {
         MermaidRenderSessions completed = mermaidSessions.complete(job, renderedDiagram);
         if (completed == mermaidSessions) {
-            return emptyPlan(this);
+            return DocumentRenderingCompletion.unchanged(this);
         }
         DocumentRenderingSession next = new DocumentRenderingSession(markdownByUri, completed);
-        return new DocumentRenderingPlan(
+        return DocumentRenderingCompletion.rendered(
                 next,
-                new DocumentRenderInput[] {next.renderInput(job.documentUri())},
-                new MermaidRenderJob[0]);
+                next.renderInput(job.documentUri()));
     }
 
-    public DocumentRenderingPlan resetForTheme(DocumentRenderingProfile profile) {
+    public DocumentRenderingBatchPlan resetForTheme(DocumentRenderingProfile profile) {
         DocumentRenderingProfile safeProfile = safeProfile(profile);
         MermaidRenderSessions reset = mermaidSessions.resetRendered();
         ArrayList<MermaidRenderJob> jobs = new ArrayList<MermaidRenderJob>();
@@ -97,7 +96,7 @@ public final class DocumentRenderingSession {
             inputs[index] = next.renderInput(documentUri);
             index++;
         }
-        return new DocumentRenderingPlan(
+        return new DocumentRenderingBatchPlan(
                 next,
                 inputs,
                 jobs.toArray(new MermaidRenderJob[jobs.size()]));
@@ -108,13 +107,6 @@ public final class DocumentRenderingSession {
                 documentUri,
                 markdownByUri.get(documentUri),
                 mermaidSessions.renderedFor(documentUri));
-    }
-
-    private static DocumentRenderingPlan emptyPlan(DocumentRenderingSession session) {
-        return new DocumentRenderingPlan(
-                session,
-                new DocumentRenderInput[0],
-                new MermaidRenderJob[0]);
     }
 
     private static DocumentRenderingProfile safeProfile(DocumentRenderingProfile profile) {
