@@ -1,6 +1,5 @@
 package io.github.yosk.mdlite.presentation;
 
-import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
 import io.github.yosk.mdlite.viewer.DocumentTabCloseResult;
 
 final class DocumentTabSessionController {
@@ -14,25 +13,27 @@ final class DocumentTabSessionController {
     }
 
     void activate(int tabIndex) {
-        complete(activity.openTabs.activate(tabIndex));
+        activity.documentTabSession.activate(tabIndex);
+        complete();
     }
 
     void activatePrevious() {
-        complete(activity.openTabs.activatePrevious());
+        activity.documentTabSession.activatePrevious();
+        complete();
     }
 
     void activateNext() {
-        complete(activity.openTabs.activateNext());
+        activity.documentTabSession.activateNext();
+        complete();
     }
 
     void close(int tabIndex) {
-        DocumentTabCloseResult result = activity.openTabs.closeOrFallback(tabIndex, activity.initialTab());
+        DocumentTabCloseResult result = activity.documentTabSession.closeOrFallback(tabIndex, activity.initialTab());
         activity.documentRenderingCoordinator.close(result);
-        complete(result.tabs());
+        complete();
     }
 
-    private void complete(OpenDocumentTabs tabs) {
-        activity.openTabs = tabs;
+    private void complete() {
         activity.clearMessage();
         activity.updateLocalizedText();
         activity.renderTabs();

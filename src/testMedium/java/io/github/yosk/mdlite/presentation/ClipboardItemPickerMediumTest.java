@@ -49,14 +49,14 @@ public class ClipboardItemPickerMediumTest {
         List<ClipboardMarkdownItem> items = Arrays.asList(
                 new ClipboardMarkdownItem("First", "# First"),
                 new ClipboardMarkdownItem("Second", "# Second"));
-        int tabsBeforeSelection = activity.openTabs.tabs().size();
+        int tabsBeforeSelection = activity.openTabs().tabs().size();
 
         activity.clipboardDocumentCreator.openSelectedClipboardItems(
                 items, new boolean[] {true, true});
 
         assertEquals("confirming two selected items must append two tabs",
-                tabsBeforeSelection + 2, activity.openTabs.tabs().size());
+                tabsBeforeSelection + 2, activity.openTabs().tabs().size());
         assertTrue("the selected clipboard content must open as a temporary draft tab",
-                activity.openTabs.activeTab() instanceof OpenDocumentTab.ClipboardDraftTab);
+                activity.openTabs().activeTab() instanceof OpenDocumentTab.ClipboardDraftTab);
     }
 }

@@ -1,9 +1,11 @@
 package io.github.yosk.mdlite.presentation;
 
 import io.github.yosk.mdlite.domain.DocumentRenderInput;
+import io.github.yosk.mdlite.domain.DocumentUri;
 import io.github.yosk.mdlite.domain.MermaidRenderJob;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.viewer.DocumentRenderingCoordinator;
+import io.github.yosk.mdlite.viewer.OpenDocumentTabSession;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
 
 final class MainActivityDocumentRenderingOutput implements DocumentRenderingCoordinator.Output {
@@ -39,16 +41,29 @@ final class MainActivityDocumentRenderingOutput implements DocumentRenderingCoor
 
     @Override
     public void refresh(DocumentRenderInput input) {
-        OpenDocumentTabs nextTabs = activity.openTabs.replaceRenderedDocument(
-                input.documentUri().value(),
-                render(input));
-        if (nextTabs == activity.openTabs) {
-            return;
+        activity.documentTabSession.replaceRenderedDocument(
+                input.documentUri(),
+                render(input),
+                new RefreshHandler(activity, input.documentUri()));
+    }
+
+    private static final class RefreshHandler implements OpenDocumentTabSession.ReplacementHandler {
+        private final MainActivity activity;
+        private final DocumentUri documentUri;
+
+        private RefreshHandler(MainActivity activity, DocumentUri documentUri) {
+            this.activity = activity;
+            this.documentUri = documentUri;
         }
-        activity.openTabs = nextTabs;
-        activity.renderTabs();
-        if (activity.openTabs.activeTab().documentUri().equals(input.documentUri())) {
-            activity.renderCurrentDocument();
+
+        @Override
+        public void replaced(OpenDocumentTabs tabs) {
+            activity.renderTabs();
+            if (tabs.activeTab().documentUri().equals(documentUri)) {
+                activity.renderCurrentDocument();
+            }
         }
+
+        @Override public void unchanged() { }
     }
 }

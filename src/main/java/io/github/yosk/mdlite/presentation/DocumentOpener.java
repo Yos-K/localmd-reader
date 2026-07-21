@@ -168,7 +168,7 @@ final class DocumentOpener {
             String markdown = readText(uri, MainActivity.MAX_FILE_SIZE_BYTES);
             String documentUri = uri.toString();
             SafeHtml rendered = activity.renderMarkdownForUri(documentUri, markdown);
-            activity.openTabs = activity.openTabs.open(
+            activity.documentTabSession.open(
                     OpenDocumentTab.fileDocument(readableFile.displayName(), documentUri, rendered));
             activity.updateLocalizedText();
             activity.renderTabs();
@@ -203,7 +203,7 @@ final class DocumentOpener {
                 (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
         String uri = "termux://open/" + Uri.encode(sourceId);
         SafeHtml rendered = activity.renderMarkdownForUri(uri, text);
-        activity.openTabs = activity.openTabs.open(
+        activity.documentTabSession.open(
                 OpenDocumentTab.fileDocument(readableFile.displayName(), uri, rendered));
         activity.updateLocalizedText();
         activity.renderTabs();

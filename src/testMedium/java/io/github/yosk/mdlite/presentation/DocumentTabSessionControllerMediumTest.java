@@ -24,7 +24,7 @@ public final class DocumentTabSessionControllerMediumTest {
         controller.activate(0);
 
         assertEquals("tab activation must update the authoritative open-tab session",
-                "file:///first.md", activity.openTabs.activeTab().uri());
+                "file:///first.md", activity.openTabs().activeTab().uri());
     }
 
     @Test
@@ -53,13 +53,13 @@ public final class DocumentTabSessionControllerMediumTest {
     @Test
     public void closingTheOnlyDocumentRestoresTheWelcomeSession() {
         MainActivity activity = Robolectric.buildActivity(MainActivity.class).setup().get();
-        activity.openTabs = OpenDocumentTabs.withInitialTab(file("Only", "file:///only.md"));
+        activity.documentTabSession.reset(OpenDocumentTabs.withInitialTab(file("Only", "file:///only.md")));
         DocumentTabSessionController controller = new DocumentTabSessionController(activity);
 
         controller.close(0);
 
         assertEquals("closing the final document must leave an always-valid welcome session",
-                MainActivity.WELCOME_URI, activity.openTabs.activeTab().uri());
+                MainActivity.WELCOME_URI, activity.openTabs().activeTab().uri());
     }
 
     @Test
@@ -79,8 +79,8 @@ public final class DocumentTabSessionControllerMediumTest {
 
     private static MainActivity activityWithTwoFiles() {
         MainActivity activity = Robolectric.buildActivity(MainActivity.class).setup().get();
-        activity.openTabs = OpenDocumentTabs.withInitialTab(file("First", "file:///first.md"))
-                .open(file("Second", "file:///second.md"));
+        activity.documentTabSession.reset(OpenDocumentTabs.withInitialTab(file("First", "file:///first.md"))
+                .open(file("Second", "file:///second.md")));
         activity.renderTabs();
         return activity;
     }

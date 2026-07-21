@@ -72,6 +72,7 @@ import io.github.yosk.mdlite.viewer.DocumentRenderingCoordinator;
 import io.github.yosk.mdlite.viewer.FontSize;
 import io.github.yosk.mdlite.viewer.GestureShortcutBindings;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
+import io.github.yosk.mdlite.viewer.OpenDocumentTabSession;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
 import io.github.yosk.mdlite.viewer.ViewerLanguage;
 import io.github.yosk.mdlite.viewer.ViewerText;
@@ -125,7 +126,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     ClipboardHistoryStore clipboardHistoryStore;
     WebView webView;
     MermaidJsRenderEngine mermaidRenderEngine;
-    OpenDocumentTabs openTabs;
+    OpenDocumentTabSession documentTabSession;
     ControlsPlacement controlsPlacement;
     ViewerLanguage currentLanguage = ViewerLanguage.english();
     ViewerTheme currentTheme = ViewerTheme.light();
@@ -235,7 +236,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         currentTheme = clampedTheme;
         viewerPalette = ViewerPalette.from(currentTheme);
-        if (root == null || openTabs == null || webView == null) {
+        if (root == null || documentTabSession == null || webView == null) {
             return;
         }
         updateLocalizedText();
@@ -297,7 +298,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         shortcutGestureDetector = new GestureDetector(this, new ShortcutGestureListener(this));
         webView.setOnTouchListener(new ViewerTouchListener(this));
         updateLocalizedText();
-        openTabs = restoreOpenTabsOrInitial();
+        documentTabSession = new OpenDocumentTabSession(restoreOpenTabsOrInitial());
         documentTabSessionController = new DocumentTabSessionController(this);
         applyNativeTheme();
         renderTabs();
@@ -599,8 +600,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         viewerText = ViewerText.fromLanguage(currentLanguage);
         settingsStore.saveViewerLanguage(currentLanguage);
         updateLocalizedText();
-        if (WELCOME_URI.equals(openTabs.activeTab().uri())) {
-            openTabs = OpenDocumentTabs.withInitialTab(initialTab());
+        if (WELCOME_URI.equals(openTabs().activeTab().uri())) {
+            documentTabSession.reset(OpenDocumentTabs.withInitialTab(initialTab()));
             renderTabs();
             renderCurrentDocument();
         }
@@ -639,8 +640,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     void renderTabs() {
         tabRow.removeAllViews();
-        for (int i = 0; i < openTabs.tabs().size(); i++) {
-            OpenDocumentTab tab = openTabs.tabs().get(i);
+        for (int i = 0; i < openTabs().tabs().size(); i++) {
+            OpenDocumentTab tab = openTabs().tabs().get(i);
             LinearLayout tabGroup = new LinearLayout(this);
             tabGroup.setOrientation(LinearLayout.HORIZONTAL);
             tabGroup.setGravity(Gravity.CENTER_VERTICAL);
@@ -650,19 +651,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
             button.setText(tab.title());
             button.setAllCaps(false);
             button.setOnClickListener(this);
-            button.setClickable(i != openTabs.activeIndex());
+            button.setClickable(i != openTabs().activeIndex());
             button.setSingleLine(true);
             button.setEllipsize(TextUtils.TruncateAt.END);
             button.setMaxWidth(dp(220));
             button.setTextSize(14);
-            button.setTypeface(i == openTabs.activeIndex() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
-            button.setTextColor(i == openTabs.activeIndex() ? onPrimaryColor() : textColor());
+            button.setTypeface(i == openTabs().activeIndex() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
+            button.setTextColor(i == openTabs().activeIndex() ? onPrimaryColor() : textColor());
             button.setPadding(dp(16), dp(8), dp(16), dp(8));
             // Pill tabs (#77): the active tab is a filled primary pill, inactive
             // tabs are borderless tonal pills, so selection reads from fill
             // contrast instead of a 1px border.
             button.setBackground(makeTonalBackground(
-                    i == openTabs.activeIndex() ? primaryColor() : surfaceAltColor(),
+                    i == openTabs().activeIndex() ? primaryColor() : surfaceAltColor(),
                     PILL_RADIUS_DP));
             tabGroup.addView(button, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -682,7 +683,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
                     LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         }
         tabRow.post(new CloseTabTouchTargets(tabRow, dp(48)));
-        tabScroller.post(new ScrollToActiveTab(tabScroller, tabRow, openTabs.activeIndex()));
+        tabScroller.post(new ScrollToActiveTab(tabScroller, tabRow, openTabs().activeIndex()));
     }
 
     void renderCurrentDocument() {
@@ -697,7 +698,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         String historyUrl = anchorId == null ? null : "https://localmd.local/#" + anchorId;
         webView.loadDataWithBaseURL("https://localmd.local/",
                 HtmlPageBuilder.buildPage(
-                        openTabs.activeTab().document(),
+                        openTabs().activeTab().document(),
                         currentTheme,
                         currentFontSize,
                         TableReadingMode.fromEntitlement(featureEntitlement)),
@@ -710,14 +711,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (!documentRenderingProfile.relativeImageRendering().isEnabled()) {
             return null;
         }
-        if (openTabs == null || !(openTabs.activeTab() instanceof OpenDocumentTab.FileDocumentTab)) {
+        if (documentTabSession == null || !(openTabs().activeTab() instanceof OpenDocumentTab.FileDocumentTab)) {
             return null;
         }
         LocalRelativeImageResource resource =
                 LocalRelativeImageResource.resolve(
-                        openTabs.activeTab().uri(),
+                        openTabs().activeTab().uri(),
                         requestUrl,
-                        allowedRelativeImageRoot(openTabs.activeTab().uri()));
+                        allowedRelativeImageRoot(openTabs().activeTab().uri()));
         if (!resource.isAvailable()) {
             return null;
         }
@@ -735,13 +736,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (!documentRenderingProfile.relativeLinkRendering().isEnabled()) {
             return false;
         }
-        if (openTabs == null || !(openTabs.activeTab() instanceof OpenDocumentTab.FileDocumentTab)) {
+        if (documentTabSession == null || !(openTabs().activeTab() instanceof OpenDocumentTab.FileDocumentTab)) {
             return false;
         }
         LocalRelativeMarkdownLink link = LocalRelativeMarkdownLink.resolve(
-                openTabs.activeTab().uri(),
+                openTabs().activeTab().uri(),
                 requestUrl,
-                allowedRelativeDocumentRoot(openTabs.activeTab().uri()));
+                allowedRelativeDocumentRoot(openTabs().activeTab().uri()));
         if (!link.isAvailable()) {
             return false;
         }
@@ -816,10 +817,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     MarkdownHeadings activeMarkdownHeadings() {
-        if (openTabs == null) {
+        if (documentTabSession == null) {
             return MarkdownHeadings.fromMarkdown("");
         }
-        String markdown = documentRenderingCoordinator.markdownFor(openTabs.activeTab().documentUri());
+        String markdown = documentRenderingCoordinator.markdownFor(openTabs().activeTab().documentUri());
         return MarkdownHeadings.fromMarkdown(markdown);
     }
 
@@ -864,7 +865,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void saveOpenTabs() {
-        tabPersistence.saveOpenTabs(openTabs);
+        tabPersistence.saveOpenTabs(openTabs());
+    }
+
+    OpenDocumentTabs openTabs() {
+        return documentTabSession.tabs();
     }
 
     void clearMessage() {
@@ -981,12 +986,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (!documentOutputAvailable()) {
             return;
         }
-        documentPrintLauncher.print(webView, openTabs.activeTab().title());
+        documentPrintLauncher.print(webView, openTabs().activeTab().title());
     }
 
     boolean documentOutputAvailable() {
-        return openTabs != null
-                && openTabs.activeTab() instanceof OpenDocumentTab.UserDocumentTab
+        return documentTabSession != null
+                && openTabs().activeTab() instanceof OpenDocumentTab.UserDocumentTab
                 && featureEntitlement.allows(ViewerFeature.EXPORT_OPTIONS);
     }
 
@@ -1006,11 +1011,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     boolean activeTabIsDraft() {
-        return openTabs != null && openTabs.activeTab() instanceof OpenDocumentTab.DraftDocumentTab;
+        return documentTabSession != null && openTabs().activeTab() instanceof OpenDocumentTab.DraftDocumentTab;
     }
 
     boolean activeTabIsFile() {
-        return openTabs != null && openTabs.activeTab() instanceof OpenDocumentTab.FileDocumentTab;
+        return documentTabSession != null && openTabs().activeTab() instanceof OpenDocumentTab.FileDocumentTab;
     }
 
     boolean pinnedDocumentsAvailable() {
@@ -1018,17 +1023,17 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     boolean activeFileIsPinned() {
-        return activeTabIsFile() && tabPersistence.isPinnedDocument(openTabs.activeTab().uri());
+        return activeTabIsFile() && tabPersistence.isPinnedDocument(openTabs().activeTab().uri());
     }
 
     void pinCurrentDocument() {
-        OpenDocumentTab tab = openTabs.activeTab();
+        OpenDocumentTab tab = openTabs().activeTab();
         tabPersistence.pinDocument(tab.title(), tab.uri());
         showInfoDialog(viewerText.pinnedFiles(), viewerText.currentFilePinned());
     }
 
     void unpinCurrentDocument() {
-        OpenDocumentTab tab = openTabs.activeTab();
+        OpenDocumentTab tab = openTabs().activeTab();
         tabPersistence.unpinDocument(tab.uri());
         showInfoDialog(viewerText.pinnedFiles(), viewerText.currentFileUnpinned());
     }
@@ -1287,8 +1292,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
             showMessage(viewerText.savedMarkdown());
             return;
         }
-        if (openTabs != null) {
-            showMessage(openTabs.activeTab().statusMessage().localized(viewerText));
+        if (documentTabSession != null) {
+            showMessage(openTabs().activeTab().statusMessage().localized(viewerText));
             return;
         }
         showMessage("");

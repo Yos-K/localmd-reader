@@ -20,7 +20,7 @@ final class HtmlDocumentExporter {
     }
 
     void exportActiveDocument() {
-        OpenDocumentTab tab = activity.openTabs.activeTab();
+        OpenDocumentTab tab = activity.openTabs().activeTab();
         activity.pendingExportHtml = HtmlPageBuilder.buildPage(
                 tab.document(),
                 activity.currentTheme,

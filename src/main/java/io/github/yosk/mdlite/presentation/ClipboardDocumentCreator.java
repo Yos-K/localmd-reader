@@ -116,7 +116,7 @@ final class ClipboardDocumentCreator {
             return;
         }
         activity.draftMarkdownByUri.put(draft.uri(), draft.markdown());
-        activity.openTabs = activity.openTabs.open(
+        activity.documentTabSession.open(
                 OpenDocumentTab.clipboardDraft(draft.displayName(), draft.uri(), draft.rendered()));
         activity.updateLocalizedText();
         activity.renderTabs();
@@ -129,7 +129,7 @@ final class ClipboardDocumentCreator {
             return;
         }
         activity.draftMarkdownByUri.put(draft.uri(), draft.markdown());
-        activity.openTabs = activity.openTabs.open(
+        activity.documentTabSession.open(
                 OpenDocumentTab.selectedTextDraft(draft.displayName(), draft.uri(), draft.rendered()));
         activity.updateLocalizedText();
         activity.renderTabs();
