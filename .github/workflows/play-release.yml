@@ -90,7 +90,7 @@ jobs:
         run: |
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
+          "$SDKMANAGER" "platforms;android-36" "build-tools;35.0.0"
 
       - name: Reject Pro preview Play upload
         if: ${{ inputs.upload_to_play && inputs.channel != 'free-play' }}
@@ -139,7 +139,7 @@ jobs:
       - name: Build signed release AAB
         if: ${{ inputs.build_system == 'script' }}
         env:
-          ANDROID_PLATFORM: android-35
+          ANDROID_PLATFORM: android-36
           ANDROID_BUILD_TOOLS: 35.0.0
           BUNDLETOOL_JAR: ${{ runner.temp }}/tools/bundletool.jar
           MDLITE_RELEASE_KEYSTORE: ${{ runner.temp }}/mdlite-release.jks

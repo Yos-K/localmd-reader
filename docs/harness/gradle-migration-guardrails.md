@@ -46,10 +46,10 @@ gh run download <run_id> -n <artifact_name> --repo Yos-K/localmd-reader
 #   推奨: CI の play-release.yml (script 経路) が生成した artifact を使う
 #   → ローカルでの環境差を排除できる
 #   代替: Termux + キーストア環境で以下を実行（CI と同じ ANDROID_PLATFORM を必ず指定）
-ANDROID_PLATFORM=android-35 \
+ANDROID_PLATFORM=android-36 \
   BUNDLETOOL_JAR=<path> MDLITE_RELEASE_KEYSTORE=<path> \
   MDLITE_RELEASE_KEY_ALIAS=<alias> sh scripts/build-release-aab.sh
-# ※ ANDROID_PLATFORM を省略すると android-33 にフォールバックし、CI AAB との比較が無効になる
+# ※ Termux手動ビルドは互換性のためandroid-33へフォールバックする。公開AABの正はAPI 36のGradle CIとする
 
 # ③ 比較: ApplicationId / versionCode / versionName / minSdk / targetSdk
 SCRIPT_AAB=<script-built.aab>
@@ -92,7 +92,7 @@ $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
 ### ② SDK インストール問題
 
-**症状**: `SDK location not found` / `platforms/android-35 not installed` / JDK バージョン不一致
+**症状**: `SDK location not found` / `platforms/android-36 not installed` / JDK バージョン不一致
 
 **確認コマンド**:
 ```bash
@@ -103,7 +103,7 @@ java -version
 
 **対処**:
 - `$ANDROID_HOME` を正しく設定する（Termux: `~/AndroidDev/sdk` 等）
-- `sdkmanager "platforms;android-35" "build-tools;35.0.0"` で該当 SDK をインストールする
+- `sdkmanager "platforms;android-36" "build-tools;35.0.0"` で該当 SDK をインストールする
 - JDK は 17 以上を使用する（CI: temurin 17）
 
 ### ③ aapt2 アーキテクチャ問題
@@ -131,16 +131,16 @@ uname -m
 
 **症状**: aapt2 アーキを解決後も `android.jar` のロードで失敗する / `failed to load android.jar`
 
-**背景**: Android 35 の `android.jar` をロードする resource-linking 段階で  
+**背景**: Android 16（API 36）の `android.jar` をロードする resource-linking 段階で
 Termux のツールチェーンとの互換性問題が発生することがある（`claude-harness-engineering-backlog.md` L234-236 実観測）。
 
 **確認コマンド**:
 ```bash
-ls $ANDROID_HOME/platforms/android-35/android.jar
+ls $ANDROID_HOME/platforms/android-36/android.jar
 ```
 
 **対処**:
-- `android.jar` が存在しない場合は再インストール: `sdkmanager "platforms;android-35"`
+- `android.jar` が存在しない場合は再インストール: `sdkmanager "platforms;android-36"`
 - それでも失敗する場合、これは Termux 固有の環境問題。  
   **`sh test.sh` が pass し CI が緑であればリリース・PR に影響なし。**
   CI の `gradle-build` が authoritative であると判断する。
@@ -153,16 +153,16 @@ ls $ANDROID_HOME/platforms/android-35/android.jar
 
 CI `gradle-build` ジョブの構成（`.github/workflows/ci.yml` L140-180 確認）:
 - `gradle/actions/setup-gradle@v5`: Gradle ビルドキャッシュを保持
-- `sdkmanager "platforms;android-35" "build-tools;35.0.0"`: **毎回ダウンロード**
+- `sdkmanager "platforms;android-36" "build-tools;35.0.0"`: **毎回ダウンロード**
 - `.android-deps`: `actions/cache@v4` でキャッシュ済み
 
-`gradle-build` の平均実行時間: 約116s（本日20件の実測、うち `platforms;android-35` DLを含む）  
+`gradle-build` の平均実行時間: 約116s（本日20件の実測、うち `platforms;android-36` DLを含む）
 `gradle-build` ジョブの timeout-minutes: 20分
 
 ### 判断: **見送り（現時点）**
 
 理由:
-- SDK platform（`platforms;android-35`、約70MB）のキャッシュ設定コスト vs CI 短縮効果を試算すると、  
+- SDK platform（`platforms;android-36`、約70MB）のキャッシュ設定コスト vs CI 短縮効果を試算すると、
   現状116sのジョブでキャッシュで20〜30s短縮できたとしても ROI は低い
 - `gradle/actions/setup-gradle@v5` が Gradle build cache を保持しており、  
   コンパイル差分が主なボトルネックではない

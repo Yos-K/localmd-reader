@@ -119,7 +119,7 @@ run 27285682358 で実測。device-smoke と smoke-render-l5 はこの問題で 
 インライン展開し、補助処理は1文に畳み込む。
 
 `.github/workflows/device-smoke.yml` は手動実行専用です。Free debug APK をビルドし、
-Android 35 エミュレータを起動して APK をインストールし、`scripts/emulator-smoke.sh`
+Android 16（API 36）エミュレータを起動して APK をインストールし、`scripts/emulator-smoke.sh`
 を実行します。スモークのラダーを進み、最初の問題で失敗します。
 
 - **L2 launch**: `MainActivity` を起動し、プロセスが生きていることを確認。
