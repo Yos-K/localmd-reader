@@ -64,7 +64,7 @@ flowchart TD
   `DocumentRenderInput[]`、実行対象の `MermaidRenderJob[]` を不可分に返す遷移結果。規則→R7。
 - **DocumentRenderingSession**（`domain/DocumentRenderingSession.java`）: 文書URI別のMarkdown本文と
   `MermaidRenderSessions` を同じライフサイクルで保持する不変セッション。操作 `open` / `complete` /
-  `resetForTheme` / `markdownFor`。規則→R6 / R7。
+  `resetForTheme` / `close` / `markdownFor`。規則→R6 / R7 / R8。
 - **RelativeLinkRendering**（`domain/RelativeLinkRendering.java`）: 相対 Markdown リンクのアンカー化設定。構成要素
   `enabled: boolean`（`disabled()` / `enabled()`）。 規則→R4。
 - **RelativeLinkRenderingPolicy**（`domain/RelativeLinkRenderingPolicy.java`）: 権限から `RelativeLinkRendering` を導く（静的）。 規則→R4。
@@ -141,6 +141,12 @@ flowchart TD
 - なぜ: 本文登録だけ、pending登録だけ、画面再描画だけが行われる部分的な完了を呼び出し側に許さない。
 - 破ると: 古い本文の再描画、ジョブの重複投入、完了した図が画面へ反映されない状態が生じる。
 
+**R8: 閉じた文書の描画状態をタブより長く保持しない**
+- 関係する語: OpenDocumentTabs × DocumentRenderingSession ／ どこで: `DocumentTabSessionController.close`
+- 分類: process ／ 支える判断: タブと本文・非同期描画の生存期間を一致させる判断。
+- なぜ: 閉じた文書の本文、完成図、pendingジョブが残ると、テーマ変更や遅延完了によって存在しないタブの再描画を試みる。
+- 破ると: 閉じた文書がメモリに残り、古い非同期結果が後続セッションへ混入する。
+
 ---
 
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
@@ -148,8 +154,9 @@ flowchart TD
 - `CodeHighlightingPolicy.fromEntitlement(e)` / `MermaidRenderingPolicy.fromEntitlement(e)`: R1 / R2 を実現。`e == null` は Free 扱い。
 - `DocumentRenderingProfile.fromEntitlement(e)`: R1 / R2 / R4 / R5 の結果を不可分な描画入力へまとめる。
   なぜ: 呼び出し側が設定の一部を更新し忘れた状態や、同じ4引数のスタンプ結合を作らない。
-- `DocumentRenderingSession.open` / `complete` / `resetForTheme`: R6 / R7 を実現し、各操作を
-  `DocumentRenderingPlan` として完了させる。未知文書の `markdownFor` はnullではなく空文字を返す。
+- `DocumentRenderingSession.open` / `complete` / `resetForTheme` / `close`: R6 / R7 / R8 を実現する。
+  描画を伴う操作は `DocumentRenderingPlan` として完了させ、`close` は本文とMermaid状態を同時に除去する。
+  未知文書の `markdownFor` はnullではなく空文字を返し、未知文書の `close` は現在セッションを保つ。
 - `RelativeLinkRenderingPolicy.fromEntitlement(e)` / `RelativeImageRenderingPolicy.fromEntitlement(e)`: R4 / R5 を実現。`e == null` は Free 扱い。
   なぜ: 権限が不明なときは安全側の Free に倒す（fail-closed）。
 - `LocalRelativeMarkdownLink.resolve(documentUri, requestUrl, allowedRootPath)`: R4 を WebView 側で実現。

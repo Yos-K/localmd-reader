@@ -31,6 +31,15 @@ public final class MermaidRenderSessions {
         return new MermaidRenderSessions(next);
     }
 
+    public MermaidRenderSessions close(String documentUri) {
+        if (!documents.containsKey(documentUri)) {
+            return this;
+        }
+        Map<String, DocumentState> next = mutableDocuments();
+        next.remove(documentUri);
+        return next.isEmpty() ? EMPTY : new MermaidRenderSessions(next);
+    }
+
     public MermaidRenderSchedule schedule(String documentUri) {
         DocumentState document = documents.get(documentUri);
         if (document == null) {

@@ -25,6 +25,8 @@ final class DocumentTabSessionController {
     }
 
     void close(int tabIndex) {
+        String closedDocumentUri = activity.openTabs.tabs().get(tabIndex).uri();
+        activity.documentRenderingSession = activity.documentRenderingSession.close(closedDocumentUri);
         complete(activity.openTabs.closeOrFallback(tabIndex, activity.initialTab()));
     }
 

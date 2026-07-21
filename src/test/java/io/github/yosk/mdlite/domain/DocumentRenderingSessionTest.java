@@ -97,6 +97,50 @@ public final class DocumentRenderingSessionTest {
         TestAssertions.assertEquals(2, reset.renderInputs().length, "theme reset must refresh every known document");
     }
 
+    @Test
+    void closingDocumentRemovesItsMarkdownFromNavigation() {
+        DocumentRenderingPlan opened = openMermaidDocument();
+
+        DocumentRenderingSession closed = opened.session().close(DOCUMENT_URI);
+
+        TestAssertions.assertEquals("", closed.markdownFor(DOCUMENT_URI),
+                "closed document Markdown must not remain available to navigation");
+    }
+
+    @Test
+    void closingDocumentPreventsItsDiagramFromBeingScheduledAgain() {
+        DocumentRenderingPlan opened = openMermaidDocument();
+        DocumentRenderingSession closed = opened.session().close(DOCUMENT_URI);
+
+        DocumentRenderingPlan reset = closed.resetForTheme(freeProfile());
+
+        TestAssertions.assertEquals(0, reset.jobs().length,
+                "closed document diagrams must not be scheduled after a theme reset");
+    }
+
+    @Test
+    void completingClosedDocumentDiagramProducesNoRenderInput() {
+        DocumentRenderingPlan opened = openMermaidDocument();
+        DocumentRenderingSession closed = opened.session().close(DOCUMENT_URI);
+
+        DocumentRenderingPlan completed = closed.complete(
+                opened.jobs()[0],
+                SafeHtml.fromTrustedRendererOutput("<svg>late</svg>"));
+
+        TestAssertions.assertEquals(0, completed.renderInputs().length,
+                "late diagram completion must not revive a closed document");
+    }
+
+    @Test
+    void closingUnknownDocumentKeepsTheRenderingSessionUnchanged() {
+        DocumentRenderingPlan opened = openMermaidDocument();
+
+        DocumentRenderingSession unchanged = opened.session().close("content://missing");
+
+        TestAssertions.assertSame(opened.session(), unchanged,
+                "closing an unknown document must preserve the existing rendering session");
+    }
+
     private static DocumentRenderingPlan openMermaidDocument() {
         return DocumentRenderingSession.empty().open(DOCUMENT_URI, MARKDOWN, freeProfile());
     }

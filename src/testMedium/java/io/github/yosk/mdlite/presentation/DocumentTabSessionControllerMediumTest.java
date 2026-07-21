@@ -2,6 +2,9 @@ package io.github.yosk.mdlite.presentation;
 
 import static org.junit.Assert.assertEquals;
 
+import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
+import io.github.yosk.mdlite.domain.DocumentRenderingSession;
+import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.file.RestorableOpenTabs;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
@@ -57,6 +60,22 @@ public final class DocumentTabSessionControllerMediumTest {
 
         assertEquals("closing the final document must leave an always-valid welcome session",
                 MainActivity.WELCOME_URI, activity.openTabs.activeTab().uri());
+    }
+
+    @Test
+    public void closingATabAlsoClosesItsDocumentRenderingSession() {
+        MainActivity activity = activityWithTwoFiles();
+        activity.documentRenderingSession = DocumentRenderingSession.empty().open(
+                "file:///second.md",
+                "# Second",
+                DocumentRenderingProfile.fromEntitlement(FeatureEntitlement.free()))
+                .session();
+        DocumentTabSessionController controller = new DocumentTabSessionController(activity);
+
+        controller.close(1);
+
+        assertEquals("closing a tab must release its Markdown rendering state",
+                "", activity.documentRenderingSession.markdownFor("file:///second.md"));
     }
 
     private static MainActivity activityWithTwoFiles() {

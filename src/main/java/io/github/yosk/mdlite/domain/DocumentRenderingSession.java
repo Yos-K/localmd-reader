@@ -54,6 +54,19 @@ public final class DocumentRenderingSession {
                 jobs);
     }
 
+    public DocumentRenderingSession close(String documentUri) {
+        requireDocumentUri(documentUri);
+        if (!markdownByUri.containsKey(documentUri)) {
+            return this;
+        }
+        Map<String, String> nextMarkdown = new HashMap<String, String>(markdownByUri);
+        nextMarkdown.remove(documentUri);
+        if (nextMarkdown.isEmpty()) {
+            return EMPTY;
+        }
+        return new DocumentRenderingSession(nextMarkdown, mermaidSessions.close(documentUri));
+    }
+
     public DocumentRenderingPlan complete(MermaidRenderJob job, SafeHtml renderedDiagram) {
         MermaidRenderSessions completed = mermaidSessions.complete(job, renderedDiagram);
         if (completed == mermaidSessions) {
