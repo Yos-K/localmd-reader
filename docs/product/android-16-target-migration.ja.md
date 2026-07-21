@@ -25,7 +25,7 @@ resourceを読めないため、ローカルスクリプトはAPI 33でコンパ
 
 - `scripts/test-target-api-policy.sh`
 - `sh test.sh`
-- GradleのFree/Pro Preview unit test
+- RobolectricのAPI 36実行に必要なJava 21上でのGradle Free/Pro Preview unit test
 - Gradle lint、debug APK、Free release AAB
 - Android 16 device smoke
 

@@ -8,7 +8,7 @@ assert_contains() {
   pattern="$2"
   file="$3"
   grep -F "$pattern" "$file" >/dev/null || {
-    echo "FAIL: $label must declare API 36 in ${file#"$ROOT/"}" >&2
+    echo "FAIL: $label is missing required target API policy configuration in ${file#"$ROOT/"}" >&2
     return 1
   }
 }
@@ -22,6 +22,7 @@ assert_contains "Termux-compatible debug build platform" 'ANDROID_PLATFORM="${AN
 assert_contains "Termux-compatible release APK platform" 'ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-33}"' "$ROOT/scripts/build-release-apk.sh"
 assert_contains "Termux-compatible release AAB platform" 'ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-33}"' "$ROOT/scripts/build-release-aab.sh"
 assert_contains "CI SDK installation" '"platforms;android-36"' "$ROOT/.github/workflows/ci.yml"
+assert_contains "API 36 Robolectric runtime" "java-version: '21'" "$ROOT/.github/workflows/ci.yml"
 assert_contains "CI manual build platform" 'ANDROID_PLATFORM: android-36' "$ROOT/.github/workflows/ci.yml"
 assert_contains "Play SDK installation" '"platforms;android-36"' "$ROOT/.github/workflows/play-release.yml"
 assert_contains "Play manual build platform" 'ANDROID_PLATFORM: android-36' "$ROOT/.github/workflows/play-release.yml"

@@ -32,7 +32,8 @@ behavior but are not release artifacts.
 
 - `scripts/test-target-api-policy.sh`
 - `sh test.sh`
-- Gradle Free and Pro Preview unit tests
+- Gradle Free and Pro Preview unit tests on Java 21, required by Robolectric's
+  API 36 runtime
 - Gradle lint, debug APKs, and Free release AAB
 - Android 16 device smoke
 
