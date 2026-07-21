@@ -32,7 +32,9 @@ import io.github.yosk.mdlite.R;
 import io.github.yosk.mdlite.domain.CompositeEntitlementSource;
 import io.github.yosk.mdlite.domain.DocumentRenderInput;
 import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
-import io.github.yosk.mdlite.domain.DocumentRenderingPlan;
+import io.github.yosk.mdlite.domain.DocumentOpeningPlan;
+import io.github.yosk.mdlite.domain.DocumentRenderingBatchPlan;
+import io.github.yosk.mdlite.domain.DocumentRenderingCompletion;
 import io.github.yosk.mdlite.domain.DocumentRenderingSession;
 import io.github.yosk.mdlite.domain.DocumentUri;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
@@ -857,13 +859,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     SafeHtml renderMarkdownForUri(String documentUri, String markdown) {
-        DocumentRenderingPlan plan = documentRenderingSession.open(
+        DocumentOpeningPlan plan = documentRenderingSession.open(
                 DocumentUri.from(documentUri),
                 markdown,
                 documentRenderingProfile);
         documentRenderingSession = plan.session();
         enqueueMermaidRenderJobs(plan.jobs());
-        return renderInput(plan.renderInputs()[0]);
+        return renderInput(plan.renderInput());
     }
 
     void saveOpenTabs() {
@@ -1258,7 +1260,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     void rerenderMermaidDiagramsForCurrentTheme() {
         if (!documentRenderingProfile.mermaidRendering().isEnabled()) { return; }
-        DocumentRenderingPlan plan = documentRenderingSession.resetForTheme(documentRenderingProfile);
+        DocumentRenderingBatchPlan plan = documentRenderingSession.resetForTheme(documentRenderingProfile);
         documentRenderingSession = plan.session();
         enqueueMermaidRenderJobs(plan.jobs());
         DocumentRenderInput[] inputs = plan.renderInputs();
@@ -1445,11 +1447,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
     }
 
-    private void applyCompletedRendering(DocumentRenderingPlan plan) {
-        documentRenderingSession = plan.session();
-        DocumentRenderInput[] inputs = plan.renderInputs();
-        if (inputs.length == 0) { return; }
-        refreshRenderedTab(inputs[0]);
+    private void applyCompletedRendering(DocumentRenderingCompletion completion) {
+        documentRenderingSession = completion.session();
+        completion.dispatch(new DocumentRenderingCompletion.Handler() {
+            @Override public void rendered(DocumentRenderInput input) { refreshRenderedTab(input); }
+            @Override public void unchanged() { }
+        });
     }
 
     private SafeHtml renderInput(DocumentRenderInput input) {

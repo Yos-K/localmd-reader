@@ -60,8 +60,12 @@ flowchart TD
   `fromEntitlement` が各ポリシーを通じて常に有効な組を生成する。規則→R1 / R2 / R4 / R5。
 - **DocumentRenderInput**（`domain/DocumentRenderInput.java`）: 1文書を描画するための、URI、nullでないMarkdown本文、
   文書内インデックス別の完成済みMermaid図をまとめた不変入力。URIは常に`DocumentUri`。規則→R7。
-- **DocumentRenderingPlan**（`domain/DocumentRenderingPlan.java`）: 次の `DocumentRenderingSession`、再描画対象の
-  `DocumentRenderInput[]`、実行対象の `MermaidRenderJob[]` を不可分に返す遷移結果。規則→R7。
+- **DocumentOpeningPlan**（`domain/DocumentOpeningPlan.java`）: 次の`DocumentRenderingSession`、必ず1件の
+  `DocumentRenderInput`、実行対象の`MermaidRenderJob[]`を不可分に返す文書オープン結果。規則→R7。
+- **DocumentRenderingCompletion**（`domain/DocumentRenderingCompletion.java`）: 非同期図描画の完了結果。
+  `Rendered{session, renderInput}`または`Unchanged{session}`を内部型として持ち、`dispatch(Handler)`で振る舞いを選ぶ。規則→R6 / R7。
+- **DocumentRenderingBatchPlan**（`domain/DocumentRenderingBatchPlan.java`）: テーマ変更など複数文書を対象にする遷移結果。
+  次の`DocumentRenderingSession`、0件以上の`DocumentRenderInput[]`、`MermaidRenderJob[]`を不可分に返す。規則→R7。
 - **DocumentRenderingSession**（`domain/DocumentRenderingSession.java`）: 文書URI別のMarkdown本文と
   `MermaidRenderSessions` を`DocumentUri`キーで同じライフサイクルに保持する不変セッション。操作 `open` / `complete` /
   `resetForTheme` / `close` / `markdownFor`。規則→R6 / R7 / R8。
@@ -136,10 +140,12 @@ flowchart TD
 - 破ると: 現在のMarkdownやテーマと異なる図が表示され、別ジョブの完了通知でpending状態も崩れる。
 
 **R7: 文書描画の状態遷移は次状態・再描画入力・非同期ジョブを同時に決定する**
-- 関係する語: DocumentRenderingSession → DocumentRenderingPlan
+- 関係する語: DocumentRenderingSession → DocumentOpeningPlan / DocumentRenderingCompletion / DocumentRenderingBatchPlan
 - 分類: process ／ 支える判断: 本文、Mermaid状態、画面更新の進行を食い違わせない判断。
-- なぜ: 本文登録だけ、pending登録だけ、画面再描画だけが行われる部分的な完了を呼び出し側に許さない。
-- 破ると: 古い本文の再描画、ジョブの重複投入、完了した図が画面へ反映されない状態が生じる。
+- なぜ: 本文登録だけ、pending登録だけ、画面再描画だけが行われる部分的な完了を許さず、さらに「必ず1件」「0または1件」
+  「0件以上」という操作固有の多重度を同じ配列型へ潰さないため。
+- 破ると: 古い本文の再描画、ジョブの重複投入、完了した図が画面へ反映されない状態に加え、`inputs[0]`や配列長による
+  暗黙の成功判定が呼び出し側へ漏れる。
 
 **R8: 閉じた文書の描画状態をタブより長く保持しない**
 - 関係する語: OpenDocumentTabs × DocumentRenderingSession ／ どこで: `DocumentTabCloseResult.renderingSessionAfter`
@@ -155,7 +161,8 @@ flowchart TD
 - `DocumentRenderingProfile.fromEntitlement(e)`: R1 / R2 / R4 / R5 の結果を不可分な描画入力へまとめる。
   なぜ: 呼び出し側が設定の一部を更新し忘れた状態や、同じ4引数のスタンプ結合を作らない。
 - `DocumentRenderingSession.open` / `complete` / `resetForTheme` / `close`: R6 / R7 / R8 を実現する。
-  描画を伴う操作は `DocumentRenderingPlan` として完了させ、`close` は本文とMermaid状態を同時に除去する。
+  `open`は`DocumentOpeningPlan`、`complete`は`DocumentRenderingCompletion`、`resetForTheme`は
+  `DocumentRenderingBatchPlan`として操作固有の多重度を表す。`close`は本文とMermaid状態を同時に除去する。
   未知文書の `markdownFor` はnullではなく空文字を返し、未知文書の `close` は現在セッションを保つ。
 - `RelativeLinkRenderingPolicy.fromEntitlement(e)` / `RelativeImageRenderingPolicy.fromEntitlement(e)`: R4 / R5 を実現。`e == null` は Free 扱い。
   なぜ: 権限が不明なときは安全側の Free に倒す（fail-closed）。

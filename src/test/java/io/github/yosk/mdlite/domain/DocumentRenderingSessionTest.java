@@ -9,34 +9,35 @@ public final class DocumentRenderingSessionTest {
 
     @Test
     void openingDocumentProducesOneAlwaysValidRenderInput() {
-        DocumentRenderingPlan plan = DocumentRenderingSession.empty().open(
+        DocumentOpeningPlan plan = DocumentRenderingSession.empty().open(
                 DOCUMENT_URI,
                 null,
                 freeProfile());
 
-        TestAssertions.assertEquals(1, plan.renderInputs().length, "opening a document must produce its render input");
+        TestAssertions.assertEquals(DOCUMENT_URI.value(), plan.renderInput().documentUri().value(),
+                "opening a document must produce its own render input");
     }
 
     @Test
     void openingDocumentNormalizesMissingMarkdownToEmptyText() {
-        DocumentRenderingPlan plan = DocumentRenderingSession.empty().open(
+        DocumentOpeningPlan plan = DocumentRenderingSession.empty().open(
                 DOCUMENT_URI,
                 null,
                 freeProfile());
 
-        TestAssertions.assertEquals("", plan.renderInputs()[0].markdown(), "render input Markdown must never be null");
+        TestAssertions.assertEquals("", plan.renderInput().markdown(), "render input Markdown must never be null");
     }
 
     @Test
     void openingMermaidDocumentSchedulesItsDiagram() {
-        DocumentRenderingPlan plan = openMermaidDocument();
+        DocumentOpeningPlan plan = openMermaidDocument();
 
         TestAssertions.assertEquals(1, plan.jobs().length, "opening Mermaid Markdown must schedule its diagram once");
     }
 
     @Test
     void openedMarkdownRemainsAvailableForDocumentNavigation() {
-        DocumentRenderingPlan opened = openMermaidDocument();
+        DocumentOpeningPlan opened = openMermaidDocument();
 
         TestAssertions.assertEquals(MARKDOWN, opened.session().markdownFor(DOCUMENT_URI),
                 "opened Markdown must remain available to derived navigation models");
@@ -52,54 +53,58 @@ public final class DocumentRenderingSessionTest {
 
     @Test
     void completedDiagramProducesAnUpdatedRenderInput() {
-        DocumentRenderingPlan opened = openMermaidDocument();
+        DocumentOpeningPlan opened = openMermaidDocument();
         SafeHtml svg = SafeHtml.fromTrustedRendererOutput("<svg>complete</svg>");
+        CapturedRenderInput capture = new CapturedRenderInput();
 
-        DocumentRenderingPlan completed = opened.session().complete(opened.jobs()[0], svg);
+        DocumentRenderingCompletion completed = opened.session().complete(opened.jobs()[0], svg);
+        completed.dispatch(capture);
 
         TestAssertions.assertSame(
                 svg,
-                completed.renderInputs()[0].renderedMermaidDiagrams().get(Integer.valueOf(0)),
+                capture.input.renderedMermaidDiagrams().get(Integer.valueOf(0)),
                 "accepted Mermaid completion must produce a render input containing its SVG");
     }
 
     @Test
     void staleCompletionProducesNoRenderInput() {
-        DocumentRenderingPlan oldTheme = openMermaidDocument();
-        DocumentRenderingPlan newTheme = oldTheme.session().resetForTheme(freeProfile());
+        DocumentOpeningPlan oldTheme = openMermaidDocument();
+        DocumentRenderingBatchPlan newTheme = oldTheme.session().resetForTheme(freeProfile());
+        RenderDispatchCount count = new RenderDispatchCount();
 
-        DocumentRenderingPlan stale = newTheme.session().complete(
+        DocumentRenderingCompletion stale = newTheme.session().complete(
                 oldTheme.jobs()[0],
                 SafeHtml.fromTrustedRendererOutput("<svg>stale</svg>"));
+        stale.dispatch(count);
 
-        TestAssertions.assertEquals(0, stale.renderInputs().length, "stale completion must not request document re-rendering");
+        TestAssertions.assertEquals(0, count.value, "stale completion must not request document re-rendering");
     }
 
     @Test
     void themeResetSchedulesEveryKnownDiagramAgain() {
-        DocumentRenderingPlan opened = openMermaidDocument();
+        DocumentOpeningPlan opened = openMermaidDocument();
 
-        DocumentRenderingPlan reset = opened.session().resetForTheme(freeProfile());
+        DocumentRenderingBatchPlan reset = opened.session().resetForTheme(freeProfile());
 
         TestAssertions.assertEquals(1, reset.jobs().length, "theme reset must schedule every known diagram for the new theme");
     }
 
     @Test
     void themeResetProducesRenderInputForEveryKnownDocument() {
-        DocumentRenderingPlan first = openMermaidDocument();
-        DocumentRenderingPlan second = first.session().open(
+        DocumentOpeningPlan first = openMermaidDocument();
+        DocumentOpeningPlan second = first.session().open(
                 DocumentUri.from("content://notes"),
                 "# Notes",
                 freeProfile());
 
-        DocumentRenderingPlan reset = second.session().resetForTheme(freeProfile());
+        DocumentRenderingBatchPlan reset = second.session().resetForTheme(freeProfile());
 
         TestAssertions.assertEquals(2, reset.renderInputs().length, "theme reset must refresh every known document");
     }
 
     @Test
     void closingDocumentRemovesItsMarkdownFromNavigation() {
-        DocumentRenderingPlan opened = openMermaidDocument();
+        DocumentOpeningPlan opened = openMermaidDocument();
 
         DocumentRenderingSession closed = opened.session().close(DOCUMENT_URI);
 
@@ -109,10 +114,10 @@ public final class DocumentRenderingSessionTest {
 
     @Test
     void closingDocumentPreventsItsDiagramFromBeingScheduledAgain() {
-        DocumentRenderingPlan opened = openMermaidDocument();
+        DocumentOpeningPlan opened = openMermaidDocument();
         DocumentRenderingSession closed = opened.session().close(DOCUMENT_URI);
 
-        DocumentRenderingPlan reset = closed.resetForTheme(freeProfile());
+        DocumentRenderingBatchPlan reset = closed.resetForTheme(freeProfile());
 
         TestAssertions.assertEquals(0, reset.jobs().length,
                 "closed document diagrams must not be scheduled after a theme reset");
@@ -120,20 +125,22 @@ public final class DocumentRenderingSessionTest {
 
     @Test
     void completingClosedDocumentDiagramProducesNoRenderInput() {
-        DocumentRenderingPlan opened = openMermaidDocument();
+        DocumentOpeningPlan opened = openMermaidDocument();
         DocumentRenderingSession closed = opened.session().close(DOCUMENT_URI);
+        RenderDispatchCount count = new RenderDispatchCount();
 
-        DocumentRenderingPlan completed = closed.complete(
+        DocumentRenderingCompletion completed = closed.complete(
                 opened.jobs()[0],
                 SafeHtml.fromTrustedRendererOutput("<svg>late</svg>"));
+        completed.dispatch(count);
 
-        TestAssertions.assertEquals(0, completed.renderInputs().length,
+        TestAssertions.assertEquals(0, count.value,
                 "late diagram completion must not revive a closed document");
     }
 
     @Test
     void closingUnknownDocumentKeepsTheRenderingSessionUnchanged() {
-        DocumentRenderingPlan opened = openMermaidDocument();
+        DocumentOpeningPlan opened = openMermaidDocument();
 
         DocumentRenderingSession unchanged = opened.session().close(DocumentUri.from("content://missing"));
 
@@ -141,8 +148,22 @@ public final class DocumentRenderingSessionTest {
                 "closing an unknown document must preserve the existing rendering session");
     }
 
-    private static DocumentRenderingPlan openMermaidDocument() {
+    private static DocumentOpeningPlan openMermaidDocument() {
         return DocumentRenderingSession.empty().open(DOCUMENT_URI, MARKDOWN, freeProfile());
+    }
+
+    private static final class CapturedRenderInput implements DocumentRenderingCompletion.Handler {
+        private DocumentRenderInput input;
+
+        @Override public void rendered(DocumentRenderInput input) { this.input = input; }
+        @Override public void unchanged() { }
+    }
+
+    private static final class RenderDispatchCount implements DocumentRenderingCompletion.Handler {
+        private int value;
+
+        @Override public void rendered(DocumentRenderInput input) { value++; }
+        @Override public void unchanged() { }
     }
 
     private static DocumentRenderingProfile freeProfile() {

@@ -1,14 +1,17 @@
 package io.github.yosk.mdlite.domain;
 
-public final class DocumentRenderingPlan {
+public final class DocumentRenderingBatchPlan {
     private final DocumentRenderingSession session;
     private final DocumentRenderInput[] renderInputs;
     private final MermaidRenderJob[] jobs;
 
-    DocumentRenderingPlan(
+    DocumentRenderingBatchPlan(
             DocumentRenderingSession session,
             DocumentRenderInput[] renderInputs,
             MermaidRenderJob[] jobs) {
+        if (session == null || renderInputs == null || jobs == null) {
+            throw new IllegalArgumentException("batch rendering requires a session, inputs, and jobs");
+        }
         this.session = session;
         this.renderInputs = copy(renderInputs);
         this.jobs = copy(jobs);

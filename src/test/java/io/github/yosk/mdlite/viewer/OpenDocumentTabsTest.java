@@ -1,7 +1,7 @@
 package io.github.yosk.mdlite.viewer;
 
 import io.github.yosk.mdlite.domain.SafeHtml;
-import io.github.yosk.mdlite.domain.DocumentRenderingPlan;
+import io.github.yosk.mdlite.domain.DocumentOpeningPlan;
 import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
 import io.github.yosk.mdlite.domain.DocumentRenderingSession;
 import io.github.yosk.mdlite.domain.DocumentUri;
@@ -145,7 +145,7 @@ public final class OpenDocumentTabsTest {
     @Test
     void closeResultRemovesClosedDocumentFromItsRenderingSession() {
         OpenDocumentTabs tabs = OpenDocumentTabs.withInitialTab(tab("First", "content://first", "first"));
-        DocumentRenderingPlan opened = DocumentRenderingSession.empty().open(
+        DocumentOpeningPlan opened = DocumentRenderingSession.empty().open(
                 DocumentUri.from("content://first"), "# First", freeProfile());
 
         DocumentRenderingSession rendering = tabs
