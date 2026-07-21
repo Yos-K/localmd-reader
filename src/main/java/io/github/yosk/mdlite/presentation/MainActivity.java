@@ -34,6 +34,7 @@ import io.github.yosk.mdlite.domain.DocumentRenderInput;
 import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
 import io.github.yosk.mdlite.domain.DocumentRenderingPlan;
 import io.github.yosk.mdlite.domain.DocumentRenderingSession;
+import io.github.yosk.mdlite.domain.DocumentUri;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
 import io.github.yosk.mdlite.domain.FolderBrowsingAction;
@@ -818,7 +819,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (openTabs == null) {
             return MarkdownHeadings.fromMarkdown("");
         }
-        String markdown = documentRenderingSession.markdownFor(openTabs.activeTab().uri());
+        String markdown = documentRenderingSession.markdownFor(openTabs.activeTab().documentUri());
         return MarkdownHeadings.fromMarkdown(markdown);
     }
 
@@ -857,7 +858,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     SafeHtml renderMarkdownForUri(String documentUri, String markdown) {
         DocumentRenderingPlan plan = documentRenderingSession.open(
-                documentUri,
+                DocumentUri.from(documentUri),
                 markdown,
                 documentRenderingProfile);
         documentRenderingSession = plan.session();
@@ -1459,7 +1460,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void refreshRenderedTab(DocumentRenderInput input) {
-        String documentUri = input.documentUri();
+        String documentUri = input.documentUri().value();
         OpenDocumentTab tab = tabByUri(documentUri);
         if (tab == null) { return; }
         SafeHtml rendered = renderInput(input);

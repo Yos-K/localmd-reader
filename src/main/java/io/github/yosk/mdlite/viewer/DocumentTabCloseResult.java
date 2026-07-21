@@ -40,7 +40,7 @@ public abstract class DocumentTabCloseResult {
         @Override
         public DocumentRenderingSession renderingSessionAfter(DocumentRenderingSession session) {
             requireSession(session);
-            return session.close(closedTab.uri());
+            return session.close(closedTab.documentUri());
         }
     }
 

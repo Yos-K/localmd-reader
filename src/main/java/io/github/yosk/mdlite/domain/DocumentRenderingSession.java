@@ -7,16 +7,16 @@ import java.util.Map;
 
 public final class DocumentRenderingSession {
     private static final DocumentRenderingSession EMPTY = new DocumentRenderingSession(
-            Collections.<String, String>emptyMap(),
+            Collections.<DocumentUri, String>emptyMap(),
             MermaidRenderSessions.empty());
 
-    private final Map<String, String> markdownByUri;
+    private final Map<DocumentUri, String> markdownByUri;
     private final MermaidRenderSessions mermaidSessions;
 
     private DocumentRenderingSession(
-            Map<String, String> markdownByUri,
+            Map<DocumentUri, String> markdownByUri,
             MermaidRenderSessions mermaidSessions) {
-        this.markdownByUri = Collections.unmodifiableMap(new HashMap<String, String>(markdownByUri));
+        this.markdownByUri = Collections.unmodifiableMap(new HashMap<DocumentUri, String>(markdownByUri));
         this.mermaidSessions = mermaidSessions;
     }
 
@@ -24,19 +24,19 @@ public final class DocumentRenderingSession {
         return EMPTY;
     }
 
-    public String markdownFor(String documentUri) {
+    public String markdownFor(DocumentUri documentUri) {
         String markdown = markdownByUri.get(documentUri);
         return markdown == null ? "" : markdown;
     }
 
     public DocumentRenderingPlan open(
-            String documentUri,
+            DocumentUri documentUri,
             String markdown,
             DocumentRenderingProfile profile) {
         requireDocumentUri(documentUri);
         String source = markdown == null ? "" : markdown;
         DocumentRenderingProfile safeProfile = safeProfile(profile);
-        Map<String, String> nextMarkdown = new HashMap<String, String>(markdownByUri);
+        Map<DocumentUri, String> nextMarkdown = new HashMap<DocumentUri, String>(markdownByUri);
         nextMarkdown.put(documentUri, source);
         MermaidRenderSessions registered = mermaidSessions.register(
                 documentUri,
@@ -54,12 +54,12 @@ public final class DocumentRenderingSession {
                 jobs);
     }
 
-    public DocumentRenderingSession close(String documentUri) {
+    public DocumentRenderingSession close(DocumentUri documentUri) {
         requireDocumentUri(documentUri);
         if (!markdownByUri.containsKey(documentUri)) {
             return this;
         }
-        Map<String, String> nextMarkdown = new HashMap<String, String>(markdownByUri);
+        Map<DocumentUri, String> nextMarkdown = new HashMap<DocumentUri, String>(markdownByUri);
         nextMarkdown.remove(documentUri);
         if (nextMarkdown.isEmpty()) {
             return EMPTY;
@@ -84,7 +84,7 @@ public final class DocumentRenderingSession {
         MermaidRenderSessions reset = mermaidSessions.resetRendered();
         ArrayList<MermaidRenderJob> jobs = new ArrayList<MermaidRenderJob>();
         if (safeProfile.mermaidRendering().isEnabled()) {
-            for (String documentUri : markdownByUri.keySet()) {
+            for (DocumentUri documentUri : markdownByUri.keySet()) {
                 MermaidRenderSchedule schedule = reset.schedule(documentUri);
                 reset = schedule.session();
                 Collections.addAll(jobs, schedule.jobs());
@@ -93,7 +93,7 @@ public final class DocumentRenderingSession {
         DocumentRenderingSession next = new DocumentRenderingSession(markdownByUri, reset);
         DocumentRenderInput[] inputs = new DocumentRenderInput[markdownByUri.size()];
         int index = 0;
-        for (String documentUri : markdownByUri.keySet()) {
+        for (DocumentUri documentUri : markdownByUri.keySet()) {
             inputs[index] = next.renderInput(documentUri);
             index++;
         }
@@ -103,7 +103,7 @@ public final class DocumentRenderingSession {
                 jobs.toArray(new MermaidRenderJob[jobs.size()]));
     }
 
-    private DocumentRenderInput renderInput(String documentUri) {
+    private DocumentRenderInput renderInput(DocumentUri documentUri) {
         return new DocumentRenderInput(
                 documentUri,
                 markdownByUri.get(documentUri),
@@ -121,8 +121,8 @@ public final class DocumentRenderingSession {
         return profile == null ? DocumentRenderingProfile.fromEntitlement(null) : profile;
     }
 
-    private static void requireDocumentUri(String documentUri) {
-        if (documentUri == null || documentUri.trim().length() == 0) {
+    private static void requireDocumentUri(DocumentUri documentUri) {
+        if (documentUri == null) {
             throw new IllegalArgumentException("document rendering requires a URI");
         }
     }

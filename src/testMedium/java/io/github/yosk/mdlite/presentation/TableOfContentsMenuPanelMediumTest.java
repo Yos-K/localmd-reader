@@ -13,7 +13,7 @@ public final class TableOfContentsMenuPanelMediumTest {
     public void renderingTwoHeadingsCreatesTwoSelectableRows() {
         MainActivity activity = Robolectric.buildActivity(MainActivity.class).setup().get();
         activity.documentRenderingSession = activity.documentRenderingSession.open(
-                activity.openTabs.activeTab().uri(),
+                activity.openTabs.activeTab().documentUri(),
                 "# Overview\n\n## Details",
                 activity.documentRenderingProfile).session();
         TableOfContentsMenuPanel panel = new TableOfContentsMenuPanel(activity);
@@ -28,7 +28,7 @@ public final class TableOfContentsMenuPanelMediumTest {
     public void renderingDocumentWithoutHeadingsCreatesOneEmptyStateRow() {
         MainActivity activity = Robolectric.buildActivity(MainActivity.class).setup().get();
         activity.documentRenderingSession = activity.documentRenderingSession.open(
-                activity.openTabs.activeTab().uri(),
+                activity.openTabs.activeTab().documentUri(),
                 "plain text",
                 activity.documentRenderingProfile).session();
         TableOfContentsMenuPanel panel = new TableOfContentsMenuPanel(activity);

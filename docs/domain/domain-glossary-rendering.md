@@ -59,11 +59,11 @@ flowchart TD
   `CodeHighlighting`、`MermaidRendering`、`RelativeLinkRendering`、`RelativeImageRendering` の不変な組。
   `fromEntitlement` が各ポリシーを通じて常に有効な組を生成する。規則→R1 / R2 / R4 / R5。
 - **DocumentRenderInput**（`domain/DocumentRenderInput.java`）: 1文書を描画するための、URI、nullでないMarkdown本文、
-  文書内インデックス別の完成済みMermaid図をまとめた不変入力。規則→R7。
+  文書内インデックス別の完成済みMermaid図をまとめた不変入力。URIは常に`DocumentUri`。規則→R7。
 - **DocumentRenderingPlan**（`domain/DocumentRenderingPlan.java`）: 次の `DocumentRenderingSession`、再描画対象の
   `DocumentRenderInput[]`、実行対象の `MermaidRenderJob[]` を不可分に返す遷移結果。規則→R7。
 - **DocumentRenderingSession**（`domain/DocumentRenderingSession.java`）: 文書URI別のMarkdown本文と
-  `MermaidRenderSessions` を同じライフサイクルで保持する不変セッション。操作 `open` / `complete` /
+  `MermaidRenderSessions` を`DocumentUri`キーで同じライフサイクルに保持する不変セッション。操作 `open` / `complete` /
   `resetForTheme` / `close` / `markdownFor`。規則→R6 / R7 / R8。
 - **RelativeLinkRendering**（`domain/RelativeLinkRendering.java`）: 相対 Markdown リンクのアンカー化設定。構成要素
   `enabled: boolean`（`disabled()` / `enabled()`）。 規則→R4。
@@ -78,7 +78,7 @@ flowchart TD
 - **MermaidDiagramBlocks**（`domain/MermaidDiagramBlocks.java`）: 本文から抽出した図ブロック群。構成要素 `MermaidDiagramBlock[]`。
   操作 `fromMarkdown(md)`/`isEmpty()`。 規則なし（抽出した図ブロックの集合）。
 - **MermaidRenderJob**（`domain/MermaidRenderJob.java`）: 非同期描画へ渡す1図分の仕事。構成要素
-  `documentUri`、`diagramIndex`、`generation`、`block`。規則→R6。
+  `documentUri: DocumentUri`、`diagramIndex`、`generation`、`block`。規則→R6。
 - **MermaidRenderSchedule**（`domain/MermaidRenderSchedule.java`）: pending登録後のセッションと、新たに開始する
   `MermaidRenderJob[]` を不可分に返す遷移結果。なぜ: 開始判定とpending登録の分離を防ぐ。
 - **MermaidRenderSessions**（`domain/MermaidRenderSessions.java`）: 文書ごとの図ブロック、描画世代、pending、

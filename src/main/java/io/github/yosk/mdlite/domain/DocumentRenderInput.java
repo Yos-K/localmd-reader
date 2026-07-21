@@ -5,21 +5,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class DocumentRenderInput {
-    private final String documentUri;
+    private final DocumentUri documentUri;
     private final String markdown;
     private final Map<Integer, SafeHtml> renderedMermaidDiagrams;
 
     DocumentRenderInput(
-            String documentUri,
+            DocumentUri documentUri,
             String markdown,
             Map<Integer, SafeHtml> renderedMermaidDiagrams) {
+        if (documentUri == null) {
+            throw new IllegalArgumentException("render input requires a document URI");
+        }
         this.documentUri = documentUri;
         this.markdown = markdown;
         this.renderedMermaidDiagrams = Collections.unmodifiableMap(
                 new HashMap<Integer, SafeHtml>(renderedMermaidDiagrams));
     }
 
-    public String documentUri() {
+    public DocumentUri documentUri() {
         return documentUri;
     }
 
