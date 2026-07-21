@@ -30,12 +30,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import io.github.yosk.mdlite.R;
 import io.github.yosk.mdlite.domain.CompositeEntitlementSource;
-import io.github.yosk.mdlite.domain.DocumentRenderInput;
 import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
-import io.github.yosk.mdlite.domain.DocumentOpeningPlan;
-import io.github.yosk.mdlite.domain.DocumentRenderingBatchPlan;
-import io.github.yosk.mdlite.domain.DocumentRenderingCompletion;
-import io.github.yosk.mdlite.domain.DocumentRenderingSession;
 import io.github.yosk.mdlite.domain.DocumentUri;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
@@ -73,6 +68,7 @@ import io.github.yosk.mdlite.infrastructure.WelcomeDocumentBuilder;
 import io.github.yosk.mdlite.viewer.ControlsPlacement;
 import io.github.yosk.mdlite.viewer.DocumentSearchQuery;
 import io.github.yosk.mdlite.viewer.DocumentSearchSession;
+import io.github.yosk.mdlite.viewer.DocumentRenderingCoordinator;
 import io.github.yosk.mdlite.viewer.FontSize;
 import io.github.yosk.mdlite.viewer.GestureShortcutBindings;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
@@ -142,7 +138,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     String pendingSaveMarkdown = "";
     String pendingExportHtml = "";
     final Map<String, String> draftMarkdownByUri = new HashMap<String, String>();
-    DocumentRenderingSession documentRenderingSession = DocumentRenderingSession.empty();
+    DocumentRenderingCoordinator documentRenderingCoordinator;
     CircleGestureTrace circleGestureTrace;
     ScaleGestureDetector fontScaleGestureDetector;
     GestureDetector shortcutGestureDetector;
@@ -294,6 +290,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         initMenuPanel();
         initMessageAndTabs();
         initWebView();
+        documentRenderingCoordinator = new DocumentRenderingCoordinator(
+                new MainActivityDocumentRenderingOutput(this));
 
         fontScaleGestureDetector = new ScaleGestureDetector(this, new FontScaleGestureListener(this));
         shortcutGestureDetector = new GestureDetector(this, new ShortcutGestureListener(this));
@@ -587,13 +585,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     @Override
     public void onMermaidRendered(MermaidRenderJob job, SafeHtml svg) {
-        applyCompletedRendering(documentRenderingSession.complete(job, svg));
+        documentRenderingCoordinator.complete(job, svg);
     }
 
     @Override
     public void onMermaidRenderFailed(MermaidRenderJob job, String reason) {
         SafeHtml errorHtml = MermaidRenderErrorHtml.from(job.block(), reason);
-        applyCompletedRendering(documentRenderingSession.complete(job, errorHtml));
+        documentRenderingCoordinator.complete(job, errorHtml);
     }
 
     void switchLanguage() {
@@ -821,7 +819,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (openTabs == null) {
             return MarkdownHeadings.fromMarkdown("");
         }
-        String markdown = documentRenderingSession.markdownFor(openTabs.activeTab().documentUri());
+        String markdown = documentRenderingCoordinator.markdownFor(openTabs.activeTab().documentUri());
         return MarkdownHeadings.fromMarkdown(markdown);
     }
 
@@ -859,13 +857,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     SafeHtml renderMarkdownForUri(String documentUri, String markdown) {
-        DocumentOpeningPlan plan = documentRenderingSession.open(
+        return documentRenderingCoordinator.open(
                 DocumentUri.from(documentUri),
                 markdown,
                 documentRenderingProfile);
-        documentRenderingSession = plan.session();
-        enqueueMermaidRenderJobs(plan.jobs());
-        return renderInput(plan.renderInput());
     }
 
     void saveOpenTabs() {
@@ -1260,13 +1255,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     void rerenderMermaidDiagramsForCurrentTheme() {
         if (!documentRenderingProfile.mermaidRendering().isEnabled()) { return; }
-        DocumentRenderingBatchPlan plan = documentRenderingSession.resetForTheme(documentRenderingProfile);
-        documentRenderingSession = plan.session();
-        enqueueMermaidRenderJobs(plan.jobs());
-        DocumentRenderInput[] inputs = plan.renderInputs();
-        for (int i = 0; i < inputs.length; i++) {
-            refreshRenderedTab(inputs[i]);
-        }
+        documentRenderingCoordinator.resetForTheme(documentRenderingProfile);
     }
 
     OpenDocumentTab initialTab() {
@@ -1439,47 +1428,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         for (int i = 1; i < restoredTabs.size(); i++) { tabs = tabs.open(restoredTabs.get(i)); }
         return tabs.activate(activeIndex);
     }
-
-    private void enqueueMermaidRenderJobs(MermaidRenderJob[] jobs) {
-        if (!documentRenderingProfile.mermaidRendering().isEnabled() || mermaidRenderEngine == null) { return; }
-        for (int i = 0; i < jobs.length; i++) {
-            mermaidRenderEngine.enqueue(jobs[i], MermaidDiagramTheme.from(currentTheme));
-        }
-    }
-
-    private void applyCompletedRendering(DocumentRenderingCompletion completion) {
-        documentRenderingSession = completion.session();
-        completion.dispatch(new DocumentRenderingCompletion.Handler() {
-            @Override public void rendered(DocumentRenderInput input) { refreshRenderedTab(input); }
-            @Override public void unchanged() { }
-        });
-    }
-
-    private SafeHtml renderInput(DocumentRenderInput input) {
-        return renderer.render(
-                input.markdown(),
-                documentRenderingProfile,
-                input.renderedMermaidDiagrams());
-    }
-
-    private void refreshRenderedTab(DocumentRenderInput input) {
-        String documentUri = input.documentUri().value();
-        OpenDocumentTab tab = tabByUri(documentUri);
-        if (tab == null) { return; }
-        SafeHtml rendered = renderInput(input);
-        openTabs = openTabs.replaceRenderedDocument(documentUri, rendered);
-        renderTabs();
-        if (openTabs.activeTab().uri().equals(documentUri)) { renderCurrentDocument(); }
-    }
-
-    private OpenDocumentTab tabByUri(String documentUri) {
-        List<OpenDocumentTab> tabs = openTabs.tabs();
-        for (int i = 0; i < tabs.size(); i++) {
-            if (tabs.get(i).uri().equals(documentUri)) { return tabs.get(i); }
-        }
-        return null;
-    }
-
 
     private void restorePendingScrollAfterPageLoad() {
         if (pendingScrollRestoreY < 0) { return; }

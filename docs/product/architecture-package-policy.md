@@ -94,6 +94,10 @@ models:
   completion dispatches `Rendered` or `Unchanged` through `DocumentRenderingCompletion`,
   and theme refresh returns zero or more inputs through `DocumentRenderingBatchPlan`.
   `MainActivity` executes these typed outcomes without array-index or length inference.
+- `DocumentRenderingCoordinator` is the sole rendering-session owner and applies
+  every typed transition before invoking its platform-independent `Output` port.
+  `MainActivityDocumentRenderingOutput` is the Android adapter; `MainActivity`
+  no longer stores or replaces rendering sessions.
   Closing a tab also closes its rendering session entry, so source and pending
   diagram work cannot outlive the document visible in `OpenDocumentTabs`.
 

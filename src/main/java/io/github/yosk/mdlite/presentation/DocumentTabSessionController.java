@@ -27,7 +27,7 @@ final class DocumentTabSessionController {
 
     void close(int tabIndex) {
         DocumentTabCloseResult result = activity.openTabs.closeOrFallback(tabIndex, activity.initialTab());
-        activity.documentRenderingSession = result.renderingSessionAfter(activity.documentRenderingSession);
+        activity.documentRenderingCoordinator.close(result);
         complete(result.tabs());
     }
 
