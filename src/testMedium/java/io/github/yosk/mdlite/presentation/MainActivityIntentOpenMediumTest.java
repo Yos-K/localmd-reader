@@ -55,7 +55,7 @@ public class MainActivityIntentOpenMediumTest {
         MainActivity activity = Robolectric.buildActivity(
                 MainActivity.class, viewIntent(uri)).setup().get();
 
-        OpenDocumentTab active = activity.openTabs.activeTab();
+        OpenDocumentTab active = activity.openTabs().activeTab();
         assertTrue("ACTION_VIEW must open a file document tab, not the welcome tab",
                 active instanceof OpenDocumentTab.FileDocumentTab);
         assertEquals("opened tab title must be the file's display name",
@@ -73,13 +73,13 @@ public class MainActivityIntentOpenMediumTest {
                 MainActivity.class, viewIntent(Uri.fromFile(first))).setup();
         MainActivity activity = controller.get();
 
-        int tabsAfterFirst = activity.openTabs.tabs().size();
+        int tabsAfterFirst = activity.openTabs().tabs().size();
 
         File second = writeMarkdown("second.md", "# SecondDoc\n");
         Uri secondUri = Uri.fromFile(second);
         controller.newIntent(viewIntent(secondUri));
 
-        OpenDocumentTabs tabs = activity.openTabs;
+        OpenDocumentTabs tabs = activity.openTabs();
         assertEquals("delivering a second ACTION_VIEW must add one more tab",
                 tabsAfterFirst + 1, tabs.tabs().size());
         assertEquals("the newly opened document must become the active tab",
@@ -97,7 +97,7 @@ public class MainActivityIntentOpenMediumTest {
         MainActivity activity = Robolectric.buildActivity(
                 MainActivity.class, viewIntent(Uri.fromFile(markdown))).setup().get();
         activity.documentRenderingProfile = DocumentRenderingProfile.fromEntitlement(FeatureEntitlement.pro());
-        int tabsBeforeLink = activity.openTabs.tabs().size();
+        int tabsBeforeLink = activity.openTabs().tabs().size();
 
         boolean opened = activity.openActiveRelativeMarkdownLink(
                 "https://localmd.local/__relative_markdown__?path=guide%2Fintro.md");
@@ -105,11 +105,11 @@ public class MainActivityIntentOpenMediumTest {
         assertEquals("Pro entitlement must open safe relative Markdown links",
                 true, opened);
         assertEquals("opening a relative Markdown link must append the target as a new tab",
-                tabsBeforeLink + 1, activity.openTabs.tabs().size());
+                tabsBeforeLink + 1, activity.openTabs().tabs().size());
         assertEquals("opened relative Markdown link must become the active tab",
-                Uri.fromFile(target).toString(), activity.openTabs.activeTab().uri());
+                Uri.fromFile(target).toString(), activity.openTabs().activeTab().uri());
         assertTrue("opened relative Markdown link must render the target file",
-                activity.openTabs.activeTab().document().value().contains("Intro"));
+                activity.openTabs().activeTab().document().value().contains("Intro"));
     }
 
     @Test

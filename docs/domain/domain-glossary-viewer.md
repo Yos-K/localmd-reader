@@ -140,13 +140,18 @@ flowchart TD
   構成要素 `tabs`、`activeIndex`。操作 `open`/`activate`/`activatePrevious`/`activateNext`/`closeOrFallback`/`activeTab`。
   - L1: 常に最低1タブを保つ。最後の1枚を閉じる操作はfallbackタブへ置換する。
     なぜ: 空タブ状態を作らず、常に表示できるものを保つ。
+- **OpenDocumentTabSession**（`viewer/OpenDocumentTabSession.java`）: `OpenDocumentTabs`の唯一の可変な所有者。
+  操作 `open`/`activate`/`activatePrevious`/`activateNext`/`closeOrFallback`/`replaceRenderedDocument`と、
+  現在の不変スナップショットを返す`tabs`。
+  - L1: 保持する値は常に有効な`OpenDocumentTabs`であり、文書タブの変更はすべてセッション操作を通る。
+    なぜ: ファイル、Intent、下書き、ジェスチャー、非同期描画という複数入口からの直接代入をなくし、所有権を一意にする。
 - **DocumentTabCloseResult**（`viewer/DocumentTabCloseResult.java`）: タブを閉じる全域的な遷移結果。
   `Closed{nextTabs, closedTab}` または `Unchanged{tabs}` を内部型として持ち、操作 `tabs()` / `renderingSessionAfter(session)` を公開する。
   - L1: `Closed`だけが閉じたタブと同じURIの描画状態を除去し、`Unchanged`はタブ・描画セッションを同一のまま返す。
     なぜ: 呼び出し側に範囲判定、URI抽出、成功時だけの描画状態更新を分散させない。
-- **DocumentTabSessionController**（`presentation/DocumentTabSessionController.java`）: 選択・閉じる・前後移動後の
-  application境界の完了処理。`OpenDocumentTabs`の更新、状態メッセージ消去、表示更新、文書描画、復元用保存を
-  必ず同じ順序で実行する。新規文書を開く際の入力元固有方針は所有しない。
+- **DocumentTabSessionController**（`presentation/DocumentTabSessionController.java`）: 選択・閉じる・前後移動を
+  `OpenDocumentTabSession`へ指示した後のapplication境界の完了処理。状態メッセージ消去、表示更新、文書描画、
+  復元用保存を必ず同じ順序で実行する。タブ状態自体や、新規文書を開く際の入力元固有方針は所有しない。
 - **TabStatusMessage**（`viewer/TabStatusMessage.java`）: タブの状態メッセージ。`none()` / `temporaryMarkdown()` / `selectedTextMarkdown()`。
   操作 `localized(ViewerText)`。 規則なし（`OpenDocumentTab.statusMessage()` が返す表示用メッセージ。文言の言語化は `ViewerText`）。
 - **ClipboardMarkdownItem**（`viewer/ClipboardMarkdownItem.java`）: クリップボード由来の Markdown 素材。構成要素 `title: String`、`markdown: String`。
@@ -172,6 +177,9 @@ flowchart TD
   なぜ: L1（最低1タブ）を保ち、UI連打などの無効な閉じる要求も例外や部分更新にせず全域的に扱うため。
 - `DocumentTabCloseResult.renderingSessionAfter(session)`: `Closed`だけが閉じたURIを描画セッションから除去し、
   `Unchanged`は入力セッションを保つ。なぜ: タブ集合と描画状態の更新成否を同じ結果型に閉じるため。
+- `OpenDocumentTabSession`の各操作: 次の`OpenDocumentTabs`を所有者自身へ反映し、呼び出し側に再代入を要求しない。
+  描画済み文書の置換は対象URIが存在する場合だけ結果ハンドラへ通知する。
+  なぜ: すべての入口で同じ所有規則を守り、存在しない非同期完了を全域的な変更なし結果として扱うため。
 - `DocumentTabSessionController.activate/close/activatePrevious/activateNext`: `OpenDocumentTabs`の遷移後に
   状態、表示、描画、永続化を一括して完了する。なぜ: clickとgestureのどちらから操作しても同じセッション結果にするため。
 - タブ操作の実態（探索 2026-06-12 で観測。出典: `exploration-sessions/2026-06-12-viewer.md`）:

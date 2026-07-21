@@ -103,7 +103,7 @@ public class HtmlExportMenuActionMediumTest {
 
     private static MainActivity activityWithOpenFile() {
         MainActivity activity = Robolectric.buildActivity(MainActivity.class).setup().get();
-        activity.openTabs = activity.openTabs.open(OpenDocumentTab.fileDocument(
+        activity.documentTabSession.open(OpenDocumentTab.fileDocument(
                 "notes.md",
                 "content://documents/notes.md",
                 SafeHtml.fromTrustedRendererOutput("<h1>Notes</h1>")));
@@ -112,7 +112,7 @@ public class HtmlExportMenuActionMediumTest {
 
     private static MainActivity activityWithClipboardDraft() {
         MainActivity activity = Robolectric.buildActivity(MainActivity.class).setup().get();
-        activity.openTabs = activity.openTabs.open(OpenDocumentTab.clipboardDraft(
+        activity.documentTabSession.open(OpenDocumentTab.clipboardDraft(
                 "Clipboard.md",
                 "draft://clipboard",
                 SafeHtml.fromTrustedRendererOutput("<h1>Clipboard</h1>")));

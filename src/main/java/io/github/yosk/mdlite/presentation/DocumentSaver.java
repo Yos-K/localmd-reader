@@ -15,7 +15,7 @@ final class DocumentSaver {
     }
 
     void saveActiveMarkdownAs() {
-        OpenDocumentTab tab = activity.openTabs.activeTab();
+        OpenDocumentTab tab = activity.openTabs().activeTab();
         if (MainActivity.WELCOME_URI.equals(tab.uri())) {
             activity.showFileOpenError(activity.viewerText.noDocumentToSave());
             return;

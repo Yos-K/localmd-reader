@@ -70,9 +70,13 @@ models:
 - `HeadingNavigation` derives an always-valid unavailable or destination result
   from headings and scroll position; `MainActivity` does not retain a sentinel
   heading index.
+- `OpenDocumentTabSession` is the sole mutable owner of the immutable
+  `OpenDocumentTabs` snapshot. File, intent, clipboard, gesture, save, and
+  rendering entry points issue commands instead of replacing snapshots in
+  `MainActivity`.
 - `DocumentTabSessionController` completes equivalent tab selection and closing
-  transitions across click and gesture entry points while `OpenDocumentTabs`
-  remains the platform-independent authoritative state.
+  transitions across click and gesture entry points after commanding
+  `OpenDocumentTabSession`; it owns Android completion effects, not tab state.
 - `DocumentTabCloseResult` represents successful and unchanged close outcomes
   polymorphically, so Android orchestration never infers success from a raw index
   and cannot close a tab without applying the same transition to rendering state.
