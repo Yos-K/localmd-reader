@@ -62,14 +62,7 @@ public final class OpenDocumentTabs {
         return this;
     }
 
-    public OpenDocumentTabs close(int index) {
-        if (tabs.size() == 1) {
-            return this;
-        }
-        if (index < 0 || index >= tabs.size()) {
-            return this;
-        }
-
+    private OpenDocumentTabs closeExisting(int index) {
         ArrayList<OpenDocumentTab> next = new ArrayList<OpenDocumentTab>(tabs);
         next.remove(index);
 
@@ -82,11 +75,15 @@ public final class OpenDocumentTabs {
         return new OpenDocumentTabs(next, nextActiveIndex);
     }
 
-    public OpenDocumentTabs closeOrFallback(int index, OpenDocumentTab fallbackTab) {
-        if (tabs.size() == 1 && index == 0) {
-            return withInitialTab(fallbackTab);
+    public DocumentTabCloseResult closeOrFallback(int index, OpenDocumentTab fallbackTab) {
+        if (index < 0 || index >= tabs.size()) {
+            return DocumentTabCloseResult.unchanged(this);
         }
-        return close(index);
+        OpenDocumentTab closedTab = tabs.get(index);
+        if (tabs.size() == 1 && index == 0) {
+            return DocumentTabCloseResult.closed(withInitialTab(fallbackTab), closedTab);
+        }
+        return DocumentTabCloseResult.closed(closeExisting(index), closedTab);
     }
 
     public OpenDocumentTab activeTab() {

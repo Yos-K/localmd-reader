@@ -142,7 +142,7 @@ flowchart TD
 - 破ると: 古い本文の再描画、ジョブの重複投入、完了した図が画面へ反映されない状態が生じる。
 
 **R8: 閉じた文書の描画状態をタブより長く保持しない**
-- 関係する語: OpenDocumentTabs × DocumentRenderingSession ／ どこで: `DocumentTabSessionController.close`
+- 関係する語: OpenDocumentTabs × DocumentRenderingSession ／ どこで: `DocumentTabCloseResult.renderingSessionAfter`
 - 分類: process ／ 支える判断: タブと本文・非同期描画の生存期間を一致させる判断。
 - なぜ: 閉じた文書の本文、完成図、pendingジョブが残ると、テーマ変更や遅延完了によって存在しないタブの再描画を試みる。
 - 破ると: 閉じた文書がメモリに残り、古い非同期結果が後続セッションへ混入する。

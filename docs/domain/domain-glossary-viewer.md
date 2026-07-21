@@ -133,8 +133,13 @@ flowchart TD
 - **DraftMarkdownDocument**（`viewer/DraftMarkdownDocument.java`）: ファイル由来でない一時Markdown。
   構成要素 `displayName`、`uri`、`markdown`、`rendered: SafeHtml`。 規則なし（一時ドキュメントのデータ。本文は SafeHtml）。
 - **OpenDocumentTabs**（`viewer/OpenDocumentTabs.java`）: 開いているタブ集合＋アクティブ位置（不変）。
-  構成要素 `tabs`、`activeIndex`。操作 `open`/`activate`/`activatePrevious`/`activateNext`/`close`/`closeOrFallback`/`activeTab`。
-  - L1: 常に最低1タブを保つ（`close` は最後の1枚を消さない）。 なぜ: 空タブ状態を作らず、常に表示できるものを保つ。
+  構成要素 `tabs`、`activeIndex`。操作 `open`/`activate`/`activatePrevious`/`activateNext`/`closeOrFallback`/`activeTab`。
+  - L1: 常に最低1タブを保つ。最後の1枚を閉じる操作はfallbackタブへ置換する。
+    なぜ: 空タブ状態を作らず、常に表示できるものを保つ。
+- **DocumentTabCloseResult**（`viewer/DocumentTabCloseResult.java`）: タブを閉じる全域的な遷移結果。
+  `Closed{nextTabs, closedTab}` または `Unchanged{tabs}` を内部型として持ち、操作 `tabs()` / `renderingSessionAfter(session)` を公開する。
+  - L1: `Closed`だけが閉じたタブと同じURIの描画状態を除去し、`Unchanged`はタブ・描画セッションを同一のまま返す。
+    なぜ: 呼び出し側に範囲判定、URI抽出、成功時だけの描画状態更新を分散させない。
 - **DocumentTabSessionController**（`presentation/DocumentTabSessionController.java`）: 選択・閉じる・前後移動後の
   application境界の完了処理。`OpenDocumentTabs`の更新、状態メッセージ消去、表示更新、文書描画、復元用保存を
   必ず同じ順序で実行する。新規文書を開く際の入力元固有方針は所有しない。
@@ -158,8 +163,11 @@ flowchart TD
 
 ### L3: 動作が守るルール
 
-- `OpenDocumentTabs.closeOrFallback(index, fallback)`: 最後の1枚を閉じるときは `fallback` で初期化、それ以外は `close`。
-  なぜ: L1（最低1タブ）を保つため、空になる操作を fallback で吸収する。
+- `OpenDocumentTabs.closeOrFallback(index, fallback)`: 有効位置なら閉じたタブを保持する`Closed`結果を返し、最後の1枚は
+  `fallback`で初期化する。範囲外なら`Unchanged`結果を返す。
+  なぜ: L1（最低1タブ）を保ち、UI連打などの無効な閉じる要求も例外や部分更新にせず全域的に扱うため。
+- `DocumentTabCloseResult.renderingSessionAfter(session)`: `Closed`だけが閉じたURIを描画セッションから除去し、
+  `Unchanged`は入力セッションを保つ。なぜ: タブ集合と描画状態の更新成否を同じ結果型に閉じるため。
 - `DocumentTabSessionController.activate/close/activatePrevious/activateNext`: `OpenDocumentTabs`の遷移後に
   状態、表示、描画、永続化を一括して完了する。なぜ: clickとgestureのどちらから操作しても同じセッション結果にするため。
 - タブ操作の実態（探索 2026-06-12 で観測。出典: `exploration-sessions/2026-06-12-viewer.md`）:
@@ -167,7 +175,7 @@ flowchart TD
   - `activatePrevious()`/`activateNext()` は端で**巡回**する（先頭→末尾・末尾→先頭。
     ジェスチャの next_tab/previous_tab が2タブで常に切り替わるのはこのため）。
   - 既存 `uri` のタブを `open` すると**重複タブを作らず既存位置で置換して activate**（タイトルも新値に更新）。
-  - 範囲外インデックスの防御は非対称: `activate` は IllegalArgumentException（fail-fast）、`close` は無視。
+  - 範囲外インデックスの防御は非対称: `activate` は IllegalArgumentException（fail-fast）、`closeOrFallback` は`Unchanged`。
     （**裁可済み 2026-06-12・処方的裁可＝条件付き意図**: 元コードはAI生成で復元すべき意図が存在しないため、
     「何であるべきか」として裁可。activate＝内部不変条件の fail-fast — 永続化由来のインデックスは境界型
     `RestorableOpenTabs.from` が [0, タブ数-1] に正規化するため範囲外は到達しない（C節 L1）。
