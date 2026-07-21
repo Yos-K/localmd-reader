@@ -86,6 +86,8 @@ models:
 - `DocumentRenderingSession` owns Markdown sources together with Mermaid state.
   Every transition returns a `DocumentRenderingPlan` containing the next session,
   render inputs, and background jobs, leaving `MainActivity` to execute and display them.
+  Closing a tab also closes its rendering session entry, so source and pending
+  diagram work cannot outlive the document visible in `OpenDocumentTabs`.
 
 Future package moves should preserve that direction.
 

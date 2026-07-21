@@ -8,7 +8,9 @@ Keep `OpenDocumentTabs` as the always-valid tab state and route tab activation,
 closing, previous, and next commands through `DocumentTabSessionController`.
 The controller completes each transition by updating the authoritative state,
 clearing stale status, refreshing localized controls and tab views, rendering
-the active document, and persisting restorable tabs.
+the active document, and persisting restorable tabs. Closing also removes the
+closed document from `DocumentRenderingSession`, so Markdown sources and
+pending background rendering cannot outlive their tab.
 
 Opening a new document remains with its source-specific coordinator because
 file opening, external intents, and clipboard drafts have different validation,
@@ -26,7 +28,7 @@ history, persistence, and anchor requirements.
 
 Click and gesture entry points previously performed the same multi-step update.
 Omitting any step could leave the visible document, tab strip, status message,
-or restored session inconsistent with `OpenDocumentTabs`. One controller makes
+rendering session, or restored session inconsistent with `OpenDocumentTabs`. One controller makes
 completion atomic at the application boundary without adding Android concerns
 to the immutable viewer model.
 
