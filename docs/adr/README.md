@@ -34,3 +34,4 @@ Why Alternatives Were Rejected, and Reconsider When.
 | [0013](0013-document-tab-session-completion.md) | Document tab session completion | Accepted |
 | [0014](0014-public-source-private-release-repositories.md) | Public source and private release repositories | Accepted |
 | [0015](0015-document-rendering-coordinator.md) | Platform-independent rendering session ownership | Accepted |
+| [0016](0016-open-document-tab-session-owner.md) | Platform-independent open document tab ownership | Accepted |
