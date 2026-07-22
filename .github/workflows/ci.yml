@@ -87,13 +87,13 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Install Android build tools
         run: |
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
+          "$SDKMANAGER" "platforms;android-36" "build-tools;35.0.0"
 
       - name: Cache Android dependencies
         uses: actions/cache@v4
@@ -117,14 +117,14 @@ jobs:
 
       - name: Run tests and debug build
         env:
-          ANDROID_PLATFORM: android-35
+          ANDROID_PLATFORM: android-36
           ANDROID_BUILD_TOOLS: 35.0.0
         run: sh test.sh
 
       - name: Build Free debug APK
         if: github.event_name == 'pull_request'
         env:
-          ANDROID_PLATFORM: android-35
+          ANDROID_PLATFORM: android-36
           ANDROID_BUILD_TOOLS: 35.0.0
           MDLITE_DEBUG_PRO_FEATURES: false
           MDLITE_DEBUG_ENABLE_PLAY_BILLING: false
@@ -139,7 +139,7 @@ jobs:
       - name: Build Pro preview debug APK
         if: github.event_name == 'pull_request'
         env:
-          ANDROID_PLATFORM: android-35
+          ANDROID_PLATFORM: android-36
           ANDROID_BUILD_TOOLS: 35.0.0
           MDLITE_DEBUG_PRO_FEATURES: true
           MDLITE_DEBUG_ENABLE_PLAY_BILLING: true
@@ -181,7 +181,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -190,7 +190,7 @@ jobs:
         run: |
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
+          "$SDKMANAGER" "platforms;android-36" "build-tools;35.0.0"
 
       - name: Run Free Gradle unit tests
         run: ./gradlew --no-daemon :app:testFreeDebugUnitTest

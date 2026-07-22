@@ -1,6 +1,7 @@
 # Project-local Android SDK versions.
 #
-# Keep LocalMD Reader on these versions during the v0.1.0 closed testing cycle.
-# New projects can choose newer SDK/build-tools versions independently.
+# Termux aapt2 cannot load API 35+ platform resources. Gradle CI remains the
+# release authority and compiles against API 36; local scripts use API 33 only
+# as a compatible compile platform while the manifest still targets API 36.
 export ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-33}"
 export ANDROID_BUILD_TOOLS="${ANDROID_BUILD_TOOLS:-35.0.2}"

@@ -119,7 +119,7 @@ Actionsストレージを圧迫しないよう、通常のmain pushではdebug A
 **コスト（限定的だが要対応）**:
 - 本リポジトリは **JUnit 5（`useJUnitPlatform()`）専用**。Robolectric の標準ランナーは JUnit4 のため、
   `junit-vintage-engine` ＋ JUnit4 ＋ Robolectric の **テスト専用依存追加**が要る（プロダクション依存は増えない）。
-- `compileSdk 35` に対応する Robolectric（API 35 対応版。導入時に対応バージョンを確認）。
+- `compileSdk 36` に対応する Robolectric 4.16以上。
 - これらは **medium**（gradle `test` ジョブでのみ実行。Termux の純 JVM ランナーでは走らない）。
 - Robolectric の初回起動はやや遅い（数秒）。
 

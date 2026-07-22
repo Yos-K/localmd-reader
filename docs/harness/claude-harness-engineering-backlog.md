@@ -207,7 +207,7 @@ Tasks:
 
 - Add Robolectric as a test-only dependency. The module uses JUnit 5 (`useJUnitPlatform()`), so add
   `junit-vintage-engine` plus JUnit4 to run Robolectric's JUnit4 runner alongside Jupiter. Pin a
-  Robolectric version that supports `compileSdk 35`.
+  Robolectric version that supports `compileSdk 36`.
 - First targets: (1) reader WebView has JavaScript disabled (behavioral guard for the Hard
   Constraint, complementing `check-hard-constraints.sh`); (2) key persistence round-trips
   (theme / font size / language / controls placement / recent / pin / restore tabs); (3) opening a
@@ -230,7 +230,7 @@ Observed failure mode:
 
 - Android SDK licenses can be accepted locally, but Gradle may still stop on Termux
   because the Maven-provided `aapt2` binary targets a different CPU architecture.
-- Overriding `aapt2` with Termux's binary can get past that step, but Android 35
+- Overriding `aapt2` with Termux's binary can get past that step, but Android 16
   resource linking may still fail while loading the SDK platform `android.jar`.
 - This is an environment/toolchain compatibility issue, not evidence that product
   code or tests are broken.

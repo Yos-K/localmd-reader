@@ -133,7 +133,7 @@ must be self-contained — inline the artifact directory instead of assigning
 it to a variable, and fold helper logic into a single statement.
 
 `.github/workflows/device-smoke.yml` is manual-only by `workflow_dispatch`. It
-builds the Free debug APK, boots an Android 35 emulator, installs the APK, and
+builds the Free debug APK, boots an Android 16 (API 36) emulator, installs the APK, and
 runs `scripts/emulator-smoke.sh`, which walks a smoke ladder and fails on the
 first problem:
 
