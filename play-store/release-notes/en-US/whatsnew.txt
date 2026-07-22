@@ -1,1 +1,1 @@
-Improves file selection in the free reader. You can now choose a folder and pick Markdown files from it.
+Updated for Android 16 compatibility and improved tab and document rendering reliability. Local Markdown reading remains offline, lightweight, and ad-free.
