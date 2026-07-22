@@ -152,11 +152,10 @@ Recent files:
 - Free keeps a small recent list of 5 entries.
 - Pro extends the recent list to 20 entries and adds pinned documents.
 
-Folder selection:
+File and library selection:
 
-- Free lets users choose a folder and then select Markdown files inside it.
-- The folder action must be worded as choosing files from a folder, not as
-  opening the whole folder as a workspace.
+- Free uses the ordinary Android file picker as its single local-file entry
+  point. It does not add a one-shot folder picker that duplicates this flow.
 - The Pro action must be worded as opening the Markdown library because it may
   resume the remembered root without showing Android's folder picker.
 - Pro provides project-style folder browsing: directories are listed before
@@ -181,6 +180,7 @@ Folder selection:
   crashing the user.
 - Empty nested folders must retain both the parent-folder action and the action
   to choose another root folder, so the navigation flow never becomes trapped.
+- This boundary is defined by ADR-0017.
 
 Tables:
 

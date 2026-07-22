@@ -20,11 +20,6 @@ document-opened|open_pinned_files|pinned-file-list-visible|Pinned files requeste
 pinned-file-list-visible|open_pinned_file|document-opened|Pinned file selected
 pinned-file-list-visible|clear_all_pins|document-opened|Pinned files cleared and dialog dismissed
 pinned-file-list-visible|close_dialog|document-opened|Pinned files dismissed
-welcome|open_folder_files|folder-file-list-visible|Folder files requested
-document-opened|open_folder_files|folder-file-list-visible|Folder files requested
-folder-file-list-visible|open_folder_file|document-opened|Folder file selected
-folder-file-list-visible|choose_another_folder|folder-file-list-visible|Folder selection reopened
-folder-file-list-visible|close_dialog|document-opened|Folder files dismissed
 temporary-document-tab-active|save_as|document-opened|Temporary document saved as file
 temporary-document-tab-active|close_temporary_tab|welcome|Temporary document discarded
 temporary-document-tab-active|switch_tab|document-opened|Existing file tab selected

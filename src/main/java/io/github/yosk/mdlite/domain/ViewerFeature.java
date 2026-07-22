@@ -32,8 +32,6 @@ public final class ViewerFeature {
             new ViewerFeature("mermaid-rendering", FREE);
     public static final ViewerFeature DOUBLE_TAP_SHORTCUTS =
             new ViewerFeature("double-tap-shortcuts", FREE);
-    public static final ViewerFeature FOLDER_BROWSING =
-            new ViewerFeature("folder-browsing", FREE);
     public static final ViewerFeature EXTRA_THEMES =
             new ViewerFeature("extra-themes", PRO);
     public static final ViewerFeature CUSTOM_GESTURE_SHORTCUTS =
@@ -76,7 +74,6 @@ public final class ViewerFeature {
         EXTENDED_RECENT_FILES,
         TABLE_OF_CONTENTS,
         HEADING_JUMP,
-        FOLDER_BROWSING,
         RELATIVE_LINKS,
         RELATIVE_IMAGES,
         EXPORT_OPTIONS,

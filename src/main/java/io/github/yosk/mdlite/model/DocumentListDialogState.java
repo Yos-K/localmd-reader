@@ -1,6 +1,5 @@
 package io.github.yosk.mdlite.model;
 
-import io.github.yosk.mdlite.file.FolderMarkdownDocuments;
 import io.github.yosk.mdlite.file.PinnedDocuments;
 import io.github.yosk.mdlite.file.RecentDocument;
 import io.github.yosk.mdlite.file.RecentDocuments;
@@ -30,13 +29,6 @@ public abstract class DocumentListDialogState {
             throw new IllegalArgumentException("pinned document dialog requires documents");
         }
         return new Pinned(documents.items());
-    }
-
-    public static Folder folder(FolderMarkdownDocuments documents) {
-        if (documents == null) {
-            throw new IllegalArgumentException("folder document dialog requires documents");
-        }
-        return new Folder(documents.items());
     }
 
     public abstract DocumentListCommand select(int index);
@@ -101,14 +93,4 @@ public abstract class DocumentListDialogState {
         }
     }
 
-    public static final class Folder extends Open {
-        private Folder(List<RecentDocument> documents) {
-            super(documents);
-        }
-
-        @Override
-        public DocumentListCommand.ChooseAnotherFolder secondaryAction() {
-            return DocumentListCommand.chooseAnotherFolder();
-        }
-    }
 }

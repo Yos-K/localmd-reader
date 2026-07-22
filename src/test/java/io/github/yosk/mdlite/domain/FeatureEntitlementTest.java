@@ -23,7 +23,6 @@ public final class FeatureEntitlementTest {
         TestAssertions.assertTrue(entitlement.allows(ViewerFeature.CODE_HIGHLIGHTING), "Free entitlement must allow basic code highlighting");
         TestAssertions.assertTrue(entitlement.allows(ViewerFeature.MERMAID_RENDERING), "Free entitlement must allow basic Mermaid rendering");
         TestAssertions.assertTrue(entitlement.allows(ViewerFeature.DOUBLE_TAP_SHORTCUTS), "Free entitlement must allow double tap shortcuts");
-        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.FOLDER_BROWSING), "Free entitlement must allow choosing Markdown files from a folder");
     }
 
     @Test
@@ -66,11 +65,10 @@ public final class FeatureEntitlementTest {
         TestAssertions.assertTrue(entitlement.allows(ViewerFeature.EXTENDED_RECENT_FILES), "Pro entitlement must allow extended recent files");
         TestAssertions.assertTrue(entitlement.allows(ViewerFeature.TABLE_OF_CONTENTS), "Pro entitlement must allow table of contents");
         TestAssertions.assertTrue(entitlement.allows(ViewerFeature.HEADING_JUMP), "Pro entitlement must allow heading jump");
-        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.FOLDER_BROWSING), "Pro entitlement must allow folder browsing");
+        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.PROJECT_LIBRARY), "Pro entitlement must allow the persistent Markdown library");
         TestAssertions.assertTrue(entitlement.allows(ViewerFeature.RELATIVE_LINKS), "Pro entitlement must allow relative links");
         TestAssertions.assertTrue(entitlement.allows(ViewerFeature.RELATIVE_IMAGES), "Pro entitlement must allow relative images");
         TestAssertions.assertTrue(entitlement.allows(ViewerFeature.EXPORT_OPTIONS), "Pro entitlement must allow export options");
-        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.PROJECT_LIBRARY), "Pro entitlement must allow nested project library navigation");
     }
 
     @Test

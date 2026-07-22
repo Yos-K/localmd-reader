@@ -3,7 +3,6 @@ welcome-screen|welcome|src/main/java/io/github/yosk/mdlite/infrastructure/Welcom
 document-viewer|document-opened|src/main/java/io/github/yosk/mdlite/viewer/OpenDocumentTab.java|FileDocumentTab
 recent-files-dialog|recent-files-dialog|src/main/java/io/github/yosk/mdlite/presentation/DocumentListDialogController.java|showRecentDocuments
 markdown-library-tree|library-tree-visible|src/main/java/io/github/yosk/mdlite/presentation/MarkdownLibraryMenuTree.java|show
-folder-files-dialog|folder-file-list-visible|src/main/java/io/github/yosk/mdlite/presentation/DocumentListDialogController.java|showFolderDocuments
 markdown-library-collapsed-row|library-tree-collapsed|src/main/java/io/github/yosk/mdlite/presentation/MarkdownLibraryMenuTree.java|toggleLoadedTree
 pinned-files-dialog|pinned-file-list-visible|src/main/java/io/github/yosk/mdlite/presentation/DocumentListDialogController.java|showPinnedDocuments
 temporary-document-tab|temporary-document-tab-active|src/main/java/io/github/yosk/mdlite/viewer/OpenDocumentTab.java|ClipboardDraftTab

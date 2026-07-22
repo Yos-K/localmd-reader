@@ -41,10 +41,6 @@ flowchart TD
     Recent --> Pin["PinnedDocuments<br/>uri でピン / 重複排除"]
     Tabs -.->|"復元用に永続化"| Restore["RestorableOpenTabs"]
 
-    Folder["選択されたフォルダー<br/>(DocumentProvider tree uri)"]
-    Folder --> FolderEntries["FolderDocumentEntry<br/>markdown / directory / unsupported"]
-    FolderEntries -->|"Markdownのみ・uri重複排除・表示名順 (L2-6)"| FolderDocs["FolderMarkdownDocuments"]
-    FolderDocs -->|"利用者が1件選ぶ"| File
 ```
 
 **読み方**: ファイルはまず `MarkdownFileOpenResult.from` で「表示名→サイズ」の順に判定され、
@@ -68,15 +64,6 @@ flowchart TD
   `ReadableMarkdownFile{displayName, sizeBytes}` / `UnsupportedMarkdownFile` / `OversizedMarkdownFile`。
   - L1: `ReadableMarkdownFile.of` は Markdown表示名と妥当なサイズを再強制（AlwaysValid）。
     なぜ:「読める」を表す型は、常に読める前提を満たす。
-- **FolderDocumentEntry**（`file/FolderDocumentEntry.java`）: フォルダー選択後に見つかった1件。
-  構成要素 `kind: {markdown, directory, unsupported}`、`displayName: String`、`uri: String`。
-  - L1: `displayName` と `uri` は非空。`markdownFile` は Markdown表示名だけ受け付け、
-    `unsupportedFile` は Markdown表示名を拒否する。`directory` はディレクトリ種別だけを表す。
-    なぜ: フォルダーから選ばせる候補の種類を失わず、Markdown候補だけを後続の開く処理へ渡すため。
-- **FolderMarkdownDocuments**（`file/FolderMarkdownDocuments.java`）: フォルダー内から選べる Markdown 候補一覧。
-  構成要素 `items: FolderDocumentEntry[]`（Markdownのみ）。
-  - L1: `items` は Markdown候補だけを含む。`isEmpty()` / `items()` で利用する。
-    なぜ: UI側が「開けない候補」を含む一覧を扱わずに済むよう、境界で選択可能な候補だけに絞る。
 
 ### L2: 語と語の間で守るルール
 
@@ -92,25 +79,14 @@ flowchart TD
 - なぜ: 過大ファイルでメモリ・描画が破綻しないよう境界で弾く。
 - 破ると: 巨大ファイルでクラッシュ・フリーズ。
 
-**L2-6: フォルダー内候補は Markdown のみを表示し、同じ uri は最初の1件にまとめ、表示名順で選ばせる**
-- 関係する語: FolderDocumentEntry → FolderMarkdownDocuments ／ どこで: `FolderMarkdownDocuments.from`
-- 分類: UX ／ 支える判断: Androidのファイルピッカーで見つけにくい Markdown を、フォルダー単位で素早く選べるようにする判断。
-- なぜ: 「フォルダーを開く」ワークスペース機能ではなく、選択済みフォルダー内の Markdown を選ぶ補助機能であるため。
-  非Markdownやディレクトリを候補に混ぜず、同じファイルの重複を避け、利用者が探しやすい順に並べる。
-- 破ると: 非対応ファイルが候補に出る、同じファイルが重複する、一覧から目的のファイルを探しにくくなる。
-
 ### L3: 動作が守るルール
 
 - `MarkdownFileOpenResult.from(name, size, policy)`: L2-1 → L2-2 の順に判定し、通れば `Readable`。
   なぜ: 安い判定（表示名）を先に、コストのかかるサイズ判定を後に置く。
 - Markdown 表示名の判定は**最終拡張子のみ**を見る（`.md`/`.markdown`、大文字小文字不問。
   `note.md.txt` は非対応）。（探索 2026-06-12 P1 で観測。出典: `exploration-sessions/2026-06-12-viewer.md`）
-- `FolderMarkdownDocuments.from(entries)`: L2-6 を実現する。入力にディレクトリや非Markdownが混ざっていても、
-  出力は Markdown 候補だけになる。なぜ: Android の DocumentProvider から返る混在した行を、利用者が選べる対象に変換するため。
-- UI文言は「フォルダーを開く」ではなく「フォルダーから選ぶ」とする。
-  なぜ: フォルダー全体をワークスペースとして開く機能ではなく、フォルダー内の Markdown を選択して開く機能だから。
-- フォルダー内候補一覧は、候補がある場合も空の場合も、閉じる導線と別フォルダーを選ぶ導線を持つ。
-  なぜ: 一度フォルダーを選んだあとに、同じ画面から選び直せないと Android の分かりにくいフォルダー構造を探索し直せないため。
+- FreeはAndroid標準のファイル選択だけを使い、Proだけが状態を保持するMarkdownライブラリを提供する。
+  なぜ: 一回限りのフォルダー選択は通常のファイル選択と目的が重複し、ライブラリの価値は反復移動にあるため（ADR-0017）。
 - 履歴系の一覧ダイアログは、削除操作とは別に閉じる導線を持つ。
   なぜ: 「閉じる」と「履歴を消す」は別操作であり、閉じるために破壊的操作を選ばせないため。
 
@@ -255,7 +231,8 @@ flowchart TD
     なぜ: 配置の設定を保存・復元できるようにする。
 - **ViewerText**（`viewer/ViewerText.java`）: 表示文言の言語別セット。ピン留め操作は `pinCurrentFile` /
   `unpinCurrentFile`、完了メッセージは `currentFilePinned` / `currentFileUnpinned` で表す。
-  規則なし（操作の可否は `ViewerFeature.EXTENDED_RECENT_FILES` とメニューアクション側の権限判定に従う）。
+  `proFeatureCatalog()`は機能名と説明を同一言語の完全な組として返す（ADR-0018）。操作の可否は
+  `ViewerFeature.EXTENDED_RECENT_FILES` とメニューアクション側の権限判定に従う。
 
 ---
 

@@ -1,12 +1,9 @@
 package io.github.yosk.mdlite.model;
 
-import io.github.yosk.mdlite.file.FolderDocumentEntry;
-import io.github.yosk.mdlite.file.FolderMarkdownDocuments;
 import io.github.yosk.mdlite.file.PinnedDocuments;
 import io.github.yosk.mdlite.file.RecentDocument;
 import io.github.yosk.mdlite.file.RecentDocuments;
 import io.github.yosk.mdlite.testing.TestAssertions;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
 public final class DocumentListDialogStateTest {
@@ -41,14 +38,6 @@ public final class DocumentListDialogStateTest {
     }
 
     @Test
-    void selectingAFolderDocumentRequestsOpeningThatDocument() {
-        DocumentListDialogState state = DocumentListDialogState.folder(folderDocuments());
-
-        TestAssertions.assertTrue(state.select(0) instanceof DocumentListCommand.OpenDocument,
-                "selecting a folder item must request opening the selected document");
-    }
-
-    @Test
     void recentDocumentsSecondaryActionClearsRecentHistory() {
         DocumentListDialogState state = DocumentListDialogState.recent(
                 RecentDocuments.empty(5).recordOpened(document()));
@@ -64,15 +53,6 @@ public final class DocumentListDialogStateTest {
 
         TestAssertions.assertTrue(state.secondaryAction() instanceof DocumentListCommand.ClearPinned,
                 "the pinned dialog secondary action must clear only pinned files");
-    }
-
-    @Test
-    void folderDocumentsSecondaryActionChoosesAnotherFolder() {
-        DocumentListDialogState state = DocumentListDialogState.folder(folderDocuments());
-
-        TestAssertions.assertTrue(
-                state.secondaryAction() instanceof DocumentListCommand.ChooseAnotherFolder,
-                "the folder dialog secondary action must reopen folder selection");
     }
 
     @Test
@@ -94,14 +74,6 @@ public final class DocumentListDialogStateTest {
     }
 
     @Test
-    void closingFolderDocumentsProducesTheClosedState() {
-        DocumentListDialogState state = DocumentListDialogState.folder(folderDocuments());
-
-        TestAssertions.assertTrue(state.close() instanceof DocumentListDialogState.Closed,
-                "closing folder documents must remove the active list context");
-    }
-
-    @Test
     void selectingWhileClosedProducesNoCommand() {
         TestAssertions.assertTrue(
                 DocumentListDialogState.closed().select(0) instanceof DocumentListCommand.None,
@@ -112,8 +84,4 @@ public final class DocumentListDialogStateTest {
         return RecentDocument.of("guide.md", "content://guide");
     }
 
-    private static FolderMarkdownDocuments folderDocuments() {
-        return FolderMarkdownDocuments.from(Collections.singletonList(
-                FolderDocumentEntry.markdownFile("guide.md", "content://guide")));
-    }
 }

@@ -34,8 +34,6 @@ import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
 import io.github.yosk.mdlite.domain.DocumentUri;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
-import io.github.yosk.mdlite.domain.FolderBrowsingAction;
-import io.github.yosk.mdlite.domain.FolderBrowsingMode;
 import io.github.yosk.mdlite.domain.HeadingNavigation;
 import io.github.yosk.mdlite.domain.HeadingScrollPosition;
 import io.github.yosk.mdlite.domain.MarkdownHeading;
@@ -165,7 +163,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private TextView messageView;
     Button menuButton;
     private MainMenuActionButton openButton;
-    private MainMenuActionButton openFolderButton;
+    MainMenuActionButton markdownLibraryButton;
     private MainMenuActionButton createFromClipboardButton;
     private MainMenuActionButton saveAsButton;
     private MainMenuActionButton exportAsHtmlButton;
@@ -357,7 +355,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void initMenuButtons() {
         openButton = menuActionButton(MainMenuActions.openFile());
-        openFolderButton = menuActionButton(MainMenuActions.openFolder());
+        markdownLibraryButton = menuActionButton(MainMenuActions.markdownLibrary());
         createFromClipboardButton = menuActionButton(MainMenuActions.createFromClipboard());
         saveAsButton = menuActionButton(MainMenuActions.saveAs());
         exportAsHtmlButton = menuActionButton(MainMenuActions.exportAsHtml());
@@ -377,7 +375,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         clipboardDiagnosticsButton = menuActionButton(MainMenuActions.clipboardDiagnostics());
         privacyButton = menuActionButton(MainMenuActions.privacy());
         menuActionButtons = new MainMenuActionButton[] {
-            openButton, openFolderButton, createFromClipboardButton, saveAsButton, exportAsHtmlButton,
+            openButton, markdownLibraryButton, createFromClipboardButton, saveAsButton, exportAsHtmlButton,
             printOrSavePdfButton, pinCurrentFileButton,
             unpinCurrentFileButton, pinnedFilesButton, recentButton,
             tableOfContentsButton, findInDocumentButton, settingsButton, themeButton, languageButton,
@@ -412,7 +410,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         filesSection = menuSection("");
         markdownLibraryMenuTree = new MarkdownLibraryMenuTree(this);
         addMenuCard(menuPanel, filesSection, openButton,
-                openFolderButton, markdownLibraryMenuTree, createFromClipboardButton, saveAsButton,
+                markdownLibraryButton, markdownLibraryMenuTree, createFromClipboardButton, saveAsButton,
                 exportAsHtmlButton, printOrSavePdfButton, pinCurrentFileButton, unpinCurrentFileButton,
                 pinnedFilesButton, recentButton);
         readingSection = menuSection("");
@@ -999,10 +997,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         documentListDialogs.showRecentDocuments();
     }
 
-    void showFolderDocuments(io.github.yosk.mdlite.file.FolderMarkdownDocuments documents) {
-        documentListDialogs.showFolderDocuments(documents);
-    }
-
     void showProjectLibrary(io.github.yosk.mdlite.file.MarkdownLibraryLocation location,
             io.github.yosk.mdlite.file.MarkdownLibraryListing listing) {
         markdownLibraryMenuTree.show(location, listing);
@@ -1279,12 +1273,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void refreshMarkdownLibraryChevron() {
-        FolderBrowsingAction action = FolderBrowsingMode.from(featureEntitlement).action();
-        if (action.hasExpandableMenuTree()) {
-            applyExpandChevron(openFolderButton, markdownLibraryMenuTree.isExpanded());
-            return;
-        }
-        openFolderButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null);
+        applyExpandChevron(markdownLibraryButton, markdownLibraryMenuTree.isExpanded());
     }
 
     private void updateLocalizedMessage() {

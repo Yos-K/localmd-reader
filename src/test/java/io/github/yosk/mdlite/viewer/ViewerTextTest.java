@@ -1,5 +1,7 @@
 package io.github.yosk.mdlite.viewer;
 
+import io.github.yosk.mdlite.domain.ProFeatureDescriptor;
+import io.github.yosk.mdlite.domain.ProFeatureCatalog;
 import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -231,6 +233,106 @@ public final class ViewerTextTest {
     }
 
     @Test
+    void japaneseViewerTextProvidesJapaneseThemeFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(0);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[0], descriptor.feature(), "Japanese theme feature");
+        TestAssertions.assertEquals("より快適な閲覧テーマ", descriptor.title(), "Japanese theme title");
+        TestAssertions.assertEquals("ライトとダークだけでは読みづらい環境に合わせて、追加の配色を選べます。",
+                descriptor.description(), "Japanese theme description");
+    }
+
+    @Test
+    void japaneseViewerTextProvidesJapaneseGestureFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(1);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[1], descriptor.feature(), "Japanese gesture feature");
+        TestAssertions.assertEquals("より多くのジェスチャーショートカット", descriptor.title(), "Japanese gesture title");
+        TestAssertions.assertEquals("円、方向、カスタムジェスチャーに、よく使う操作を割り当てられます。",
+                descriptor.description(), "Japanese gesture description");
+    }
+
+    @Test
+    void japaneseViewerTextProvidesJapaneseTableOfContentsFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(2);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[2], descriptor.feature(), "Japanese table of contents feature");
+        TestAssertions.assertEquals("長い文書をすばやく移動", descriptor.title(), "Japanese table of contents title");
+        TestAssertions.assertEquals("目次を開いて、読んでいた位置を失わずに見出しへ移動できます。",
+                descriptor.description(), "Japanese table of contents description");
+    }
+
+    @Test
+    void japaneseViewerTextProvidesJapaneseHeadingShortcutFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(3);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[3], descriptor.feature(), "Japanese heading feature");
+        TestAssertions.assertEquals("見出し移動ショートカット", descriptor.title(), "Japanese heading title");
+        TestAssertions.assertEquals("閲覧中にジェスチャーで前後の見出しへ移動できます。",
+                descriptor.description(), "Japanese heading description");
+    }
+
+    @Test
+    void japaneseViewerTextProvidesJapaneseTableReadingFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(4);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[4], descriptor.feature(), "Japanese table feature");
+        TestAssertions.assertEquals("横に広い表を読みやすく", descriptor.title(), "Japanese table title");
+        TestAssertions.assertEquals("横に広い表を読むとき、見出し行と先頭列を表示したままにできます。",
+                descriptor.description(), "Japanese table description");
+    }
+
+    @Test
+    void japaneseViewerTextProvidesJapaneseHistoryFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(5);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[5], descriptor.feature(), "Japanese history feature");
+        TestAssertions.assertEquals("より多くの閲覧履歴", descriptor.title(), "Japanese history title");
+        TestAssertions.assertEquals("多数のローカル文書を切り替えるとき、より多くの最近開いたファイルを保持します。",
+                descriptor.description(), "Japanese history description");
+    }
+
+    @Test
+    void japaneseViewerTextProvidesJapaneseRelativeLinkFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(6);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[6], descriptor.feature(), "Japanese link feature");
+        TestAssertions.assertEquals("つながったプロジェクトノート", descriptor.title(), "Japanese link title");
+        TestAssertions.assertEquals("ローカルの文書セット内にある安全な相対Markdownリンクを開けます。",
+                descriptor.description(), "Japanese link description");
+    }
+
+    @Test
+    void japaneseViewerTextProvidesJapaneseRelativeImageFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(7);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[7], descriptor.feature(), "Japanese image feature");
+        TestAssertions.assertEquals("プロジェクトノート内のローカル画像", descriptor.title(), "Japanese image title");
+        TestAssertions.assertEquals("ローカルのMarkdown文書セット内にある安全な相対画像を表示します。",
+                descriptor.description(), "Japanese image description");
+    }
+
+    @Test
+    void japaneseViewerTextProvidesJapaneseExportFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(8);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[8], descriptor.feature(), "Japanese export feature");
+        TestAssertions.assertEquals("エクスポートと印刷", descriptor.title(), "Japanese export title");
+        TestAssertions.assertEquals("HTMLとして保存するか、Androidの印刷機能からPDFとして保存できます。",
+                descriptor.description(), "Japanese export description");
+    }
+
+    @Test
+    void japaneseViewerTextProvidesJapaneseLibraryFeatureCopy() {
+        ProFeatureDescriptor descriptor = japaneseFeature(9);
+
+        TestAssertions.assertSame(ProFeatureCatalog.initialFeatures()[9], descriptor.feature(), "Japanese library feature");
+        TestAssertions.assertEquals("プロジェクトフォルダーを移動", descriptor.title(), "Japanese library title");
+        TestAssertions.assertEquals("ライブラリを閉じずに、階層を移動して関連するMarkdownファイルを開けます。",
+                descriptor.description(), "Japanese library description");
+    }
+
+    @Test
     void englishViewerTextProvidesRestorePurchaseActionLabel() {
         ViewerText text = ViewerText.fromLanguage(ViewerLanguage.english());
 
@@ -249,4 +351,9 @@ public final class ViewerTextTest {
                 text.purchaseMessage("purchase_unavailable"),
                 "Japanese viewer text must provide the unavailable purchase message");
     }
+
+    private static ProFeatureDescriptor japaneseFeature(int index) {
+        return ViewerText.fromLanguage(ViewerLanguage.japanese()).proFeatureCatalog()[index];
+    }
+
 }

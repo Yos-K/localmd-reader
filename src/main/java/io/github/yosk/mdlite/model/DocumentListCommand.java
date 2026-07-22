@@ -6,7 +6,6 @@ public abstract class DocumentListCommand {
     private static final None NONE = new None();
     private static final ClearRecent CLEAR_RECENT = new ClearRecent();
     private static final ClearPinned CLEAR_PINNED = new ClearPinned();
-    private static final ChooseAnotherFolder CHOOSE_ANOTHER_FOLDER = new ChooseAnotherFolder();
 
     private DocumentListCommand() {
     }
@@ -27,10 +26,6 @@ public abstract class DocumentListCommand {
         return CLEAR_PINNED;
     }
 
-    static ChooseAnotherFolder chooseAnotherFolder() {
-        return CHOOSE_ANOTHER_FOLDER;
-    }
-
     public abstract void execute(Handler handler);
 
     public interface Handler {
@@ -42,7 +37,6 @@ public abstract class DocumentListCommand {
 
         void clearPinned();
 
-        void chooseAnotherFolder();
     }
 
     public static final class None extends DocumentListCommand {
@@ -95,13 +89,4 @@ public abstract class DocumentListCommand {
         }
     }
 
-    public static final class ChooseAnotherFolder extends DocumentListCommand {
-        private ChooseAnotherFolder() {
-        }
-
-        @Override
-        public void execute(Handler handler) {
-            handler.chooseAnotherFolder();
-        }
-    }
 }

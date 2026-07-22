@@ -35,3 +35,5 @@ Why Alternatives Were Rejected, and Reconsider When.
 | [0014](0014-public-source-private-release-repositories.md) | Public source and private release repositories | Accepted |
 | [0015](0015-document-rendering-coordinator.md) | Platform-independent rendering session ownership | Accepted |
 | [0016](0016-open-document-tab-session-owner.md) | Platform-independent open document tab ownership | Accepted |
+| [0017](0017-free-file-opening-and-pro-library-boundary.md) | One Free file entry point and persistent Pro library | Accepted |
+| [0018](0018-language-complete-view-composition.md) | Complete language-specific view composition | Accepted |

@@ -5,9 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Base64;
 import io.github.yosk.mdlite.domain.SafeHtml;
-import io.github.yosk.mdlite.domain.FolderBrowsingMode;
 import io.github.yosk.mdlite.file.FileInfo;
-import io.github.yosk.mdlite.file.FolderMarkdownDocuments;
 import io.github.yosk.mdlite.file.MarkdownLibraryLocation;
 import io.github.yosk.mdlite.file.MarkdownFileOpenResult;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
@@ -40,7 +38,7 @@ final class DocumentOpener {
     }
 
     void openMarkdownLibrary() {
-        projectLibraryOpener.open(FolderBrowsingMode.from(activity.featureEntitlement));
+        projectLibraryOpener.open();
     }
 
     void chooseAnotherFolder() {
@@ -53,12 +51,7 @@ final class DocumentOpener {
             return;
         }
         persistReadPermission(data, treeUri);
-        FolderBrowsingMode mode = FolderBrowsingMode.from(activity.featureEntitlement);
-        if (mode instanceof FolderBrowsingMode.ProjectFolderNavigation) {
-            projectLibraryOpener.openSelectedRoot(treeUri.toString());
-            return;
-        }
-        activity.showFolderDocuments(FolderMarkdownDocuments.from(folderDocumentReader.entries(treeUri)));
+        projectLibraryOpener.openSelectedRoot(treeUri.toString());
     }
 
     void openProjectLibrary(MarkdownLibraryLocation location) {

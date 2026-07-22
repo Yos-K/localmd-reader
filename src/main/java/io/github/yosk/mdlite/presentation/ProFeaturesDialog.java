@@ -8,7 +8,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import io.github.yosk.mdlite.domain.BillingPurchaseSnapshot;
-import io.github.yosk.mdlite.domain.ProFeatureCatalog;
 import io.github.yosk.mdlite.domain.ProFeaturePresentationItem;
 import io.github.yosk.mdlite.domain.ProFeaturesPresentation;
 import io.github.yosk.mdlite.domain.ProPurchaseFlowCallback;
@@ -30,7 +29,7 @@ final class ProFeaturesDialog {
                 .setTitle(activity.viewerText.proFeatures())
                 // interaction-surface: pro-features-dialog
                 .setView(proFeaturesView())
-                .setNegativeButton("OK", null)
+                .setNegativeButton(activity.viewerText.close(), null)
                 .show();
     }
 
@@ -150,7 +149,7 @@ final class ProFeaturesDialog {
         return ProFeaturesPresentation.from(
                 activity.featureEntitlement,
                 activity.proPurchaseUiState,
-                ProFeatureCatalog.initialFeatures());
+                activity.viewerText.proFeatureCatalog());
     }
 
     private static final class StartPurchaseCallback implements ProPurchaseFlowCallback {

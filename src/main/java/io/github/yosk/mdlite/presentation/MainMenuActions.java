@@ -8,8 +8,8 @@ final class MainMenuActions {
         return new OpenFileMenuAction();
     }
 
-    static MainMenuAction openFolder() {
-        return FolderBrowsingMenuActions.openFolder();
+    static MainMenuAction markdownLibrary() {
+        return MarkdownLibraryMenuActions.markdownLibrary();
     }
 
     static MainMenuAction createFromClipboard() {

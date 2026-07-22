@@ -8,7 +8,7 @@ public final class ProFeaturePresentationTest {
     @Test
     void freeEntitlementCreatesLockedItemsForTheInitialCatalog() {
         ProFeaturePresentationItem[] items =
-                ProFeaturePresentation.from(FeatureEntitlement.free(), ProFeatureCatalog.initialFeatures());
+                ProFeaturePresentation.from(FeatureEntitlement.free(), englishFeatures());
 
         TestAssertions.assertEquals(10, items.length, "presentation item count");
         lockedPresentationItem(items[0], "first item");
@@ -26,7 +26,7 @@ public final class ProFeaturePresentationTest {
     @Test
     void proEntitlementCreatesAvailableItemsForTheInitialCatalog() {
         ProFeaturePresentationItem[] items =
-                ProFeaturePresentation.from(FeatureEntitlement.pro(), ProFeatureCatalog.initialFeatures());
+                ProFeaturePresentation.from(FeatureEntitlement.pro(), englishFeatures());
 
         TestAssertions.assertEquals(10, items.length, "presentation item count");
         availablePresentationItem(items[0], "first item");
@@ -53,7 +53,7 @@ public final class ProFeaturePresentationTest {
 
     @Test
     void presentationItemsPreserveDescriptorText() {
-        ProFeatureDescriptor descriptor = ProFeatureCatalog.find(ViewerFeature.EXTRA_THEMES);
+        ProFeatureDescriptor descriptor = englishFeatures()[0];
         ProFeaturePresentationItem[] items =
                 ProFeaturePresentation.from(FeatureEntitlement.free(), new ProFeatureDescriptor[] {descriptor});
 
@@ -81,5 +81,9 @@ public final class ProFeaturePresentationTest {
                 "A free-tier feature is available even to a Free entitlement");
         TestAssertions.assertFalse(items[1].isAvailable(),
                 "A Pro-tier feature stays locked for a Free entitlement");
+    }
+
+    private static ProFeatureDescriptor[] englishFeatures() {
+        return ProFeatureFixtures.descriptors();
     }
 }
