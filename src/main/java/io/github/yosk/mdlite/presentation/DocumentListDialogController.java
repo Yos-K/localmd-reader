@@ -3,7 +3,6 @@ package io.github.yosk.mdlite.presentation;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.net.Uri;
-import io.github.yosk.mdlite.file.FolderMarkdownDocuments;
 import io.github.yosk.mdlite.file.PinnedDocuments;
 import io.github.yosk.mdlite.file.RecentDocument;
 import io.github.yosk.mdlite.file.RecentDocuments;
@@ -15,6 +14,7 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
         DialogInterface.OnDismissListener, DocumentListCommand.Handler {
     private final MainActivity activity;
     private DocumentListDialogState state = DocumentListDialogState.closed();
+    private AlertDialog activeDialog;
 
     DocumentListDialogController(MainActivity activity) {
         this.activity = activity;
@@ -50,30 +50,13 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
                 .setPositiveButton(activity.viewerText.close(), null));
     }
 
-    // interaction-surface: folder-files-dialog
-    void showFolderDocuments(FolderMarkdownDocuments documents) {
-        state = DocumentListDialogState.folder(documents);
-        if (documents.items().isEmpty()) {
-            showDialog(dialogBuilder(activity.viewerText.openFolder())
-                    .setMessage(activity.viewerText.noMarkdownFilesInFolder())
-                    .setNegativeButton(activity.viewerText.chooseAnotherFolder(), this)
-                    .setPositiveButton(activity.viewerText.close(), null));
-            return;
-        }
-        showDialog(dialogBuilder(activity.viewerText.openFolder())
-                // interaction-surface: folder-files-dialog
-                .setItems(labels(documents.items()), this)
-                .setNegativeButton(activity.viewerText.chooseAnotherFolder(), this)
-                .setPositiveButton(activity.viewerText.close(), null));
-    }
-
     @Override
     // interaction-command: open_recent_file
     // interaction-command: clear_recent_files
+    // interaction-command: choose_pinned_file_action
     // interaction-command: open_pinned_file
+    // interaction-command: unpin_pinned_file
     // interaction-command: clear_all_pins
-    // interaction-command: open_folder_file
-    // interaction-command: choose_another_folder
     public void onClick(DialogInterface dialog, int which) {
         DocumentListCommand command = which == DialogInterface.BUTTON_NEGATIVE
                 ? state.secondaryAction() : state.select(which);
@@ -84,7 +67,10 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
     @Override
     // interaction-command: close_dialog
     public void onDismiss(DialogInterface dialog) {
-        state = state.close();
+        if (dialog == activeDialog) {
+            state = state.close();
+            activeDialog = null;
+        }
     }
 
     @Override
@@ -97,6 +83,24 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
     }
 
     @Override
+    public void choosePinnedDocumentAction(RecentDocument document) {
+        state = DocumentListDialogState.pinnedActions(document);
+        showDialog(dialogBuilder(document.displayName())
+                // interaction-surface: pinned-file-actions-dialog
+                .setItems(new String[] {
+                        activity.viewerText.openPinnedDocumentAction(),
+                        activity.viewerText.unpinPinnedDocumentAction()
+                }, this)
+                .setPositiveButton(activity.viewerText.close(), null));
+    }
+
+    @Override
+    public void unpinDocument(RecentDocument document) {
+        activity.unpinPinnedDocument(document);
+        showPinnedDocuments();
+    }
+
+    @Override
     public void clearRecent() {
         activity.tabPersistence.clearRecentDocuments();
         activity.showInfoDialog(activity.viewerText.recentFiles(),
@@ -105,14 +109,7 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
 
     @Override
     public void clearPinned() {
-        activity.tabPersistence.clearPinnedDocuments();
-        activity.showInfoDialog(activity.viewerText.pinnedFiles(),
-                activity.viewerText.pinnedFilesCleared());
-    }
-
-    @Override
-    public void chooseAnotherFolder() {
-        activity.chooseAnotherFolder();
+        activity.clearPinnedDocuments();
     }
 
     private void showEmptyDialog(String title, String message) {
@@ -129,6 +126,7 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
     private void showDialog(AlertDialog.Builder builder) {
         AlertDialog dialog = builder.create();
         dialog.setOnDismissListener(this);
+        activeDialog = dialog;
         dialog.show();
     }
 

@@ -99,8 +99,10 @@ UI状態から `ProPurchasePresentation` が「購入アクションを出すか
 - なぜ: 特典一覧の「利用可能か」表示を権限と一致させる（ハブの「権限が機能を許可するか」を提示に反映）。
 - 破ると: 使えない特典を利用可能と表示する／その逆。
 - 注記（探索2026-06-13 P3/P13）: `available` は **特典自身の tier** で決まる（`entitlement.allows(feature) = pro || feature.isFree()`）。
-  記述子リスト（`ProFeatureCatalog`）への所属で決まるのではない。そのため **free-tier の特典をリストに入れると Free 権限でも `available`** になる。
-  現行カタログ（`ProFeatureCatalog.initialFeatures()`）は **全10件が Pro-tier** なので、Free では全ロック・Pro では全解放になり、この区別は表面化しない。
+  言語別の記述子リスト（`ViewerText.proFeatureCatalog()`）への所属で決まるのではない。そのため
+  **free-tier の特典をリストに入れると Free 権限でも `available`** になる。
+  言語非依存の現行カタログ（`ProFeatureCatalog.initialFeatures()`）と対応する言語別記述子は
+  **全10件が Pro-tier** なので、Free では全ロック・Pro では全解放になり、この区別は表面化しない。
   なぜ: 提示の可否は機能の権限そのものに従わせる（リスト編集ミスで権限と表示が食い違わない）。
   2軸の整合: Pro なら全特典解放 + 購入アクション非表示（PUR2）、Free+ready なら全 Pro 特典ロック + 購入アクション表示——権限と提示が一貫する。
 

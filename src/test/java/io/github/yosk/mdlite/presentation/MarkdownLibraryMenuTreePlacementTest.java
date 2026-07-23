@@ -13,7 +13,7 @@ public final class MarkdownLibraryMenuTreePlacementTest {
         String source = sourceFile("MainActivity.java");
 
         TestAssertions.assertContains(source,
-                "openFolderButton, markdownLibraryMenuTree, createFromClipboardButton",
+                "markdownLibraryButton, markdownLibraryMenuTree, createFromClipboardButton",
                 "The persistent tree must appear directly below the library action");
     }
 
@@ -38,7 +38,7 @@ public final class MarkdownLibraryMenuTreePlacementTest {
         String source = sourceFile("MainActivity.java");
 
         TestAssertions.assertContains(source,
-                "applyExpandChevron(openFolderButton, markdownLibraryMenuTree.isExpanded())",
+                "applyExpandChevron(markdownLibraryButton, markdownLibraryMenuTree.isExpanded())",
                 "The library action must communicate whether its persistent tree is expanded");
     }
 

@@ -9,6 +9,7 @@ import io.github.yosk.mdlite.domain.RelativeLinkRendering;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Locale;
 import java.util.Map;
 
 public final class JavaSimpleMarkdownRenderer {
@@ -82,6 +83,7 @@ public final class JavaSimpleMarkdownRenderer {
         StringBuilder paragraph = new StringBuilder();
         int openList = LIST_NONE;
         int mermaidIndex = 0;
+        int previewCodeBlockIndex = 0;
         MarkdownHeadingAnchors headingAnchors = new MarkdownHeadingAnchors();
 
         for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
@@ -91,6 +93,10 @@ public final class JavaSimpleMarkdownRenderer {
                     if (safeMermaidRendering.isEnabled() && "mermaid".equals(codeBlockLanguage)) {
                         html.append(renderMermaidBlock(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
                         mermaidIndex++;
+                    } else if (isPreviewableCodeBlockLanguage(codeBlockLanguage)) {
+                        html.append(renderPreviewableCodeBlock(previewCodeBlockIndex, codeBlock.toString(),
+                                codeBlockLanguage, safeCodeHighlighting));
+                        previewCodeBlockIndex++;
                     } else {
                         html.append(renderCodeBlockLines(codeBlock.toString(), codeBlockLanguage, safeCodeHighlighting));
                     }
@@ -102,7 +108,8 @@ public final class JavaSimpleMarkdownRenderer {
                     openList = closeList(html, openList);
                     inCodeBlock = true;
                     codeBlockLanguage = codeFenceLanguage(line);
-                    if (!(safeMermaidRendering.isEnabled() && "mermaid".equals(codeBlockLanguage))) {
+                    if (!(safeMermaidRendering.isEnabled() && "mermaid".equals(codeBlockLanguage))
+                            && !isPreviewableCodeBlockLanguage(codeBlockLanguage)) {
                         html.append(openCodeBlockHtml(line));
                     }
                 }
@@ -209,6 +216,9 @@ public final class JavaSimpleMarkdownRenderer {
         if (inCodeBlock) {
             if (safeMermaidRendering.isEnabled() && "mermaid".equals(codeBlockLanguage)) {
                 html.append(renderMermaidBlock(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
+            } else if (isPreviewableCodeBlockLanguage(codeBlockLanguage)) {
+                html.append(renderPreviewableCodeBlock(previewCodeBlockIndex, codeBlock.toString(),
+                        codeBlockLanguage, safeCodeHighlighting));
             } else {
                 html.append(renderCodeBlockLines(codeBlock.toString(), codeBlockLanguage, safeCodeHighlighting));
             }
@@ -217,6 +227,102 @@ public final class JavaSimpleMarkdownRenderer {
         flushParagraph(html, paragraph, safeRelativeLinkRendering, safeRelativeImageRendering);
 
         return SafeHtml.fromTrustedRendererOutput(html.toString());
+    }
+
+    private static String renderPreviewableCodeBlock(
+            int index,
+            String codeBlock,
+            String language,
+            CodeHighlighting codeHighlighting) {
+        String rawId = "code-preview-" + index + "-raw";
+        String previewId = "code-preview-" + index + "-preview";
+        return "<div class=\"code-preview-toggle\">"
+                + "<input class=\"code-preview-radio code-preview-raw-radio\" type=\"radio\" name=\"code-preview-"
+                + index + "\" id=\"" + rawId + "\" checked>"
+                + "<label class=\"code-preview-label\" for=\"" + rawId + "\">Raw</label>"
+                + "<input class=\"code-preview-radio code-preview-preview-radio\" type=\"radio\" name=\"code-preview-"
+                + index + "\" id=\"" + previewId + "\">"
+                + "<label class=\"code-preview-label\" for=\"" + previewId + "\">Preview</label>"
+                + "<div class=\"code-preview-pane code-preview-raw\">"
+                + openCodeBlockHtml("```" + language)
+                + renderCodeBlockLines(codeBlock, language, codeHighlighting)
+                + "</div><div class=\"code-preview-pane code-preview-rendered\">"
+                + renderCodeBlockPreview(codeBlock, language)
+                + "</div></div>";
+    }
+
+    private static String renderCodeBlockPreview(String codeBlock, String language) {
+        String source = trimTrailingCodeBlockNewline(codeBlock);
+        if (isMarkdownPreviewLanguage(language)) {
+            return new JavaSimpleMarkdownRenderer()
+                    .render(source, CodeHighlighting.plain(), MermaidRendering.plainCode(),
+                            RelativeLinkRendering.disabled(), RelativeImageRendering.disabled(), null)
+                    .value();
+        }
+        return renderSafeHtmlPreview(source);
+    }
+
+    private static String renderSafeHtmlPreview(String source) {
+        StringBuilder rendered = new StringBuilder();
+        int index = 0;
+        while (index < source.length()) {
+            char current = source.charAt(index);
+            if (current != '<') {
+                rendered.append(escapeHtmlChar(current));
+                index++;
+                continue;
+            }
+            int tagEnd = source.indexOf('>', index + 1);
+            if (tagEnd < 0) {
+                rendered.append("&lt;");
+                index++;
+                continue;
+            }
+            rendered.append(renderSafeHtmlPreviewTag(source.substring(index + 1, tagEnd)));
+            index = tagEnd + 1;
+        }
+        return rendered.toString();
+    }
+
+    private static String renderSafeHtmlPreviewTag(String tag) {
+        String trimmed = tag.trim();
+        boolean closing = trimmed.startsWith("/");
+        String name = safeHtmlPreviewTagName(trimmed, closing);
+        if (!isAllowedHtmlPreviewTag(name)) {
+            return escapeHtml("<" + tag + ">");
+        }
+        return closing ? "</" + name + ">" : "<" + name + ">";
+    }
+
+    private static String safeHtmlPreviewTagName(String tag, boolean closing) {
+        int index = closing ? 1 : 0;
+        while (index < tag.length() && Character.isWhitespace(tag.charAt(index))) { index++; }
+        int start = index;
+        while (index < tag.length() && Character.isLetterOrDigit(tag.charAt(index))) { index++; }
+        return tag.substring(start, index).toLowerCase(Locale.US);
+    }
+
+    private static boolean isAllowedHtmlPreviewTag(String name) {
+        return "p".equals(name) || "strong".equals(name) || "em".equals(name)
+                || "b".equals(name) || "i".equals(name) || "ul".equals(name)
+                || "ol".equals(name) || "li".equals(name) || "blockquote".equals(name)
+                || "code".equals(name) || "pre".equals(name) || "br".equals(name)
+                || "hr".equals(name) || "h1".equals(name) || "h2".equals(name)
+                || "h3".equals(name) || "h4".equals(name) || "h5".equals(name)
+                || "h6".equals(name);
+    }
+
+    private static String trimTrailingCodeBlockNewline(String codeBlock) {
+        return codeBlock.endsWith("\n")
+                ? codeBlock.substring(0, codeBlock.length() - 1) : codeBlock;
+    }
+
+    private static boolean isPreviewableCodeBlockLanguage(String language) {
+        return "html".equals(language) || isMarkdownPreviewLanguage(language);
+    }
+
+    private static boolean isMarkdownPreviewLanguage(String language) {
+        return "markdown".equals(language) || "md".equals(language);
     }
 
     private static String renderCodeBlockLines(String codeBlock, String language, CodeHighlighting codeHighlighting) {
@@ -311,11 +417,19 @@ public final class JavaSimpleMarkdownRenderer {
         if (trimmed.length() <= 3) {
             return "";
         }
-        String language = trimmed.substring(3).trim();
+        String language = firstInfoStringToken(trimmed.substring(3).trim());
         if (!isSafeLanguageName(language)) {
             return "";
         }
-        return language;
+        return language.toLowerCase(Locale.US);
+    }
+
+    private static String firstInfoStringToken(String infoString) {
+        int end = 0;
+        while (end < infoString.length() && !Character.isWhitespace(infoString.charAt(end))) {
+            end++;
+        }
+        return infoString.substring(0, end);
     }
 
     private static boolean isSafeLanguageName(String language) {
@@ -489,6 +603,12 @@ public final class JavaSimpleMarkdownRenderer {
             }
 
             if (code == null) {
+                int strongEnd = appendMarkdownStrongIfPresent(
+                        out, text, i, relativeLinkRendering, relativeImageRendering);
+                if (strongEnd >= i) {
+                    i = strongEnd;
+                    continue;
+                }
                 int imageEnd = appendMarkdownImageIfPresent(out, text, i, relativeLinkRendering, relativeImageRendering);
                 if (imageEnd >= i) {
                     i = imageEnd;
@@ -510,6 +630,47 @@ public final class JavaSimpleMarkdownRenderer {
         }
 
         return out.toString();
+    }
+
+    private static int appendMarkdownStrongIfPresent(
+            StringBuilder out,
+            String text,
+            int index,
+            RelativeLinkRendering relativeLinkRendering,
+            RelativeImageRendering relativeImageRendering) {
+        if (text.charAt(index) != '*'
+                || index + 1 >= text.length()
+                || text.charAt(index + 1) != '*'
+                || isEscaped(text, index)) {
+            return -1;
+        }
+        int end = closingStrongMarker(text, index + 2);
+        if (end < 0 || end == index + 2) {
+            return -1;
+        }
+        out.append("<strong>")
+                .append(renderInline(text.substring(index + 2, end),
+                        relativeLinkRendering, relativeImageRendering))
+                .append("</strong>");
+        return end + 1;
+    }
+
+    private static int closingStrongMarker(String text, int start) {
+        for (int i = start; i + 1 < text.length(); i++) {
+            if (text.charAt(i) == '*' && text.charAt(i + 1) == '*'
+                    && !isEscaped(text, i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean isEscaped(String text, int index) {
+        int slashCount = 0;
+        for (int i = index - 1; i >= 0 && text.charAt(i) == '\\'; i--) {
+            slashCount++;
+        }
+        return slashCount % 2 == 1;
     }
 
     private static int appendMarkdownImageIfPresent(

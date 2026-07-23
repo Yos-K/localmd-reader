@@ -31,3 +31,6 @@ ADRは、複数の妥当な実装案があり、コードやPR履歴だけから
 | [0014](0014-public-source-private-release-repositories.ja.md) | 公開ソースと非公開リリースの分離 | 採用 |
 | [0015](0015-document-rendering-coordinator.ja.md) | プラットフォーム非依存の描画セッション所有 | 採用 |
 | [0016](0016-open-document-tab-session-owner.ja.md) | プラットフォーム非依存の開いている文書タブ所有 | 採用 |
+| [0017](0017-free-file-opening-and-pro-library-boundary.ja.md) | Freeの一つのファイル選択とProの継続的なライブラリ | 採用 |
+| [0018](0018-language-complete-view-composition.ja.md) | 完全な言語別ビュー構成 | 採用 |
+| [0019](0019-pinned-document-bookmark-semantics.ja.md) | 開いているタブから独立したピン留め文書 | 採用 |

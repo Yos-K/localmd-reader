@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import io.github.yosk.mdlite.domain.FolderBrowsingMode;
 import io.github.yosk.mdlite.file.MarkdownLibraryEntryPoint;
 import io.github.yosk.mdlite.file.MarkdownLibraryListing;
 import io.github.yosk.mdlite.file.MarkdownLibraryLocation;
@@ -24,8 +23,8 @@ final class ProjectLibraryOpener {
                 new SharedPreferencesMarkdownLibraryRootStorage(activity));
     }
 
-    void open(FolderBrowsingMode mode) {
-        MarkdownLibraryEntryPoint entryPoint = MarkdownLibraryEntryPoint.from(mode, rootStore.load());
+    void open() {
+        MarkdownLibraryEntryPoint entryPoint = MarkdownLibraryEntryPoint.from(rootStore.load());
         if (entryPoint instanceof MarkdownLibraryEntryPoint.ResumeProjectLibrary) {
             MarkdownLibraryEntryPoint.ResumeProjectLibrary resume =
                     (MarkdownLibraryEntryPoint.ResumeProjectLibrary) entryPoint;

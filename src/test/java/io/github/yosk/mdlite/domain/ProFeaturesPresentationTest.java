@@ -10,7 +10,7 @@ public final class ProFeaturesPresentationTest {
         ProFeaturesPresentation presentation = ProFeaturesPresentation.from(
                 FeatureEntitlement.free(),
                 ProPurchaseUiState.ready(),
-                ProFeatureCatalog.initialFeatures());
+                englishFeatures());
 
         TestAssertions.assertFalse(presentation.isPro(), "Free presentation must expose Free status");
         TestAssertions.assertTrue(presentation.purchase().shouldShowAction(), "Free ready billing must expose purchase action");
@@ -26,7 +26,7 @@ public final class ProFeaturesPresentationTest {
         ProFeaturesPresentation presentation = ProFeaturesPresentation.from(
                 FeatureEntitlement.pro(),
                 ProPurchaseUiState.ready(),
-                ProFeatureCatalog.initialFeatures());
+                englishFeatures());
 
         TestAssertions.assertTrue(presentation.isPro(), "Pro presentation must expose Pro status");
         TestAssertions.assertFalse(presentation.purchase().shouldShowAction(), "Pro presentation must hide purchase action");
@@ -42,7 +42,7 @@ public final class ProFeaturesPresentationTest {
         ProFeaturesPresentation presentation = ProFeaturesPresentation.from(
                 FeatureEntitlement.free(),
                 ProPurchaseUiState.unavailable(),
-                ProFeatureCatalog.initialFeatures());
+                englishFeatures());
 
         TestAssertions.assertFalse(presentation.isPro(), "Unavailable billing must keep Free status");
         TestAssertions.assertFalse(presentation.purchase().shouldShowAction(), "Unavailable billing must hide purchase action");
@@ -58,7 +58,7 @@ public final class ProFeaturesPresentationTest {
     @Test
     void featuresReturnsADefensiveCopy() {
         ProFeaturesPresentation presentation = ProFeaturesPresentation.from(
-                FeatureEntitlement.pro(), ProPurchaseUiState.ready(), ProFeatureCatalog.initialFeatures());
+                FeatureEntitlement.pro(), ProPurchaseUiState.ready(), englishFeatures());
 
         ProFeaturePresentationItem[] first = presentation.features();
         int originalLength = first.length;
@@ -75,5 +75,9 @@ public final class ProFeaturesPresentationTest {
 
     private static void availablePresentationItem(ProFeaturePresentationItem item, String label) {
         TestAssertions.assertTrue(item.isAvailable(), "Pro entitlement must make Pro presentation " + label + " available");
+    }
+
+    private static ProFeatureDescriptor[] englishFeatures() {
+        return ProFeatureFixtures.descriptors();
     }
 }

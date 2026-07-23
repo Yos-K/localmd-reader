@@ -69,7 +69,8 @@ flowchart TD
     Ent -->|"L2-2 fromEntitlement"| Limit["RecentDocumentLimit<br/>EXTENDED_RECENT_FILES → 20 / 他 5"]
     Ent -->|"L2-3 fromEntitlement"| Mode["TableReadingMode<br/>TABLE_READING_ENHANCEMENTS → enhanced / 他 standard"]
 
-    Feature -.->|"L2-4 find (登録済みのみ)"| Catalog["ProFeatureCatalog → ProFeatureDescriptor"]
+    Feature -.->|"L2-4 find (登録済みのみ)"| Catalog["ProFeatureCatalog<br/>言語非依存の機能一覧"]
+    Catalog -.-> Copy["ViewerText.proFeatureCatalog()<br/>同一言語の提示文言"]
 ```
 
 ### 語の定義（構成要素 と L1: その語が単独で守るルール）
@@ -114,25 +115,21 @@ flowchart TD
   - L1: 各状態はファクトリで生成。`fromPersistenceCode(code)` は永続コードから復元し、未知コードは `unknown`。
     なぜ: 永続データの破損や将来の未知コードでも壊さず `unknown`（→ L2-7 で Free）に倒す（fail-closed）。
   - 操作: `entitlement()`（L2-7 の写像）、`persistenceCode()`（永続化コードへ）。
-- **ProFeatureCatalog**（`domain/ProFeatureCatalog.java`）: Pro提供機能の登録簿。構成要素 `INITIAL_FEATURES:
-  ProFeatureDescriptor[]`（静的）。操作 `initialFeatures()` / `find(feature)`。 規則→L2-4（登録済みのみ提示可）。
-  表示文言は「ロックされた機能」ではなく、長い文書・横に広い表・関連するローカル文書群を速く快適に読むための
-  利用価値として表現する。現行カタログは8つの読書快適化機能、表示中の文書をHTMLとして保存または
-  Android標準印刷へ渡す`EXPORT_OPTIONS`、選択したツリー内を階層移動する`PROJECT_LIBRARY`の全10件で、
-  すべてPro-tierである。
+- **ProFeatureCatalog**（`domain/ProFeatureCatalog.java`）: Pro提供機能の言語非依存な登録簿。構成要素
+  `INITIAL_FEATURES: ViewerFeature[]`（静的）。操作 `initialFeatures()` / `find(feature)`。
+  現行カタログは8つの読書快適化機能、表示中の文書をHTMLとして保存またはAndroid標準印刷へ渡す
+  `EXPORT_OPTIONS`、選択したツリー内を階層移動する`PROJECT_LIBRARY`の全10件で、すべてPro-tierである。
+  タイトルと説明は持たず、選択中の`ViewerText.proFeatureCatalog()`が同じ機能順の言語別記述子を供給する。
 - **ProFeatureDescriptor**（`domain/ProFeatureDescriptor.java`）: Pro機能の提示情報。構成要素 `feature:
-  ViewerFeature`、`title: String`、`description: String`。 規則なし（提示データ）。
+  ViewerFeature`、`title: String`、`description: String`。タイトルと説明は一つの`ViewerText`に属する同一言語の
+  組として生成する（ADR-0018）。
 - **ProProduct**（`domain/ProProduct.java`）: Play Billing 上のPro課金プロダクト。構成要素 `productId: String`。
   操作 `productId()` / `isOneTimePurchase()`。 規則なし（課金プロダクト情報）。詳細は [`play-billing-design.ja.md`](../product/play-billing-design.ja.md)。
 - **RecentDocumentLimit**（`domain/RecentDocumentLimit.java`）: 履歴の表示上限。構成要素 `maxItems: int`。操作 `maxItems()`。 規則→L2-2（権限から導出）。
 - **TableReadingMode**（`domain/TableReadingMode.java`）: 表の読みやすさモード。構成要素 `enhanced: boolean`。操作 `isEnhanced()`。 規則→L2-3（権限から導出）。
-- **FolderBrowsingMode**（`domain/FolderBrowsingMode.java`）: フォルダー選択後の利用形態。
-  Freeの`FlatFolderSelection`またはProの`ProjectFolderNavigation`のどちらかであり、権限から一意に導く。
-- **FolderBrowsingAction**（`domain/FolderBrowsingAction.java`）: ライブラリ入口でユーザーが実行する動作。
-  Freeの`ChooseFromFolder`またはProの`OpenProjectLibrary`であり、メニュー文言はこの型を各言語へ翻訳する。
-  `ChooseFromFolder`はAndroidの選択画面へ移る前にメニューを閉じ、`OpenProjectLibrary`は
-  メニュー内の常設ツリーを表示するためメニューを開いたままにする。`hasExpandableMenuTree()`は
-  Freeでは偽、Proでは真を返し、ツリーの開閉動作と展開記号の表示を同じ規則から導く。
+- **MarkdownLibraryEntryPoint**（`file/MarkdownLibraryEntryPoint.java`）: Proライブラリを開く入口。
+  保存済みルートがなければ`ChooseFolder`、有効な記憶があれば`ResumeProjectLibrary`となる。
+  Freeはこの入口を持たず、Android標準のファイル選択だけを使う（ADR-0017）。
 - **NavigationMenuState**（`model/NavigationMenuState.java`）: ハンバーガーメニューの操作状態。
   `Closed`と`Open`だけを持ち、`open()`と`close()`はどちらの状態から呼んでも有効な状態を返す。
   Androidのvisibilityやアニメーション値は状態判定に使わない。
@@ -141,7 +138,7 @@ flowchart TD
   絞り込み条件から表示一覧を導出する。開閉しても同じ内容と条件を保持する。Viewのvisibility、入力欄、
   nullableなフィールドから状態を推測しない。
 - **DocumentListDialogState**（`model/DocumentListDialogState.java`）: 文書一覧ダイアログの操作セッション。
-  `Closed`、`Recent`、`Pinned`、`Folder`を区別し、同時に複数の一覧種別になる不正状態を作らない。
+  `Closed`、`Recent`、`Pinned`を区別し、同時に複数の一覧種別になる不正状態を作らない。
   項目選択と副操作を全域関数として`DocumentListCommand`へ変換する。
 - **DocumentListCommand**（`model/DocumentListCommand.java`）: 文書一覧から発生する効果の型。
   `None`、`OpenDocument`、`ClearRecent`、`ClearPinned`、`ChooseAnotherFolder`を区別し、
@@ -201,7 +198,7 @@ flowchart TD
 - なぜ: 「支援購入は Pro 以上の追加階層を作らない／純粋な支援」方針。Pro 機能を明示カタログで一元管理し、
   無秩序な機能追加・提示を防ぐ。さらに Free は基本のオフライン閲覧として成立させ、Pro は長い文書や関連文書を
   より速く快適に読む上乗せとして提示する方針を守る。**だから**カタログ外は提示不可（例外）にし、カタログ内の
-  文言も利用価値ベースにする。
+  言語別の提示文言も利用価値ベースにする。
 - 分類: business ／ 支える判断: 支援購入に追加階層を作らず、Pro機能を明示カタログで一元管理する判断。
 - 破ると: 未登録機能を Pro 対象として提示してしまう。
 

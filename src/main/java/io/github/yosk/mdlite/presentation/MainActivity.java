@@ -34,8 +34,6 @@ import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
 import io.github.yosk.mdlite.domain.DocumentUri;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
-import io.github.yosk.mdlite.domain.FolderBrowsingAction;
-import io.github.yosk.mdlite.domain.FolderBrowsingMode;
 import io.github.yosk.mdlite.domain.HeadingNavigation;
 import io.github.yosk.mdlite.domain.HeadingScrollPosition;
 import io.github.yosk.mdlite.domain.MarkdownHeading;
@@ -77,6 +75,9 @@ import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
 import io.github.yosk.mdlite.viewer.ViewerLanguage;
 import io.github.yosk.mdlite.viewer.ViewerText;
 import io.github.yosk.mdlite.viewer.ViewerTheme;
+import io.github.yosk.mdlite.viewer.TabPinningDecision;
+import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
+import io.github.yosk.mdlite.file.RecentDocument;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -86,10 +87,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class MainActivity extends Activity implements View.OnClickListener,
+public final class MainActivity extends Activity implements View.OnClickListener, View.OnLongClickListener,
         View.OnApplyWindowInsetsListener,
         MermaidJsRenderEngine.Listener, CustomGestureDrawingView.Listener,
-        HeadingNavigation.Handler {
+        HeadingNavigation.Handler, TabPinningDecision.Handler {
 
     static final int REQUEST_OPEN_DOCUMENT = 1001;
     static final int REQUEST_SAVE_DOCUMENT = 1002;
@@ -137,6 +138,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     FontSize currentFontSize = FontSize.defaultSize();
     FontSize renderedFontSize = FontSize.defaultSize();
     String pendingSaveMarkdown = "";
+    SavedDocumentPlacement pendingSavePlacement = SavedDocumentPlacement.openNormally();
     String pendingExportHtml = "";
     final Map<String, String> draftMarkdownByUri = new HashMap<String, String>();
     DocumentRenderingCoordinator documentRenderingCoordinator;
@@ -165,7 +167,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private TextView messageView;
     Button menuButton;
     private MainMenuActionButton openButton;
-    private MainMenuActionButton openFolderButton;
+    MainMenuActionButton markdownLibraryButton;
     private MainMenuActionButton createFromClipboardButton;
     private MainMenuActionButton saveAsButton;
     private MainMenuActionButton exportAsHtmlButton;
@@ -357,7 +359,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private void initMenuButtons() {
         openButton = menuActionButton(MainMenuActions.openFile());
-        openFolderButton = menuActionButton(MainMenuActions.openFolder());
+        markdownLibraryButton = menuActionButton(MainMenuActions.markdownLibrary());
         createFromClipboardButton = menuActionButton(MainMenuActions.createFromClipboard());
         saveAsButton = menuActionButton(MainMenuActions.saveAs());
         exportAsHtmlButton = menuActionButton(MainMenuActions.exportAsHtml());
@@ -377,7 +379,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         clipboardDiagnosticsButton = menuActionButton(MainMenuActions.clipboardDiagnostics());
         privacyButton = menuActionButton(MainMenuActions.privacy());
         menuActionButtons = new MainMenuActionButton[] {
-            openButton, openFolderButton, createFromClipboardButton, saveAsButton, exportAsHtmlButton,
+            openButton, markdownLibraryButton, createFromClipboardButton, saveAsButton, exportAsHtmlButton,
             printOrSavePdfButton, pinCurrentFileButton,
             unpinCurrentFileButton, pinnedFilesButton, recentButton,
             tableOfContentsButton, findInDocumentButton, settingsButton, themeButton, languageButton,
@@ -412,7 +414,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         filesSection = menuSection("");
         markdownLibraryMenuTree = new MarkdownLibraryMenuTree(this);
         addMenuCard(menuPanel, filesSection, openButton,
-                openFolderButton, markdownLibraryMenuTree, createFromClipboardButton, saveAsButton,
+                markdownLibraryButton, markdownLibraryMenuTree, createFromClipboardButton, saveAsButton,
                 exportAsHtmlButton, printOrSavePdfButton, pinCurrentFileButton, unpinCurrentFileButton,
                 pinnedFilesButton, recentButton);
         readingSection = menuSection("");
@@ -649,9 +651,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
             TabButton button = new TabButton(this, i);
             button.setText(tab.title());
+            TabPinningDecision pinning = tabPinningDecision(tab);
+            button.setContentDescription(pinning.tabDescription(viewerText, tab.title()));
             button.setAllCaps(false);
             button.setOnClickListener(this);
-            button.setClickable(i != openTabs().activeIndex());
+            button.setOnLongClickListener(this);
+            button.setLongClickable(true);
             button.setSingleLine(true);
             button.setEllipsize(TextUtils.TruncateAt.END);
             button.setMaxWidth(dp(220));
@@ -659,6 +664,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
             button.setTypeface(i == openTabs().activeIndex() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
             button.setTextColor(i == openTabs().activeIndex() ? onPrimaryColor() : textColor());
             button.setPadding(dp(16), dp(8), dp(16), dp(8));
+            if (pinning instanceof TabPinningDecision.Unpin) {
+                button.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                        themedIcon(R.drawable.ic_push_pin_18, i == openTabs().activeIndex()
+                                ? onPrimaryColor() : textColor()), null, null, null);
+                button.setCompoundDrawablePadding(dp(6));
+            }
             // Pill tabs (#77): the active tab is a filled primary pill, inactive
             // tabs are borderless tonal pills, so selection reads from fill
             // contrast instead of a 1px border.
@@ -684,6 +695,18 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         tabRow.post(new CloseTabTouchTargets(tabRow, dp(48)));
         tabScroller.post(new ScrollToActiveTab(tabScroller, tabRow, openTabs().activeIndex()));
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        if (!(view instanceof TabButton)) {
+            return false;
+        }
+        int index = ((TabButton) view).tabIndex();
+        if (index < 0 || index >= openTabs().tabs().size()) {
+            return false;
+        }
+        return tabPinningDecision(openTabs().tabs().get(index)).perform(this);
     }
 
     void renderCurrentDocument() {
@@ -999,10 +1022,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         documentListDialogs.showRecentDocuments();
     }
 
-    void showFolderDocuments(io.github.yosk.mdlite.file.FolderMarkdownDocuments documents) {
-        documentListDialogs.showFolderDocuments(documents);
-    }
-
     void showProjectLibrary(io.github.yosk.mdlite.file.MarkdownLibraryLocation location,
             io.github.yosk.mdlite.file.MarkdownLibraryListing listing) {
         markdownLibraryMenuTree.show(location, listing);
@@ -1027,15 +1046,48 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void pinCurrentDocument() {
-        OpenDocumentTab tab = openTabs().activeTab();
-        tabPersistence.pinDocument(tab.title(), tab.uri());
-        showInfoDialog(viewerText.pinnedFiles(), viewerText.currentFilePinned());
+        TabPinningDecision.from(pinnedDocumentsAvailable(), openTabs().activeTab(), false)
+                .perform(this);
     }
 
     void unpinCurrentDocument() {
-        OpenDocumentTab tab = openTabs().activeTab();
+        TabPinningDecision.from(pinnedDocumentsAvailable(), openTabs().activeTab(), true)
+                .perform(this);
+    }
+
+    @Override
+    public void pin(OpenDocumentTab.FileDocumentTab tab) {
+        tabPersistence.pinDocument(tab.title(), tab.uri());
+        refreshPinnedDocumentUi(viewerText.currentFilePinned());
+    }
+
+    @Override
+    public void unpin(OpenDocumentTab.FileDocumentTab tab) {
         tabPersistence.unpinDocument(tab.uri());
-        showInfoDialog(viewerText.pinnedFiles(), viewerText.currentFileUnpinned());
+        refreshPinnedDocumentUi(viewerText.currentFileUnpinned());
+    }
+
+    void clearPinnedDocuments() {
+        tabPersistence.clearPinnedDocuments();
+        refreshPinnedDocumentUi(viewerText.pinnedFilesCleared());
+    }
+
+    void unpinPinnedDocument(RecentDocument document) {
+        tabPersistence.unpinDocument(document.uri());
+        renderTabs();
+        refreshMenuActionButtons();
+        showMessage(viewerText.currentFileUnpinned());
+    }
+
+    private TabPinningDecision tabPinningDecision(OpenDocumentTab tab) {
+        return TabPinningDecision.from(pinnedDocumentsAvailable(), tab,
+                tabPersistence.isPinnedDocument(tab.uri()));
+    }
+
+    private void refreshPinnedDocumentUi(String message) {
+        renderTabs();
+        refreshMenuActionButtons();
+        showMessage(message);
     }
 
     void showPinnedDocuments() {
@@ -1279,12 +1331,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void refreshMarkdownLibraryChevron() {
-        FolderBrowsingAction action = FolderBrowsingMode.from(featureEntitlement).action();
-        if (action.hasExpandableMenuTree()) {
-            applyExpandChevron(openFolderButton, markdownLibraryMenuTree.isExpanded());
-            return;
-        }
-        openFolderButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, null, null);
+        applyExpandChevron(markdownLibraryButton, markdownLibraryMenuTree.isExpanded());
     }
 
     private void updateLocalizedMessage() {

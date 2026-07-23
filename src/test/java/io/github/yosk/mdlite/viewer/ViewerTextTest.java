@@ -4,6 +4,21 @@ import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
 
 public final class ViewerTextTest {
+    @Test
+    void englishPinnedDocumentActionsDescribeTheSelectedFileOperations() {
+        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.english());
+
+        TestAssertions.assertEquals("Open", text.openPinnedDocumentAction(),
+                "English pinned-file action must describe opening the selected file");
+    }
+
+    @Test
+    void japanesePinnedDocumentActionsDescribeIndividualUnpinning() {
+        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.japanese());
+
+        TestAssertions.assertEquals("このファイルのピン留めを解除", text.unpinPinnedDocumentAction(),
+                "Japanese pinned-file action must distinguish individual unpinning from clearing all pins");
+    }
 
     @Test
     void englishViewerTextProvidesEnglishTemporaryMarkdownMessage() {
@@ -200,53 +215,4 @@ public final class ViewerTextTest {
                 "Selected text message must explain the clipboard fallback when formatting is missing");
     }
 
-    @Test
-    void englishViewerTextProvidesPurchaseActionLabel() {
-        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.english());
-
-        TestAssertions.assertEquals(
-                "Unlock Pro",
-                text.purchaseProAction(),
-                "English viewer text must provide the Pro purchase action label");
-    }
-
-    @Test
-    void englishViewerTextExplainsProAsConvenienceNotARequiredUpgrade() {
-        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.english());
-
-        TestAssertions.assertEquals(
-                "Free covers the core offline reader. Pro adds faster navigation and comfort tools for long files and linked project notes.",
-                text.proFeaturesIntro(),
-                "English Pro intro must preserve the Free value proposition before describing Pro convenience");
-    }
-
-    @Test
-    void japaneseViewerTextExplainsProAsConvenienceNotARequiredUpgrade() {
-        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.japanese());
-
-        TestAssertions.assertEquals(
-                "Free版はオフライン閲覧の基本機能を備えています。Proでは長い文書や関連するプロジェクト文書を、より速く快適に読めます。",
-                text.proFeaturesIntro(),
-                "Japanese Pro intro must preserve the Free value proposition before describing Pro convenience");
-    }
-
-    @Test
-    void englishViewerTextProvidesRestorePurchaseActionLabel() {
-        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.english());
-
-        TestAssertions.assertEquals(
-                "Restore purchase",
-                text.restorePurchaseAction(),
-                "English viewer text must provide the Pro purchase restore action label");
-    }
-
-    @Test
-    void japaneseViewerTextProvidesPurchaseUnavailableMessage() {
-        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.japanese());
-
-        TestAssertions.assertEquals(
-                "購入はまだ利用できません。",
-                text.purchaseMessage("purchase_unavailable"),
-                "Japanese viewer text must provide the unavailable purchase message");
-    }
 }

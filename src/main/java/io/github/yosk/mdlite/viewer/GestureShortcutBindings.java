@@ -19,7 +19,7 @@ public final class GestureShortcutBindings {
         if (binding == null) {
             throw new IllegalArgumentException("gesture shortcut binding is required");
         }
-        ArrayList<GestureShortcutBinding> next = withoutTrigger(binding.trigger());
+        ArrayList<GestureShortcutBinding> next = withoutTriggerAndActiveAction(binding);
         next.add(binding);
         return new GestureShortcutBindings(next);
     }
@@ -50,11 +50,26 @@ public final class GestureShortcutBindings {
         return items;
     }
 
-    private ArrayList<GestureShortcutBinding> withoutTrigger(GestureShortcutTrigger trigger) {
+    public GestureShortcutTrigger triggerFor(GestureShortcutAction action) {
+        if (action == null || action.isOff()) {
+            return null;
+        }
+        for (int i = 0; i < items.size(); i++) {
+            GestureShortcutBinding item = items.get(i);
+            if (action.equals(item.action())) {
+                return item.trigger();
+            }
+        }
+        return null;
+    }
+
+    private ArrayList<GestureShortcutBinding> withoutTriggerAndActiveAction(
+            GestureShortcutBinding binding) {
         ArrayList<GestureShortcutBinding> next = new ArrayList<GestureShortcutBinding>();
         for (int i = 0; i < items.size(); i++) {
             GestureShortcutBinding item = items.get(i);
-            if (!trigger.equals(item.trigger())) {
+            if (!item.trigger().equals(binding.trigger())
+                    && (binding.action().isOff() || !item.action().equals(binding.action()))) {
                 next.add(item);
             }
         }

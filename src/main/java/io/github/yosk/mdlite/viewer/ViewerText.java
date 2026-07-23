@@ -1,5 +1,8 @@
 package io.github.yosk.mdlite.viewer;
 
+import io.github.yosk.mdlite.domain.ProFeatureDescriptor;
+import io.github.yosk.mdlite.domain.ViewerFeature;
+
 public abstract class ViewerText {
     public static ViewerText fromLanguage(ViewerLanguage language) {
         if (language != null && language.isJapanese()) {
@@ -11,7 +14,6 @@ public abstract class ViewerText {
     public abstract String menuButton();
     public abstract String openMenuDescription();
     public abstract String openFile();
-    public abstract String openFolder();
     public abstract String createFromClipboard();
     public abstract String saveAs();
     public abstract String exportAsHtml();
@@ -36,12 +38,15 @@ public abstract class ViewerText {
     public abstract String unpinCurrentFile();
     public abstract String noPinnedFiles();
     public abstract String clearPinnedFiles();
+    public abstract String openPinnedDocumentAction();
+    public abstract String unpinPinnedDocumentAction();
     public abstract String currentFilePinned();
     public abstract String currentFileUnpinned();
     public abstract String pinnedFilesCleared();
     public abstract String appearanceSettings();
     public abstract String proFeatures();
     public abstract String proFeaturesIntro();
+    public abstract ProFeatureDescriptor[] proFeatureCatalog();
     public abstract String clipboardDiagnostics();
     public abstract String privacy();
     public abstract String moveControlsToTop();
@@ -67,6 +72,14 @@ public abstract class ViewerText {
     public abstract String nextHeadingAction();
     public abstract String previousHeadingAction();
     public abstract String off();
+    public abstract String assignedGestureSuffix(String gestureName);
+    public abstract String doubleTapGesture();
+    public abstract String circleGesture();
+    public abstract String customGesture();
+    public abstract String swipeLeftGesture();
+    public abstract String swipeRightGesture();
+    public abstract String swipeUpGesture();
+    public abstract String swipeDownGesture();
     public abstract String recentFiles();
     public abstract String openMarkdownFile();
     public abstract String noRecentFiles();
@@ -107,6 +120,8 @@ public abstract class ViewerText {
     public abstract String duskTheme();
     public abstract String themeLabel(ViewerTheme theme);
     public abstract String welcomeTabTitle();
+    public abstract String documentTab(String title);
+    public abstract String pinnedDocumentTab(String title);
     public abstract String closeTabDescription(String title);
     public abstract String historyClipboardTitle(int index);
     public abstract String proStatus(boolean pro);
@@ -122,7 +137,6 @@ public abstract class ViewerText {
         @Override public String menuButton() { return "Menu"; }
         @Override public String openMenuDescription() { return "Open menu"; }
         @Override public String openFile() { return "Open file"; }
-        @Override public String openFolder() { return "Choose from folder"; }
         @Override public String createFromClipboard() { return "Create from clipboard"; }
         @Override public String saveAs() { return "Save as..."; }
         @Override public String exportAsHtml() { return "Export as HTML"; }
@@ -147,12 +161,50 @@ public abstract class ViewerText {
         @Override public String unpinCurrentFile() { return "Unpin current file"; }
         @Override public String noPinnedFiles() { return "No pinned files yet."; }
         @Override public String clearPinnedFiles() { return "Clear pinned files"; }
+        @Override public String openPinnedDocumentAction() { return "Open"; }
+        @Override public String unpinPinnedDocumentAction() { return "Unpin this file"; }
         @Override public String currentFilePinned() { return "Pinned current file."; }
         @Override public String currentFileUnpinned() { return "Unpinned current file."; }
         @Override public String pinnedFilesCleared() { return "Pinned files cleared."; }
+        @Override public String documentTab(String title) { return "Tab: " + title; }
+        @Override public String pinnedDocumentTab(String title) { return "Pinned tab: " + title; }
         @Override public String appearanceSettings() { return "Appearance"; }
         @Override public String proFeatures() { return "Pro features"; }
         @Override public String proFeaturesIntro() { return "Free covers the core offline reader. Pro adds faster navigation and comfort tools for long files and linked project notes."; }
+        @Override public ProFeatureDescriptor[] proFeatureCatalog() {
+            return new ProFeatureDescriptor[] {
+                new ProFeatureDescriptor(ViewerFeature.EXTRA_THEMES,
+                        "More comfortable reading themes",
+                        "Choose extra color styles when light and dark are not enough for your reading environment."),
+                new ProFeatureDescriptor(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS,
+                        "More gesture shortcuts",
+                        "Assign circle, direction, and custom gestures to the actions you repeat most."),
+                new ProFeatureDescriptor(ViewerFeature.TABLE_OF_CONTENTS,
+                        "Faster long-document navigation",
+                        "Open the table of contents and jump through headings without losing your place."),
+                new ProFeatureDescriptor(ViewerFeature.HEADING_JUMP,
+                        "Heading jump shortcuts",
+                        "Move to the next or previous heading from gestures while reading."),
+                new ProFeatureDescriptor(ViewerFeature.TABLE_READING_ENHANCEMENTS,
+                        "Easier wide-table reading",
+                        "Keep table headers and first columns visible while reading wide tables."),
+                new ProFeatureDescriptor(ViewerFeature.EXTENDED_RECENT_FILES,
+                        "More reading history",
+                        "Keep more recent files available when you switch between many local documents."),
+                new ProFeatureDescriptor(ViewerFeature.RELATIVE_LINKS,
+                        "Linked project notes",
+                        "Open safe relative Markdown links inside local project document sets."),
+                new ProFeatureDescriptor(ViewerFeature.RELATIVE_IMAGES,
+                        "Local images in project notes",
+                        "Render safe relative image references inside local Markdown document sets."),
+                new ProFeatureDescriptor(ViewerFeature.EXPORT_OPTIONS,
+                        "Export and print",
+                        "Save as HTML or use Android printing to save as PDF."),
+                new ProFeatureDescriptor(ViewerFeature.PROJECT_LIBRARY,
+                        "Navigate project folders",
+                        "Move through nested folders and open related Markdown files without leaving the library.")
+            };
+        }
         @Override public String clipboardDiagnostics() { return "Clipboard diagnostics"; }
         @Override public String privacy() { return "Privacy"; }
         @Override public String moveControlsToTop() { return "Move controls to top"; }
@@ -178,6 +230,14 @@ public abstract class ViewerText {
         @Override public String nextHeadingAction() { return "Next heading"; }
         @Override public String previousHeadingAction() { return "Previous heading"; }
         @Override public String off() { return "Off"; }
+        @Override public String assignedGestureSuffix(String gestureName) { return " (assigned to " + gestureName + ")"; }
+        @Override public String doubleTapGesture() { return "Double tap"; }
+        @Override public String circleGesture() { return "Circle"; }
+        @Override public String customGesture() { return "Custom"; }
+        @Override public String swipeLeftGesture() { return "Left"; }
+        @Override public String swipeRightGesture() { return "Right"; }
+        @Override public String swipeUpGesture() { return "Up"; }
+        @Override public String swipeDownGesture() { return "Down"; }
         @Override public String recentFiles() { return "Recent files"; }
         @Override public String openMarkdownFile() { return "Open Markdown file"; }
         @Override public String noRecentFiles() { return "No recent files yet."; }
@@ -274,7 +334,6 @@ public abstract class ViewerText {
         @Override public String menuButton() { return "メニュー"; }
         @Override public String openMenuDescription() { return "メニューを開く"; }
         @Override public String openFile() { return "ファイルを開く"; }
-        @Override public String openFolder() { return "フォルダーから選ぶ"; }
         @Override public String createFromClipboard() { return "クリップボードから作成"; }
         @Override public String saveAs() { return "名前を付けて保存"; }
         @Override public String exportAsHtml() { return "HTMLとしてエクスポート"; }
@@ -299,12 +358,50 @@ public abstract class ViewerText {
         @Override public String unpinCurrentFile() { return "現在のファイルのピン留めを解除"; }
         @Override public String noPinnedFiles() { return "ピン留めしたファイルはまだありません。"; }
         @Override public String clearPinnedFiles() { return "ピン留めをクリア"; }
+        @Override public String openPinnedDocumentAction() { return "開く"; }
+        @Override public String unpinPinnedDocumentAction() { return "このファイルのピン留めを解除"; }
         @Override public String currentFilePinned() { return "現在のファイルをピン留めしました。"; }
         @Override public String currentFileUnpinned() { return "現在のファイルのピン留めを解除しました。"; }
         @Override public String pinnedFilesCleared() { return "ピン留めをクリアしました。"; }
+        @Override public String documentTab(String title) { return "タブ: " + title; }
+        @Override public String pinnedDocumentTab(String title) { return "ピン留めしたタブ: " + title; }
         @Override public String appearanceSettings() { return "表示設定"; }
         @Override public String proFeatures() { return "Pro機能"; }
         @Override public String proFeaturesIntro() { return "Free版はオフライン閲覧の基本機能を備えています。Proでは長い文書や関連するプロジェクト文書を、より速く快適に読めます。"; }
+        @Override public ProFeatureDescriptor[] proFeatureCatalog() {
+            return new ProFeatureDescriptor[] {
+                new ProFeatureDescriptor(ViewerFeature.EXTRA_THEMES,
+                        "より快適な閲覧テーマ",
+                        "ライトとダークだけでは読みづらい環境に合わせて、追加の配色を選べます。"),
+                new ProFeatureDescriptor(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS,
+                        "より多くのジェスチャーショートカット",
+                        "円、方向、カスタムジェスチャーに、よく使う操作を割り当てられます。"),
+                new ProFeatureDescriptor(ViewerFeature.TABLE_OF_CONTENTS,
+                        "長い文書をすばやく移動",
+                        "目次を開いて、読んでいた位置を失わずに見出しへ移動できます。"),
+                new ProFeatureDescriptor(ViewerFeature.HEADING_JUMP,
+                        "見出し移動ショートカット",
+                        "閲覧中にジェスチャーで前後の見出しへ移動できます。"),
+                new ProFeatureDescriptor(ViewerFeature.TABLE_READING_ENHANCEMENTS,
+                        "横に広い表を読みやすく",
+                        "横に広い表を読むとき、見出し行と先頭列を表示したままにできます。"),
+                new ProFeatureDescriptor(ViewerFeature.EXTENDED_RECENT_FILES,
+                        "より多くの閲覧履歴",
+                        "多数のローカル文書を切り替えるとき、より多くの最近開いたファイルを保持します。"),
+                new ProFeatureDescriptor(ViewerFeature.RELATIVE_LINKS,
+                        "つながったプロジェクトノート",
+                        "ローカルの文書セット内にある安全な相対Markdownリンクを開けます。"),
+                new ProFeatureDescriptor(ViewerFeature.RELATIVE_IMAGES,
+                        "プロジェクトノート内のローカル画像",
+                        "ローカルのMarkdown文書セット内にある安全な相対画像を表示します。"),
+                new ProFeatureDescriptor(ViewerFeature.EXPORT_OPTIONS,
+                        "エクスポートと印刷",
+                        "HTMLとして保存するか、Androidの印刷機能からPDFとして保存できます。"),
+                new ProFeatureDescriptor(ViewerFeature.PROJECT_LIBRARY,
+                        "プロジェクトフォルダーを移動",
+                        "ライブラリを閉じずに、階層を移動して関連するMarkdownファイルを開けます。")
+            };
+        }
         @Override public String clipboardDiagnostics() { return "クリップボード診断"; }
         @Override public String privacy() { return "プライバシー"; }
         @Override public String moveControlsToTop() { return "操作バーを上に移動"; }
@@ -330,6 +427,14 @@ public abstract class ViewerText {
         @Override public String nextHeadingAction() { return "次の見出し"; }
         @Override public String previousHeadingAction() { return "前の見出し"; }
         @Override public String off() { return "オフ"; }
+        @Override public String assignedGestureSuffix(String gestureName) { return "（割り当て先: " + gestureName + "）"; }
+        @Override public String doubleTapGesture() { return "ダブルタップ"; }
+        @Override public String circleGesture() { return "円"; }
+        @Override public String customGesture() { return "カスタム"; }
+        @Override public String swipeLeftGesture() { return "左方向"; }
+        @Override public String swipeRightGesture() { return "右方向"; }
+        @Override public String swipeUpGesture() { return "上方向"; }
+        @Override public String swipeDownGesture() { return "下方向"; }
         @Override public String recentFiles() { return "最近開いたファイル"; }
         @Override public String openMarkdownFile() { return "Markdownファイルを開く"; }
         @Override public String noRecentFiles() { return "最近開いたファイルはまだありません。"; }

@@ -4,6 +4,14 @@ import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
 
 public final class StyledMarkdownTextTest {
+    @Test
+    void plainClipboardMarkdownKeepsExistingSyntaxAvailableToTheRenderer() {
+        StyledMarkdownText text = new StyledMarkdownText()
+                .append("This is **important**.", MarkdownStyle.plain());
+
+        TestAssertions.assertEquals("This is **important**.", text.value(),
+                "plain clipboard text must preserve intentional Markdown syntax");
+    }
 
     @Test
     void plainTextKeepsReadableMarkdownText() {

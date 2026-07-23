@@ -1,6 +1,7 @@
 package io.github.yosk.mdlite.viewer;
 
 import io.github.yosk.mdlite.domain.SafeHtml;
+import io.github.yosk.mdlite.domain.DocumentUri;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,51 @@ public final class OpenDocumentTabs {
         }
         next.add(tab);
         return new OpenDocumentTabs(next, next.size() - 1);
+    }
+
+    OpenDocumentTabs replaceDraftWithFile(
+            DocumentUri draftUri,
+            OpenDocumentTab.FileDocumentTab savedFile) {
+        ArrayList<OpenDocumentTab> next = new ArrayList<OpenDocumentTab>(tabs);
+        int draftIndex = indexOfDraft(next, draftUri);
+        int savedFileIndex = indexOfUri(next, savedFile.documentUri());
+        if (savedFileIndex >= 0) {
+            next.set(savedFileIndex, savedFile);
+            if (draftIndex >= 0 && draftIndex != savedFileIndex) {
+                next.remove(draftIndex);
+                savedFileIndex = draftIndex < savedFileIndex ? savedFileIndex - 1 : savedFileIndex;
+            }
+            return new OpenDocumentTabs(next, savedFileIndex);
+        }
+        if (draftIndex >= 0) {
+            next.set(draftIndex, savedFile);
+            return new OpenDocumentTabs(next, draftIndex);
+        }
+        return open(savedFile);
+    }
+
+    private static int indexOfDraft(
+            List<OpenDocumentTab> tabs,
+            DocumentUri draftUri) {
+        for (int i = 0; i < tabs.size(); i++) {
+            OpenDocumentTab tab = tabs.get(i);
+            if (tab instanceof OpenDocumentTab.DraftDocumentTab
+                    && tab.documentUri().equals(draftUri)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static int indexOfUri(
+            List<OpenDocumentTab> tabs,
+            DocumentUri uri) {
+        for (int i = 0; i < tabs.size(); i++) {
+            if (tabs.get(i).documentUri().equals(uri)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public OpenDocumentTabs activate(int index) {

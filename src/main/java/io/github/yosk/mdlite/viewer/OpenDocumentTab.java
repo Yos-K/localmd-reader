@@ -25,7 +25,7 @@ public abstract class OpenDocumentTab {
         return fileDocument(title, uri, document);
     }
 
-    public static OpenDocumentTab fileDocument(String title, String uri, SafeHtml document) {
+    public static FileDocumentTab fileDocument(String title, String uri, SafeHtml document) {
         return new FileDocumentTab(title, uri, document);
     }
 

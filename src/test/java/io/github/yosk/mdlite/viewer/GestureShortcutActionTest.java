@@ -5,6 +5,11 @@ import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
 
 public final class GestureShortcutActionTest {
+    @Test
+    void independentlyCreatedActionsWithTheSameMeaningAreEqual() {
+        TestAssertions.assertTrue(GestureShortcutAction.openMenu().equals(GestureShortcutAction.openMenu()),
+                "gesture actions must compare by domain value rather than object identity");
+    }
 
     @Test
     void offActionCyclesToOpenMenuForProUsers() {

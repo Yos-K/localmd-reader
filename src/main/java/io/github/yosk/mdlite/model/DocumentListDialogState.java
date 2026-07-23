@@ -1,6 +1,5 @@
 package io.github.yosk.mdlite.model;
 
-import io.github.yosk.mdlite.file.FolderMarkdownDocuments;
 import io.github.yosk.mdlite.file.PinnedDocuments;
 import io.github.yosk.mdlite.file.RecentDocument;
 import io.github.yosk.mdlite.file.RecentDocuments;
@@ -32,11 +31,8 @@ public abstract class DocumentListDialogState {
         return new Pinned(documents.items());
     }
 
-    public static Folder folder(FolderMarkdownDocuments documents) {
-        if (documents == null) {
-            throw new IllegalArgumentException("folder document dialog requires documents");
-        }
-        return new Folder(documents.items());
+    public static PinnedActions pinnedActions(RecentDocument document) {
+        return new PinnedActions(document);
     }
 
     public abstract DocumentListCommand select(int index);
@@ -75,7 +71,11 @@ public abstract class DocumentListDialogState {
             if (index < 0 || index >= documents.size()) {
                 return DocumentListCommand.none();
             }
-            return DocumentListCommand.open(documents.get(index));
+            return selectedDocument(documents.get(index));
+        }
+
+        protected DocumentListCommand selectedDocument(RecentDocument document) {
+            return DocumentListCommand.open(document);
         }
     }
 
@@ -96,19 +96,41 @@ public abstract class DocumentListDialogState {
         }
 
         @Override
+        protected DocumentListCommand selectedDocument(RecentDocument document) {
+            return DocumentListCommand.choosePinnedDocumentAction(document);
+        }
+
+        @Override
         public DocumentListCommand.ClearPinned secondaryAction() {
             return DocumentListCommand.clearPinned();
         }
     }
 
-    public static final class Folder extends Open {
-        private Folder(List<RecentDocument> documents) {
-            super(documents);
+    public static final class PinnedActions extends DocumentListDialogState {
+        private final RecentDocument document;
+
+        private PinnedActions(RecentDocument document) {
+            if (document == null) {
+                throw new IllegalArgumentException("pinned-document actions require a document");
+            }
+            this.document = document;
         }
 
         @Override
-        public DocumentListCommand.ChooseAnotherFolder secondaryAction() {
-            return DocumentListCommand.chooseAnotherFolder();
+        public DocumentListCommand select(int index) {
+            if (index == 0) {
+                return DocumentListCommand.open(document);
+            }
+            if (index == 1) {
+                return DocumentListCommand.unpin(document);
+            }
+            return DocumentListCommand.none();
+        }
+
+        @Override
+        public DocumentListCommand.None secondaryAction() {
+            return DocumentListCommand.none();
         }
     }
+
 }
