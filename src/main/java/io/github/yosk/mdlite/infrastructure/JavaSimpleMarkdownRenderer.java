@@ -85,17 +85,17 @@ public final class JavaSimpleMarkdownRenderer {
 
         for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
             String line = lines[lineIndex];
-            if (isFenceLine(line)) {
+            if (MarkdownCodeBlockRenderer.isFenceLine(line)) {
                 if (inCodeBlock) {
                     if (safeMermaidRendering.isEnabled() && codeFence.isMermaid()) {
-                        html.append(renderMermaidBlock(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
+                        html.append(MarkdownCodeBlockRenderer.renderMermaid(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
                         mermaidIndex++;
                     } else if (codeFence.isPreviewable()) {
-                        html.append(renderPreviewableCodeBlock(previewCodeBlockIndex, codeBlock.toString(),
+                        html.append(MarkdownCodeBlockRenderer.renderPreviewable(previewCodeBlockIndex, codeBlock.toString(),
                                 codeFence, safeCodeHighlighting));
                         previewCodeBlockIndex++;
                     } else {
-                        html.append(renderCodeBlockLines(codeBlock.toString(), codeFence.language(), safeCodeHighlighting));
+                        html.append(MarkdownCodeBlockRenderer.renderLines(codeBlock.toString(), codeFence, safeCodeHighlighting));
                     }
                     inCodeBlock = false;
                     codeFence = CodeFenceInfo.plain();
@@ -107,7 +107,7 @@ public final class JavaSimpleMarkdownRenderer {
                     codeFence = CodeFenceInfo.fromFenceLine(line);
                     if (!(safeMermaidRendering.isEnabled() && codeFence.isMermaid())
                             && !codeFence.isPreviewable()) {
-                        html.append(openCodeBlockHtml(codeFence));
+                        html.append(MarkdownCodeBlockRenderer.openingHtml(codeFence));
                     }
                 }
                 continue;
@@ -124,17 +124,20 @@ public final class JavaSimpleMarkdownRenderer {
                 continue;
             }
 
-            if (lineIndex + 1 < lines.length && isTableHeaderLine(line) && isTableSeparatorLine(lines[lineIndex + 1])) {
+            if (lineIndex + 1 < lines.length
+                    && MarkdownTableRenderer.isRow(line)
+                    && MarkdownTableRenderer.isSeparator(lines[lineIndex + 1])) {
                 flushParagraph(html, paragraph, safeRelativeLinkRendering, safeRelativeImageRendering);
                 openList = closeList(html, openList);
-                String[] headerCells = splitTableCells(line);
                 html.append("<div class=\"table-scroll\"><table><thead><tr>");
-                appendTableCells(html, headerCells, "th", safeRelativeLinkRendering, safeRelativeImageRendering);
+                html.append(MarkdownTableRenderer.renderCells(
+                        line, "th", safeRelativeLinkRendering, safeRelativeImageRendering));
                 html.append("</tr></thead><tbody>");
                 lineIndex += 2;
-                while (lineIndex < lines.length && isTableHeaderLine(lines[lineIndex])) {
+                while (lineIndex < lines.length && MarkdownTableRenderer.isRow(lines[lineIndex])) {
                     html.append("<tr>");
-                    appendTableCells(html, splitTableCells(lines[lineIndex]), "td", safeRelativeLinkRendering, safeRelativeImageRendering);
+                    html.append(MarkdownTableRenderer.renderCells(
+                            lines[lineIndex], "td", safeRelativeLinkRendering, safeRelativeImageRendering));
                     html.append("</tr>");
                     lineIndex++;
                 }
@@ -212,132 +215,18 @@ public final class JavaSimpleMarkdownRenderer {
 
         if (inCodeBlock) {
             if (safeMermaidRendering.isEnabled() && codeFence.isMermaid()) {
-                html.append(renderMermaidBlock(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
+                html.append(MarkdownCodeBlockRenderer.renderMermaid(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
             } else if (codeFence.isPreviewable()) {
-                html.append(renderPreviewableCodeBlock(previewCodeBlockIndex, codeBlock.toString(),
+                html.append(MarkdownCodeBlockRenderer.renderPreviewable(previewCodeBlockIndex, codeBlock.toString(),
                         codeFence, safeCodeHighlighting));
             } else {
-                html.append(renderCodeBlockLines(codeBlock.toString(), codeFence.language(), safeCodeHighlighting));
+                html.append(MarkdownCodeBlockRenderer.renderLines(codeBlock.toString(), codeFence, safeCodeHighlighting));
             }
         }
         closeList(html, openList);
         flushParagraph(html, paragraph, safeRelativeLinkRendering, safeRelativeImageRendering);
 
         return SafeHtml.fromTrustedRendererOutput(html.toString());
-    }
-
-    private static String renderPreviewableCodeBlock(
-            int index,
-            String codeBlock,
-            CodeFenceInfo codeFence,
-            CodeHighlighting codeHighlighting) {
-        SafeHtml raw = SafeHtml.fromTrustedRendererOutput(
-                openCodeBlockHtml(codeFence)
-                        + renderCodeBlockLines(codeBlock, codeFence.language(), codeHighlighting));
-        return CodeBlockPreviewHtml.from(index, raw,
-                renderCodeBlockPreview(codeBlock, codeFence)).value();
-    }
-
-    private static SafeHtml renderCodeBlockPreview(String codeBlock, CodeFenceInfo codeFence) {
-        String source = trimTrailingCodeBlockNewline(codeBlock);
-        if (codeFence.isMarkdownPreview()) {
-            return new JavaSimpleMarkdownRenderer()
-                    .render(source, CodeHighlighting.plain(), MermaidRendering.plainCode(),
-                            RelativeLinkRendering.disabled(), RelativeImageRendering.disabled(), null);
-        }
-        return SafeHtmlCodePreview.from(source);
-    }
-
-    private static String trimTrailingCodeBlockNewline(String codeBlock) {
-        return codeBlock.endsWith("\n")
-                ? codeBlock.substring(0, codeBlock.length() - 1) : codeBlock;
-    }
-
-    private static String renderCodeBlockLines(String codeBlock, String language, CodeHighlighting codeHighlighting) {
-        String[] codeLines = codeBlock.split("\\n", -1);
-        StringBuilder rendered = new StringBuilder();
-        for (int i = 0; i < codeLines.length; i++) {
-            if (i == codeLines.length - 1 && codeLines[i].length() == 0) {
-                continue;
-            }
-            rendered.append(renderCodeBlockLine(codeLines[i], language, codeHighlighting)).append('\n');
-        }
-        rendered.append("</code></pre>");
-        return rendered.toString();
-    }
-
-    private static String renderMermaidBlock(int index, String source, Map<Integer, SafeHtml> renderedMermaidDiagrams) {
-        SafeHtml rendered = renderedMermaidDiagrams == null ? null : renderedMermaidDiagrams.get(Integer.valueOf(index));
-        if (rendered != null) {
-            return "<div class=\"mermaid-diagram\"><div class=\"mermaid-diagram-scale\">" + rendered.value() + "</div></div>";
-        }
-        return "<div class=\"mermaid-placeholder\" data-mermaid-index=\"" + index + "\">"
-                + "<strong>Mermaid diagram</strong>"
-                + "<span>Rendering in background...</span>"
-                + "<pre><code class=\"language-mermaid\">" + escapeHtml(source.trim()) + "</code></pre>"
-                + "</div>";
-    }
-
-    private static String renderCodeBlockLine(String line, String language, CodeHighlighting codeHighlighting) {
-        if (!codeHighlighting.isEnabled()) {
-            return escapeHtml(line);
-        }
-        if ("java".equals(language)) {
-            return JavaCodeHighlighter.highlightLine(line);
-        }
-        if ("kt".equals(language) || "kotlin".equals(language)) {
-            return KotlinCodeHighlighter.highlightLine(line);
-        }
-        if ("js".equals(language) || "jsx".equals(language) || "javascript".equals(language)
-                || "ts".equals(language) || "tsx".equals(language) || "typescript".equals(language)) {
-            return JavaScriptCodeHighlighter.highlightLine(line);
-        }
-        if ("py".equals(language) || "python".equals(language)) {
-            return PythonCodeHighlighter.highlightLine(line);
-        }
-        if ("html".equals(language) || "xml".equals(language)) {
-            return MarkupCodeHighlighter.highlightLine(line);
-        }
-        if ("css".equals(language)) {
-            return CssCodeHighlighter.highlightLine(line);
-        }
-        if ("yaml".equals(language) || "yml".equals(language)) {
-            return YamlCodeHighlighter.highlightLine(line);
-        }
-        if ("json".equals(language)) {
-            return JsonCodeHighlighter.highlightLine(line);
-        }
-        if ("sh".equals(language) || "bash".equals(language) || "shell".equals(language)) {
-            return ShellCodeHighlighter.highlightLine(line);
-        }
-        return escapeHtml(line);
-    }
-
-    private static boolean isFenceLine(String line) {
-        // Match the heading extractor (MarkdownHeadings.isFenceLine): up to 3 spaces of
-        // indentation then a run of 3+ backticks. Keeping the two in lockstep prevents a
-        // hash line inside an indented/trailing-space fence from rendering as a heading on
-        // the page while being absent from the TOC/jump list (or vice versa).
-        int indent = 0;
-        while (indent < line.length() && line.charAt(indent) == ' ') {
-            indent++;
-        }
-        if (indent > 3) {
-            return false;
-        }
-        int ticks = 0;
-        while (indent + ticks < line.length() && line.charAt(indent + ticks) == '`') {
-            ticks++;
-        }
-        return ticks >= 3;
-    }
-
-    private static String openCodeBlockHtml(CodeFenceInfo codeFence) {
-        String language = codeFence.language();
-        if (language.length() == 0) {
-            return "<pre><code>";
-        }
-        return "<pre><code class=\"language-" + language + "\">";
     }
 
     private static int headingLevel(String line) {
@@ -366,71 +255,6 @@ public final class JavaSimpleMarkdownRenderer {
             return index + 2;
         }
         return 0;
-    }
-
-    private static boolean isTableHeaderLine(String line) {
-        String trimmed = line.trim();
-        return trimmed.indexOf('|') >= 0 && splitTableCells(trimmed).length > 1;
-    }
-
-    private static boolean isTableSeparatorLine(String line) {
-        String[] cells = splitTableCells(line);
-        if (cells.length < 2) {
-            return false;
-        }
-        for (int i = 0; i < cells.length; i++) {
-            if (!isTableSeparatorCell(cells[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isTableSeparatorCell(String cell) {
-        String trimmed = cell.trim();
-        if (trimmed.startsWith(":")) {
-            trimmed = trimmed.substring(1);
-        }
-        if (trimmed.endsWith(":")) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-        }
-        if (trimmed.length() < 3) {
-            return false;
-        }
-        for (int i = 0; i < trimmed.length(); i++) {
-            if (trimmed.charAt(i) != '-') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static String[] splitTableCells(String line) {
-        String trimmed = line.trim();
-        if (trimmed.startsWith("|")) {
-            trimmed = trimmed.substring(1);
-        }
-        if (trimmed.endsWith("|")) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-        }
-        String[] rawCells = trimmed.split("\\|", -1);
-        for (int i = 0; i < rawCells.length; i++) {
-            rawCells[i] = rawCells[i].trim();
-        }
-        return rawCells;
-    }
-
-    private static void appendTableCells(
-            StringBuilder html,
-            String[] cells,
-            String tag,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        for (int i = 0; i < cells.length; i++) {
-            html.append('<').append(tag).append('>')
-                    .append(MarkdownInlineRenderer.render(cells[i], relativeLinkRendering, relativeImageRendering))
-                    .append("</").append(tag).append('>');
-        }
     }
 
     private static int closeList(StringBuilder html, int openList) {
@@ -471,32 +295,6 @@ public final class JavaSimpleMarkdownRenderer {
         }
         html.append("<p>").append(MarkdownInlineRenderer.render(paragraph.toString(), relativeLinkRendering, relativeImageRendering)).append("</p>");
         paragraph.setLength(0);
-    }
-
-
-    private static String escapeHtml(String text) {
-        StringBuilder escaped = new StringBuilder();
-        for (int i = 0; i < text.length(); i++) {
-            escaped.append(escapeHtmlChar(text.charAt(i)));
-        }
-        return escaped.toString();
-    }
-
-    private static String escapeHtmlChar(char value) {
-        switch (value) {
-            case '&':
-                return "&amp;";
-            case '<':
-                return "&lt;";
-            case '>':
-                return "&gt;";
-            case '"':
-                return "&quot;";
-            case '\'':
-                return "&#39;";
-            default:
-                return String.valueOf(value);
-        }
     }
 
 }
