@@ -11,25 +11,26 @@ public final class MenuPanelScrollabilityTest {
     @Test
     void menuPanelIsHostedByAScrollContainerSoEveryExpandedSectionRemainsReachable()
             throws IOException {
-        String source = mainActivitySource();
+        String source = sourceFile("ReaderScreenInitializer.java");
 
-        TestAssertions.assertContains(source, "menuScrollContainer.addView(menuPanel",
+        TestAssertions.assertContains(source,
+                "menuScrollContainer.addView(activity.menuPanel",
                 "The complete menu must be inside its vertical scroll container");
     }
 
     @Test
     void menuTransitionMovesTheScrollContainerThatOwnsTheVisiblePanel() throws IOException {
-        String source = mainActivitySource();
+        String source = sourceFile("MainActivity.java");
 
         TestAssertions.assertContains(source,
                 "new MenuTransitions(menuScrollContainer, menuScrim)",
                 "Menu animation must target the scroll container");
     }
 
-    private static String mainActivitySource() throws IOException {
+    private static String sourceFile(String fileName) throws IOException {
         String projectRoot = System.getProperty("user.dir").replaceFirst("/app$", "");
         return new String(Files.readAllBytes(Paths.get(projectRoot,
-                "src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java")),
+                "src/main/java/io/github/yosk/mdlite/presentation/" + fileName)),
                 StandardCharsets.UTF_8);
     }
 }

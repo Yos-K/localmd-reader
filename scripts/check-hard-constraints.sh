@@ -12,7 +12,7 @@ set -eu
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 
 MANIFEST="$ROOT/src/main/AndroidManifest.xml"
-READER="$ROOT/src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java"
+READER_CONFIGURATION="$ROOT/src/main/java/io/github/yosk/mdlite/presentation/ReaderScreenInitializer.java"
 
 fail() {
   echo "Hard constraint violated: $1" >&2
@@ -20,7 +20,7 @@ fail() {
 }
 
 [ -f "$MANIFEST" ] || fail "missing manifest: $MANIFEST"
-[ -f "$READER" ] || fail "missing reader activity: $READER"
+[ -f "$READER_CONFIGURATION" ] || fail "missing reader WebView configuration: $READER_CONFIGURATION"
 
 # 1. The app must never request INTERNET.
 if grep -q 'android.permission.INTERNET' "$MANIFEST"; then
@@ -28,12 +28,12 @@ if grep -q 'android.permission.INTERNET' "$MANIFEST"; then
 fi
 
 # 2. The main reader WebView must keep JavaScript disabled.
-COMPACT_READER="$(tr -d '[:space:]' < "$READER")"
+COMPACT_READER="$(tr -d '[:space:]' < "$READER_CONFIGURATION")"
 if printf '%s' "$COMPACT_READER" | grep -q 'setJavaScriptEnabled(true)'; then
-  fail "main reader WebView enables JavaScript in $READER"
+  fail "main reader WebView enables JavaScript in $READER_CONFIGURATION"
 fi
 if ! printf '%s' "$COMPACT_READER" | grep -q 'setJavaScriptEnabled(false)'; then
-  fail "main reader WebView does not explicitly disable JavaScript in $READER"
+  fail "main reader WebView does not explicitly disable JavaScript in $READER_CONFIGURATION"
 fi
 
 echo "Hard constraint checks passed"

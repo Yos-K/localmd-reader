@@ -10,7 +10,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -21,13 +20,9 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import io.github.yosk.mdlite.R;
 import io.github.yosk.mdlite.domain.CompositeEntitlementSource;
 import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
@@ -163,57 +158,57 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private SettingsDialogs settingsDialogs;
     private GestureShortcutDialogs gestureShortcutDialogs;
     private GestureShortcutHandler gestureShortcutHandler;
-    private DocumentSearchBar documentSearchBar;
+    DocumentSearchBar documentSearchBar;
     DocumentTabSessionController documentTabSessionController;
     PinnedDocumentController pinnedDocumentController;
     private DocumentTabBar documentTabBar;
 
-    private TextView messageView;
+    TextView messageView;
     Button menuButton;
-    private MainMenuActionButton openButton;
+    MainMenuActionButton openButton;
     MainMenuActionButton markdownLibraryButton;
-    private MainMenuActionButton createFromClipboardButton;
-    private MainMenuActionButton saveAsButton;
-    private MainMenuActionButton exportAsHtmlButton;
-    private MainMenuActionButton printOrSavePdfButton;
-    private MainMenuActionButton pinCurrentFileButton;
-    private MainMenuActionButton unpinCurrentFileButton;
-    private MainMenuActionButton pinnedFilesButton;
-    private MainMenuActionButton recentButton;
-    private MainMenuActionButton settingsButton;
-    private MainMenuActionButton tableOfContentsButton;
-    private MainMenuActionButton findInDocumentButton;
-    private MainMenuActionButton themeButton;
-    private MainMenuActionButton languageButton;
-    private MainMenuActionButton controlsPlacementButton;
-    private MainMenuActionButton gestureShortcutsButton;
-    private MainMenuActionButton proFeaturesButton;
+    MainMenuActionButton createFromClipboardButton;
+    MainMenuActionButton saveAsButton;
+    MainMenuActionButton exportAsHtmlButton;
+    MainMenuActionButton printOrSavePdfButton;
+    MainMenuActionButton pinCurrentFileButton;
+    MainMenuActionButton unpinCurrentFileButton;
+    MainMenuActionButton pinnedFilesButton;
+    MainMenuActionButton recentButton;
+    MainMenuActionButton settingsButton;
+    MainMenuActionButton tableOfContentsButton;
+    MainMenuActionButton findInDocumentButton;
+    MainMenuActionButton themeButton;
+    MainMenuActionButton languageButton;
+    MainMenuActionButton controlsPlacementButton;
+    MainMenuActionButton gestureShortcutsButton;
+    MainMenuActionButton proFeaturesButton;
     MainMenuActionButton clipboardDiagnosticsButton;
-    private MainMenuActionButton privacyButton;
-    private MainMenuActionButton[] menuActionButtons;
-    private LinearLayout settingsPanel;
-    private ExpandableMenuSection settingsMenuSection;
-    private TableOfContentsMenuPanel tableOfContentsPanel;
-    private ExpandableMenuSection tableOfContentsMenuSection;
-    private MarkdownLibraryMenuTree markdownLibraryMenuTree;
+    MainMenuActionButton privacyButton;
+    MainMenuActionButton[] menuActionButtons;
+    LinearLayout settingsPanel;
+    ExpandableMenuSection settingsMenuSection;
+    TableOfContentsMenuPanel tableOfContentsPanel;
+    ExpandableMenuSection tableOfContentsMenuSection;
+    MarkdownLibraryMenuTree markdownLibraryMenuTree;
     SwipeMenuScrollView menuScrollContainer;
     SwipeMenuLayout menuPanel;
     View menuScrim;
     private MenuTransitions menuTransitions;
-    private final List<LinearLayout> menuCards = new ArrayList<LinearLayout>();
-    private LinearLayout root;
-    private LinearLayout topBar;
-    private LinearLayout controlsBar;
+    final List<LinearLayout> menuCards = new ArrayList<LinearLayout>();
+    LinearLayout root;
+    LinearLayout topBar;
+    LinearLayout controlsBar;
     LinearLayout tabRow;
-    private HorizontalScrollView tabScroller;
+    HorizontalScrollView tabScroller;
     private int systemTopInsetPx;
     private int systemBottomInsetPx;
-    private TextView appTitle;
-    private TextView menuTitle;
-    private TextView filesSection;
-    private TextView readingSection;
-    private TextView layoutSection;
-    private TextView infoSection;
+    TextView appTitle;
+    TextView menuTitle;
+    TextView filesSection;
+    TextView readingSection;
+    TextView layoutSection;
+    TextView infoSection;
     private String currentMessage = MESSAGE_NONE;
     private float accumulatedPinchScale = 1f;
     private float temporaryPinchScale = 1f;
@@ -291,14 +286,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         viewerPalette = ViewerPalette.from(currentTheme);
         gestureShortcutBindings = settingsStore.loadGestureShortcutBindings();
 
-        root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        initTopBar();
-        initMenuButtons();
-        initMenuPanel();
-        initMessageAndTabs();
+        ReaderScreenInitializer.initialize(this);
         documentTabBar = new DocumentTabBar(this, tabScroller, tabRow);
-        initWebView();
         documentRenderingCoordinator = new DocumentRenderingCoordinator(
                 new MainActivityDocumentRenderingOutput(this));
 
@@ -334,191 +323,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
     }
 
-    private void initTopBar() {
-        topBar = new LinearLayout(this);
-        topBar.setOrientation(LinearLayout.HORIZONTAL);
-        topBar.setGravity(Gravity.CENTER_VERTICAL);
-        topBar.setPadding(dp(14), dp(10), dp(14), dp(10));
-        topBar.setBackgroundColor(backgroundColor());
-
-        menuButton = new Button(this);
-        menuButton.setText("Menu");
-        menuButton.setContentDescription("Open menu");
-        menuButton.setAllCaps(false);
-        menuButton.setOnClickListener(this);
-        styleToolbarButton(menuButton);
-        topBar.addView(menuButton, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-
-        appTitle = new TextView(this);
-        appTitle.setText("LocalMD Reader");
-        appTitle.setTextColor(textColor());
-        appTitle.setTextSize(17);
-        appTitle.setTypeface(Typeface.DEFAULT_BOLD);
-        appTitle.setGravity(Gravity.CENTER_VERTICAL);
-        appTitle.setSingleLine(true);
-        appTitle.setEllipsize(TextUtils.TruncateAt.END);
-        appTitle.setPadding(dp(14), 0, 0, 0);
-        topBar.addView(appTitle, new LinearLayout.LayoutParams(0,
-                LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-    }
-
-    private void initMenuButtons() {
-        openButton = menuActionButton(MainMenuActions.openFile());
-        markdownLibraryButton = menuActionButton(MainMenuActions.markdownLibrary());
-        createFromClipboardButton = menuActionButton(MainMenuActions.createFromClipboard());
-        saveAsButton = menuActionButton(MainMenuActions.saveAs());
-        exportAsHtmlButton = menuActionButton(MainMenuActions.exportAsHtml());
-        printOrSavePdfButton = menuActionButton(PrintDocumentMenuActions.printOrSavePdf());
-        pinCurrentFileButton = menuActionButton(MainMenuActions.pinCurrentFile());
-        unpinCurrentFileButton = menuActionButton(MainMenuActions.unpinCurrentFile());
-        pinnedFilesButton = menuActionButton(MainMenuActions.pinnedFiles());
-        recentButton = menuActionButton(MainMenuActions.recentFiles());
-        settingsButton = menuActionButton(MainMenuActions.settings());
-        tableOfContentsButton = menuActionButton(MainMenuActions.tableOfContents());
-        findInDocumentButton = menuActionButton(MainMenuActions.findInDocument());
-        themeButton = menuActionButton(MainMenuActions.theme());
-        languageButton = menuActionButton(MainMenuActions.language());
-        controlsPlacementButton = menuActionButton(MainMenuActions.controlsPlacement());
-        gestureShortcutsButton = menuActionButton(MainMenuActions.gestureShortcuts());
-        proFeaturesButton = menuActionButton(MainMenuActions.proFeatures());
-        clipboardDiagnosticsButton = menuActionButton(MainMenuActions.clipboardDiagnostics());
-        privacyButton = menuActionButton(MainMenuActions.privacy());
-        menuActionButtons = new MainMenuActionButton[] {
-            openButton, markdownLibraryButton, createFromClipboardButton, saveAsButton, exportAsHtmlButton,
-            printOrSavePdfButton, pinCurrentFileButton,
-            unpinCurrentFileButton, pinnedFilesButton, recentButton,
-            tableOfContentsButton, findInDocumentButton, settingsButton, themeButton, languageButton,
-            controlsPlacementButton, gestureShortcutsButton, proFeaturesButton,
-            clipboardDiagnosticsButton, privacyButton
-        };
-    }
-
-    private void initMenuPanel() {
-        menuScrollContainer = new SwipeMenuScrollView(this);
-        menuScrollContainer.setVisibility(View.GONE);
-        menuScrollContainer.setBackgroundColor(backgroundColor());
-        menuScrollContainer.setClickable(true);
-
-        menuPanel = new SwipeMenuLayout(this);
-        menuPanel.setOrientation(LinearLayout.VERTICAL);
-        menuPanel.setVisibility(View.VISIBLE);
-        menuPanel.setBackgroundColor(backgroundColor());
-        menuPanel.setPadding(dp(18), dp(28), dp(18), dp(18));
-        menuPanel.setClickable(true);
-        menuScrollContainer.addView(menuPanel, new ScrollView.LayoutParams(
-                ScrollView.LayoutParams.MATCH_PARENT,
-                ScrollView.LayoutParams.WRAP_CONTENT));
-
-        menuTitle = new TextView(this);
-        menuTitle.setTextColor(textColor());
-        menuTitle.setTextSize(22);
-        menuTitle.setTypeface(Typeface.DEFAULT_BOLD);
-        menuTitle.setGravity(Gravity.CENTER_VERTICAL);
-        menuTitle.setPadding(dp(8), 0, dp(8), dp(18));
-        menuPanel.addView(menuTitle, wrapParams());
-        filesSection = menuSection("");
-        markdownLibraryMenuTree = new MarkdownLibraryMenuTree(this);
-        addMenuCard(menuPanel, filesSection, openButton,
-                markdownLibraryButton, markdownLibraryMenuTree, createFromClipboardButton, saveAsButton,
-                exportAsHtmlButton, printOrSavePdfButton, pinCurrentFileButton, unpinCurrentFileButton,
-                pinnedFilesButton, recentButton);
-        readingSection = menuSection("");
-        addMenuCard(menuPanel, readingSection, tableOfContentsButton, findInDocumentButton);
-        tableOfContentsPanel = new TableOfContentsMenuPanel(this);
-        menuPanel.addView(tableOfContentsPanel, wrapParams());
-        tableOfContentsMenuSection = new ExpandableMenuSection(
-                tableOfContentsPanel, tableOfContentsPanel);
-        addMenuCard(menuPanel, null, settingsButton);
-
-        settingsPanel = new LinearLayout(this);
-        settingsPanel.setOrientation(LinearLayout.VERTICAL);
-        settingsPanel.setVisibility(View.GONE);
-        settingsPanel.setPadding(dp(10), 0, 0, 0);
-        menuPanel.addView(settingsPanel, wrapParams());
-        settingsMenuSection = ExpandableMenuSection.staticContent(settingsPanel);
-        layoutSection = menuSection("");
-        addMenuCard(settingsPanel, layoutSection, themeButton, languageButton,
-                controlsPlacementButton, gestureShortcutsButton);
-        infoSection = menuSection("");
-        addMenuCard(settingsPanel, infoSection, proFeaturesButton, clipboardDiagnosticsButton, privacyButton);
-    }
-
-    /**
-     * Grouped-list pattern (#77): one rounded tonal card per menu section, rows
-     * inside stay flat with their own ripple. Cards reduce the rounded-corner
-     * count from one-per-button to one-per-section and avoid the scalloped
-     * seams of adjacent rounded buttons.
-     */
-    private void addMenuCard(LinearLayout parent, TextView sectionLabel, View... items) {
-        if (sectionLabel != null) {
-            parent.addView(sectionLabel, wrapParams());
-        }
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        addMenuItems(card, items);
-        menuCards.add(card);
-        styleMenuCard(card);
-        LinearLayout.LayoutParams params = wrapParams();
-        params.bottomMargin = dp(10);
-        parent.addView(card, params);
-    }
-
-    private void styleMenuCard(LinearLayout card) {
+    void styleMenuCard(LinearLayout card) {
         card.setBackground(makePlainTonalBackground(surfaceAltColor(), 12));
         card.setClipToOutline(true);
     }
 
-    private void initMessageAndTabs() {
-        messageView = new TextView(this);
-        messageView.setGravity(Gravity.CENTER_VERTICAL);
-        messageView.setTextColor(textColor());
-        messageView.setBackgroundColor(messageColor());
-        messageView.setPadding(dp(24), dp(12), dp(24), dp(12));
-
-        tabRow = new LinearLayout(this);
-        tabRow.setOrientation(LinearLayout.HORIZONTAL);
-        tabRow.setPadding(dp(12), dp(8), dp(12), dp(8));
-
-        tabScroller = new HorizontalScrollView(this);
-        tabScroller.setHorizontalScrollBarEnabled(true);
-        tabScroller.setBackgroundColor(backgroundColor());
-        tabScroller.addView(tabRow, new HorizontalScrollView.LayoutParams(
-                HorizontalScrollView.LayoutParams.WRAP_CONTENT,
-                HorizontalScrollView.LayoutParams.WRAP_CONTENT));
-
-        controlsBar = new LinearLayout(this);
-        controlsBar.setOrientation(LinearLayout.VERTICAL);
-        controlsBar.addView(topBar, wrapParams());
-        controlsBar.addView(tabScroller, wrapParams());
-        controlsBar.addView(documentSearchBar, wrapParams());
-    }
-
-    private void initWebView() {
-        webView = new WebView(this);
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(false);
-        settings.setDomStorageEnabled(false);
-        settings.setDatabaseEnabled(false);
-        settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
-        settings.setSupportZoom(false);
-        settings.setBuiltInZoomControls(false);
-        settings.setDisplayZoomControls(false);
-        webView.setWebViewClient(new AppLinkClient(this));
-        if (documentRenderingProfile.mermaidRendering().isEnabled()) {
-            mermaidRenderEngine = new MermaidJsRenderEngine(this, this);
-        }
-    }
-
-    private static void addMenuItems(LinearLayout parent, View... views) {
-        LinearLayout.LayoutParams params = wrapParams();
-        for (View v : views) {
-            parent.addView(v, params);
-        }
-    }
-
-    private static LinearLayout.LayoutParams wrapParams() {
+    static LinearLayout.LayoutParams wrapParams() {
         return new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
     }
@@ -1173,7 +983,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     int primaryStrongColor() { return viewerPalette.primaryStrong; }
     int onPrimaryColor() { return viewerPalette.onPrimary; }
     int borderColor() { return viewerPalette.border; }
-    private int messageColor() { return viewerPalette.message; }
+    int messageColor() { return viewerPalette.message; }
 
     void changeFontSizeByPinch(float scaleFactor) {
         if (!FontSize.canApplyPinchScale(scaleFactor)) {
@@ -1293,13 +1103,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return menuTransitions.isOpenTargeted();
     }
 
-    private MainMenuActionButton menuActionButton(MainMenuAction action) {
+    MainMenuActionButton menuActionButton(MainMenuAction action) {
         MainMenuActionButton button = new MainMenuActionButton(this, action);
         styleMenuButton(button);
         return button;
     }
 
-    private TextView menuSection(String label) {
+    TextView menuSection(String label) {
         TextView section = new TextView(this);
         section.setText(label);
         section.setTextColor(primaryStrongColor());
@@ -1312,7 +1122,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     // Bold discipline (#77): bold is reserved for the app titles, the active
     // tab and section labels, so buttons and rows below use the regular face.
 
-    private void styleToolbarButton(TextView view) {
+    void styleToolbarButton(TextView view) {
         view.setTextColor(primaryStrongColor());
         view.setTextSize(15);
         view.setTypeface(Typeface.DEFAULT);
@@ -1403,65 +1213,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         catch (SecurityException e) { return RestoredOpenDocumentTab.unavailable(); }
     }
 
-    private void restorePendingScrollAfterPageLoad() {
+    void restorePendingScrollAfterPageLoad() {
         if (pendingScrollRestoreY < 0) { return; }
         int scrollY = pendingScrollRestoreY;
         pendingScrollRestoreY = -1;
         webView.post(new RestoreScrollPosition(webView, scrollY, 6));
     }
 
-    private static final class AppLinkClient extends WebViewClient {
-        private final MainActivity activity;
-
-        private AppLinkClient(MainActivity activity) {
-            this.activity = activity;
-        }
-
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            return handleUrlLoading(view, url);
-        }
-
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            Uri uri = request == null ? null : request.getUrl();
-            return handleUrlLoading(view, uri == null ? null : uri.toString());
-        }
-
-        @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-            return activity.openActiveRelativeImage(url);
-        }
-
-        @Override
-        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-            Uri uri = request == null ? null : request.getUrl();
-            return activity.openActiveRelativeImage(uri == null ? null : uri.toString());
-        }
-
-        @Override
-        public void onPageFinished(WebView view, String url) {
-            activity.restorePendingScrollAfterPageLoad();
-        }
-
-        private boolean handleUrlLoading(WebView view, String url) {
-            if (WelcomeDocumentBuilder.OPEN_MARKDOWN_URL.equals(url)) {
-                activity.openMarkdownPicker();
-                return true;
-            }
-            if (url == null) { return true; }
-            if (activity.openActiveRelativeMarkdownLink(url)) {
-                return true;
-            }
-            String lower = url.toLowerCase();
-            if (lower.startsWith("https://localmd.local/")) {
-                return true;
-            }
-            if (lower.startsWith("https://") || lower.startsWith("http://")) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                view.getContext().startActivity(intent);
-            }
-            return true;
-        }
-    }
 }
