@@ -54,7 +54,6 @@ import io.github.yosk.mdlite.file.LocalRelativeImageResource;
 import io.github.yosk.mdlite.file.LocalRelativeMarkdownLink;
 import io.github.yosk.mdlite.file.MarkdownFileOpenResult;
 import io.github.yosk.mdlite.file.RestorableOpenTab;
-import io.github.yosk.mdlite.file.RestorableOpenTabs;
 import io.github.yosk.mdlite.infrastructure.BuildEntitlementSource;
 import io.github.yosk.mdlite.infrastructure.BuildProPurchaseStatusRefresh;
 import io.github.yosk.mdlite.infrastructure.CachedProPurchaseEntitlementSource;
@@ -76,7 +75,10 @@ import io.github.yosk.mdlite.viewer.ViewerLanguage;
 import io.github.yosk.mdlite.viewer.ViewerText;
 import io.github.yosk.mdlite.viewer.ViewerTheme;
 import io.github.yosk.mdlite.viewer.TabPinningDecision;
+import io.github.yosk.mdlite.viewer.PinnedDocumentController;
 import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
+import io.github.yosk.mdlite.model.RestoredOpenDocumentTab;
+import io.github.yosk.mdlite.model.RestoredOpenDocumentTabs;
 import io.github.yosk.mdlite.file.RecentDocument;
 import java.io.File;
 import java.io.FileInputStream;
@@ -90,7 +92,7 @@ import java.util.Map;
 public final class MainActivity extends Activity implements View.OnClickListener, View.OnLongClickListener,
         View.OnApplyWindowInsetsListener,
         MermaidJsRenderEngine.Listener, CustomGestureDrawingView.Listener,
-        HeadingNavigation.Handler, TabPinningDecision.Handler {
+        HeadingNavigation.Handler, PinnedDocumentController.Host {
 
     static final int REQUEST_OPEN_DOCUMENT = 1001;
     static final int REQUEST_SAVE_DOCUMENT = 1002;
@@ -163,6 +165,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private GestureShortcutHandler gestureShortcutHandler;
     private DocumentSearchBar documentSearchBar;
     DocumentTabSessionController documentTabSessionController;
+    PinnedDocumentController pinnedDocumentController;
+    private DocumentTabBar documentTabBar;
 
     private TextView messageView;
     Button menuButton;
@@ -265,6 +269,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         reloadFeatureEntitlement();
 
         tabPersistence = new TabPersistence(this, RecentDocumentLimit.fromEntitlement(featureEntitlement));
+        pinnedDocumentController = new PinnedDocumentController(tabPersistence, this);
         documentOpener = new DocumentOpener(this);
         documentSaver = new DocumentSaver(this);
         documentListDialogs = new DocumentListDialogController(this);
@@ -292,6 +297,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         initMenuButtons();
         initMenuPanel();
         initMessageAndTabs();
+        documentTabBar = new DocumentTabBar(this, tabScroller, tabRow);
         initWebView();
         documentRenderingCoordinator = new DocumentRenderingCoordinator(
                 new MainActivityDocumentRenderingOutput(this));
@@ -641,60 +647,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void renderTabs() {
-        tabRow.removeAllViews();
-        for (int i = 0; i < openTabs().tabs().size(); i++) {
-            OpenDocumentTab tab = openTabs().tabs().get(i);
-            LinearLayout tabGroup = new LinearLayout(this);
-            tabGroup.setOrientation(LinearLayout.HORIZONTAL);
-            tabGroup.setGravity(Gravity.CENTER_VERTICAL);
-            tabGroup.setPadding(0, 0, dp(6), 0);
-
-            TabButton button = new TabButton(this, i);
-            button.setText(tab.title());
-            TabPinningDecision pinning = tabPinningDecision(tab);
-            button.setContentDescription(pinning.tabDescription(viewerText, tab.title()));
-            button.setAllCaps(false);
-            button.setOnClickListener(this);
-            button.setOnLongClickListener(this);
-            button.setLongClickable(true);
-            button.setSingleLine(true);
-            button.setEllipsize(TextUtils.TruncateAt.END);
-            button.setMaxWidth(dp(220));
-            button.setTextSize(14);
-            button.setTypeface(i == openTabs().activeIndex() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
-            button.setTextColor(i == openTabs().activeIndex() ? onPrimaryColor() : textColor());
-            button.setPadding(dp(16), dp(8), dp(16), dp(8));
-            if (pinning instanceof TabPinningDecision.Unpin) {
-                button.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                        themedIcon(R.drawable.ic_push_pin_18, i == openTabs().activeIndex()
-                                ? onPrimaryColor() : textColor()), null, null, null);
-                button.setCompoundDrawablePadding(dp(6));
-            }
-            // Pill tabs (#77): the active tab is a filled primary pill, inactive
-            // tabs are borderless tonal pills, so selection reads from fill
-            // contrast instead of a 1px border.
-            button.setBackground(makeTonalBackground(
-                    i == openTabs().activeIndex() ? primaryColor() : surfaceAltColor(),
-                    PILL_RADIUS_DP));
-            tabGroup.addView(button, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-
-            if (!WELCOME_URI.equals(tab.uri())) {
-                CloseTabText closeText = new CloseTabText(this, i);
-                closeText.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                        themedIcon(R.drawable.ic_close_20, mutedColor()), null, null, null);
-                closeText.setGravity(Gravity.CENTER);
-                closeText.setPadding(dp(6), 0, dp(14), 0);
-                closeText.setContentDescription(viewerText.closeTabDescription(tab.title()));
-                closeText.setOnClickListener(this);
-                tabGroup.addView(closeText, new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
-            }
-            tabRow.addView(tabGroup, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        }
-        tabRow.post(new CloseTabTouchTargets(tabRow, dp(48)));
-        tabScroller.post(new ScrollToActiveTab(tabScroller, tabRow, openTabs().activeIndex()));
+        documentTabBar.render(openTabs());
     }
 
     @Override
@@ -706,7 +659,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (index < 0 || index >= openTabs().tabs().size()) {
             return false;
         }
-        return tabPinningDecision(openTabs().tabs().get(index)).perform(this);
+        return pinnedDocumentController.decision(openTabs().tabs().get(index))
+                .perform(pinnedDocumentController);
     }
 
     void renderCurrentDocument() {
@@ -1037,54 +991,33 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return documentTabSession != null && openTabs().activeTab() instanceof OpenDocumentTab.FileDocumentTab;
     }
 
-    boolean pinnedDocumentsAvailable() {
+    @Override
+    public boolean pinnedDocumentsAvailable() {
         return featureEntitlement.allows(ViewerFeature.EXTENDED_RECENT_FILES);
     }
 
     boolean activeFileIsPinned() {
-        return activeTabIsFile() && tabPersistence.isPinnedDocument(openTabs().activeTab().uri());
+        return activeTabIsFile() && pinnedDocumentController.isPinned(openTabs().activeTab());
     }
 
     void pinCurrentDocument() {
-        TabPinningDecision.from(pinnedDocumentsAvailable(), openTabs().activeTab(), false)
-                .perform(this);
+        pinnedDocumentController.pinCurrent(openTabs().activeTab());
     }
 
     void unpinCurrentDocument() {
-        TabPinningDecision.from(pinnedDocumentsAvailable(), openTabs().activeTab(), true)
-                .perform(this);
-    }
-
-    @Override
-    public void pin(OpenDocumentTab.FileDocumentTab tab) {
-        tabPersistence.pinDocument(tab.title(), tab.uri());
-        refreshPinnedDocumentUi(viewerText.currentFilePinned());
-    }
-
-    @Override
-    public void unpin(OpenDocumentTab.FileDocumentTab tab) {
-        tabPersistence.unpinDocument(tab.uri());
-        refreshPinnedDocumentUi(viewerText.currentFileUnpinned());
+        pinnedDocumentController.unpinCurrent(openTabs().activeTab());
     }
 
     void clearPinnedDocuments() {
-        tabPersistence.clearPinnedDocuments();
-        refreshPinnedDocumentUi(viewerText.pinnedFilesCleared());
+        pinnedDocumentController.clear();
     }
 
     void unpinPinnedDocument(RecentDocument document) {
-        tabPersistence.unpinDocument(document.uri());
-        renderTabs();
-        refreshMenuActionButtons();
-        showMessage(viewerText.currentFileUnpinned());
+        pinnedDocumentController.unpin(document.uri());
     }
 
-    private TabPinningDecision tabPinningDecision(OpenDocumentTab tab) {
-        return TabPinningDecision.from(pinnedDocumentsAvailable(), tab,
-                tabPersistence.isPinnedDocument(tab.uri()));
-    }
-
-    private void refreshPinnedDocumentUi(String message) {
+    @Override
+    public void refreshPinnedDocuments(String message) {
         renderTabs();
         refreshMenuActionButtons();
         showMessage(message);
@@ -1098,7 +1031,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return viewerText.recentFiles();
     }
 
-    ViewerText viewerText() {
+    @Override
+    public ViewerText viewerText() {
         return viewerText;
     }
 
@@ -1438,47 +1372,35 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private OpenDocumentTabs restoreOpenTabsOrInitial() {
-        RestorableOpenTabs storedTabs = tabPersistence.loadRestorableOpenTabs();
-        if (storedTabs.isEmpty()) { return OpenDocumentTabs.withInitialTab(initialTab()); }
-        ArrayList<OpenDocumentTab> restoredTabs = new ArrayList<OpenDocumentTab>();
-        int restoredActiveIndex = -1;
-        List<RestorableOpenTab> items = storedTabs.tabs();
-        for (int i = 0; i < items.size(); i++) {
-            OpenDocumentTab tab = restoreOpenTab(items.get(i));
-            if (tab != null) {
-                if (i == storedTabs.activeIndex()) { restoredActiveIndex = restoredTabs.size(); }
-                restoredTabs.add(tab);
-            }
-        }
-        if (restoredTabs.isEmpty()) { return OpenDocumentTabs.withInitialTab(initialTab()); }
-        if (restoredActiveIndex < 0) {
-            restoredActiveIndex = storedTabs.activeIndex();
-            if (restoredActiveIndex >= restoredTabs.size()) { restoredActiveIndex = restoredTabs.size() - 1; }
-        }
-        return openTabsFrom(restoredTabs, restoredActiveIndex);
+        return RestoredOpenDocumentTabs.restore(
+                tabPersistence.loadRestorableOpenTabs(),
+                initialTab(),
+                new RestoredOpenDocumentTabs.Loader() {
+                    @Override
+                    public RestoredOpenDocumentTab load(RestorableOpenTab storedTab) {
+                        return restoreOpenTab(storedTab);
+                    }
+                });
     }
 
-    private OpenDocumentTab restoreOpenTab(RestorableOpenTab storedTab) {
+    private RestoredOpenDocumentTab restoreOpenTab(RestorableOpenTab storedTab) {
         try {
             Uri uri = Uri.parse(storedTab.uri());
             FileInfo fileInfo = documentOpener.readFileInfo(uri);
             String displayName = fileInfo.displayName.length() == 0 ? storedTab.title() : fileInfo.displayName;
             MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(displayName, fileInfo.sizeBytes, fileSizePolicy);
-            if (!(openResult instanceof MarkdownFileOpenResult.ReadableMarkdownFile)) { return null; }
+            if (!(openResult instanceof MarkdownFileOpenResult.ReadableMarkdownFile)) {
+                return RestoredOpenDocumentTab.unavailable();
+            }
             MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
             String markdown = documentOpener.readText(uri, MAX_FILE_SIZE_BYTES);
             String documentUri = uri.toString();
             SafeHtml rendered = renderMarkdownForUri(documentUri, markdown);
-            return OpenDocumentTab.fileDocument(readableFile.displayName(), documentUri, rendered);
-        } catch (IllegalArgumentException e) { return null; }
-        catch (IOException e) { return null; }
-        catch (SecurityException e) { return null; }
-    }
-
-    private static OpenDocumentTabs openTabsFrom(List<OpenDocumentTab> restoredTabs, int activeIndex) {
-        OpenDocumentTabs tabs = OpenDocumentTabs.withInitialTab(restoredTabs.get(0));
-        for (int i = 1; i < restoredTabs.size(); i++) { tabs = tabs.open(restoredTabs.get(i)); }
-        return tabs.activate(activeIndex);
+            return RestoredOpenDocumentTab.available(
+                    OpenDocumentTab.fileDocument(readableFile.displayName(), documentUri, rendered));
+        } catch (IllegalArgumentException e) { return RestoredOpenDocumentTab.unavailable(); }
+        catch (IOException e) { return RestoredOpenDocumentTab.unavailable(); }
+        catch (SecurityException e) { return RestoredOpenDocumentTab.unavailable(); }
     }
 
     private void restorePendingScrollAfterPageLoad() {
