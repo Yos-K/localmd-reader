@@ -7,8 +7,6 @@ import io.github.yosk.mdlite.domain.MermaidRendering;
 import io.github.yosk.mdlite.domain.RelativeImageRendering;
 import io.github.yosk.mdlite.domain.RelativeLinkRendering;
 import io.github.yosk.mdlite.domain.SafeHtml;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Map;
 
 public final class JavaSimpleMarkdownRenderer {
@@ -152,7 +150,7 @@ public final class JavaSimpleMarkdownRenderer {
                 String headingText = line.substring(headingLevel + 1).trim();
                 html.append("<h").append(headingLevel)
                         .append(" id=\"").append(headingAnchors.nextAnchorId(headingText)).append("\">")
-                        .append(renderInline(headingText, safeRelativeLinkRendering, safeRelativeImageRendering))
+                        .append(MarkdownInlineRenderer.render(headingText, safeRelativeLinkRendering, safeRelativeImageRendering))
                         .append("</h").append(headingLevel).append(">");
                 continue;
             }
@@ -167,7 +165,7 @@ public final class JavaSimpleMarkdownRenderer {
             if (line.startsWith("> ")) {
                 flushParagraph(html, paragraph, safeRelativeLinkRendering, safeRelativeImageRendering);
                 openList = closeList(html, openList);
-                html.append("<blockquote>").append(renderInline(line.substring(2).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</blockquote>");
+                html.append("<blockquote>").append(MarkdownInlineRenderer.render(line.substring(2).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</blockquote>");
                 continue;
             }
 
@@ -181,7 +179,7 @@ public final class JavaSimpleMarkdownRenderer {
                         openList = LIST_CHECKLIST;
                     }
                     html.append("<li>").append(checkbox).append(' ')
-                            .append(renderInline(line.substring(6).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
+                            .append(MarkdownInlineRenderer.render(line.substring(6).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
                     continue;
                 }
                 if (openList != LIST_UNORDERED) {
@@ -189,7 +187,7 @@ public final class JavaSimpleMarkdownRenderer {
                     html.append("<ul>");
                     openList = LIST_UNORDERED;
                 }
-                html.append("<li>").append(renderInline(line.substring(2).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
+                html.append("<li>").append(MarkdownInlineRenderer.render(line.substring(2).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
                 continue;
             }
 
@@ -201,7 +199,7 @@ public final class JavaSimpleMarkdownRenderer {
                     html.append("<ol>");
                     openList = LIST_ORDERED;
                 }
-                html.append("<li>").append(renderInline(line.substring(orderedMarkerLength).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
+                html.append("<li>").append(MarkdownInlineRenderer.render(line.substring(orderedMarkerLength).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
                 continue;
             }
 
@@ -430,7 +428,7 @@ public final class JavaSimpleMarkdownRenderer {
             RelativeImageRendering relativeImageRendering) {
         for (int i = 0; i < cells.length; i++) {
             html.append('<').append(tag).append('>')
-                    .append(renderInline(cells[i], relativeLinkRendering, relativeImageRendering))
+                    .append(MarkdownInlineRenderer.render(cells[i], relativeLinkRendering, relativeImageRendering))
                     .append("</").append(tag).append('>');
         }
     }
@@ -471,208 +469,10 @@ public final class JavaSimpleMarkdownRenderer {
         if (paragraph.length() == 0) {
             return;
         }
-        html.append("<p>").append(renderInline(paragraph.toString(), relativeLinkRendering, relativeImageRendering)).append("</p>");
+        html.append("<p>").append(MarkdownInlineRenderer.render(paragraph.toString(), relativeLinkRendering, relativeImageRendering)).append("</p>");
         paragraph.setLength(0);
     }
 
-    private static String renderInline(
-            String text,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        StringBuilder out = new StringBuilder();
-        StringBuilder code = null;
-
-        for (int i = 0; i < text.length(); i++) {
-            char current = text.charAt(i);
-            if (current == '`') {
-                if (code == null) {
-                    code = new StringBuilder();
-                } else {
-                    out.append("<code>").append(escapeHtml(code.toString())).append("</code>");
-                    code = null;
-                }
-                continue;
-            }
-
-            if (code == null) {
-                int strongEnd = appendMarkdownStrongIfPresent(
-                        out, text, i, relativeLinkRendering, relativeImageRendering);
-                if (strongEnd >= i) {
-                    i = strongEnd;
-                    continue;
-                }
-                int imageEnd = appendMarkdownImageIfPresent(out, text, i, relativeLinkRendering, relativeImageRendering);
-                if (imageEnd >= i) {
-                    i = imageEnd;
-                    continue;
-                }
-                int linkEnd = appendMarkdownLinkIfPresent(out, text, i, relativeLinkRendering, relativeImageRendering);
-                if (linkEnd >= i) {
-                    i = linkEnd;
-                    continue;
-                }
-                out.append(escapeHtmlChar(current));
-            } else {
-                code.append(current);
-            }
-        }
-
-        if (code != null) {
-            out.append('`').append(escapeHtml(code.toString()));
-        }
-
-        return out.toString();
-    }
-
-    private static int appendMarkdownStrongIfPresent(
-            StringBuilder out,
-            String text,
-            int index,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        if (text.charAt(index) != '*'
-                || index + 1 >= text.length()
-                || text.charAt(index + 1) != '*'
-                || isEscaped(text, index)) {
-            return -1;
-        }
-        int end = closingStrongMarker(text, index + 2);
-        if (end < 0 || end == index + 2) {
-            return -1;
-        }
-        out.append("<strong>")
-                .append(renderInline(text.substring(index + 2, end),
-                        relativeLinkRendering, relativeImageRendering))
-                .append("</strong>");
-        return end + 1;
-    }
-
-    private static int closingStrongMarker(String text, int start) {
-        for (int i = start; i + 1 < text.length(); i++) {
-            if (text.charAt(i) == '*' && text.charAt(i + 1) == '*'
-                    && !isEscaped(text, i)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private static boolean isEscaped(String text, int index) {
-        int slashCount = 0;
-        for (int i = index - 1; i >= 0 && text.charAt(i) == '\\'; i--) {
-            slashCount++;
-        }
-        return slashCount % 2 == 1;
-    }
-
-    private static int appendMarkdownImageIfPresent(
-            StringBuilder out,
-            String text,
-            int index,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        if (text.charAt(index) != '!' || index + 1 >= text.length() || text.charAt(index + 1) != '[') {
-            return -1;
-        }
-        int labelEnd = text.indexOf(']', index + 2);
-        if (labelEnd < 0 || labelEnd + 1 >= text.length() || text.charAt(labelEnd + 1) != '(') {
-            return -1;
-        }
-        int urlEnd = text.indexOf(')', labelEnd + 2);
-        if (urlEnd < 0) {
-            return -1;
-        }
-
-        String alt = text.substring(index + 2, labelEnd);
-        String url = text.substring(labelEnd + 2, urlEnd).trim();
-        if (isSafeImageUrl(url, relativeImageRendering)) {
-            out.append("<img src=\"").append(escapeHtml(localRelativeImageRequestUrl(url))).append("\" alt=\"")
-                    .append(escapeHtml(renderInline(alt, relativeLinkRendering, RelativeImageRendering.disabled())))
-                    .append("\">");
-        } else {
-            out.append(renderInline(alt, relativeLinkRendering, RelativeImageRendering.disabled()));
-        }
-        return urlEnd;
-    }
-
-    private static int appendMarkdownLinkIfPresent(
-            StringBuilder out,
-            String text,
-            int index,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        if (text.charAt(index) != '[') {
-            return -1;
-        }
-        int labelEnd = text.indexOf(']', index + 1);
-        if (labelEnd < 0 || labelEnd + 1 >= text.length() || text.charAt(labelEnd + 1) != '(') {
-            return -1;
-        }
-        int urlEnd = text.indexOf(')', labelEnd + 2);
-        if (urlEnd < 0) {
-            return -1;
-        }
-
-        String label = text.substring(index + 1, labelEnd);
-        String url = text.substring(labelEnd + 2, urlEnd).trim();
-        if (isSafeLinkUrl(url, relativeLinkRendering)) {
-            out.append("<a href=\"").append(escapeHtml(linkHref(url, relativeLinkRendering))).append("\">")
-                    .append(renderInline(label, relativeLinkRendering, relativeImageRendering))
-                    .append("</a>");
-        } else {
-            out.append(renderInline(label, relativeLinkRendering, relativeImageRendering));
-        }
-        return urlEnd;
-    }
-
-    private static boolean isSafeImageUrl(String url, RelativeImageRendering relativeImageRendering) {
-        String lower = url.toLowerCase();
-        return relativeImageRendering != null
-                && relativeImageRendering.isEnabled()
-                && isSafeRelativeLinkUrl(url, lower);
-    }
-
-    private static String localRelativeImageRequestUrl(String url) {
-        try {
-            return "https://localmd.local/__relative_image__?path=" + URLEncoder.encode(url, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return "https://localmd.local/__relative_image__?path=";
-        }
-    }
-
-    private static boolean isSafeLinkUrl(String url, RelativeLinkRendering relativeLinkRendering) {
-        String lower = url.toLowerCase();
-        if (lower.startsWith("https://") || lower.startsWith("http://")) {
-            return true;
-        }
-        return relativeLinkRendering != null
-                && relativeLinkRendering.isEnabled()
-                && isSafeRelativeLinkUrl(url, lower);
-    }
-
-    private static String linkHref(String url, RelativeLinkRendering relativeLinkRendering) {
-        String lower = url.toLowerCase();
-        if (lower.startsWith("https://") || lower.startsWith("http://")) {
-            return url;
-        }
-        return localRelativeMarkdownRequestUrl(url);
-    }
-
-    private static String localRelativeMarkdownRequestUrl(String url) {
-        try {
-            return "https://localmd.local/__relative_markdown__?path=" + URLEncoder.encode(url, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return "https://localmd.local/__relative_markdown__?path=";
-        }
-    }
-
-    private static boolean isSafeRelativeLinkUrl(String url, String lower) {
-        return url.length() > 0
-                && !url.startsWith("/")
-                && !url.startsWith("\\")
-                && !url.startsWith("//")
-                && lower.indexOf(':') < 0;
-    }
 
     private static String escapeHtml(String text) {
         StringBuilder escaped = new StringBuilder();
