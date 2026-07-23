@@ -3,11 +3,9 @@ package io.github.yosk.mdlite.presentation;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.GestureDetector;
@@ -162,6 +160,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     DocumentTabSessionController documentTabSessionController;
     PinnedDocumentController pinnedDocumentController;
     private DocumentTabBar documentTabBar;
+    private ReaderAppearance readerAppearance;
 
     TextView messageView;
     Button menuButton;
@@ -286,6 +285,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         viewerPalette = ViewerPalette.from(currentTheme);
         gestureShortcutBindings = settingsStore.loadGestureShortcutBindings();
 
+        readerAppearance = new ReaderAppearance(this);
         ReaderScreenInitializer.initialize(this);
         documentTabBar = new DocumentTabBar(this, tabScroller, tabRow);
         documentRenderingCoordinator = new DocumentRenderingCoordinator(
@@ -324,8 +324,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void styleMenuCard(LinearLayout card) {
-        card.setBackground(makePlainTonalBackground(surfaceAltColor(), 12));
-        card.setClipToOutline(true);
+        readerAppearance.styleMenuCard(card);
     }
 
     static LinearLayout.LayoutParams wrapParams() {
@@ -910,16 +909,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     /** Vector icons replace the old text glyphs (#73); tinted per theme. */
     Drawable themedIcon(int resId, int color) {
-        Drawable icon = getDrawable(resId).mutate();
-        icon.setTint(color);
-        return icon;
+        return readerAppearance.themedIcon(resId, color);
     }
 
     void applyExpandChevron(TextView button, boolean expanded) {
-        button.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null,
-                themedIcon(expanded ? R.drawable.ic_expand_less_18 : R.drawable.ic_expand_more_18,
-                        textColor()), null);
-        button.setCompoundDrawablePadding(dp(6));
+        readerAppearance.applyExpandChevron(button, expanded);
     }
 
     /**
@@ -928,7 +922,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
      * shape; its color derives from the theme primary at low alpha.
      */
     Drawable makeRoundedBackground(int fillColor, int strokeColor, int radiusDp) {
-        return withRipple(makePlainRoundedBackground(fillColor, strokeColor, radiusDp), radiusDp);
+        return readerAppearance.roundedBackground(fillColor, strokeColor, radiusDp);
     }
 
     /**
@@ -936,42 +930,22 @@ public final class MainActivity extends Activity implements View.OnClickListener
      * from the page by fill contrast alone, without the 1px border noise.
      */
     Drawable makeTonalBackground(int fillColor, int radiusDp) {
-        return withRipple(makePlainTonalBackground(fillColor, radiusDp), radiusDp);
+        return readerAppearance.tonalBackground(fillColor, radiusDp);
     }
 
     /** Non-interactive tonal container (section cards must not ripple). */
     GradientDrawable makePlainTonalBackground(int fillColor, int radiusDp) {
-        GradientDrawable surface = new GradientDrawable();
-        surface.setColor(fillColor);
-        surface.setCornerRadius(dp(radiusDp));
-        return surface;
+        return readerAppearance.plainTonalBackground(fillColor, radiusDp);
     }
 
     /** Transparent row inside a card: ripple feedback without its own surface. */
     Drawable makeRowRippleBackground() {
-        GradientDrawable mask = new GradientDrawable();
-        mask.setColor(0xffffffff);
-        return new RippleDrawable(ColorStateList.valueOf(rippleColor()), null, mask);
+        return readerAppearance.rowRippleBackground();
     }
 
     /** Plain variant for non-interactive surfaces (text fields must not ripple). */
     GradientDrawable makePlainRoundedBackground(int fillColor, int strokeColor, int radiusDp) {
-        GradientDrawable background = new GradientDrawable();
-        background.setColor(fillColor);
-        background.setCornerRadius(dp(radiusDp));
-        background.setStroke(1, strokeColor);
-        return background;
-    }
-
-    private Drawable withRipple(GradientDrawable content, int radiusDp) {
-        GradientDrawable mask = new GradientDrawable();
-        mask.setColor(0xffffffff);
-        mask.setCornerRadius(dp(radiusDp));
-        return new RippleDrawable(ColorStateList.valueOf(rippleColor()), content, mask);
-    }
-
-    int rippleColor() {
-        return (primaryColor() & 0x00ffffff) | 0x33000000;
+        return readerAppearance.plainRoundedBackground(fillColor, strokeColor, radiusDp);
     }
 
     int backgroundColor() { return viewerPalette.background; }
@@ -1015,27 +989,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void applyNativeTheme() {
-        SystemBarsTheme.apply(getWindow(), viewerPalette);
-        root.setBackgroundColor(backgroundColor());
-        topBar.setBackgroundColor(backgroundColor());
-        tabScroller.setBackgroundColor(backgroundColor());
-        menuScrollContainer.setBackgroundColor(backgroundColor());
-        menuPanel.setBackgroundColor(backgroundColor());
-        appTitle.setTextColor(textColor());
-        menuTitle.setTextColor(textColor());
-        messageView.setTextColor(textColor());
-        messageView.setBackgroundColor(messageColor());
-        styleToolbarButton(menuButton);
-        for (int i = 0; i < menuActionButtons.length; i++) { styleMenuButton(menuActionButtons[i]); }
-        for (int i = 0; i < menuCards.size(); i++) { styleMenuCard(menuCards.get(i)); }
-        markdownLibraryMenuTree.refreshStyle();
-        tableOfContentsPanel.refreshStyle();
-        documentSearchBar.refreshStyle();
-        int sc = primaryStrongColor();
-        filesSection.setTextColor(sc);
-        readingSection.setTextColor(sc);
-        layoutSection.setTextColor(sc);
-        infoSection.setTextColor(sc);
+        readerAppearance.applyCurrentTheme();
     }
 
     void applyControlsPlacement() {
@@ -1123,37 +1077,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
     // tab and section labels, so buttons and rows below use the regular face.
 
     void styleToolbarButton(TextView view) {
-        view.setTextColor(primaryStrongColor());
-        view.setTextSize(15);
-        view.setTypeface(Typeface.DEFAULT);
-        view.setPadding(dp(16), dp(9), dp(16), dp(9));
-        view.setBackground(makeRoundedBackground(surfaceAltColor(), borderColor(), 8));
-        view.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                themedIcon(R.drawable.ic_menu_20, primaryStrongColor()), null, null, null);
-        view.setCompoundDrawablePadding(dp(8));
+        readerAppearance.styleToolbarButton(view);
     }
 
     void styleCompactButton(TextView view) {
-        view.setTextColor(primaryStrongColor());
-        view.setTextSize(14);
-        view.setTypeface(Typeface.DEFAULT);
-        view.setMinWidth(0);
-        view.setMinHeight(0);
-        view.setMinimumWidth(0);
-        view.setMinimumHeight(0);
-        view.setPadding(dp(8), dp(4), dp(8), dp(4));
-        view.setBackground(makeRoundedBackground(surfaceAltColor(), borderColor(), 8));
+        readerAppearance.styleCompactButton(view);
     }
 
     private void styleMenuButton(TextView view) {
-        view.setTextColor(textColor());
-        view.setTextSize(16);
-        view.setTypeface(Typeface.DEFAULT);
-        view.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
-        view.setPadding(dp(16), dp(12), dp(16), dp(12));
-        // Rows live inside a section card (tonal surfaceAlt), so they stay
-        // transparent themselves and only contribute ripple feedback.
-        view.setBackground(makeRowRippleBackground());
+        readerAppearance.styleMenuButton(view);
     }
 
     private void applyControlsBarInsets() {
