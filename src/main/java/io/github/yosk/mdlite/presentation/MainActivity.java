@@ -75,6 +75,8 @@ import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
 import io.github.yosk.mdlite.viewer.ViewerLanguage;
 import io.github.yosk.mdlite.viewer.ViewerText;
 import io.github.yosk.mdlite.viewer.ViewerTheme;
+import io.github.yosk.mdlite.viewer.TabPinningDecision;
+import io.github.yosk.mdlite.file.RecentDocument;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -84,10 +86,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class MainActivity extends Activity implements View.OnClickListener,
+public final class MainActivity extends Activity implements View.OnClickListener, View.OnLongClickListener,
         View.OnApplyWindowInsetsListener,
         MermaidJsRenderEngine.Listener, CustomGestureDrawingView.Listener,
-        HeadingNavigation.Handler {
+        HeadingNavigation.Handler, TabPinningDecision.Handler {
 
     static final int REQUEST_OPEN_DOCUMENT = 1001;
     static final int REQUEST_SAVE_DOCUMENT = 1002;
@@ -647,9 +649,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
             TabButton button = new TabButton(this, i);
             button.setText(tab.title());
+            TabPinningDecision pinning = tabPinningDecision(tab);
+            button.setContentDescription(pinning.tabDescription(viewerText, tab.title()));
             button.setAllCaps(false);
             button.setOnClickListener(this);
-            button.setClickable(i != openTabs().activeIndex());
+            button.setOnLongClickListener(this);
+            button.setLongClickable(true);
             button.setSingleLine(true);
             button.setEllipsize(TextUtils.TruncateAt.END);
             button.setMaxWidth(dp(220));
@@ -657,6 +662,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
             button.setTypeface(i == openTabs().activeIndex() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
             button.setTextColor(i == openTabs().activeIndex() ? onPrimaryColor() : textColor());
             button.setPadding(dp(16), dp(8), dp(16), dp(8));
+            if (pinning instanceof TabPinningDecision.Unpin) {
+                button.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                        themedIcon(R.drawable.ic_push_pin_18, i == openTabs().activeIndex()
+                                ? onPrimaryColor() : textColor()), null, null, null);
+                button.setCompoundDrawablePadding(dp(6));
+            }
             // Pill tabs (#77): the active tab is a filled primary pill, inactive
             // tabs are borderless tonal pills, so selection reads from fill
             // contrast instead of a 1px border.
@@ -682,6 +693,18 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         tabRow.post(new CloseTabTouchTargets(tabRow, dp(48)));
         tabScroller.post(new ScrollToActiveTab(tabScroller, tabRow, openTabs().activeIndex()));
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        if (!(view instanceof TabButton)) {
+            return false;
+        }
+        int index = ((TabButton) view).tabIndex();
+        if (index < 0 || index >= openTabs().tabs().size()) {
+            return false;
+        }
+        return tabPinningDecision(openTabs().tabs().get(index)).perform(this);
     }
 
     void renderCurrentDocument() {
@@ -1021,15 +1044,48 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void pinCurrentDocument() {
-        OpenDocumentTab tab = openTabs().activeTab();
-        tabPersistence.pinDocument(tab.title(), tab.uri());
-        showInfoDialog(viewerText.pinnedFiles(), viewerText.currentFilePinned());
+        TabPinningDecision.from(pinnedDocumentsAvailable(), openTabs().activeTab(), false)
+                .perform(this);
     }
 
     void unpinCurrentDocument() {
-        OpenDocumentTab tab = openTabs().activeTab();
+        TabPinningDecision.from(pinnedDocumentsAvailable(), openTabs().activeTab(), true)
+                .perform(this);
+    }
+
+    @Override
+    public void pin(OpenDocumentTab.FileDocumentTab tab) {
+        tabPersistence.pinDocument(tab.title(), tab.uri());
+        refreshPinnedDocumentUi(viewerText.currentFilePinned());
+    }
+
+    @Override
+    public void unpin(OpenDocumentTab.FileDocumentTab tab) {
         tabPersistence.unpinDocument(tab.uri());
-        showInfoDialog(viewerText.pinnedFiles(), viewerText.currentFileUnpinned());
+        refreshPinnedDocumentUi(viewerText.currentFileUnpinned());
+    }
+
+    void clearPinnedDocuments() {
+        tabPersistence.clearPinnedDocuments();
+        refreshPinnedDocumentUi(viewerText.pinnedFilesCleared());
+    }
+
+    void unpinPinnedDocument(RecentDocument document) {
+        tabPersistence.unpinDocument(document.uri());
+        renderTabs();
+        refreshMenuActionButtons();
+        showMessage(viewerText.currentFileUnpinned());
+    }
+
+    private TabPinningDecision tabPinningDecision(OpenDocumentTab tab) {
+        return TabPinningDecision.from(pinnedDocumentsAvailable(), tab,
+                tabPersistence.isPinnedDocument(tab.uri()));
+    }
+
+    private void refreshPinnedDocumentUi(String message) {
+        renderTabs();
+        refreshMenuActionButtons();
+        showMessage(message);
     }
 
     void showPinnedDocuments() {

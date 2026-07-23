@@ -31,6 +31,10 @@ public abstract class DocumentListDialogState {
         return new Pinned(documents.items());
     }
 
+    public static PinnedActions pinnedActions(RecentDocument document) {
+        return new PinnedActions(document);
+    }
+
     public abstract DocumentListCommand select(int index);
 
     public abstract DocumentListCommand secondaryAction();
@@ -67,7 +71,11 @@ public abstract class DocumentListDialogState {
             if (index < 0 || index >= documents.size()) {
                 return DocumentListCommand.none();
             }
-            return DocumentListCommand.open(documents.get(index));
+            return selectedDocument(documents.get(index));
+        }
+
+        protected DocumentListCommand selectedDocument(RecentDocument document) {
+            return DocumentListCommand.open(document);
         }
     }
 
@@ -88,8 +96,40 @@ public abstract class DocumentListDialogState {
         }
 
         @Override
+        protected DocumentListCommand selectedDocument(RecentDocument document) {
+            return DocumentListCommand.choosePinnedDocumentAction(document);
+        }
+
+        @Override
         public DocumentListCommand.ClearPinned secondaryAction() {
             return DocumentListCommand.clearPinned();
+        }
+    }
+
+    public static final class PinnedActions extends DocumentListDialogState {
+        private final RecentDocument document;
+
+        private PinnedActions(RecentDocument document) {
+            if (document == null) {
+                throw new IllegalArgumentException("pinned-document actions require a document");
+            }
+            this.document = document;
+        }
+
+        @Override
+        public DocumentListCommand select(int index) {
+            if (index == 0) {
+                return DocumentListCommand.open(document);
+            }
+            if (index == 1) {
+                return DocumentListCommand.unpin(document);
+            }
+            return DocumentListCommand.none();
+        }
+
+        @Override
+        public DocumentListCommand.None secondaryAction() {
+            return DocumentListCommand.none();
         }
     }
 

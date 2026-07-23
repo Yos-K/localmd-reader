@@ -29,12 +29,36 @@ public final class DocumentListDialogStateTest {
     }
 
     @Test
-    void selectingAPinnedDocumentRequestsOpeningThatDocument() {
+    void selectingAPinnedDocumentRequestsItsAvailableActions() {
         DocumentListDialogState state = DocumentListDialogState.pinned(
                 PinnedDocuments.empty(5).pin(document()));
 
+        TestAssertions.assertTrue(state.select(0) instanceof DocumentListCommand.ChoosePinnedDocumentAction,
+                "selecting a pinned item must offer opening and individual unpinning");
+    }
+
+    @Test
+    void selectingOpenFromPinnedDocumentActionsRequestsOpeningThatDocument() {
+        DocumentListDialogState state = DocumentListDialogState.pinnedActions(document());
+
         TestAssertions.assertTrue(state.select(0) instanceof DocumentListCommand.OpenDocument,
-                "selecting a pinned item must request opening the selected document");
+                "the first pinned-document action must open the selected document");
+    }
+
+    @Test
+    void selectingUnpinFromPinnedDocumentActionsRequestsIndividualUnpin() {
+        DocumentListDialogState state = DocumentListDialogState.pinnedActions(document());
+
+        TestAssertions.assertTrue(state.select(1) instanceof DocumentListCommand.UnpinDocument,
+                "the second pinned-document action must remove only the selected bookmark");
+    }
+
+    @Test
+    void selectingOutsidePinnedDocumentActionsProducesNoCommand() {
+        DocumentListDialogState state = DocumentListDialogState.pinnedActions(document());
+
+        TestAssertions.assertTrue(state.select(2) instanceof DocumentListCommand.None,
+                "an invalid pinned-document action must remain a total no-op");
     }
 
     @Test

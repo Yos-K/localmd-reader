@@ -18,6 +18,14 @@ public abstract class DocumentListCommand {
         return new OpenDocument(document);
     }
 
+    static ChoosePinnedDocumentAction choosePinnedDocumentAction(RecentDocument document) {
+        return new ChoosePinnedDocumentAction(document);
+    }
+
+    static UnpinDocument unpin(RecentDocument document) {
+        return new UnpinDocument(document);
+    }
+
     static ClearRecent clearRecent() {
         return CLEAR_RECENT;
     }
@@ -32,6 +40,10 @@ public abstract class DocumentListCommand {
         void none();
 
         void openDocument(RecentDocument document);
+
+        void choosePinnedDocumentAction(RecentDocument document);
+
+        void unpinDocument(RecentDocument document);
 
         void clearRecent();
 
@@ -66,6 +78,38 @@ public abstract class DocumentListCommand {
         @Override
         public void execute(Handler handler) {
             handler.openDocument(document);
+        }
+    }
+
+    public static final class ChoosePinnedDocumentAction extends DocumentListCommand {
+        private final RecentDocument document;
+
+        private ChoosePinnedDocumentAction(RecentDocument document) {
+            if (document == null) {
+                throw new IllegalArgumentException("pinned-document action requires a document");
+            }
+            this.document = document;
+        }
+
+        @Override
+        public void execute(Handler handler) {
+            handler.choosePinnedDocumentAction(document);
+        }
+    }
+
+    public static final class UnpinDocument extends DocumentListCommand {
+        private final RecentDocument document;
+
+        private UnpinDocument(RecentDocument document) {
+            if (document == null) {
+                throw new IllegalArgumentException("unpin command requires a document");
+            }
+            this.document = document;
+        }
+
+        @Override
+        public void execute(Handler handler) {
+            handler.unpinDocument(document);
         }
     }
 

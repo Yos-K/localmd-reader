@@ -14,6 +14,7 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
         DialogInterface.OnDismissListener, DocumentListCommand.Handler {
     private final MainActivity activity;
     private DocumentListDialogState state = DocumentListDialogState.closed();
+    private AlertDialog activeDialog;
 
     DocumentListDialogController(MainActivity activity) {
         this.activity = activity;
@@ -64,7 +65,10 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
     @Override
     // interaction-command: close_dialog
     public void onDismiss(DialogInterface dialog) {
-        state = state.close();
+        if (dialog == activeDialog) {
+            state = state.close();
+            activeDialog = null;
+        }
     }
 
     @Override
@@ -77,6 +81,23 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
     }
 
     @Override
+    public void choosePinnedDocumentAction(RecentDocument document) {
+        state = DocumentListDialogState.pinnedActions(document);
+        showDialog(dialogBuilder(document.displayName())
+                .setItems(new String[] {
+                        activity.viewerText.openPinnedDocumentAction(),
+                        activity.viewerText.unpinPinnedDocumentAction()
+                }, this)
+                .setPositiveButton(activity.viewerText.close(), null));
+    }
+
+    @Override
+    public void unpinDocument(RecentDocument document) {
+        activity.unpinPinnedDocument(document);
+        showPinnedDocuments();
+    }
+
+    @Override
     public void clearRecent() {
         activity.tabPersistence.clearRecentDocuments();
         activity.showInfoDialog(activity.viewerText.recentFiles(),
@@ -85,9 +106,7 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
 
     @Override
     public void clearPinned() {
-        activity.tabPersistence.clearPinnedDocuments();
-        activity.showInfoDialog(activity.viewerText.pinnedFiles(),
-                activity.viewerText.pinnedFilesCleared());
+        activity.clearPinnedDocuments();
     }
 
     private void showEmptyDialog(String title, String message) {
@@ -104,6 +123,7 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
     private void showDialog(AlertDialog.Builder builder) {
         AlertDialog dialog = builder.create();
         dialog.setOnDismissListener(this);
+        activeDialog = dialog;
         dialog.show();
     }
 

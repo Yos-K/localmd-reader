@@ -38,6 +38,8 @@ public abstract class ViewerText {
     public abstract String unpinCurrentFile();
     public abstract String noPinnedFiles();
     public abstract String clearPinnedFiles();
+    public abstract String openPinnedDocumentAction();
+    public abstract String unpinPinnedDocumentAction();
     public abstract String currentFilePinned();
     public abstract String currentFileUnpinned();
     public abstract String pinnedFilesCleared();
@@ -110,6 +112,8 @@ public abstract class ViewerText {
     public abstract String duskTheme();
     public abstract String themeLabel(ViewerTheme theme);
     public abstract String welcomeTabTitle();
+    public abstract String documentTab(String title);
+    public abstract String pinnedDocumentTab(String title);
     public abstract String closeTabDescription(String title);
     public abstract String historyClipboardTitle(int index);
     public abstract String proStatus(boolean pro);
@@ -149,9 +153,13 @@ public abstract class ViewerText {
         @Override public String unpinCurrentFile() { return "Unpin current file"; }
         @Override public String noPinnedFiles() { return "No pinned files yet."; }
         @Override public String clearPinnedFiles() { return "Clear pinned files"; }
+        @Override public String openPinnedDocumentAction() { return "Open"; }
+        @Override public String unpinPinnedDocumentAction() { return "Unpin this file"; }
         @Override public String currentFilePinned() { return "Pinned current file."; }
         @Override public String currentFileUnpinned() { return "Unpinned current file."; }
         @Override public String pinnedFilesCleared() { return "Pinned files cleared."; }
+        @Override public String documentTab(String title) { return "Tab: " + title; }
+        @Override public String pinnedDocumentTab(String title) { return "Pinned tab: " + title; }
         @Override public String appearanceSettings() { return "Appearance"; }
         @Override public String proFeatures() { return "Pro features"; }
         @Override public String proFeaturesIntro() { return "Free covers the core offline reader. Pro adds faster navigation and comfort tools for long files and linked project notes."; }
@@ -334,9 +342,13 @@ public abstract class ViewerText {
         @Override public String unpinCurrentFile() { return "現在のファイルのピン留めを解除"; }
         @Override public String noPinnedFiles() { return "ピン留めしたファイルはまだありません。"; }
         @Override public String clearPinnedFiles() { return "ピン留めをクリア"; }
+        @Override public String openPinnedDocumentAction() { return "開く"; }
+        @Override public String unpinPinnedDocumentAction() { return "このファイルのピン留めを解除"; }
         @Override public String currentFilePinned() { return "現在のファイルをピン留めしました。"; }
         @Override public String currentFileUnpinned() { return "現在のファイルのピン留めを解除しました。"; }
         @Override public String pinnedFilesCleared() { return "ピン留めをクリアしました。"; }
+        @Override public String documentTab(String title) { return "タブ: " + title; }
+        @Override public String pinnedDocumentTab(String title) { return "ピン留めしたタブ: " + title; }
         @Override public String appearanceSettings() { return "表示設定"; }
         @Override public String proFeatures() { return "Pro機能"; }
         @Override public String proFeaturesIntro() { return "Free版はオフライン閲覧の基本機能を備えています。Proでは長い文書や関連するプロジェクト文書を、より速く快適に読めます。"; }

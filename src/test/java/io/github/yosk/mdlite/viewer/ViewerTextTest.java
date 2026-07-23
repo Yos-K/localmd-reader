@@ -4,6 +4,21 @@ import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
 
 public final class ViewerTextTest {
+    @Test
+    void englishPinnedDocumentActionsDescribeTheSelectedFileOperations() {
+        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.english());
+
+        TestAssertions.assertEquals("Open", text.openPinnedDocumentAction(),
+                "English pinned-file action must describe opening the selected file");
+    }
+
+    @Test
+    void japanesePinnedDocumentActionsDescribeIndividualUnpinning() {
+        ViewerText text = ViewerText.fromLanguage(ViewerLanguage.japanese());
+
+        TestAssertions.assertEquals("このファイルのピン留めを解除", text.unpinPinnedDocumentAction(),
+                "Japanese pinned-file action must distinguish individual unpinning from clearing all pins");
+    }
 
     @Test
     void englishViewerTextProvidesEnglishTemporaryMarkdownMessage() {
