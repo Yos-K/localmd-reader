@@ -17,9 +17,12 @@ library-tree-visible|close_menu|document-opened|Library menu dismissed
 library-tree-collapsed|expand_library_tree|library-tree-visible|Library tree expanded
 library-tree-collapsed|close_menu|document-opened|Collapsed library menu dismissed
 document-opened|open_pinned_files|pinned-file-list-visible|Pinned files requested
-pinned-file-list-visible|open_pinned_file|document-opened|Pinned file selected
+pinned-file-list-visible|choose_pinned_file_action|pinned-file-actions-visible|Pinned file selected
 pinned-file-list-visible|clear_all_pins|document-opened|Pinned files cleared and dialog dismissed
 pinned-file-list-visible|close_dialog|document-opened|Pinned files dismissed
+pinned-file-actions-visible|open_pinned_file|document-opened|Selected pinned file opened
+pinned-file-actions-visible|unpin_pinned_file|pinned-file-list-visible|Selected pinned file unpinned
+pinned-file-actions-visible|close_dialog|document-opened|Pinned file actions dismissed
 temporary-document-tab-active|save_as|document-opened|Temporary document saved as file
 temporary-document-tab-active|close_temporary_tab|welcome|Temporary document discarded
 temporary-document-tab-active|switch_tab|document-opened|Existing file tab selected

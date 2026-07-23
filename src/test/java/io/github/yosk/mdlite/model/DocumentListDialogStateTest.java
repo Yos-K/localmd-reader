@@ -98,6 +98,14 @@ public final class DocumentListDialogStateTest {
     }
 
     @Test
+    void closingPinnedDocumentActionsProducesTheClosedState() {
+        DocumentListDialogState state = DocumentListDialogState.pinnedActions(document());
+
+        TestAssertions.assertTrue(state.close() instanceof DocumentListDialogState.Closed,
+                "closing pinned-document actions must remove the selected document context");
+    }
+
+    @Test
     void selectingWhileClosedProducesNoCommand() {
         TestAssertions.assertTrue(
                 DocumentListDialogState.closed().select(0) instanceof DocumentListCommand.None,

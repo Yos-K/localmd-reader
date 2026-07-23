@@ -5,6 +5,7 @@ recent-files-dialog|recent-files-dialog|src/main/java/io/github/yosk/mdlite/pres
 markdown-library-tree|library-tree-visible|src/main/java/io/github/yosk/mdlite/presentation/MarkdownLibraryMenuTree.java|show
 markdown-library-collapsed-row|library-tree-collapsed|src/main/java/io/github/yosk/mdlite/presentation/MarkdownLibraryMenuTree.java|toggleLoadedTree
 pinned-files-dialog|pinned-file-list-visible|src/main/java/io/github/yosk/mdlite/presentation/DocumentListDialogController.java|showPinnedDocuments
+pinned-file-actions-dialog|pinned-file-actions-visible|src/main/java/io/github/yosk/mdlite/presentation/DocumentListDialogController.java|choosePinnedDocumentAction
 temporary-document-tab|temporary-document-tab-active|src/main/java/io/github/yosk/mdlite/viewer/OpenDocumentTab.java|ClipboardDraftTab
 external-open-entry|external-file-opened|src/main/java/io/github/yosk/mdlite/presentation/DocumentOpener.java|handleIncomingIntent
 unsupported-file-dialog|unsupported-file-dialog|src/main/java/io/github/yosk/mdlite/presentation/DocumentOpener.java|showFileOpenError

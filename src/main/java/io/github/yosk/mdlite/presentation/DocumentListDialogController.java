@@ -53,7 +53,9 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
     @Override
     // interaction-command: open_recent_file
     // interaction-command: clear_recent_files
+    // interaction-command: choose_pinned_file_action
     // interaction-command: open_pinned_file
+    // interaction-command: unpin_pinned_file
     // interaction-command: clear_all_pins
     public void onClick(DialogInterface dialog, int which) {
         DocumentListCommand command = which == DialogInterface.BUTTON_NEGATIVE
@@ -84,6 +86,7 @@ final class DocumentListDialogController implements DialogInterface.OnClickListe
     public void choosePinnedDocumentAction(RecentDocument document) {
         state = DocumentListDialogState.pinnedActions(document);
         showDialog(dialogBuilder(document.displayName())
+                // interaction-surface: pinned-file-actions-dialog
                 .setItems(new String[] {
                         activity.viewerText.openPinnedDocumentAction(),
                         activity.viewerText.unpinPinnedDocumentAction()

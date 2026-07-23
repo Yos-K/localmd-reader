@@ -5,6 +5,7 @@ recent-files-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/
 library-tree-visible|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/MainMenuActions.java
 library-tree-collapsed|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/MarkdownLibraryMenuTree.java
 pinned-file-list-visible|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/PinnedDocumentMenuActions.java
+pinned-file-actions-visible|overlay|no|src/main/java/io/github/yosk/mdlite/model/DocumentListDialogState.java
 temporary-document-tab-active|entry|yes|src/main/java/io/github/yosk/mdlite/viewer/OpenDocumentTab.java
 external-file-opened|entry|yes|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java
 unsupported-file-dialog|entry|yes|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java
