@@ -18,12 +18,12 @@ old final tree, current implementation, and tests by capability.
 | Pin mark on pinned tabs | Missing, restoring | Added theme-colored `ic_push_pin_18` |
 | Individual removal from pinned files | Missing, restoring | Added explicit open/unpin action state and commands |
 | Pin mutation UI synchronization | Missing, restoring | Routed all mutation paths through shared refresh behavior |
-| Unique gesture action assignments | Missing | Current `put` replaces only the same trigger and leaves the action on other gestures |
-| Assigned gesture shown in action choices | Missing | The former assignment-label model and tests are absent |
-| Replace a temporary tab after Save As | Missing | Current saving opens the saved URI without replacing its draft |
-| Markdown bold rendering from clipboard content | Missing | Current inline renderer handles code, links, and images but not emphasis |
-| Raw/Preview for HTML and Markdown code blocks | Missing | Current renderer and page styles have no preview switch |
-| Code-fence metadata for previews | Missing | Must return with Raw/Preview support |
+| Unique gesture action assignments | Restored | Assigning an active action now moves it to the selected gesture |
+| Assigned gesture shown in action choices | Restored | Localized action labels identify the current gesture owner |
+| Replace a temporary tab after Save As | Restored | Typed placement replaces the source draft and reuses an open destination |
+| Markdown bold rendering from clipboard content | Restored | Plain clipboard Markdown remains intact and `**` renders as strong text |
+| Raw/Preview for HTML and Markdown code blocks | Restored | Theme-aware switch and restricted safe HTML preview are covered by tests |
+| Code-fence metadata for previews | Restored | The normalized first info-string token selects language behavior |
 
 ## Restoration Order
 

@@ -76,6 +76,7 @@ import io.github.yosk.mdlite.viewer.ViewerLanguage;
 import io.github.yosk.mdlite.viewer.ViewerText;
 import io.github.yosk.mdlite.viewer.ViewerTheme;
 import io.github.yosk.mdlite.viewer.TabPinningDecision;
+import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
 import io.github.yosk.mdlite.file.RecentDocument;
 import java.io.File;
 import java.io.FileInputStream;
@@ -137,6 +138,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     FontSize currentFontSize = FontSize.defaultSize();
     FontSize renderedFontSize = FontSize.defaultSize();
     String pendingSaveMarkdown = "";
+    SavedDocumentPlacement pendingSavePlacement = SavedDocumentPlacement.openNormally();
     String pendingExportHtml = "";
     final Map<String, String> draftMarkdownByUri = new HashMap<String, String>();
     DocumentRenderingCoordinator documentRenderingCoordinator;

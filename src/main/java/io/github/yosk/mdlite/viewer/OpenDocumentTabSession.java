@@ -32,6 +32,15 @@ public final class OpenDocumentTabSession {
         tabs = tabs.open(tab);
     }
 
+    public void openSavedFile(
+            OpenDocumentTab.FileDocumentTab savedFile,
+            SavedDocumentPlacement placement) {
+        if (savedFile == null || placement == null) {
+            throw new IllegalArgumentException("saved file opening requires a file and placement");
+        }
+        tabs = placement.place(tabs, savedFile);
+    }
+
     public void activate(int index) {
         tabs = tabs.activate(index);
     }

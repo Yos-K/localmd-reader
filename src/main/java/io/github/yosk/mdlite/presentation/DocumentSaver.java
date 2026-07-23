@@ -3,6 +3,7 @@ package io.github.yosk.mdlite.presentation;
 import android.content.Intent;
 import android.net.Uri;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
+import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +27,7 @@ final class DocumentSaver {
             return;
         }
         activity.pendingSaveMarkdown = markdown;
+        activity.pendingSavePlacement = SavedDocumentPlacement.from(tab);
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("text/markdown");
@@ -45,8 +47,10 @@ final class DocumentSaver {
             } finally {
                 output.close();
             }
+            SavedDocumentPlacement placement = activity.pendingSavePlacement;
             activity.pendingSaveMarkdown = "";
-            activity.documentOpener.openUri(uri, true);
+            activity.pendingSavePlacement = SavedDocumentPlacement.openNormally();
+            activity.documentOpener.openSavedUri(uri, placement, true);
             activity.showSavedMarkdownMessage();
         } catch (IOException e) {
             activity.showFileOpenError(activity.viewerText.createMarkdownFailed());

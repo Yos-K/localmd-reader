@@ -72,6 +72,14 @@ public abstract class ViewerText {
     public abstract String nextHeadingAction();
     public abstract String previousHeadingAction();
     public abstract String off();
+    public abstract String assignedGestureSuffix(String gestureName);
+    public abstract String doubleTapGesture();
+    public abstract String circleGesture();
+    public abstract String customGesture();
+    public abstract String swipeLeftGesture();
+    public abstract String swipeRightGesture();
+    public abstract String swipeUpGesture();
+    public abstract String swipeDownGesture();
     public abstract String recentFiles();
     public abstract String openMarkdownFile();
     public abstract String noRecentFiles();
@@ -222,6 +230,14 @@ public abstract class ViewerText {
         @Override public String nextHeadingAction() { return "Next heading"; }
         @Override public String previousHeadingAction() { return "Previous heading"; }
         @Override public String off() { return "Off"; }
+        @Override public String assignedGestureSuffix(String gestureName) { return " (assigned to " + gestureName + ")"; }
+        @Override public String doubleTapGesture() { return "Double tap"; }
+        @Override public String circleGesture() { return "Circle"; }
+        @Override public String customGesture() { return "Custom"; }
+        @Override public String swipeLeftGesture() { return "Left"; }
+        @Override public String swipeRightGesture() { return "Right"; }
+        @Override public String swipeUpGesture() { return "Up"; }
+        @Override public String swipeDownGesture() { return "Down"; }
         @Override public String recentFiles() { return "Recent files"; }
         @Override public String openMarkdownFile() { return "Open Markdown file"; }
         @Override public String noRecentFiles() { return "No recent files yet."; }
@@ -411,6 +427,14 @@ public abstract class ViewerText {
         @Override public String nextHeadingAction() { return "次の見出し"; }
         @Override public String previousHeadingAction() { return "前の見出し"; }
         @Override public String off() { return "オフ"; }
+        @Override public String assignedGestureSuffix(String gestureName) { return "（割り当て先: " + gestureName + "）"; }
+        @Override public String doubleTapGesture() { return "ダブルタップ"; }
+        @Override public String circleGesture() { return "円"; }
+        @Override public String customGesture() { return "カスタム"; }
+        @Override public String swipeLeftGesture() { return "左方向"; }
+        @Override public String swipeRightGesture() { return "右方向"; }
+        @Override public String swipeUpGesture() { return "上方向"; }
+        @Override public String swipeDownGesture() { return "下方向"; }
         @Override public String recentFiles() { return "最近開いたファイル"; }
         @Override public String openMarkdownFile() { return "Markdownファイルを開く"; }
         @Override public String noRecentFiles() { return "最近開いたファイルはまだありません。"; }

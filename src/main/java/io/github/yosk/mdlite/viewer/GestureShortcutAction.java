@@ -228,4 +228,15 @@ public final class GestureShortcutAction {
         }
         return off();
     }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof GestureShortcutAction
+                && value == ((GestureShortcutAction) other).value;
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
 }

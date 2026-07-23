@@ -9,6 +9,7 @@ import io.github.yosk.mdlite.file.FileInfo;
 import io.github.yosk.mdlite.file.MarkdownLibraryLocation;
 import io.github.yosk.mdlite.file.MarkdownFileOpenResult;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
+import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -143,6 +144,18 @@ final class DocumentOpener {
     }
 
     void openUri(Uri uri, boolean remember, String targetAnchorId) {
+        openUri(uri, remember, targetAnchorId, SavedDocumentPlacement.openNormally());
+    }
+
+    void openSavedUri(Uri uri, SavedDocumentPlacement placement, boolean remember) {
+        openUri(uri, remember, "", placement);
+    }
+
+    private void openUri(
+            Uri uri,
+            boolean remember,
+            String targetAnchorId,
+            SavedDocumentPlacement placement) {
         FileInfo fileInfo = readFileInfo(uri);
         MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(
                 fileInfo.displayName, fileInfo.sizeBytes, activity.fileSizePolicy);
@@ -161,8 +174,9 @@ final class DocumentOpener {
             String markdown = readText(uri, MainActivity.MAX_FILE_SIZE_BYTES);
             String documentUri = uri.toString();
             SafeHtml rendered = activity.renderMarkdownForUri(documentUri, markdown);
-            activity.documentTabSession.open(
-                    OpenDocumentTab.fileDocument(readableFile.displayName(), documentUri, rendered));
+            activity.documentTabSession.openSavedFile(
+                    OpenDocumentTab.fileDocument(readableFile.displayName(), documentUri, rendered),
+                    placement);
             activity.updateLocalizedText();
             activity.renderTabs();
             activity.renderCurrentDocument(targetAnchorId);

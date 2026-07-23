@@ -69,4 +69,13 @@ public final class MarkdownStyle {
     boolean isBulletListItem() {
         return bulletListItem;
     }
+
+    boolean isPlain() {
+        return !bold
+                && !italic
+                && !underline
+                && linkUrl.length() == 0
+                && headingLevel == 0
+                && !bulletListItem;
+    }
 }

@@ -13,6 +13,65 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 public final class JavaSimpleMarkdownRendererTest {
+    @Test
+    void rendersMarkdownBoldAsStrongText() {
+        SafeHtml html = renderer.render("This is **important**.");
+
+        TestAssertions.assertContains(html.value(), "This is <strong>important</strong>.",
+                "Markdown bold syntax must render as strong text");
+    }
+
+    @Test
+    void escapedMarkdownBoldMarkersDoNotCreateStrongText() {
+        SafeHtml html = renderer.render("This is \\**important\\**.");
+
+        TestAssertions.assertNotContains(html.value(), "<strong>important</strong>",
+                "escaped Markdown bold markers must remain literal text");
+    }
+
+    @Test
+    void htmlCodeBlockProvidesRawAndRenderedPreviewPanes() {
+        SafeHtml html = renderer.render("```html\n<strong>Hello</strong>\n```");
+
+        TestAssertions.assertContains(html.value(),
+                "<div class=\"code-preview-pane code-preview-rendered\"><strong>Hello</strong></div>",
+                "HTML preview must render allowed markup beside its escaped raw source");
+    }
+
+    @Test
+    void htmlCodeBlockPreviewDoesNotEmitScriptElements() {
+        SafeHtml html = renderer.render("```html\n<script>alert(1)</script>\n```");
+
+        TestAssertions.assertNotContains(html.value(), "<script>",
+                "HTML code previews must never activate script elements");
+    }
+
+    @Test
+    void markdownCodeBlockProvidesRenderedPreviewPane() {
+        SafeHtml html = renderer.render("```markdown\n# Title\n\n**important**\n```");
+
+        TestAssertions.assertContains(html.value(),
+                "<div class=\"code-preview-pane code-preview-rendered\"><h1 id=\"title\">Title</h1><p><strong>important</strong></p></div>",
+                "Markdown code previews must reuse the normal Markdown renderer");
+    }
+
+    @Test
+    void codeFenceMetadataDoesNotDisableItsLanguagePreview() {
+        SafeHtml html = renderer.render("```html title=example\n<h1>Title</h1>\n```");
+
+        TestAssertions.assertContains(html.value(), "class=\"code-preview-toggle\"",
+                "the first code-fence info token must continue to select preview behavior");
+    }
+
+    @Test
+    void htmlPreviewDropsAttributesFromAllowedElements() {
+        SafeHtml html = renderer.render(
+                "```html\n<h1 class=\"title\" onclick=\"alert(1)\">Title</h1>\n```");
+
+        TestAssertions.assertContains(html.value(),
+                "<div class=\"code-preview-pane code-preview-rendered\"><h1>Title</h1></div>",
+                "HTML preview must preserve an allowed element while dropping every attribute");
+    }
 
     private final JavaSimpleMarkdownRenderer renderer = new JavaSimpleMarkdownRenderer();
 

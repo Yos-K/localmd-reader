@@ -21,6 +21,9 @@ public final class StyledMarkdownText {
         if (isTabSeparatedTable(text)) {
             return table(text);
         }
+        if (style.isPlain()) {
+            return text;
+        }
 
         String styled = escapeMarkdown(text);
         if (style.isBold()) {

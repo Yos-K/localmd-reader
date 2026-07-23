@@ -4,6 +4,15 @@ import io.github.yosk.mdlite.testing.TestAssertions;
 import org.junit.jupiter.api.Test;
 
 public final class GestureShortcutBindingsTest {
+    @Test
+    void assigningAnActiveActionToAnotherGestureMovesItInsteadOfDuplicatingIt() {
+        GestureShortcutBindings bindings = GestureShortcutBindings.empty()
+                .put(GestureShortcutBinding.of(GestureShortcutTrigger.doubleTap(), GestureShortcutAction.openMenu()))
+                .put(GestureShortcutBinding.of(GestureShortcutTrigger.circle(), GestureShortcutAction.openMenu()));
+
+        TestAssertions.assertTrue(bindings.actionFor(GestureShortcutTrigger.doubleTap()).isOff(),
+                "an action moved to another gesture must leave its previous trigger unassigned");
+    }
 
     @Test
     void emptyBindingsReturnOffForUnknownTrigger() {

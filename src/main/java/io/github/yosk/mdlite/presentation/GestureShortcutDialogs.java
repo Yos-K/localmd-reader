@@ -7,6 +7,7 @@ import io.github.yosk.mdlite.domain.ViewerFeature;
 import io.github.yosk.mdlite.viewer.CustomGestureShape;
 import io.github.yosk.mdlite.viewer.CustomGestureShortcut;
 import io.github.yosk.mdlite.viewer.GestureShortcutAction;
+import io.github.yosk.mdlite.viewer.GestureShortcutActionLabels;
 import io.github.yosk.mdlite.viewer.GestureShortcutBinding;
 import io.github.yosk.mdlite.viewer.GestureShortcutTrigger;
 
@@ -272,11 +273,8 @@ final class GestureShortcutDialogs {
     }
 
     private String[] gestureActionLabels(GestureShortcutAction[] actions) {
-        String[] labels = new String[actions.length];
-        for (int i = 0; i < actions.length; i++) {
-            labels[i] = actionLabel(actions[i]);
-        }
-        return labels;
+        return GestureShortcutActionLabels.from(
+                actions, activity.gestureShortcutBindings, activity.viewerText);
     }
 
     private GestureShortcutAction doubleTapShortcut() {
