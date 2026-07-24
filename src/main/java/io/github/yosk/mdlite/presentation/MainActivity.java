@@ -41,8 +41,6 @@ import io.github.yosk.mdlite.domain.UnavailableProPurchaseFlow;
 import io.github.yosk.mdlite.domain.ViewerFeature;
 import io.github.yosk.mdlite.file.FileInfo;
 import io.github.yosk.mdlite.file.FileSizePolicy;
-import io.github.yosk.mdlite.file.LocalRelativeImageResource;
-import io.github.yosk.mdlite.file.LocalRelativeMarkdownLink;
 import io.github.yosk.mdlite.file.MarkdownFileOpenResult;
 import io.github.yosk.mdlite.file.RestorableOpenTab;
 import io.github.yosk.mdlite.infrastructure.BuildEntitlementSource;
@@ -71,10 +69,7 @@ import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
 import io.github.yosk.mdlite.model.RestoredOpenDocumentTab;
 import io.github.yosk.mdlite.model.RestoredOpenDocumentTabs;
 import io.github.yosk.mdlite.file.RecentDocument;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -159,6 +154,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private DocumentTabBar documentTabBar;
     private ReaderAppearance readerAppearance;
     private DocumentNavigationController documentNavigationController;
+    private RelativeDocumentResources relativeDocumentResources;
 
     TextView messageView;
     Button menuButton;
@@ -263,6 +259,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         tabPersistence = new TabPersistence(this, RecentDocumentLimit.fromEntitlement(featureEntitlement));
         pinnedDocumentController = new PinnedDocumentController(tabPersistence, this);
         documentOpener = new DocumentOpener(this);
+        relativeDocumentResources = new RelativeDocumentResources(this);
         documentSaver = new DocumentSaver(this);
         documentListDialogs = new DocumentListDialogController(this);
         htmlDocumentExporter = new HtmlDocumentExporter(this);
@@ -490,65 +487,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     WebResourceResponse openActiveRelativeImage(String requestUrl) {
-        if (!documentRenderingProfile.relativeImageRendering().isEnabled()) {
-            return null;
-        }
-        if (documentTabSession == null || !(openTabs().activeTab() instanceof OpenDocumentTab.FileDocumentTab)) {
-            return null;
-        }
-        LocalRelativeImageResource resource =
-                LocalRelativeImageResource.resolve(
-                        openTabs().activeTab().uri(),
-                        requestUrl,
-                        allowedRelativeImageRoot(openTabs().activeTab().uri()));
-        if (!resource.isAvailable()) {
-            return null;
-        }
-        try {
-            return new WebResourceResponse(
-                    resource.mimeType(),
-                    null,
-                    new FileInputStream(resource.filePath()));
-        } catch (IOException e) {
-            return null;
-        }
+        return relativeDocumentResources.openImage(requestUrl);
     }
 
     boolean openActiveRelativeMarkdownLink(String requestUrl) {
-        if (!documentRenderingProfile.relativeLinkRendering().isEnabled()) {
-            return false;
-        }
-        if (documentTabSession == null || !(openTabs().activeTab() instanceof OpenDocumentTab.FileDocumentTab)) {
-            return false;
-        }
-        LocalRelativeMarkdownLink link = LocalRelativeMarkdownLink.resolve(
-                openTabs().activeTab().uri(),
-                requestUrl,
-                allowedRelativeDocumentRoot(openTabs().activeTab().uri()));
-        if (!link.isAvailable()) {
-            return false;
-        }
-        documentOpener.openUri(Uri.fromFile(new File(link.filePath())), true, link.targetAnchorId());
-        return true;
-    }
-
-    private String allowedRelativeImageRoot(String markdownDocumentUri) {
-        return allowedRelativeDocumentRoot(markdownDocumentUri);
-    }
-
-    private String allowedRelativeDocumentRoot(String markdownDocumentUri) {
-        try {
-            URI document = URI.create(markdownDocumentUri);
-            if (!"file".equals(document.getScheme())) {
-                return "";
-            }
-            File documentFile = new File(document.getPath() == null ? "" : document.getPath());
-            File documentDirectory = documentFile.getParentFile();
-            File documentSetRoot = documentDirectory == null ? null : documentDirectory.getParentFile();
-            return documentSetRoot == null ? "" : documentSetRoot.getAbsolutePath();
-        } catch (IllegalArgumentException e) {
-            return "";
-        }
+        return relativeDocumentResources.openMarkdown(requestUrl);
     }
 
     boolean tableOfContentsAvailable() {
