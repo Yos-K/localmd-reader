@@ -27,7 +27,6 @@ import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
 import io.github.yosk.mdlite.domain.DocumentUri;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.FeatureEntitlements;
-import io.github.yosk.mdlite.domain.HeadingNavigation;
 import io.github.yosk.mdlite.domain.HeadingScrollPosition;
 import io.github.yosk.mdlite.domain.MarkdownHeading;
 import io.github.yosk.mdlite.domain.MarkdownHeadings;
@@ -37,7 +36,6 @@ import io.github.yosk.mdlite.domain.ProPurchaseUiState;
 import io.github.yosk.mdlite.domain.RecentDocumentLimit;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.domain.TableOfContentsItem;
-import io.github.yosk.mdlite.domain.TableOfContentsItems;
 import io.github.yosk.mdlite.domain.TableReadingMode;
 import io.github.yosk.mdlite.domain.UnavailableProPurchaseFlow;
 import io.github.yosk.mdlite.domain.ViewerFeature;
@@ -57,7 +55,7 @@ import io.github.yosk.mdlite.infrastructure.ProPurchaseStatusRefresh;
 import io.github.yosk.mdlite.infrastructure.WelcomeDocumentBuilder;
 import io.github.yosk.mdlite.viewer.ControlsPlacement;
 import io.github.yosk.mdlite.viewer.DocumentSearchQuery;
-import io.github.yosk.mdlite.viewer.DocumentSearchSession;
+import io.github.yosk.mdlite.viewer.DocumentNavigationController;
 import io.github.yosk.mdlite.viewer.DocumentRenderingCoordinator;
 import io.github.yosk.mdlite.viewer.FontSize;
 import io.github.yosk.mdlite.viewer.GestureShortcutBindings;
@@ -85,7 +83,7 @@ import java.util.Map;
 public final class MainActivity extends Activity implements View.OnClickListener, View.OnLongClickListener,
         View.OnApplyWindowInsetsListener,
         MermaidJsRenderEngine.Listener, CustomGestureDrawingView.Listener,
-        HeadingNavigation.Handler, PinnedDocumentController.Host {
+        DocumentNavigationController.Host, PinnedDocumentController.Host {
 
     static final int REQUEST_OPEN_DOCUMENT = 1001;
     static final int REQUEST_SAVE_DOCUMENT = 1002;
@@ -128,7 +126,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
     ViewerTheme currentTheme = ViewerTheme.light();
     ViewerPalette viewerPalette = ViewerPalette.from(ViewerTheme.light());
     GestureShortcutBindings gestureShortcutBindings = GestureShortcutBindings.empty();
-    DocumentSearchSession documentSearchSession = DocumentSearchSession.empty();
     ViewerText viewerText = ViewerText.fromLanguage(ViewerLanguage.english());
     FontSize currentFontSize = FontSize.defaultSize();
     FontSize renderedFontSize = FontSize.defaultSize();
@@ -161,6 +158,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     PinnedDocumentController pinnedDocumentController;
     private DocumentTabBar documentTabBar;
     private ReaderAppearance readerAppearance;
+    private DocumentNavigationController documentNavigationController;
 
     TextView messageView;
     Button menuButton;
@@ -287,6 +285,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         readerAppearance = new ReaderAppearance(this);
         ReaderScreenInitializer.initialize(this);
+        documentNavigationController = new DocumentNavigationController(this);
         documentTabBar = new DocumentTabBar(this, tabScroller, tabRow);
         documentRenderingCoordinator = new DocumentRenderingCoordinator(
                 new MainActivityDocumentRenderingOutput(this));
@@ -477,10 +476,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void renderCurrentDocument(String anchorId) {
-        documentSearchSession = documentSearchSession.clear();
-        if (documentSearchBar != null) {
-            documentSearchBar.syncFromSession();
-        }
+        documentNavigationController.resetForDocument();
         String historyUrl = anchorId == null ? null : "https://localmd.local/#" + anchorId;
         webView.loadDataWithBaseURL("https://localmd.local/",
                 HtmlPageBuilder.buildPage(
@@ -560,49 +556,43 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void showFindInDocumentDialog() {
-        documentSearchBar.showBar();
+        documentNavigationController.showSearchBar();
     }
 
     void showFindInDocumentBar() {
-        documentSearchBar.showBar();
-    }
-
-    void findTextInDocument(String query) {
-        webView.findAllAsync(query);
+        documentNavigationController.showSearchBar();
     }
 
     void searchTextInDocument(DocumentSearchQuery query) {
-        documentSearchSession = documentSearchSession.search(query);
-        if (documentSearchSession.hasActiveQuery()) {
-            findTextInDocument(documentSearchSession.queryText());
-        }
+        documentNavigationController.search(query);
     }
 
     boolean hasActiveDocumentSearch() {
-        return documentSearchSession.hasActiveQuery();
+        return documentNavigationController.hasActiveSearch();
     }
 
     String currentSearchQueryText() {
-        return documentSearchSession.queryText();
+        return documentNavigationController.searchQueryText();
     }
 
     void findNextSearchResult() {
-        if (documentSearchSession.hasActiveQuery()) {
-            webView.findNext(true);
-        }
+        documentNavigationController.nextSearchResult();
     }
 
     void findPreviousSearchResult() {
-        if (documentSearchSession.hasActiveQuery()) {
-            webView.findNext(false);
-        }
+        documentNavigationController.previousSearchResult();
     }
 
     void clearWebViewSearch() {
-        webView.clearMatches();
+        documentNavigationController.clearSearchMatches();
     }
 
     MarkdownHeadings activeMarkdownHeadings() {
+        return documentNavigationController.activeHeadings();
+    }
+
+    @Override
+    public MarkdownHeadings activeHeadings() {
         if (documentTabSession == null) {
             return MarkdownHeadings.fromMarkdown("");
         }
@@ -611,35 +601,53 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void jumpToHeading(MarkdownHeading heading) {
-        HeadingNavigation.selected(
-                TableOfContentsItems.from(activeMarkdownHeadings()),
-                heading).handle(this);
+        documentNavigationController.jumpTo(heading);
     }
 
     void jumpToNextHeading() {
-        activeHeadingNavigation().next().handle(this);
+        documentNavigationController.jumpToNextHeading();
     }
 
     void jumpToPreviousHeading() {
-        activeHeadingNavigation().previous().handle(this);
-    }
-
-    private HeadingNavigation activeHeadingNavigation() {
-        return HeadingNavigation.from(
-                TableOfContentsItems.from(activeMarkdownHeadings()),
-                HeadingScrollPosition.fromWebViewMetrics(
-                        webView.getScrollY(),
-                        webView.getContentHeight(),
-                        webView.getHeight(),
-                        webView.getScale()));
+        documentNavigationController.jumpToPreviousHeading();
     }
 
     @Override
-    public void unavailable() {
+    public void showSearchBar() {
+        documentSearchBar.showBar();
     }
 
     @Override
-    public void destination(MarkdownHeading heading) {
+    public void findAll(String query) {
+        webView.findAllAsync(query);
+    }
+
+    @Override
+    public void findNext(boolean forward) {
+        webView.findNext(forward);
+    }
+
+    @Override
+    public void clearSearchMatches() {
+        webView.clearMatches();
+    }
+
+    @Override
+    public void synchronizeSearchBar() {
+        documentSearchBar.syncFromSession();
+    }
+
+    @Override
+    public HeadingScrollPosition headingScrollPosition() {
+        return HeadingScrollPosition.fromWebViewMetrics(
+                webView.getScrollY(),
+                webView.getContentHeight(),
+                webView.getHeight(),
+                webView.getScale());
+    }
+
+    @Override
+    public void openHeading(MarkdownHeading heading) {
         renderCurrentDocument(heading.anchorId());
     }
 
