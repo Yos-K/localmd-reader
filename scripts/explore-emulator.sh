@@ -67,7 +67,7 @@ open_fixture() { # $1=fixture path
   b64="$(base64 < "$1" | tr -d '\n')"
   adb shell am start -n "$PKG/io.github.yosk.mdlite.presentation.MainActivity" -a "$ACTION" \
     --activity-single-top \
-    --esa "$EX_TITLES" "$name" --esa "$EX_SOURCES" "$1" --esa "$EX_TEXTS" "$b64" >/dev/null
+    --esa "$EX_TITLES" "$name" --esa "$EX_SOURCES" "$1" --esa "$EX_TEXTS" "$b64" </dev/null >/dev/null
   sleep 8
 }
 
@@ -80,7 +80,7 @@ chevron() { # $1=dir $2=cx $3=cy $4=size — 往復ストロークを motioneven
     down)  p="DOWN $((cx-h)) $((cy-h));MOVE $cx $((cy+h));UP $((cx+h)) $((cy-h))" ;;
   esac
   old_ifs=$IFS; IFS=';'
-  for ev in $p; do adb shell input motionevent $ev; done
+  for ev in $p; do adb shell input motionevent $ev </dev/null; done
   IFS=$old_ifs
 }
 
@@ -109,7 +109,7 @@ case "$MODE" in
     [ -f "$OPS_FILE" ] || { echo "ops file not found: $OPS_FILE" >&2; exit 2; }
     echo "exploration(ops): pkg=$PKG file=$OPS_FILE"
     lineno=0
-    while IFS= read -r line || [ -n "$line" ]; do
+    while IFS= read -r line <&3 || [ -n "$line" ]; do
       lineno=$((lineno + 1))
       case "$line" in ''|'#'*) continue ;; esac
       set -- $line
@@ -117,20 +117,20 @@ case "$MODE" in
       echo "  L$lineno: $line"
       case "$op" in
         fixture) open_fixture "$ROOT/$2" ;;
-        tap)     adb shell input tap "$2" "$3"; sleep 2 ;;
-        swipe)   adb shell input swipe "$2" "$3" "$4" "$5" "${6:-150}"; sleep 2 ;;
+        tap)     adb shell input tap "$2" "$3" </dev/null; sleep 2 ;;
+        swipe)   adb shell input swipe "$2" "$3" "$4" "$5" "${6:-150}" </dev/null; sleep 2 ;;
         chevron-left)  chevron left  "$2" "$3" "$4"; sleep 2 ;;
         chevron-right) chevron right "$2" "$3" "$4"; sleep 2 ;;
         chevron-up)    chevron up    "$2" "$3" "$4"; sleep 2 ;;
         chevron-down)  chevron down  "$2" "$3" "$4"; sleep 2 ;;
-        key)     adb shell input keyevent "KEYCODE_$2"; sleep 2 ;;
-        text)    shift; adb shell input text "$*"; sleep 1 ;;
+        key)     adb shell input keyevent "KEYCODE_$2" </dev/null; sleep 2 ;;
+        text)    shift; adb shell input text "$*" </dev/null; sleep 1 ;;
         wait)    sleep "$2" ;;
         shot)    evidence "$2"; continue ;;
         *) echo "  unknown op '$op' (L$lineno) — skip" >&2; continue ;;
       esac
       evidence "$(printf 'L%02d-%s' "$lineno" "$op")"
-    done < "$OPS_FILE"
+    done 3< "$OPS_FILE"
     finish_evidence
     echo "exploration(ops): $step evidence steps captured in $ART_DIR"
     ;;
