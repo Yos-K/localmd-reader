@@ -39,10 +39,7 @@ import io.github.yosk.mdlite.domain.TableOfContentsItem;
 import io.github.yosk.mdlite.domain.TableReadingMode;
 import io.github.yosk.mdlite.domain.UnavailableProPurchaseFlow;
 import io.github.yosk.mdlite.domain.ViewerFeature;
-import io.github.yosk.mdlite.file.FileInfo;
 import io.github.yosk.mdlite.file.FileSizePolicy;
-import io.github.yosk.mdlite.file.MarkdownFileOpenResult;
-import io.github.yosk.mdlite.file.RestorableOpenTab;
 import io.github.yosk.mdlite.infrastructure.BuildEntitlementSource;
 import io.github.yosk.mdlite.infrastructure.BuildProPurchaseStatusRefresh;
 import io.github.yosk.mdlite.infrastructure.CachedProPurchaseEntitlementSource;
@@ -70,6 +67,7 @@ import io.github.yosk.mdlite.viewer.PinnedDocumentController;
 import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
 import io.github.yosk.mdlite.model.RestoredOpenDocumentTab;
 import io.github.yosk.mdlite.model.RestoredOpenDocumentTabs;
+import io.github.yosk.mdlite.model.RestorableOpenDocumentLoader;
 import io.github.yosk.mdlite.file.RecentDocument;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -156,6 +154,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private ReaderAppearance readerAppearance;
     private DocumentNavigationController documentNavigationController;
     private RelativeDocumentResources relativeDocumentResources;
+    private RestorableOpenDocumentLoader restorableOpenDocumentLoader;
 
     TextView messageView;
     Button menuButton;
@@ -285,6 +284,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         documentTabBar = new DocumentTabBar(this, tabScroller, tabRow);
         documentRenderingCoordinator = new DocumentRenderingCoordinator(
                 new MainActivityDocumentRenderingOutput(this));
+        restorableOpenDocumentLoader = new RestorableOpenDocumentLoader(
+                new RestorableOpenDocumentSource(documentOpener),
+                new MainActivityRestorableOpenDocumentRenderer(this),
+                fileSizePolicy,
+                MAX_FILE_SIZE_BYTES);
 
         fontScaleGestureDetector = new ScaleGestureDetector(this, new FontScaleGestureListener(this));
         shortcutGestureDetector = new GestureDetector(this, new ShortcutGestureListener(this));
@@ -1036,32 +1040,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return RestoredOpenDocumentTabs.restore(
                 tabPersistence.loadRestorableOpenTabs(),
                 initialTab(),
-                new RestoredOpenDocumentTabs.Loader() {
-                    @Override
-                    public RestoredOpenDocumentTab load(RestorableOpenTab storedTab) {
-                        return restoreOpenTab(storedTab);
-                    }
-                });
-    }
-
-    private RestoredOpenDocumentTab restoreOpenTab(RestorableOpenTab storedTab) {
-        try {
-            Uri uri = Uri.parse(storedTab.uri());
-            FileInfo fileInfo = documentOpener.readFileInfo(uri);
-            String displayName = fileInfo.displayName.length() == 0 ? storedTab.title() : fileInfo.displayName;
-            MarkdownFileOpenResult openResult = MarkdownFileOpenResult.from(displayName, fileInfo.sizeBytes, fileSizePolicy);
-            if (!(openResult instanceof MarkdownFileOpenResult.ReadableMarkdownFile)) {
-                return RestoredOpenDocumentTab.unavailable();
-            }
-            MarkdownFileOpenResult.ReadableMarkdownFile readableFile = (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
-            String markdown = documentOpener.readText(uri, MAX_FILE_SIZE_BYTES);
-            String documentUri = uri.toString();
-            SafeHtml rendered = renderMarkdownForUri(documentUri, markdown);
-            return RestoredOpenDocumentTab.available(
-                    OpenDocumentTab.fileDocument(readableFile.displayName(), documentUri, rendered));
-        } catch (IllegalArgumentException e) { return RestoredOpenDocumentTab.unavailable(); }
-        catch (IOException e) { return RestoredOpenDocumentTab.unavailable(); }
-        catch (SecurityException e) { return RestoredOpenDocumentTab.unavailable(); }
+                restorableOpenDocumentLoader);
     }
 
     void restorePendingScrollAfterPageLoad() {
