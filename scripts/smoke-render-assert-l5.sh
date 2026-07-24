@@ -29,7 +29,7 @@ mkdir -p "$ART_DIR"
 fail() {
   echo "L5 render-assert failed: $1" >&2
   adb logcat -d -v time > "$ART_DIR/logcat.txt" 2>/dev/null || true
-  adb exec-out screencap -p > "$ART_DIR/screen.png" 2>/dev/null || true
+  sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/screen.png" 2>/dev/null || true
   adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/ui-dump.xml" 2>/dev/null || true
   exit 1
 }
@@ -86,7 +86,7 @@ assert_visible_text() {
     return 0
   fi
   adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/${label}-fail-ui-dump.xml" 2>/dev/null || true
-  adb exec-out screencap -p > "$ART_DIR/${label}-fail-screen.png" 2>/dev/null || true
+  sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/${label}-fail-screen.png" 2>/dev/null || true
   return 1
 }
 
@@ -115,7 +115,7 @@ tap_visible_text_occurrence() {
   bounds="$(printf '%s\n' "$node" | sed -n 's/.*bounds="\[\([0-9][0-9]*\),\([0-9][0-9]*\)\]\[\([0-9][0-9]*\),\([0-9][0-9]*\)\]".*/\1 \2 \3 \4/p')"
   if [ -z "$bounds" ]; then
     adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/${label}-tap-fail-ui-dump.xml" 2>/dev/null || true
-    adb exec-out screencap -p > "$ART_DIR/${label}-tap-fail-screen.png" 2>/dev/null || true
+    sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/${label}-tap-fail-screen.png" 2>/dev/null || true
     return 1
   fi
   coords="$(printf '%s\n' "$bounds")"
@@ -215,7 +215,7 @@ echo "L5 detection-capability check: render-nonexistent correctly absent"
 
 # Final evidence capture
 adb logcat -d -v time > "$ART_DIR/logcat.txt" 2>/dev/null || true
-adb exec-out screencap -p > "$ART_DIR/screen.png" 2>/dev/null || true
+sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/screen.png" 2>/dev/null || true
 adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/ui-dump.xml" 2>/dev/null || true
 
 echo "L5 render-assert smoke passed"

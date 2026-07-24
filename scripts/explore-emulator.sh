@@ -43,7 +43,7 @@ step=0
 evidence() { # $1=label — スクショ + UIダンプを連番で採取
   step=$((step + 1))
   tag=$(printf '%03d-%s' "$step" "$1")
-  adb exec-out screencap -p > "$ART_DIR/$tag.png" 2>/dev/null || true
+  sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/$tag.png" 2>/dev/null || true
   adb shell rm -f /sdcard/ui-dump.xml
   adb shell uiautomator dump /sdcard/ui-dump.xml >/dev/null 2>&1 || true
   adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/$tag.xml" 2>/dev/null || true

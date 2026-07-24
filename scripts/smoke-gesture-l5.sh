@@ -58,7 +58,7 @@ fail() {
   echo "gesture-smoke debug: viewer_settings.xml follows" >&2
   adb shell run-as "$PKG" cat shared_prefs/viewer_settings.xml >&2 2>/dev/null || true
   adb logcat -d -v time > "$ART_DIR/logcat.txt" 2>/dev/null || true
-  adb exec-out screencap -p > "$ART_DIR/fail-screen.png" 2>/dev/null || true
+  sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/fail-screen.png" 2>/dev/null || true
   adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/fail-ui-dump.xml" 2>/dev/null || true
   exit 1
 }
@@ -88,7 +88,7 @@ dismiss_pixel_launcher_anr_if_present() {
 
 save_evidence() {
   adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/$1-ui-dump.xml" 2>/dev/null || true
-  adb exec-out screencap -p > "$ART_DIR/$1-screen.png" 2>/dev/null || true
+  sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/$1-screen.png" 2>/dev/null || true
 }
 
 # Retry by REDOING the gesture, never by falling back to a tap: a fallback
@@ -235,6 +235,6 @@ fi
 echo "gesture-smoke detection-capability: nonexistent text correctly absent"
 
 adb logcat -d -v time > "$ART_DIR/logcat.txt" 2>/dev/null || true
-adb exec-out screencap -p > "$ART_DIR/screen.png" 2>/dev/null || true
+sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/screen.png" 2>/dev/null || true
 
 echo "gesture-smoke passed (G1 edge-open / G2 swipe-close / G3 double-tap / G4 chevron next_tab)"
