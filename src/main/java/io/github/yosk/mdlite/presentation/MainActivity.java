@@ -155,6 +155,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     private DocumentNavigationController documentNavigationController;
     private RelativeDocumentResources relativeDocumentResources;
     private RestorableOpenDocumentLoader restorableOpenDocumentLoader;
+    private ActivityResultRouter activityResultRouter;
 
     TextView messageView;
     Button menuButton;
@@ -284,6 +285,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         documentTabBar = new DocumentTabBar(this, tabScroller, tabRow);
         documentRenderingCoordinator = new DocumentRenderingCoordinator(
                 new MainActivityDocumentRenderingOutput(this));
+        activityResultRouter = new ActivityResultRouter(this);
         restorableOpenDocumentLoader = new RestorableOpenDocumentLoader(
                 new RestorableOpenDocumentSource(documentOpener),
                 new MainActivityRestorableOpenDocumentRenderer(this),
@@ -372,27 +374,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_OPEN_DOCUMENT && resultCode == RESULT_OK && data != null) {
-            documentOpener.openSelectedDocuments(data);
-            return;
-        }
-        if (requestCode == REQUEST_OPEN_FOLDER && resultCode == RESULT_OK && data != null) {
-            documentOpener.openSelectedFolder(data);
-            return;
-        }
-        if (requestCode == REQUEST_SAVE_DOCUMENT && resultCode == RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                documentSaver.writePendingMarkdown(uri);
-            }
-            return;
-        }
-        if (requestCode == REQUEST_EXPORT_HTML && resultCode == RESULT_OK && data != null) {
-            Uri uri = data.getData();
-            if (uri != null) {
-                htmlDocumentExporter.writePendingHtml(uri);
-            }
-        }
+        activityResultRouter.handle(requestCode, resultCode, data);
     }
 
     @Override
@@ -614,6 +596,14 @@ public final class MainActivity extends Activity implements View.OnClickListener
     void clearMessage() {
         currentMessage = MESSAGE_NONE;
         updateLocalizedMessage();
+    }
+
+    void writePendingMarkdown(Uri uri) {
+        documentSaver.writePendingMarkdown(uri);
+    }
+
+    void writePendingHtml(Uri uri) {
+        htmlDocumentExporter.writePendingHtml(uri);
     }
 
     void showSavedMarkdownMessage() {
