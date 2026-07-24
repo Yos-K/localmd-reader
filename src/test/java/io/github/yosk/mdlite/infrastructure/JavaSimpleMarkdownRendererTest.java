@@ -33,8 +33,10 @@ public final class JavaSimpleMarkdownRendererTest {
     void htmlCodeBlockProvidesRawAndRenderedPreviewPanes() {
         SafeHtml html = renderer.render("```html\n<strong>Hello</strong>\n```");
 
+        TestAssertions.assertContains(html.value(), "<button type=\"button\" class=\"code-preview-button\"",
+                "HTML preview must expose a native button for switching panes");
         TestAssertions.assertContains(html.value(),
-                "<div class=\"code-preview-pane code-preview-rendered\"><strong>Hello</strong></div>",
+                "<div class=\"code-preview-pane code-preview-rendered\" style=\"display:none\"><strong>Hello</strong></div>",
                 "HTML preview must render allowed markup beside its escaped raw source");
     }
 
@@ -51,7 +53,7 @@ public final class JavaSimpleMarkdownRendererTest {
         SafeHtml html = renderer.render("```markdown\n# Title\n\n**important**\n```");
 
         TestAssertions.assertContains(html.value(),
-                "<div class=\"code-preview-pane code-preview-rendered\"><h1 id=\"title\">Title</h1><p><strong>important</strong></p></div>",
+                "<div class=\"code-preview-pane code-preview-rendered\" style=\"display:none\"><h1 id=\"title\">Title</h1><p><strong>important</strong></p></div>",
                 "Markdown code previews must reuse the normal Markdown renderer");
     }
 
@@ -69,7 +71,7 @@ public final class JavaSimpleMarkdownRendererTest {
                 "```html\n<h1 class=\"title\" onclick=\"alert(1)\">Title</h1>\n```");
 
         TestAssertions.assertContains(html.value(),
-                "<div class=\"code-preview-pane code-preview-rendered\"><h1>Title</h1></div>",
+                "<div class=\"code-preview-pane code-preview-rendered\" style=\"display:none\"><h1>Title</h1></div>",
                 "HTML preview must preserve an allowed element while dropping every attribute");
     }
 
