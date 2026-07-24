@@ -109,6 +109,7 @@ tap_visible_text_occurrence() {
   local y2
   local x
   local y
+  local navigation_top
   adb shell rm -f /sdcard/ui-dump.xml
   adb shell uiautomator dump /sdcard/ui-dump.xml >/dev/null 2>&1 || true
   node="$(adb shell cat /sdcard/ui-dump.xml 2>/dev/null | tr '>' '>\n' | grep "$keyword" | sed -n "${occurrence}p" || true)"
@@ -126,6 +127,19 @@ tap_visible_text_occurrence() {
   y2="$4"
   x=$(((x1 + x2) / 2))
   y=$(((y1 + y2) / 2))
+  # WebView accessibility nodes can retain virtual bounds in the system
+  # navigation bar after their content has scrolled away.  Tapping such a
+  # node is not an interaction success and can make this smoke report a
+  # false positive.  Read the actual navigation-bar boundary from the dump.
+  navigation_top="$(printf '%s\n' "$(adb shell cat /sdcard/ui-dump.xml 2>/dev/null)" \
+    | tr '>' '\n' | grep 'resource-id="android:id/navigationBarBackground"' \
+    | sed -n 's/.*bounds="\[[0-9][0-9]*,\([0-9][0-9]*\)\].*/\1/p' | head -1)"
+  if [ -n "$navigation_top" ] && [ "$y2" -gt "$navigation_top" ]; then
+    adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/${label}-tap-offscreen-ui-dump.xml" 2>/dev/null || true
+    sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/${label}-tap-offscreen-screen.png" 2>/dev/null || true
+    echo "L5 tap unavailable: $label ($keyword #$occurrence bounds [$x1,$y1][$x2,$y2] overlap navigation bar at y=$navigation_top)" >&2
+    return 1
+  fi
   adb shell input tap "$x" "$y" >/dev/null
   sleep 1
   echo "L5 tap ok: $label ($keyword #$occurrence at $x,$y)"
