@@ -113,7 +113,7 @@ tap_visible_text_occurrence() {
   local navigation_top
   adb shell rm -f /sdcard/ui-dump.xml
   adb shell uiautomator dump /sdcard/ui-dump.xml >/dev/null 2>&1 || true
-  node="$(adb shell cat /sdcard/ui-dump.xml 2>/dev/null | tr '>' '>\n' | grep "text=\"$keyword\"" | sed -n "${occurrence}p" || true)"
+  node="$(adb shell cat /sdcard/ui-dump.xml 2>/dev/null | sed 's#/>#/>\n#g' | grep "text=\"$keyword\"" | sed -n "${occurrence}p" || true)"
   bounds="$(printf '%s\n' "$node" | sed -n 's/.*bounds="\[\([0-9][0-9]*\),\([0-9][0-9]*\)\]\[\([0-9][0-9]*\),\([0-9][0-9]*\)\]".*/\1 \2 \3 \4/p')"
   if [ -z "$bounds" ]; then
     adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/${label}-tap-fail-ui-dump.xml" 2>/dev/null || true
@@ -133,7 +133,7 @@ tap_visible_text_occurrence() {
   # node is not an interaction success and can make this smoke report a
   # false positive.  Read the actual navigation-bar boundary from the dump.
   navigation_top="$(printf '%s\n' "$(adb shell cat /sdcard/ui-dump.xml 2>/dev/null)" \
-    | tr '>' '\n' | grep 'resource-id="android:id/navigationBarBackground"' \
+    | sed 's#/>#/>\n#g' | grep 'resource-id="android:id/navigationBarBackground"' \
     | sed -n 's/.*bounds="\[[0-9][0-9]*,\([0-9][0-9]*\)\].*/\1/p' | head -1)"
   if [ -n "$navigation_top" ] && [ "$y2" -gt "$navigation_top" ]; then
     adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/${label}-tap-offscreen-ui-dump.xml" 2>/dev/null || true

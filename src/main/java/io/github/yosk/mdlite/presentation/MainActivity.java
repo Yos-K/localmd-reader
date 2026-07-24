@@ -264,6 +264,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         settingsDialogs = new SettingsDialogs(this);
         gestureShortcutDialogs = new GestureShortcutDialogs(this);
         gestureShortcutHandler = new GestureShortcutHandler(this);
+        documentNavigationController = new DocumentNavigationController(this);
         documentSearchBar = new DocumentSearchBar(this);
 
         appRoot = new EdgeSwipeFrameLayout(this);
@@ -280,7 +281,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         ReaderScreenInitializer.initialize(this);
         fontPinchController = new FontPinchController(
                 FontSize.defaultSize(), new MainActivityFontPinchOutput(this));
-        documentNavigationController = new DocumentNavigationController(this);
         documentTabBar = new DocumentTabBar(this, tabScroller, tabRow);
         documentRenderingCoordinator = new DocumentRenderingCoordinator(
                 new MainActivityDocumentRenderingOutput(this));
