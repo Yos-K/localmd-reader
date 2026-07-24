@@ -46,6 +46,7 @@ b64() {
 launch_render_fixture() {
   local fixture_b64
   fixture_b64="$(b64 "$FIXTURE")"
+  adb shell am force-stop "$PKG" >/dev/null 2>&1 || true
   adb shell am start -n "$ACTIVITY" -a "$ACTION" --activity-single-top \
     --esa "$EX_TITLES" "smoke-render.md" \
     --esa "$EX_SOURCES" "$FIXTURE" \
@@ -112,7 +113,7 @@ tap_visible_text_occurrence() {
   local navigation_top
   adb shell rm -f /sdcard/ui-dump.xml
   adb shell uiautomator dump /sdcard/ui-dump.xml >/dev/null 2>&1 || true
-  node="$(adb shell cat /sdcard/ui-dump.xml 2>/dev/null | tr '>' '>\n' | grep "$keyword" | sed -n "${occurrence}p" || true)"
+  node="$(adb shell cat /sdcard/ui-dump.xml 2>/dev/null | tr '>' '>\n' | grep "text=\"$keyword\"" | sed -n "${occurrence}p" || true)"
   bounds="$(printf '%s\n' "$node" | sed -n 's/.*bounds="\[\([0-9][0-9]*\),\([0-9][0-9]*\)\]\[\([0-9][0-9]*\),\([0-9][0-9]*\)\]".*/\1 \2 \3 \4/p')"
   if [ -z "$bounds" ]; then
     adb shell cat /sdcard/ui-dump.xml > "$ART_DIR/${label}-tap-fail-ui-dump.xml" 2>/dev/null || true
@@ -151,6 +152,7 @@ tap_visible_text_occurrence() {
 adb logcat -c 2>/dev/null || true
 
 # L2: launch app (cold start to ensure a clean state before the fixture open)
+adb shell am force-stop "$PKG" >/dev/null 2>&1 || true
 adb shell am start -W -n "$ACTIVITY" >/dev/null
 sleep 3
 if ! adb shell pidof "$PKG" >/dev/null 2>&1; then
@@ -182,6 +184,13 @@ fi
 if ! assert_visible_text "Preview" "code-preview-toggle"; then
   fail "code-preview regression: Raw/Preview switcher not visible for previewable code blocks"
 fi
+
+# WebView accessibility exposes virtual descendants only after their region has
+# entered the viewport. Bring the preview controls into the physical viewport
+# before resolving the exact button text; otherwise the heading can be found
+# while the actual control is still off-screen.
+adb shell input swipe 500 1800 500 900 400 >/dev/null
+sleep 1
 
 if ! tap_visible_text "Preview" "code-preview-preview-label"; then
   fail "code-preview regression: Preview label could not be tapped"
