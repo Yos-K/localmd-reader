@@ -24,7 +24,7 @@ final class HtmlDocumentExporter {
         activity.pendingExportHtml = HtmlPageBuilder.buildPage(
                 tab.document(),
                 activity.currentTheme,
-                activity.currentFontSize,
+                activity.fontPinchController.currentFontSize(),
                 TableReadingMode.fromEntitlement(activity.featureEntitlement));
 
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);

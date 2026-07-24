@@ -55,6 +55,7 @@ import io.github.yosk.mdlite.viewer.ControlsPlacement;
 import io.github.yosk.mdlite.viewer.DocumentSearchQuery;
 import io.github.yosk.mdlite.viewer.DocumentNavigationController;
 import io.github.yosk.mdlite.viewer.DocumentRenderingCoordinator;
+import io.github.yosk.mdlite.viewer.FontPinchController;
 import io.github.yosk.mdlite.viewer.FontSize;
 import io.github.yosk.mdlite.viewer.GestureShortcutBindings;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
@@ -122,8 +123,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     ViewerPalette viewerPalette = ViewerPalette.from(ViewerTheme.light());
     GestureShortcutBindings gestureShortcutBindings = GestureShortcutBindings.empty();
     ViewerText viewerText = ViewerText.fromLanguage(ViewerLanguage.english());
-    FontSize currentFontSize = FontSize.defaultSize();
-    FontSize renderedFontSize = FontSize.defaultSize();
+    FontPinchController fontPinchController;
     String pendingSaveMarkdown = "";
     SavedDocumentPlacement pendingSavePlacement = SavedDocumentPlacement.openNormally();
     String pendingExportHtml = "";
@@ -203,10 +203,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
     TextView layoutSection;
     TextView infoSection;
     private String currentMessage = MESSAGE_NONE;
-    private float accumulatedPinchScale = 1f;
-    private float temporaryPinchScale = 1f;
-    private int pendingScrollRestoreY = -1;
-    private FontSize pinchStartFontSize = FontSize.defaultSize();
     private boolean trackingEdgeSwipe;
     private float edgeSwipeStartX;
     private float menuSwipeStartX;
@@ -282,6 +278,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         readerAppearance = new ReaderAppearance(this);
         ReaderScreenInitializer.initialize(this);
+        fontPinchController = new FontPinchController(
+                FontSize.defaultSize(), new MainActivityFontPinchOutput(this));
         documentNavigationController = new DocumentNavigationController(this);
         documentTabBar = new DocumentTabBar(this, tabScroller, tabRow);
         documentRenderingCoordinator = new DocumentRenderingCoordinator(
@@ -479,11 +477,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
                 HtmlPageBuilder.buildPage(
                         openTabs().activeTab().document(),
                         currentTheme,
-                        currentFontSize,
+                        fontPinchController.currentFontSize(),
                         TableReadingMode.fromEntitlement(featureEntitlement)),
                 "text/html", "UTF-8", historyUrl);
-        renderedFontSize = currentFontSize;
-        webView.getSettings().setTextZoom(100);
+        fontPinchController.documentRendered();
     }
 
     WebResourceResponse openActiveRelativeImage(String requestUrl) {
@@ -911,32 +908,15 @@ public final class MainActivity extends Activity implements View.OnClickListener
     int messageColor() { return viewerPalette.message; }
 
     void changeFontSizeByPinch(float scaleFactor) {
-        if (!FontSize.canApplyPinchScale(scaleFactor)) {
-            return;
-        }
-        accumulatedPinchScale *= scaleFactor;
-        temporaryPinchScale = clampedTemporaryPinchScale(temporaryPinchScale * scaleFactor);
-        FontSize changed = pinchStartFontSize.changedByPinchScale(accumulatedPinchScale);
-        if (changed.sp() != currentFontSize.sp()) { currentFontSize = changed; }
-        int zoomPercent = Math.round((pinchStartFontSize.sp() * temporaryPinchScale * 100f) / renderedFontSize.sp());
-        webView.getSettings().setTextZoom(zoomPercent);
+        fontPinchController.changeBy(scaleFactor);
     }
 
     void beginFontSizePinch() {
-        accumulatedPinchScale = 1f;
-        temporaryPinchScale = 1f;
-        pinchStartFontSize = currentFontSize;
+        fontPinchController.begin();
     }
 
     void finishFontSizePinch() {
-        accumulatedPinchScale = 1f;
-        temporaryPinchScale = 1f;
-        if (currentFontSize.sp() != renderedFontSize.sp()) {
-            pendingScrollRestoreY = restoredScrollYForFontChange(renderedFontSize, currentFontSize);
-            renderCurrentDocument();
-        } else {
-            webView.getSettings().setTextZoom(100);
-        }
+        fontPinchController.finish();
     }
 
     void applyNativeTheme() {
@@ -1050,20 +1030,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         menuPanel.setPadding(dp(18), systemTopInsetPx + dp(28), dp(18), dp(18));
     }
 
-    private float clampedTemporaryPinchScale(float scale) {
-        float minScale = FontSize.MIN_SP / (float) pinchStartFontSize.sp();
-        float maxScale = FontSize.MAX_SP / (float) pinchStartFontSize.sp();
-        return Math.max(minScale, Math.min(maxScale, scale));
-    }
-
-    private int restoredScrollYForFontChange(FontSize previousFontSize, FontSize nextFontSize) {
-        FontSize safePrevious = previousFontSize == null ? FontSize.defaultSize() : previousFontSize;
-        FontSize safeNext = nextFontSize == null ? FontSize.defaultSize() : nextFontSize;
-        float scale = safeNext.sp() / (float) safePrevious.sp();
-        float viewportCenter = webView.getScrollY() + (webView.getHeight() / 2f);
-        return Math.max(0, Math.round((viewportCenter * scale) - (webView.getHeight() / 2f)));
-    }
-
     private OpenDocumentTabs restoreOpenTabsOrInitial() {
         return RestoredOpenDocumentTabs.restore(
                 tabPersistence.loadRestorableOpenTabs(),
@@ -1097,10 +1063,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void restorePendingScrollAfterPageLoad() {
-        if (pendingScrollRestoreY < 0) { return; }
-        int scrollY = pendingScrollRestoreY;
-        pendingScrollRestoreY = -1;
-        webView.post(new RestoreScrollPosition(webView, scrollY, 6));
+        fontPinchController.pageLoaded();
     }
 
 }
