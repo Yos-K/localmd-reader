@@ -23,7 +23,7 @@ final class HtmlDocumentExporter {
         OpenDocumentTab tab = activity.openTabs().activeTab();
         activity.pendingExportHtml = HtmlPageBuilder.buildPage(
                 tab.document(),
-                activity.currentTheme,
+                activity.currentTheme(),
                 activity.fontPinchController.currentFontSize(),
                 TableReadingMode.fromEntitlement(activity.featureEntitlement));
 

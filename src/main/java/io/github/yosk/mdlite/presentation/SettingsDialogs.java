@@ -17,7 +17,7 @@ final class SettingsDialogs {
     void showThemeDialog() {
         ViewerTheme[] themes = availableThemes();
         new AlertDialog.Builder(activity)
-                .setTitle(activity.viewerText.themeLabel(activity.currentTheme))
+                .setTitle(activity.viewerText.themeLabel(activity.currentTheme()))
                 // interaction-surface: theme-dialog
                 .setItems(themeLabels(themes), new ThemeClickListener(activity, themes))
                 .setNegativeButton("OK", null)

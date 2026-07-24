@@ -60,6 +60,7 @@ import io.github.yosk.mdlite.viewer.OpenDocumentTab;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabSession;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
 import io.github.yosk.mdlite.viewer.ViewerLanguage;
+import io.github.yosk.mdlite.viewer.ViewerPreferences;
 import io.github.yosk.mdlite.viewer.ViewerText;
 import io.github.yosk.mdlite.viewer.ViewerTheme;
 import io.github.yosk.mdlite.viewer.TabPinningDecision;
@@ -116,9 +117,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     WebView webView;
     MermaidJsRenderEngine mermaidRenderEngine;
     OpenDocumentTabSession documentTabSession;
-    ControlsPlacement controlsPlacement;
-    ViewerLanguage currentLanguage = ViewerLanguage.english();
-    ViewerTheme currentTheme = ViewerTheme.light();
+    ViewerPreferences viewerPreferences = ViewerPreferences.defaults();
     ViewerPalette viewerPalette = ViewerPalette.from(ViewerTheme.light());
     GestureShortcutBindings gestureShortcutBindings = GestureShortcutBindings.empty();
     ViewerText viewerText = ViewerText.fromLanguage(ViewerLanguage.english());
@@ -221,12 +220,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void reclampCurrentThemeForEntitlement() {
-        ViewerTheme clampedTheme = currentTheme.clampedForEntitlement(featureEntitlement);
-        if (clampedTheme.storedValue().equals(currentTheme.storedValue())) {
+        ViewerTheme clampedTheme = viewerPreferences.theme().clampedForEntitlement(featureEntitlement);
+        if (clampedTheme.storedValue().equals(viewerPreferences.theme().storedValue())) {
             return;
         }
-        currentTheme = clampedTheme;
-        viewerPalette = ViewerPalette.from(currentTheme);
+        viewerPreferences = viewerPreferences.withTheme(clampedTheme);
+        viewerPalette = ViewerPalette.from(viewerPreferences.theme());
         if (root == null || documentTabSession == null || webView == null) {
             return;
         }
@@ -270,11 +269,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         appRoot = new EdgeSwipeFrameLayout(this);
         settingsStore = new ViewerSettingsStore(this, featureEntitlement);
         clipboardHistoryStore = new ClipboardHistoryStore(this);
-        controlsPlacement = settingsStore.loadControlsPlacement();
-        currentLanguage = settingsStore.loadViewerLanguage();
-        viewerText = ViewerText.fromLanguage(currentLanguage);
-        currentTheme = settingsStore.loadViewerTheme();
-        viewerPalette = ViewerPalette.from(currentTheme);
+        viewerPreferences = new ViewerPreferences(
+                settingsStore.loadViewerLanguage(), settingsStore.loadViewerTheme(),
+                settingsStore.loadControlsPlacement());
+        viewerText = ViewerText.fromLanguage(viewerPreferences.language());
+        viewerPalette = ViewerPalette.from(viewerPreferences.theme());
         gestureShortcutBindings = settingsStore.loadGestureShortcutBindings();
 
         readerAppearance = new ReaderAppearance(this);
@@ -394,9 +393,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void switchLanguage() {
-        currentLanguage = currentLanguage.toggled();
-        viewerText = ViewerText.fromLanguage(currentLanguage);
-        settingsStore.saveViewerLanguage(currentLanguage);
+        viewerPreferences = viewerPreferences.withLanguage(viewerPreferences.language().toggled());
+        viewerText = ViewerText.fromLanguage(viewerPreferences.language());
+        settingsStore.saveViewerLanguage(viewerPreferences.language());
         updateLocalizedText();
         if (WELCOME_URI.equals(openTabs().activeTab().uri())) {
             documentTabSession.reset(OpenDocumentTabs.withInitialTab(initialTab()));
@@ -406,21 +405,25 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void toggleControlsPlacement() {
-        controlsPlacement = controlsPlacement.toggled();
-        settingsStore.saveControlsPlacement(controlsPlacement);
+        viewerPreferences = viewerPreferences.withControlsPlacement(viewerPreferences.controlsPlacement().toggled());
+        settingsStore.saveControlsPlacement(viewerPreferences.controlsPlacement());
         updateLocalizedText();
         applyControlsPlacement();
     }
 
     void applySelectedTheme(ViewerTheme theme) {
-        currentTheme = theme;
-        settingsStore.saveViewerTheme(currentTheme);
-        viewerPalette = ViewerPalette.from(currentTheme);
+        viewerPreferences = viewerPreferences.withTheme(theme);
+        settingsStore.saveViewerTheme(viewerPreferences.theme());
+        viewerPalette = ViewerPalette.from(viewerPreferences.theme());
         updateLocalizedText();
         applyNativeTheme();
         rerenderMermaidDiagramsForCurrentTheme();
         renderTabs();
         renderCurrentDocument();
+    }
+
+    void selectNextTheme() {
+        applySelectedTheme(viewerPreferences.theme().next(featureEntitlement));
     }
 
     void updateLocalizedText() {
@@ -463,7 +466,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         webView.loadDataWithBaseURL("https://localmd.local/",
                 HtmlPageBuilder.buildPage(
                         openTabs().activeTab().document(),
-                        currentTheme,
+                        viewerPreferences.theme(),
                         fontPinchController.currentFontSize(),
                         TableReadingMode.fromEntitlement(featureEntitlement)),
                 "text/html", "UTF-8", historyUrl);
@@ -789,11 +792,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     ViewerTheme currentTheme() {
-        return currentTheme;
+        return viewerPreferences.theme();
     }
 
     ControlsPlacement controlsPlacement() {
-        return controlsPlacement;
+        return viewerPreferences.controlsPlacement();
     }
 
     boolean customGestureShortcutsAvailable() {
@@ -922,7 +925,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     void applyControlsPlacement() {
         root.removeAllViews();
         applyControlsBarInsets();
-        if (controlsPlacement.isBottom()) {
+        if (viewerPreferences.controlsPlacement().isBottom()) {
             root.addView(messageView, wrapParams());
             root.addView(webView, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
@@ -942,7 +945,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     OpenDocumentTab initialTab() {
         return OpenDocumentTab.welcome(viewerText.welcomeTabTitle(), WELCOME_URI,
-                WelcomeDocumentBuilder.build(currentLanguage));
+                WelcomeDocumentBuilder.build(viewerPreferences.language()));
     }
 
     void refreshMenuActionButtons() {
@@ -1016,7 +1019,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void applyControlsBarInsets() {
-        if (controlsPlacement.isBottom()) {
+        if (viewerPreferences.controlsPlacement().isBottom()) {
             root.setPadding(0, systemTopInsetPx, 0, 0);
             controlsBar.setPadding(0, 0, 0, systemBottomInsetPx);
         } else {

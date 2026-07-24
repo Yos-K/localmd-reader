@@ -48,21 +48,11 @@ final class GestureShortcutHandler {
             return true;
         }
         if (action.isNextTheme()) {
-            activity.currentTheme = activity.currentTheme.next(activity.featureEntitlement);
-            activity.settingsStore.saveViewerTheme(activity.currentTheme);
-            activity.viewerPalette = ViewerPalette.from(activity.currentTheme);
-            activity.updateLocalizedText();
-            activity.applyNativeTheme();
-            activity.rerenderMermaidDiagramsForCurrentTheme();
-            activity.renderTabs();
-            activity.renderCurrentDocument();
+            activity.selectNextTheme();
             return true;
         }
         if (action.isMoveControls()) {
-            activity.controlsPlacement = activity.controlsPlacement.toggled();
-            activity.settingsStore.saveControlsPlacement(activity.controlsPlacement);
-            activity.updateLocalizedText();
-            activity.applyControlsPlacement();
+            activity.toggleControlsPlacement();
             return true;
         }
         if (action.isShowSearchBar()) {
