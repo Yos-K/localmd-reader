@@ -58,6 +58,7 @@ import io.github.yosk.mdlite.viewer.DocumentRenderingCoordinator;
 import io.github.yosk.mdlite.viewer.FontPinchController;
 import io.github.yosk.mdlite.viewer.FontSize;
 import io.github.yosk.mdlite.viewer.GestureShortcutBindings;
+import io.github.yosk.mdlite.viewer.HorizontalSwipe;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabSession;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
@@ -829,9 +830,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         }
         if (!trackingEdgeSwipe) { return false; }
         if (event.getAction() == MotionEvent.ACTION_UP) {
-            float distance = event.getX() - edgeSwipeStartX;
             trackingEdgeSwipe = false;
-            if (distance >= dp(MENU_SWIPE_MIN_DISTANCE_DP)) { openMenu(); return true; }
+            if (HorizontalSwipe.from(edgeSwipeStartX, event.getX(), dp(MENU_SWIPE_MIN_DISTANCE_DP))
+                    == HorizontalSwipe.RIGHT) { openMenu(); return true; }
         }
         if (event.getAction() == MotionEvent.ACTION_CANCEL) { trackingEdgeSwipe = false; }
         return true;
@@ -843,7 +844,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
             return false;
         }
         if (event.getAction() == MotionEvent.ACTION_UP) {
-            if (event.getX() - menuSwipeStartX <= -dp(MENU_SWIPE_MIN_DISTANCE_DP)) {
+            if (HorizontalSwipe.from(menuSwipeStartX, event.getX(), dp(MENU_SWIPE_MIN_DISTANCE_DP))
+                    == HorizontalSwipe.LEFT) {
                 closeMenu();
                 return true;
             }
