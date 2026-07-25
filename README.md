@@ -10,9 +10,9 @@
 
 LocalMD Reader is a lightweight Android Markdown viewer.
 
-LocalMD Reader is currently in Google Play testing and release preparation.
+LocalMD Reader is currently available through Google Play open testing.
 
-Closed testing links:
+Open testing links:
 
 - Web: https://play.google.com/apps/testing/io.github.yosk.mdlite
 - Android: https://play.google.com/store/apps/details?id=io.github.yosk.mdlite
@@ -139,10 +139,11 @@ See [docs/release/release-signing.md](docs/release/release-signing.md).
 
 ## Repository Status
 
-This repository is public for closed testing and release preparation.
+This repository is public for open testing and release preparation.
 
-Closed testing notes are in [docs/release/closed-testing-guide.md](docs/release/closed-testing-guide.md).
-Tester invitation text is in
+The completed closed-testing process is recorded in
+[docs/release/closed-testing-guide.md](docs/release/closed-testing-guide.md).
+Its archived tester invitation text is in
 [play-store/testing/closed-test-invitation.txt](play-store/testing/closed-test-invitation.txt).
 
 ## License
