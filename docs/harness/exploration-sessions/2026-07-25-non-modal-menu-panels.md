@@ -19,6 +19,8 @@
 | 4 | ジェスチャーを展開し、ダブルタップの動作候補を開く | 同じパネル内で候補と戻る操作を表示する | 期待どおり | 確認済み |
 | 5 | 動作を選択する | 保存後にジェスチャー一覧へ戻る | 期待どおり | 確認済み |
 | 6 | メニューを開いたままテーマを変更する | メニューボタンの読み上げは「閉じる」を維持する | 「開く」へ戻った | 修正・単体テスト化 |
+| 7 | 最近開いたファイルとピン留めを交互に展開する | 各内容が所有する操作行の直下に表示される | 初期実装ではカード末尾に集約され所属が曖昧 | ADR追記・構造修正・受け入れテスト化 |
+| 8 | 修正版で最近開いたファイルとピン留め空状態を展開する | 操作行、内容、次の操作行の順で表示される | 実機で期待どおり | 確認済み |
 
 ## 修正
 
@@ -26,11 +28,15 @@
 `menuAccessibilityDescription()`で現在の表示状態から説明を導出するように変更した。
 回帰防止は`NonModalDocumentListsStructureTest.appearanceChangesPreserveTheMenuAccessibilityAction`へ追加した。
 
+展開パネルは所有する操作行の直後かつ同じカード内へ配置する規則をADR-0022へ追加した。
+ファイル一覧、目次、テーマ、ジェスチャーの配置を統一し、
+`NonModalDocumentListsStructureTest.everyExpandablePanelImmediatelyFollowsItsOwningAction`で固定した。
+
 ## 価値評価
 
-- probes: 6
-- findings: 1
+- probes: 8
+- findings: 2
 - triage-issue: 0
 - triage-glossary: 0
-- triage-assert: 1
-- time-minutes: 20
+- triage-assert: 2
+- time-minutes: 30

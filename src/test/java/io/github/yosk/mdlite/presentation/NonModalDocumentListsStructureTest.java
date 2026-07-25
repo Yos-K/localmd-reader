@@ -24,7 +24,7 @@ public final class NonModalDocumentListsStructureTest {
 
     @Test
     void readerScreenOwnsExpandableRecentAndPinnedPanels() throws IOException {
-        String initializer = source("ReaderScreenInitializer.java");
+        String initializer = source("ReaderScreenInitializer.java").replaceAll("\\s+", " ");
         String panel = source("DocumentListMenuPanel.java");
 
         TestAssertions.assertContains(initializer, "new DocumentListMenuPanel(activity, false)",
@@ -90,6 +90,24 @@ public final class NonModalDocumentListsStructureTest {
         TestAssertions.assertNotContains(activity,
                 "menuButton.setContentDescription(viewerText.openMenuDescription());\n        appTitle",
                 "localized updates must not reset an open menu to the open action");
+    }
+
+    @Test
+    void everyExpandablePanelImmediatelyFollowsItsOwningAction() throws IOException {
+        String initializer = source("ReaderScreenInitializer.java").replaceAll("\\s+", " ");
+
+        TestAssertions.assertContains(initializer,
+                "activity.pinnedFilesButton, activity.pinnedDocumentsPanel, activity.recentButton, "
+                        + "activity.recentDocumentsPanel",
+                "pinned and recent contents must remain attached to their own rows");
+        TestAssertions.assertContains(initializer,
+                "activity.tableOfContentsButton, activity.tableOfContentsPanel, activity.findInDocumentButton",
+                "the table of contents must remain attached to its row");
+        TestAssertions.assertContains(initializer,
+                "activity.themeButton, activity.themePanel, activity.languageButton, "
+                        + "activity.controlsPlacementButton, activity.gestureShortcutsButton, "
+                        + "activity.gestureShortcutPanel",
+                "theme and gesture contents must remain attached to their own rows");
     }
 
     private static String source(String fileName) throws IOException {

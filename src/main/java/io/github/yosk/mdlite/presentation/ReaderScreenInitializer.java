@@ -110,27 +110,24 @@ final class ReaderScreenInitializer {
         activity.menuPanel.addView(activity.menuTitle, MainActivity.wrapParams());
         activity.filesSection = activity.menuSection("");
         activity.markdownLibraryMenuTree = new MarkdownLibraryMenuTree(activity);
+        activity.pinnedDocumentsPanel = new DocumentListMenuPanel(activity, true);
+        activity.pinnedDocumentsMenuSection =
+                new ExpandableMenuSection(activity.pinnedDocumentsPanel, activity.pinnedDocumentsPanel);
+        activity.recentDocumentsPanel = new DocumentListMenuPanel(activity, false);
+        activity.recentDocumentsMenuSection =
+                new ExpandableMenuSection(activity.recentDocumentsPanel, activity.recentDocumentsPanel);
         addMenuCard(activity, activity.menuPanel, activity.filesSection, activity.openButton,
                 activity.markdownLibraryButton, activity.markdownLibraryMenuTree,
                 activity.createFromClipboardButton,
                 activity.saveAsButton, activity.exportAsHtmlButton, activity.printOrSavePdfButton,
                 activity.pinCurrentFileButton, activity.unpinCurrentFileButton, activity.pinnedFilesButton,
-                activity.recentButton);
-        activity.pinnedDocumentsPanel = new DocumentListMenuPanel(activity, true);
-        activity.menuPanel.addView(activity.pinnedDocumentsPanel, MainActivity.wrapParams());
-        activity.pinnedDocumentsMenuSection =
-                new ExpandableMenuSection(activity.pinnedDocumentsPanel, activity.pinnedDocumentsPanel);
-        activity.recentDocumentsPanel = new DocumentListMenuPanel(activity, false);
-        activity.menuPanel.addView(activity.recentDocumentsPanel, MainActivity.wrapParams());
-        activity.recentDocumentsMenuSection =
-                new ExpandableMenuSection(activity.recentDocumentsPanel, activity.recentDocumentsPanel);
+                activity.pinnedDocumentsPanel, activity.recentButton, activity.recentDocumentsPanel);
         activity.readingSection = activity.menuSection("");
-        addMenuCard(activity, activity.menuPanel, activity.readingSection, activity.tableOfContentsButton,
-                activity.findInDocumentButton);
         activity.tableOfContentsPanel = new TableOfContentsMenuPanel(activity);
-        activity.menuPanel.addView(activity.tableOfContentsPanel, MainActivity.wrapParams());
         activity.tableOfContentsMenuSection =
                 new ExpandableMenuSection(activity.tableOfContentsPanel, activity.tableOfContentsPanel);
+        addMenuCard(activity, activity.menuPanel, activity.readingSection, activity.tableOfContentsButton,
+                activity.tableOfContentsPanel, activity.findInDocumentButton);
         addMenuCard(activity, activity.menuPanel, null, activity.settingsButton);
 
         activity.settingsPanel = new LinearLayout(activity);
@@ -140,15 +137,14 @@ final class ReaderScreenInitializer {
         activity.menuPanel.addView(activity.settingsPanel, MainActivity.wrapParams());
         activity.settingsMenuSection = ExpandableMenuSection.staticContent(activity.settingsPanel);
         activity.layoutSection = activity.menuSection("");
-        addMenuCard(activity, activity.settingsPanel, activity.layoutSection, activity.themeButton,
-                activity.languageButton, activity.controlsPlacementButton, activity.gestureShortcutsButton);
         activity.themePanel = new ThemeMenuPanel(activity);
-        activity.settingsPanel.addView(activity.themePanel, MainActivity.wrapParams());
         activity.themeMenuSection = new ExpandableMenuSection(activity.themePanel, activity.themePanel);
         activity.gestureShortcutPanel = new GestureShortcutMenuPanel(activity);
-        activity.settingsPanel.addView(activity.gestureShortcutPanel, MainActivity.wrapParams());
         activity.gestureShortcutMenuSection =
                 new ExpandableMenuSection(activity.gestureShortcutPanel, activity.gestureShortcutPanel);
+        addMenuCard(activity, activity.settingsPanel, activity.layoutSection, activity.themeButton, activity.themePanel,
+                activity.languageButton, activity.controlsPlacementButton, activity.gestureShortcutsButton,
+                activity.gestureShortcutPanel);
         activity.infoSection = activity.menuSection("");
         addMenuCard(activity, activity.settingsPanel, activity.infoSection, activity.proFeaturesButton,
                 activity.clipboardDiagnosticsButton, activity.privacyButton);

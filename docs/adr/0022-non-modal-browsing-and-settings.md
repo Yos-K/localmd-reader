@@ -9,6 +9,10 @@ the table of contents, the Markdown library, and gestures, as expandable panels
 inside the navigation menu. Prefer non-modal controls for themes and display
 settings so choices can be compared without losing context.
 
+Place every expandable panel immediately after its owning action row and inside
+the same visual group. Do not collect panels at the end of a card. Communicate
+ownership through the row chevron, immediate placement, and left indentation.
+
 Reserve dialogs for actions that require an explicit response before work can
 continue: naming a saved file, purchasing, confirming destructive operations,
 or reporting an error that prevents continuation.
