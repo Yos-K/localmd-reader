@@ -202,9 +202,11 @@ final class GestureShortcutDialogs {
         activity.customGestureDrawingView = new CustomGestureDrawingView(activity,
                 activity.viewerText.drawCustomGestureInstruction(),
                 activity.viewerText.cancel(),
+                activity.systemTopInsetPx(),
                 activity.backgroundColor(), activity.primaryColor(), activity.textColor(), activity);
         activity.appRoot.addView(activity.customGestureDrawingView, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        activity.registerCustomGestureBackCallback();
     }
 
     void clearCustomGestureShortcut() {
@@ -243,6 +245,7 @@ final class GestureShortcutDialogs {
     }
 
     private void finishCustomGestureDrawing() {
+        activity.unregisterCustomGestureBackCallback();
         if (activity.customGestureDrawingView != null) {
             activity.appRoot.removeView(activity.customGestureDrawingView);
             activity.customGestureDrawingView = null;

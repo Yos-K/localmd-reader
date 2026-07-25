@@ -7,6 +7,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -21,6 +22,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import io.github.yosk.mdlite.R;
 import io.github.yosk.mdlite.domain.CompositeEntitlementSource;
 import io.github.yosk.mdlite.domain.DocumentRenderingProfile;
@@ -196,6 +199,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     HorizontalScrollView tabScroller;
     private int systemTopInsetPx;
     private int systemBottomInsetPx;
+    private OnBackInvokedCallback customGestureBackCallback;
     TextView appTitle;
     TextView menuTitle;
     TextView filesSection;
@@ -361,6 +365,32 @@ public final class MainActivity extends Activity implements View.OnClickListener
         systemBottomInsetPx = insets.getSystemWindowInsetBottom();
         applyControlsBarInsets();
         return insets;
+    }
+
+    int systemTopInsetPx() {
+        return systemTopInsetPx;
+    }
+
+    void registerCustomGestureBackCallback() {
+        if (Build.VERSION.SDK_INT < 33 || customGestureBackCallback != null) {
+            return;
+        }
+        customGestureBackCallback = new OnBackInvokedCallback() {
+            @Override
+            public void onBackInvoked() {
+                gestureShortcutDialogs.cancelCustomGestureRegistration();
+            }
+        };
+        getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, customGestureBackCallback);
+    }
+
+    void unregisterCustomGestureBackCallback() {
+        if (Build.VERSION.SDK_INT < 33 || customGestureBackCallback == null) {
+            return;
+        }
+        getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(customGestureBackCallback);
+        customGestureBackCallback = null;
     }
 
     @Override

@@ -19,14 +19,21 @@ public final class CustomGestureDrawingLayoutTest {
     @Test
     void topRightPointInsideTheVisibleCancelLabelCancelsRegistration() {
         TestAssertions.assertTrue(
-                CustomGestureDrawingLayout.isCancelTarget(968, 95, 900f, 150f),
+                CustomGestureDrawingLayout.isCancelTarget(968, 95, 180f, 900f, 150f),
                 "a tap on the visible top-right cancel affordance must cancel registration");
     }
 
     @Test
     void drawingPointOutsideTheCancelLabelRemainsPartOfTheGesture() {
         TestAssertions.assertFalse(
-                CustomGestureDrawingLayout.isCancelTarget(968, 95, 500f, 500f),
+                CustomGestureDrawingLayout.isCancelTarget(968, 95, 180f, 500f, 500f),
                 "a point in the drawing surface must not be mistaken for cancellation");
+    }
+
+    @Test
+    void visibleLeftSideOfTheCancelLabelBelongsToItsTouchTarget() {
+        TestAssertions.assertTrue(
+                CustomGestureDrawingLayout.isCancelTarget(968, 95, 180f, 740f, 150f),
+                "the entire visible cancel label needs one matching touch target");
     }
 }

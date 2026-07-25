@@ -21,6 +21,9 @@
 | P6 | 画面消灯中の物理UI探索 | 操作列の途中で端末が消灯した状態でADB入力を継続 | 入力はアプリへ届かずSystem UIが前面になった | 規則が沈黙（ハーネス制約） | 実機探索時は画面点灯維持が必要 |
 | P7 | 描画中の中断 | 描画画面のUIと戻る処理を確認 | 画面上にキャンセル操作がなく、戻る操作にも描画専用処理がなかった | 規則が沈黙 | glossary GES9、キャンセル領域テスト2件 |
 | P8 | 登録状態の再起動復元 | 修正版を再起動して登録済み・未登録の両状態を再確認する計画 | 端末ロック後に無線ADBがofflineとなり未確認 | 未確認 | 次回の実機チャーターへ継続 |
+| P9 | GES8の実機配線 | 修正版登録画面を実機で撮影 | 初回修正は子ViewへInsetsが届かず通知領域に重なった。Activity取得値の明示渡し後は重なりなし | 規則と異なる | Activity取得値の配線テスト、実機再確認済み |
+| P10 | 可視キャンセルと当たり判定 | キャンセル文字の左側をタップ | 初回は文字幅とタップ矩形が別計算で反応しなかった。同一矩形化後は閲覧画面へ戻った | 規則と異なる | 同一矩形モデル、境界テスト、実機再確認済み |
+| P11 | GES9の端末戻る | Android 13以降の実機で描画中に戻る | 旧`onBackPressed`ではActivityが終了した。`OnBackInvokedDispatcher`対応後はActivityを維持して描画だけ終了 | 規則と異なる | modern back配線テスト、実機再確認済み |
 
 ## 振り分けの結果
 
@@ -43,6 +46,9 @@
 | P6 | なし | 画面消灯はアプリ仕様ではなく物理探索ハーネスの実行条件 | テスト対象外。点灯維持を実機手順で扱う |
 | P7 | `CustomGestureDrawingLayoutTest.topRightPointInsideTheVisibleCancelLabelCancelsRegistration` | 表示されたキャンセル領域を操作できる | 追加済み |
 | P7 | `CustomGestureDrawingLayoutTest.drawingPointOutsideTheCancelLabelRemainsPartOfTheGesture` | 通常の描画をキャンセルと誤認しない | 追加済み |
+| P9 | `CustomGestureDrawingInsetsStructureTest.drawingViewReceivesTheInsetAlreadyObservedByTheActivity` | Activityが取得済みのInsetsを描画Viewへ明示的に渡す | 追加済み |
+| P10 | `CustomGestureDrawingLayoutTest.visibleLeftSideOfTheCancelLabelBelongsToItsTouchTarget` | 可視キャンセル文字の全幅が同じタップ領域に入る | 追加済み |
+| P11 | `CustomGestureDrawingInsetsStructureTest.drawingViewReceivesTheInsetAlreadyObservedByTheActivity` | 描画開始・終了時に新しい戻るコールバックを登録・解除する | 追加済み（同じ配線契約） |
 
 P8は未確認でありfindingではない。次回観測後に欠陥と判定した場合、この表へ回帰テストを追加する。
 
@@ -54,9 +60,9 @@ P8は未確認でありfindingではない。次回観測後に欠陥と判定�
 
 ## 価値評価（機械可読・集計は scripts/exploration-status.sh）
 
-- probes: 8
-- findings: 5
+- probes: 11
+- findings: 8
 - triage-issue: 0
 - triage-glossary: 4
-- triage-assert: 10
-- time-minutes: 35
+- triage-assert: 12
+- time-minutes: 50

@@ -6,7 +6,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowInsets;
 import io.github.yosk.mdlite.viewer.CustomGestureDrawingLayout;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +31,7 @@ final class CustomGestureDrawingView extends View {
             Context context,
             String instruction,
             String cancelLabel,
+            int systemTopInset,
             int backgroundColor,
             int strokeColor,
             int textColor,
@@ -39,6 +39,7 @@ final class CustomGestureDrawingView extends View {
         super(context);
         this.instruction = instruction;
         this.cancelLabel = cancelLabel;
+        this.systemTopInset = Math.max(0, systemTopInset);
         this.listener = listener;
         setBackgroundColor(backgroundColor);
         strokePaint.setColor(strokeColor);
@@ -50,15 +51,6 @@ final class CustomGestureDrawingView extends View {
         textPaint.setTextSize(42f);
         setClickable(true);
         setContentDescription(instruction);
-        setOnApplyWindowInsetsListener(new OnApplyWindowInsetsListener() {
-            @Override
-            public WindowInsets onApplyWindowInsets(View view, WindowInsets insets) {
-                systemTopInset = insets.getSystemWindowInsetTop();
-                invalidate();
-                return insets;
-            }
-        });
-        requestApplyInsets();
     }
 
     @Override
@@ -67,7 +59,8 @@ final class CustomGestureDrawingView extends View {
         canvas.drawText(instruction, 36f,
                 CustomGestureDrawingLayout.instructionBaseline(systemTopInset), textPaint);
         canvas.drawText(cancelLabel,
-                getWidth() - 36f - textPaint.measureText(cancelLabel),
+                CustomGestureDrawingLayout.cancelLabelStartX(
+                        getWidth(), textPaint.measureText(cancelLabel)),
                 CustomGestureDrawingLayout.instructionBaseline(systemTopInset), textPaint);
         canvas.drawPath(path, strokePaint);
     }
@@ -80,7 +73,8 @@ final class CustomGestureDrawingView extends View {
         }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             cancelPressed = CustomGestureDrawingLayout.isCancelTarget(
-                    getWidth(), systemTopInset, event.getX(), event.getY());
+                    getWidth(), systemTopInset, textPaint.measureText(cancelLabel),
+                    event.getX(), event.getY());
             if (cancelPressed) {
                 return true;
             }

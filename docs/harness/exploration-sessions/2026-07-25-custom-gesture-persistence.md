@@ -20,7 +20,7 @@
 | P5 | 非有限座標 | 保存値と描画入力へNaNを混入 | 修正前は`CustomGestureShape`を構築でき、Always-Validを破った | 規則と異なる | 有限性L1、例テスト2件 |
 | P6 | 保存の途中状態 | `saveCustomGestureShortcut`のEditor操作を確認 | 形状と動作を同じEditorで書き、1回の`apply`で確定していた | 規則どおり | 肯定的証拠 |
 | P7 | 削除の途中状態 | `clearCustomGestureShortcut`のEditor操作を確認 | 形状と動作を同じEditorで削除し、1回の`apply`で確定していた | 規則どおり | 肯定的証拠 |
-| P8 | プロセス再起動後の実機復元 | 無線ADB実機への再接続を確認 | 接続端末がなく未確認 | 未確認 | 次回の実機チャーターへ継続 |
+| P8 | プロセス再起動後の実機復元 | 登録済みでforce-stop・起動後、削除して再度force-stop・起動 | 登録済みの形状動作は「検索バーを表示」として復元され、削除後は「オフ」を維持した | 規則どおり | 実機の肯定的証拠 |
 
 ## 振り分けの結果
 
@@ -41,7 +41,7 @@
 | P5 | `CustomGestureShortcutTest.nonFiniteStoredShapeRestoresNoShortcut` | 非有限な保存ペアは登録なしへ閉じる | 追加済み |
 | P6 | なし | SharedPreferences Editorの同一トランザクション構造 | Android境界。現時点はコード観測、将来medium test候補 |
 | P7 | なし | SharedPreferences Editorの同一トランザクション構造 | Android境界。現時点はコード観測、将来medium test候補 |
-| P8 | なし | 実機再起動後の復元 | 未確認。実機接続後に判断する |
+| P8 | なし | 実機再起動後の復元 | 実機確認済み。自動化はAndroid medium test候補 |
 
 ## 次のチャーター候補
 
