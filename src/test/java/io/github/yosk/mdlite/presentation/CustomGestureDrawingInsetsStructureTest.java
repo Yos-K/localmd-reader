@@ -24,6 +24,10 @@ public final class CustomGestureDrawingInsetsStructureTest {
                 "the Activity must expose its observed inset to focused presentation collaborators");
         TestAssertions.assertContains(activity, "registerOnBackInvokedCallback",
                 "custom gesture drawing must intercept the modern Android back dispatcher");
+        TestAssertions.assertContains(activity, "@SuppressLint(\"GestureBackNavigation\")",
+                "the legacy fallback must document why predictive-back lint does not apply to it");
+        TestAssertions.assertContains(activity, "Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU",
+                "onBackPressed must only handle custom drawing on Android versions without the modern dispatcher");
         TestAssertions.assertContains(dialogs, "activity.registerCustomGestureBackCallback()",
                 "starting custom gesture drawing must register its modern back callback");
         TestAssertions.assertContains(dialogs, "activity.unregisterCustomGestureBackCallback()",

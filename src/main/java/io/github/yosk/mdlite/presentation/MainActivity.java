@@ -1,5 +1,6 @@
 package io.github.yosk.mdlite.presentation;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -415,8 +416,10 @@ public final class MainActivity
     }
 
     @Override
+    @SuppressLint("GestureBackNavigation")
     public void onBackPressed() {
-        if (gestureShortcutDialogs.cancelCustomGestureRegistration()) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                && gestureShortcutDialogs.cancelCustomGestureRegistration()) {
             return;
         }
         super.onBackPressed();
