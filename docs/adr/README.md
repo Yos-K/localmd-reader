@@ -33,6 +33,7 @@ Why Alternatives Were Rejected, and Reconsider When.
 | [0012](0012-derived-heading-navigation.md) | Derived heading navigation without sentinel state | Accepted |
 | [0013](0013-document-tab-session-completion.md) | Document tab session completion | Accepted |
 | [0014](0014-public-source-private-release-repositories.md) | Public source and private release repositories | Accepted |
+| [0023](0023-promote-existing-play-bundles-between-tracks.md) | Promote existing Play bundles between tracks | Accepted |
 | [0015](0015-document-rendering-coordinator.md) | Platform-independent rendering session ownership | Accepted |
 | [0016](0016-open-document-tab-session-owner.md) | Platform-independent open document tab ownership | Accepted |
 | [0017](0017-free-file-opening-and-pro-library-boundary.md) | One Free file entry point and persistent Pro library | Accepted |

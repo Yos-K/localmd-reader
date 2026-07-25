@@ -29,6 +29,7 @@ ADRは、複数の妥当な実装案があり、コードやPR履歴だけから
 | [0012](0012-derived-heading-navigation.ja.md) | 番兵状態を使わない見出し移動 | 採用 |
 | [0013](0013-document-tab-session-completion.ja.md) | 文書タブのセッション遷移完了 | 採用 |
 | [0014](0014-public-source-private-release-repositories.ja.md) | 公開ソースと非公開リリースの分離 | 採用 |
+| [0023](0023-promote-existing-play-bundles-between-tracks.ja.md) | 既存Play Bundleのトラック間昇格 | 採用 |
 | [0015](0015-document-rendering-coordinator.ja.md) | プラットフォーム非依存の描画セッション所有 | 採用 |
 | [0016](0016-open-document-tab-session-owner.ja.md) | プラットフォーム非依存の開いている文書タブ所有 | 採用 |
 | [0017](0017-free-file-opening-and-pro-library-boundary.ja.md) | Freeの一つのファイル選択とProの継続的なライブラリ | 採用 |

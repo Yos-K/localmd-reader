@@ -1,0 +1,89 @@
+name: Play Open Test Promotion
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: Existing Google Play bundle versionCode
+        required: true
+        default: '33'
+      track:
+        description: Google Play open testing track
+        required: true
+        default: beta
+      status:
+        description: Release status
+        required: true
+        default: completed
+        type: choice
+        options:
+          - completed
+          - draft
+      changes_not_sent_for_review:
+        description: Keep the change out of review
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: play-open-test-promotion-${{ inputs.track }}
+  cancel-in-progress: false
+
+jobs:
+  promote-existing-bundle:
+    if: github.repository == 'Yos-K/localmd-reader-release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: play-console
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install Play API dependencies
+        run: python -m pip install -r requirements-play-api.txt
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+      - name: Promote existing bundle to open testing
+        env:
+          CHANGES_NOT_SENT_FOR_REVIEW: ${{ inputs.changes_not_sent_for_review }}
+        run: |
+          REVIEW_ARGS=""
+          if [ "$CHANGES_NOT_SENT_FOR_REVIEW" = "true" ]; then
+            REVIEW_ARGS="--changes-not-sent-for-review"
+          fi
+          python scripts/play-upload-closed-test.py \
+            --version-code "${{ inputs.version_code }}" \
+            --track "${{ inputs.track }}" \
+            --status "${{ inputs.status }}" \
+            --name "LocalMD Reader v0.2.12 open test" \
+            $REVIEW_ARGS
+
+      - name: Promotion summary
+        if: always()
+        run: |
+          {
+            echo "## Play open-test promotion"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Package | io.github.yosk.mdlite |"
+            echo "| Version code | ${{ inputs.version_code }} |"
+            echo "| Track | ${{ inputs.track }} |"
+            echo "| Status | ${{ inputs.status }} |"
+            echo "| Result | ${{ job.status }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
