@@ -54,6 +54,18 @@ public final class NonModalDocumentListsStructureTest {
                 "selecting a shortcut action must have an explicit command entry point");
     }
 
+    @Test
+    void gestureActionChoicesStayInsideTheExpandablePanel() throws IOException {
+        String panel = source("GestureShortcutMenuPanel.java");
+        String dialogs = source("GestureShortcutDialogs.java");
+
+        TestAssertions.assertContains(
+                panel, "void showActions(int targetIndex)", "a selected gesture must reveal actions inline");
+        TestAssertions.assertContains(panel, "void showGestureList()", "inline action choices must return to the list");
+        TestAssertions.assertNotContains(
+                dialogs, "new AlertDialog.Builder(activity)", "gesture configuration must not use modal choices");
+    }
+
     private static String source(String fileName) throws IOException {
         String projectRoot = System.getProperty("user.dir").replaceFirst("/app$", "");
         return new String(Files.readAllBytes(

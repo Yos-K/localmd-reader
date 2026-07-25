@@ -50,11 +50,11 @@ table-of-contents-expanded|jump_to_heading|document-opened|Heading selected
 table-of-contents-expanded|close_menu|document-opened|Menu dismissed
 theme-dialog|select_theme|document-opened|Theme selected
 theme-dialog|close_dialog|document-opened|Theme selection dismissed
-gesture-shortcuts-panel-expanded|select_shortcut_action|gesture-action-dialog|Shortcut action selection requested
+gesture-shortcuts-panel-expanded|select_shortcut_action|gesture-shortcuts-panel-expanded|Inline shortcut action choices displayed
 gesture-shortcuts-panel-expanded|collapse_gesture_shortcuts|settings-section-expanded|Gesture shortcuts collapsed
 gesture-shortcuts-panel-expanded|close_menu|document-opened|Menu dismissed
-gesture-action-dialog|apply_shortcut_action|gesture-shortcuts-panel-expanded|Shortcut action changed
-gesture-action-dialog|close_dialog|document-opened|Shortcut action selection dismissed
+gesture-shortcuts-panel-expanded|apply_shortcut_action|gesture-shortcuts-panel-expanded|Shortcut action changed
+gesture-shortcuts-panel-expanded|return_to_gesture_list|gesture-shortcuts-panel-expanded|Gesture list restored
 pro-features-dialog|start_purchase|pro-features-dialog|Purchase requested
 pro-features-dialog|restore_purchase|pro-features-dialog|Purchase restore requested
 pro-features-dialog|close_dialog|document-opened|Pro features dismissed

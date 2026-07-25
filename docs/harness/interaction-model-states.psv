@@ -14,7 +14,6 @@ table-of-contents-collapsed|overlay|no|src/main/java/io/github/yosk/mdlite/model
 table-of-contents-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/model/DisclosureState.java
 theme-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java
 gesture-shortcuts-panel-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/GestureShortcutMenuPanel.java
-gesture-action-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/GestureShortcutDialogs.java
 pro-features-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/ProFeaturesDialog.java
 clipboard-diagnostics-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java
 privacy-policy-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java

@@ -16,8 +16,22 @@ final class GestureShortcutMenuPanel extends LinearLayout implements Runnable {
 
     @Override
     public void run() {
+        showGestureList();
+    }
+
+    void showGestureList() {
         removeAllViews();
         addView(activity.gestureShortcutDialogs.gestureShortcutListView(),
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+    }
+
+    void showActions(int targetIndex) {
+        removeAllViews();
+        addView(activity.gestureShortcutDialogs.gestureShortcutActionView(targetIndex, new Runnable() {
+            @Override
+            public void run() {
+                showGestureList();
+            }
+        }), new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
     }
 }
