@@ -51,6 +51,17 @@ public final class ViewerTextTest {
     }
 
     @Test
+    void menuAccessibilityDescriptionsComeFromTheActiveLanguageSet() {
+        ViewerText englishText = ViewerText.fromLanguage(ViewerLanguage.english());
+        ViewerText japaneseText = ViewerText.fromLanguage(ViewerLanguage.japanese());
+
+        TestAssertions.assertEquals("Close menu", englishText.closeMenuDescription(),
+                "English UI must describe closing the menu in English");
+        TestAssertions.assertEquals("メニューを閉じる", japaneseText.closeMenuDescription(),
+                "Japanese UI must describe closing the menu in Japanese");
+    }
+
+    @Test
     void languageSwitchActionDescribesTargetLanguage() {
         ViewerText englishText = ViewerText.fromLanguage(ViewerLanguage.english());
         ViewerText japaneseText = ViewerText.fromLanguage(ViewerLanguage.japanese());

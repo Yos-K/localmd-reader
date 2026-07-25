@@ -13,6 +13,7 @@ public abstract class ViewerText {
 
     public abstract String menuButton();
     public abstract String openMenuDescription();
+    public abstract String closeMenuDescription();
     public abstract String openFile();
     public abstract String createFromClipboard();
     public abstract String saveAs();
@@ -136,6 +137,7 @@ public abstract class ViewerText {
     private static final class EnglishViewerText extends ViewerText {
         @Override public String menuButton() { return "Menu"; }
         @Override public String openMenuDescription() { return "Open menu"; }
+        @Override public String closeMenuDescription() { return "Close menu"; }
         @Override public String openFile() { return "Open file"; }
         @Override public String createFromClipboard() { return "Create from clipboard"; }
         @Override public String saveAs() { return "Save as..."; }
@@ -333,6 +335,7 @@ public abstract class ViewerText {
     private static final class JapaneseViewerText extends ViewerText {
         @Override public String menuButton() { return "メニュー"; }
         @Override public String openMenuDescription() { return "メニューを開く"; }
+        @Override public String closeMenuDescription() { return "メニューを閉じる"; }
         @Override public String openFile() { return "ファイルを開く"; }
         @Override public String createFromClipboard() { return "クリップボードから作成"; }
         @Override public String saveAs() { return "名前を付けて保存"; }

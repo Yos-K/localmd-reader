@@ -399,9 +399,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         updateLocalizedText();
         if (WELCOME_URI.equals(openTabs().activeTab().uri())) {
             documentTabSession.reset(OpenDocumentTabs.withInitialTab(initialTab()));
-            renderTabs();
             renderCurrentDocument();
         }
+        renderTabs();
     }
 
     void toggleControlsPlacement() {
@@ -633,12 +633,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
     void openMenu() {
         tableOfContentsMenuSection.refreshExpandedContent();
         menuTransitions.open();
-        menuButton.setContentDescription("Close menu");
+        menuButton.setContentDescription(viewerText.closeMenuDescription());
     }
 
     void closeMenu() {
         menuTransitions.close();
-        menuButton.setContentDescription("Open menu");
+        menuButton.setContentDescription(viewerText.openMenuDescription());
     }
 
     // interaction-surface: settings-collapsed-row
