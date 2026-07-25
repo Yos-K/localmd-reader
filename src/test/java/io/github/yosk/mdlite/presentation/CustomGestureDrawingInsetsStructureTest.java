@@ -29,4 +29,20 @@ public final class CustomGestureDrawingInsetsStructureTest {
         TestAssertions.assertContains(dialogs, "activity.unregisterCustomGestureBackCallback()",
                 "finishing custom gesture drawing must remove its modern back callback");
     }
+
+    @Test
+    void drawingViewExposesItsCancellationActionToAssistiveTechnology() throws IOException {
+        String projectRoot = System.getProperty("user.dir").replaceFirst("/app$", "");
+        String drawingView = new String(Files.readAllBytes(Paths.get(projectRoot,
+                "src/main/java/io/github/yosk/mdlite/presentation/CustomGestureDrawingView.java")),
+                StandardCharsets.UTF_8);
+
+        TestAssertions.assertContains(drawingView,
+                "setContentDescription(instruction + \". \" + cancelLabel)",
+                "assistive technology must identify both the drawing instruction and cancel action");
+        TestAssertions.assertContains(drawingView, "public boolean performClick()",
+                "assistive technology must be able to invoke the visible cancel action");
+        TestAssertions.assertContains(drawingView, "performClick();",
+                "touch and assistive actions must use the same cancellation behavior");
+    }
 }

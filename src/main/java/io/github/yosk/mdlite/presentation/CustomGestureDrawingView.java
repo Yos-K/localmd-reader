@@ -50,7 +50,7 @@ final class CustomGestureDrawingView extends View {
         textPaint.setColor(textColor);
         textPaint.setTextSize(42f);
         setClickable(true);
-        setContentDescription(instruction);
+        setContentDescription(instruction + ". " + cancelLabel);
     }
 
     @Override
@@ -93,7 +93,7 @@ final class CustomGestureDrawingView extends View {
         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
             if (cancelPressed) {
                 cancelPressed = false;
-                listener.onCustomGestureDrawingCancelled();
+                performClick();
                 return true;
             }
             append(event);
@@ -106,6 +106,13 @@ final class CustomGestureDrawingView extends View {
             cancelPressed = false;
             reset();
         }
+        return true;
+    }
+
+    @Override
+    public boolean performClick() {
+        super.performClick();
+        listener.onCustomGestureDrawingCancelled();
         return true;
     }
 

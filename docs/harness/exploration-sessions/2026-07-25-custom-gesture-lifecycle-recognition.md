@@ -17,10 +17,13 @@
 | P2 | CG-A02 | force-stop・起動後に同じ座標列を描画 | 復元された形状と動作で検索バーが開いた | 規則どおり | 実機の肯定的証拠 |
 | P3 | CG-B03 | 描画画面をUI dumpで確認後、Homeへ移動してランチャーから復帰 | 描画面、案内、キャンセル可能な状態を維持し、同じActivityへ復帰した | 規則どおり | `build/b03-before.xml`、`build/b03-after.xml` |
 | P4 | CG-B04 | 描画中に端末表示を横向きへ回転し、縦向きへ戻した後に登録形状を描画 | クラッシュせず描画を中断し、既存の検索動作も発火した | 規則どおり | `build/b04-before.xml`、`build/b04-final.xml`、`build/b04-registration.png` |
+| P5 | CG-C04 | 検索バーが閉じた状態で、位置と速度を変えた上下スクロールを8回実行 | 検索動作は誤発火しなかった | 規則どおり | `build/c04-pre.xml`、`build/c04-after.xml` |
+| P6 | CG-C01 | 登録時より小さく別位置で同じ直線形状を描画 | 登録済みの検索バーが開いた | 規則どおり | `build/c01-small.png` |
+| P7 | CG-D03 | 描画画面のUI dumpで案内とキャンセル操作のアクセシビリティ情報を確認 | 描画案内は存在するが、表示中のキャンセル操作を支援技術から識別できない | **F1** | 恒久テストへ蒸留 |
 
 ## 振り分けの結果
 
-- **① issue**: 現時点ではなし。無効な座標操作はfindingに含めない。
+- **① issue**: F1。表示されるキャンセル操作がアクセシビリティ情報に含まれていなかった。
 - **② glossary**: Home復帰は描画セッションを継続し、構成変更による再生成は描画途中だけを破棄する。
 - **③ assert**: A01、A02、B03、B04の期待結果を実機証拠で確認した。
 
@@ -28,6 +31,7 @@
 
 | finding | 回帰テスト | 確認する仕様 | 状態または未反映理由 |
 |---|---|---|---|
+| F1 | `CustomGestureDrawingInsetsStructureTest.drawingViewExposesItsCancellationActionToAssistiveTechnology` | 描画面の説明からキャンセルを識別でき、支援技術のクリックとタッチが同じキャンセル動作を通る | 反映済み。全909テスト成功、`build/a11y-fixed.xml`で実機確認済み |
 
 ## 次のチャーター候補
 
@@ -37,9 +41,9 @@
 
 ## 価値評価（機械可読・集計は scripts/exploration-status.sh）
 
-- probes: 4
-- findings: 0
-- triage-issue: 0
+- probes: 7
+- findings: 1
+- triage-issue: 1
 - triage-glossary: 1
-- triage-assert: 4
-- time-minutes: 22
+- triage-assert: 6
+- time-minutes: 31
