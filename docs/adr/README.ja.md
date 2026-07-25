@@ -35,3 +35,4 @@ ADRは、複数の妥当な実装案があり、コードやPR履歴だけから
 | [0018](0018-language-complete-view-composition.ja.md) | 完全な言語別ビュー構成 | 採用 |
 | [0019](0019-pinned-document-bookmark-semantics.ja.md) | 開いているタブから独立したピン留め文書 | 採用 |
 | [0020](0020-main-activity-composition-boundary.ja.md) | MainActivityをAndroidの構成境界に保つ | 採用 |
+| [0021](0021-advisory-physical-device-exploration.ja.md) | クラウド実機でのPro版助言的探索 | 採用 |

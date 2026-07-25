@@ -39,3 +39,4 @@ Why Alternatives Were Rejected, and Reconsider When.
 | [0018](0018-language-complete-view-composition.md) | Complete language-specific view composition | Accepted |
 | [0019](0019-pinned-document-bookmark-semantics.md) | Pinned documents independent from open tabs | Accepted |
 | [0020](0020-main-activity-composition-boundary.md) | MainActivity as Android composition boundary | Accepted |
+| [0021](0021-advisory-physical-device-exploration.md) | Advisory Pro exploration on cloud physical devices | Accepted |
