@@ -1,8 +1,7 @@
 package io.github.yosk.mdlite.presentation;
 
 final class MainMenuActions {
-    private MainMenuActions() {
-    }
+    private MainMenuActions() {}
 
     static MainMenuAction openFile() {
         return new OpenFileMenuAction();
@@ -132,8 +131,7 @@ final class MainMenuActions {
 
         @Override
         void perform(MainActivity activity) {
-            activity.closeMenu();
-            activity.showRecentDocuments();
+            activity.toggleRecentDocumentsPanel();
         }
     }
 
@@ -234,8 +232,7 @@ final class MainMenuActions {
 
         @Override
         void perform(MainActivity activity) {
-            activity.closeMenu();
-            activity.showGestureShortcutsDialog();
+            activity.toggleGestureShortcutsPanel();
         }
     }
 

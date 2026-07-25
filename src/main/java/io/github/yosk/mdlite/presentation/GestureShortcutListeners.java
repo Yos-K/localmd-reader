@@ -27,7 +27,7 @@ final class GestureShortcutListeners {
         public void onClick(View view) {
             if (view instanceof GestureShortcutRow) {
                 if (dialog != null) { dialog.dismiss(); }
-                dialogs.selectGestureTarget(((GestureShortcutRow) view).targetIndex());
+                dialogs.selectShortcutAction(((GestureShortcutRow) view).targetIndex());
             }
         }
     }

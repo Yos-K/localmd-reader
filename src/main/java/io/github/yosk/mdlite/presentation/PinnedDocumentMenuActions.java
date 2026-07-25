@@ -3,8 +3,7 @@ package io.github.yosk.mdlite.presentation;
 import io.github.yosk.mdlite.viewer.PinnedDocumentMenuVisibility;
 
 final class PinnedDocumentMenuActions {
-    private PinnedDocumentMenuActions() {
-    }
+    private PinnedDocumentMenuActions() {}
 
     static MainMenuAction pinCurrentFile() {
         return new PinCurrentFileMenuAction();
@@ -49,8 +48,7 @@ final class PinnedDocumentMenuActions {
 
         @Override
         void perform(MainActivity activity) {
-            activity.closeMenu();
-            activity.showPinnedDocuments();
+            activity.togglePinnedDocumentsPanel();
         }
     }
 
@@ -74,8 +72,6 @@ final class PinnedDocumentMenuActions {
 
     private static PinnedDocumentMenuVisibility visibility(MainActivity activity) {
         return PinnedDocumentMenuVisibility.of(
-                activity.pinnedDocumentsAvailable(),
-                activity.activeTabIsFile(),
-                activity.activeFileIsPinned());
+                activity.pinnedDocumentsAvailable(), activity.activeTabIsFile(), activity.activeFileIsPinned());
     }
 }

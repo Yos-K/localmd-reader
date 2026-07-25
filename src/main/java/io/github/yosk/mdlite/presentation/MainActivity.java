@@ -15,13 +15,13 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.WindowInsets;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebView;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 import io.github.yosk.mdlite.R;
@@ -43,6 +43,7 @@ import io.github.yosk.mdlite.domain.TableReadingMode;
 import io.github.yosk.mdlite.domain.UnavailableProPurchaseFlow;
 import io.github.yosk.mdlite.domain.ViewerFeature;
 import io.github.yosk.mdlite.file.FileSizePolicy;
+import io.github.yosk.mdlite.file.RecentDocument;
 import io.github.yosk.mdlite.infrastructure.BuildEntitlementSource;
 import io.github.yosk.mdlite.infrastructure.BuildProPurchaseStatusRefresh;
 import io.github.yosk.mdlite.infrastructure.CachedProPurchaseEntitlementSource;
@@ -51,10 +52,13 @@ import io.github.yosk.mdlite.infrastructure.JavaSimpleMarkdownRenderer;
 import io.github.yosk.mdlite.infrastructure.ProPurchaseCacheStore;
 import io.github.yosk.mdlite.infrastructure.ProPurchaseStatusRefresh;
 import io.github.yosk.mdlite.infrastructure.WelcomeDocumentBuilder;
+import io.github.yosk.mdlite.model.RestorableOpenDocumentLoader;
+import io.github.yosk.mdlite.model.RestoredOpenDocumentTab;
+import io.github.yosk.mdlite.model.RestoredOpenDocumentTabs;
 import io.github.yosk.mdlite.viewer.ControlsPlacement;
-import io.github.yosk.mdlite.viewer.DocumentSearchQuery;
 import io.github.yosk.mdlite.viewer.DocumentNavigationController;
 import io.github.yosk.mdlite.viewer.DocumentRenderingCoordinator;
+import io.github.yosk.mdlite.viewer.DocumentSearchQuery;
 import io.github.yosk.mdlite.viewer.FontPinchController;
 import io.github.yosk.mdlite.viewer.FontSize;
 import io.github.yosk.mdlite.viewer.GestureShortcutBindings;
@@ -62,28 +66,23 @@ import io.github.yosk.mdlite.viewer.HorizontalSwipe;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabSession;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
+import io.github.yosk.mdlite.viewer.PinnedDocumentController;
+import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
+import io.github.yosk.mdlite.viewer.TabPinningDecision;
 import io.github.yosk.mdlite.viewer.ViewerLanguage;
 import io.github.yosk.mdlite.viewer.ViewerPreferences;
 import io.github.yosk.mdlite.viewer.ViewerText;
 import io.github.yosk.mdlite.viewer.ViewerTheme;
-import io.github.yosk.mdlite.viewer.TabPinningDecision;
-import io.github.yosk.mdlite.viewer.PinnedDocumentController;
-import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
-import io.github.yosk.mdlite.model.RestoredOpenDocumentTab;
-import io.github.yosk.mdlite.model.RestoredOpenDocumentTabs;
-import io.github.yosk.mdlite.model.RestorableOpenDocumentLoader;
-import io.github.yosk.mdlite.file.RecentDocument;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class MainActivity extends Activity implements View.OnClickListener, View.OnLongClickListener,
-        View.OnApplyWindowInsetsListener,
-        MermaidJsRenderEngine.Listener, CustomGestureDrawingView.Listener,
-        DocumentNavigationController.Host, PinnedDocumentController.Host {
-
+public final class MainActivity
+        extends Activity implements View.OnClickListener, View.OnLongClickListener, View.OnApplyWindowInsetsListener,
+                                    MermaidJsRenderEngine.Listener, CustomGestureDrawingView.Listener,
+                                    DocumentNavigationController.Host, PinnedDocumentController.Host {
     static final int REQUEST_OPEN_DOCUMENT = 1001;
     static final int REQUEST_SAVE_DOCUMENT = 1002;
     static final int REQUEST_OPEN_FOLDER = 1003;
@@ -143,11 +142,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
     DocumentOpener documentOpener;
     ClipboardDocumentCreator clipboardDocumentCreator;
     private DocumentSaver documentSaver;
-    private DocumentListDialogController documentListDialogs;
     private HtmlDocumentExporter htmlDocumentExporter;
     DocumentPrintLauncher documentPrintLauncher;
     private SettingsDialogs settingsDialogs;
-    private GestureShortcutDialogs gestureShortcutDialogs;
+    GestureShortcutDialogs gestureShortcutDialogs;
     private GestureShortcutHandler gestureShortcutHandler;
     DocumentSearchBar documentSearchBar;
     DocumentTabSessionController documentTabSessionController;
@@ -186,6 +184,12 @@ public final class MainActivity extends Activity implements View.OnClickListener
     ExpandableMenuSection settingsMenuSection;
     TableOfContentsMenuPanel tableOfContentsPanel;
     ExpandableMenuSection tableOfContentsMenuSection;
+    DocumentListMenuPanel recentDocumentsPanel;
+    ExpandableMenuSection recentDocumentsMenuSection;
+    DocumentListMenuPanel pinnedDocumentsPanel;
+    ExpandableMenuSection pinnedDocumentsMenuSection;
+    GestureShortcutMenuPanel gestureShortcutPanel;
+    ExpandableMenuSection gestureShortcutMenuSection;
     MarkdownLibraryMenuTree markdownLibraryMenuTree;
     SwipeMenuScrollView menuScrollContainer;
     SwipeMenuLayout menuPanel;
@@ -213,8 +217,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private FeatureEntitlement loadFeatureEntitlement(ProPurchaseCacheStore purchaseCacheStore) {
         return FeatureEntitlements.current(CompositeEntitlementSource.anyPro(
-                BuildEntitlementSource.current(),
-                new CachedProPurchaseEntitlementSource(purchaseCacheStore)));
+                BuildEntitlementSource.current(), new CachedProPurchaseEntitlementSource(purchaseCacheStore)));
     }
 
     void reloadFeatureEntitlement() {
@@ -247,12 +250,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         circleGestureTrace = new CircleGestureTrace(getResources().getDisplayMetrics().density);
         purchaseCacheStore = new ProPurchaseCacheStore(new SharedPreferencesProPurchaseCacheStorage(this));
         proPurchaseStatusRefresh = BuildProPurchaseStatusRefresh.current(
-                purchaseCacheStore,
-                AndroidProPurchaseStatusProviderFactory.current(this));
+                purchaseCacheStore, AndroidProPurchaseStatusProviderFactory.current(this));
         proPurchaseFlow = AndroidProPurchaseFlowFactory.current(
-                this,
-                proPurchaseStatusRefresh,
-                new PurchaseStatusUiCallback(this));
+                this, proPurchaseStatusRefresh, new PurchaseStatusUiCallback(this));
         proPurchaseStatusRefresh.refreshAt(System.currentTimeMillis(), new PurchaseStatusUiCallback(this));
         reloadFeatureEntitlement();
 
@@ -261,7 +261,6 @@ public final class MainActivity extends Activity implements View.OnClickListener
         documentOpener = new DocumentOpener(this);
         relativeDocumentResources = new RelativeDocumentResources(this);
         documentSaver = new DocumentSaver(this);
-        documentListDialogs = new DocumentListDialogController(this);
         htmlDocumentExporter = new HtmlDocumentExporter(this);
         documentPrintLauncher = new AndroidDocumentPrintLauncher(this);
         clipboardDocumentCreator = new ClipboardDocumentCreator(this);
@@ -274,8 +273,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         appRoot = new EdgeSwipeFrameLayout(this);
         settingsStore = new ViewerSettingsStore(this, featureEntitlement);
         clipboardHistoryStore = new ClipboardHistoryStore(this);
-        viewerPreferences = new ViewerPreferences(
-                settingsStore.loadViewerLanguage(), settingsStore.loadViewerTheme(),
+        viewerPreferences = new ViewerPreferences(settingsStore.loadViewerLanguage(), settingsStore.loadViewerTheme(),
                 settingsStore.loadControlsPlacement());
         viewerText = ViewerText.fromLanguage(viewerPreferences.language());
         viewerPalette = ViewerPalette.from(viewerPreferences.theme());
@@ -283,17 +281,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
         readerAppearance = new ReaderAppearance(this);
         ReaderScreenInitializer.initialize(this);
-        fontPinchController = new FontPinchController(
-                FontSize.defaultSize(), new MainActivityFontPinchOutput(this));
+        fontPinchController = new FontPinchController(FontSize.defaultSize(), new MainActivityFontPinchOutput(this));
         documentTabBar = new DocumentTabBar(this, tabScroller, tabRow);
-        documentRenderingCoordinator = new DocumentRenderingCoordinator(
-                new MainActivityDocumentRenderingOutput(this));
+        documentRenderingCoordinator = new DocumentRenderingCoordinator(new MainActivityDocumentRenderingOutput(this));
         activityResultRouter = new ActivityResultRouter(this);
-        restorableOpenDocumentLoader = new RestorableOpenDocumentLoader(
-                new RestorableOpenDocumentSource(documentOpener),
-                new MainActivityRestorableOpenDocumentRenderer(this),
-                fileSizePolicy,
-                MAX_FILE_SIZE_BYTES);
+        restorableOpenDocumentLoader =
+                new RestorableOpenDocumentLoader(new RestorableOpenDocumentSource(documentOpener),
+                        new MainActivityRestorableOpenDocumentRenderer(this), fileSizePolicy, MAX_FILE_SIZE_BYTES);
 
         fontScaleGestureDetector = new ScaleGestureDetector(this, new FontScaleGestureListener(this));
         shortcutGestureDetector = new GestureDetector(this, new ShortcutGestureListener(this));
@@ -307,17 +301,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
         applyControlsPlacement();
 
         appRoot.setOnApplyWindowInsetsListener(this);
-        appRoot.addView(root, new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        appRoot.addView(root,
+                new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         menuScrim = new View(this);
         menuScrim.setBackgroundColor(0x66000000);
         menuScrim.setAlpha(0f);
         menuScrim.setVisibility(View.GONE);
         menuScrim.setOnClickListener(this);
-        appRoot.addView(menuScrim, new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-        FrameLayout.LayoutParams menuParams = new FrameLayout.LayoutParams(
-                dp(MENU_WIDTH_DP), FrameLayout.LayoutParams.MATCH_PARENT);
+        appRoot.addView(menuScrim,
+                new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        FrameLayout.LayoutParams menuParams =
+                new FrameLayout.LayoutParams(dp(MENU_WIDTH_DP), FrameLayout.LayoutParams.MATCH_PARENT);
         menuParams.gravity = Gravity.START;
         appRoot.addView(menuScrollContainer, menuParams);
         menuTransitions = new MenuTransitions(menuScrollContainer, menuScrim);
@@ -495,8 +491,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
         if (index < 0 || index >= openTabs().tabs().size()) {
             return false;
         }
-        return pinnedDocumentController.decision(openTabs().tabs().get(index))
-                .perform(pinnedDocumentController);
+        return pinnedDocumentController.decision(openTabs().tabs().get(index)).perform(pinnedDocumentController);
     }
 
     void renderCurrentDocument() {
@@ -507,11 +502,8 @@ public final class MainActivity extends Activity implements View.OnClickListener
         documentNavigationController.resetForDocument();
         String historyUrl = anchorId == null ? null : "https://localmd.local/#" + anchorId;
         webView.loadDataWithBaseURL("https://localmd.local/",
-                HtmlPageBuilder.buildPage(
-                        openTabs().activeTab().document(),
-                        viewerPreferences.theme(),
-                        fontPinchController.currentFontSize(),
-                        TableReadingMode.fromEntitlement(featureEntitlement)),
+                HtmlPageBuilder.buildPage(openTabs().activeTab().document(), viewerPreferences.theme(),
+                        fontPinchController.currentFontSize(), TableReadingMode.fromEntitlement(featureEntitlement)),
                 "text/html", "UTF-8", historyUrl);
         fontPinchController.documentRendered();
     }
@@ -613,10 +605,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     @Override
     public HeadingScrollPosition headingScrollPosition() {
         return HeadingScrollPosition.fromWebViewMetrics(
-                webView.getScrollY(),
-                webView.getContentHeight(),
-                webView.getHeight(),
-                webView.getScale());
+                webView.getScrollY(), webView.getContentHeight(), webView.getHeight(), webView.getScale());
     }
 
     @Override
@@ -625,10 +614,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     SafeHtml renderMarkdownForUri(String documentUri, String markdown) {
-        return documentRenderingCoordinator.open(
-                DocumentUri.from(documentUri),
-                markdown,
-                documentRenderingProfile);
+        return documentRenderingCoordinator.open(DocumentUri.from(documentUri), markdown, documentRenderingProfile);
     }
 
     void saveOpenTabs() {
@@ -670,11 +656,7 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     void showInfoDialog(String title, String message) {
-        new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show();
+        new AlertDialog.Builder(this).setTitle(title).setMessage(message).setPositiveButton("OK", null).show();
     }
 
     void openMenu() {
@@ -714,8 +696,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
         openMarkdownLibrary();
     }
 
-    void showGestureShortcutsDialog() {
-        gestureShortcutDialogs.showGestureShortcutsDialog();
+    void toggleGestureShortcutsPanel() {
+        gestureShortcutMenuSection.toggle();
+        refreshMenuActionButtons();
+    }
+
+    void refreshGestureShortcutsPanel() {
+        gestureShortcutMenuSection.refreshExpandedContent();
     }
 
     void showThemeDialog() {
@@ -769,13 +756,13 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     boolean documentOutputAvailable() {
-        return documentTabSession != null
-                && openTabs().activeTab() instanceof OpenDocumentTab.UserDocumentTab
+        return documentTabSession != null && openTabs().activeTab() instanceof OpenDocumentTab.UserDocumentTab
                 && featureEntitlement.allows(ViewerFeature.EXPORT_OPTIONS);
     }
 
-    void showRecentDocuments() {
-        documentListDialogs.showRecentDocuments();
+    void toggleRecentDocumentsPanel() {
+        recentDocumentsMenuSection.toggle();
+        refreshMenuActionButtons();
     }
 
     void showProjectLibrary(io.github.yosk.mdlite.file.MarkdownLibraryLocation location,
@@ -814,6 +801,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
         pinnedDocumentController.clear();
     }
 
+    void clearRecentDocuments() {
+        tabPersistence.clearRecentDocuments();
+        showMessage(viewerText.recentFilesCleared());
+    }
+
     void unpinPinnedDocument(RecentDocument document) {
         pinnedDocumentController.unpin(document.uri());
     }
@@ -825,8 +817,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
         showMessage(message);
     }
 
-    void showPinnedDocuments() {
-        documentListDialogs.showPinnedDocuments();
+    void togglePinnedDocumentsPanel() {
+        pinnedDocumentsMenuSection.toggle();
+        refreshMenuActionButtons();
     }
 
     String recentFilesTitle() {
@@ -861,7 +854,9 @@ public final class MainActivity extends Activity implements View.OnClickListener
     boolean handleEdgeSwipe(MotionEvent event) {
         if (isMenuOpen()) {
             if (event.getX() > dp(MENU_WIDTH_DP)) {
-                if (event.getAction() == MotionEvent.ACTION_UP) { closeMenu(); }
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    closeMenu();
+                }
                 return true;
             }
             trackingEdgeSwipe = false;
@@ -872,13 +867,20 @@ public final class MainActivity extends Activity implements View.OnClickListener
             edgeSwipeStartX = event.getX();
             return trackingEdgeSwipe;
         }
-        if (!trackingEdgeSwipe) { return false; }
+        if (!trackingEdgeSwipe) {
+            return false;
+        }
         if (event.getAction() == MotionEvent.ACTION_UP) {
             trackingEdgeSwipe = false;
             if (HorizontalSwipe.from(edgeSwipeStartX, event.getX(), dp(MENU_SWIPE_MIN_DISTANCE_DP))
-                    == HorizontalSwipe.RIGHT) { openMenu(); return true; }
+                    == HorizontalSwipe.RIGHT) {
+                openMenu();
+                return true;
+            }
         }
-        if (event.getAction() == MotionEvent.ACTION_CANCEL) { trackingEdgeSwipe = false; }
+        if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+            trackingEdgeSwipe = false;
+        }
         return true;
     }
 
@@ -942,16 +944,36 @@ public final class MainActivity extends Activity implements View.OnClickListener
         return readerAppearance.plainRoundedBackground(fillColor, strokeColor, radiusDp);
     }
 
-    int backgroundColor() { return viewerPalette.background; }
-    int surfaceColor() { return viewerPalette.surface; }
-    int surfaceAltColor() { return viewerPalette.surfaceAlt; }
-    int textColor() { return viewerPalette.text; }
-    int mutedColor() { return viewerPalette.muted; }
-    int primaryColor() { return viewerPalette.primary; }
-    int primaryStrongColor() { return viewerPalette.primaryStrong; }
-    int onPrimaryColor() { return viewerPalette.onPrimary; }
-    int borderColor() { return viewerPalette.border; }
-    int messageColor() { return viewerPalette.message; }
+    int backgroundColor() {
+        return viewerPalette.background;
+    }
+    int surfaceColor() {
+        return viewerPalette.surface;
+    }
+    int surfaceAltColor() {
+        return viewerPalette.surfaceAlt;
+    }
+    int textColor() {
+        return viewerPalette.text;
+    }
+    int mutedColor() {
+        return viewerPalette.muted;
+    }
+    int primaryColor() {
+        return viewerPalette.primary;
+    }
+    int primaryStrongColor() {
+        return viewerPalette.primaryStrong;
+    }
+    int onPrimaryColor() {
+        return viewerPalette.onPrimary;
+    }
+    int borderColor() {
+        return viewerPalette.border;
+    }
+    int messageColor() {
+        return viewerPalette.message;
+    }
 
     void changeFontSizeByPinch(float scaleFactor) {
         fontPinchController.changeBy(scaleFactor);
@@ -974,33 +996,38 @@ public final class MainActivity extends Activity implements View.OnClickListener
         applyControlsBarInsets();
         if (viewerPreferences.controlsPlacement().isBottom()) {
             root.addView(messageView, wrapParams());
-            root.addView(webView, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+            root.addView(webView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
             root.addView(controlsBar, wrapParams());
         } else {
             root.addView(controlsBar, wrapParams());
             root.addView(messageView, wrapParams());
-            root.addView(webView, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+            root.addView(webView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
         }
     }
 
     void rerenderMermaidDiagramsForCurrentTheme() {
-        if (!documentRenderingProfile.mermaidRendering().isEnabled()) { return; }
+        if (!documentRenderingProfile.mermaidRendering().isEnabled()) {
+            return;
+        }
         documentRenderingCoordinator.resetForTheme(documentRenderingProfile);
     }
 
     OpenDocumentTab initialTab() {
-        return OpenDocumentTab.welcome(viewerText.welcomeTabTitle(), WELCOME_URI,
-                WelcomeDocumentBuilder.build(viewerPreferences.language()));
+        return OpenDocumentTab.welcome(
+                viewerText.welcomeTabTitle(), WELCOME_URI, WelcomeDocumentBuilder.build(viewerPreferences.language()));
     }
 
     void refreshMenuActionButtons() {
-        for (int i = 0; i < menuActionButtons.length; i++) { menuActionButtons[i].refresh(this); }
+        for (int i = 0; i < menuActionButtons.length; i++) {
+            menuActionButtons[i].refresh(this);
+        }
         settingsButton.setText(viewerText.settings());
         tableOfContentsButton.setText(viewerText.tableOfContents());
         settingsMenuSection.refreshChevron(this, settingsButton);
         tableOfContentsMenuSection.refreshChevron(this, tableOfContentsButton);
+        recentDocumentsMenuSection.refreshChevron(this, recentButton);
+        pinnedDocumentsMenuSection.refreshChevron(this, pinnedFilesButton);
+        gestureShortcutMenuSection.refreshChevron(this, gestureShortcutsButton);
         refreshMarkdownLibraryChevron();
         documentSearchBar.refreshText();
     }
@@ -1027,7 +1054,11 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     private void toggleMenu() {
-        if (isMenuOpen()) { closeMenu(); } else { openMenu(); }
+        if (isMenuOpen()) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
     }
 
     private boolean isMenuOpen() {
@@ -1078,13 +1109,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
 
     private OpenDocumentTabs restoreOpenTabsOrInitial() {
         return RestoredOpenDocumentTabs.restore(
-                tabPersistence.loadRestorableOpenTabs(),
-                initialTab(),
-                restorableOpenDocumentLoader);
+                tabPersistence.loadRestorableOpenTabs(), initialTab(), restorableOpenDocumentLoader);
     }
 
     void restorePendingScrollAfterPageLoad() {
         fontPinchController.pageLoaded();
     }
-
 }

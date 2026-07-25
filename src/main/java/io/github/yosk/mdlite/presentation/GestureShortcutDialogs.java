@@ -4,49 +4,42 @@ import android.app.AlertDialog;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import io.github.yosk.mdlite.domain.ViewerFeature;
+import io.github.yosk.mdlite.viewer.CustomGestureMenu;
 import io.github.yosk.mdlite.viewer.CustomGestureShape;
 import io.github.yosk.mdlite.viewer.CustomGestureShortcut;
-import io.github.yosk.mdlite.viewer.CustomGestureMenu;
 import io.github.yosk.mdlite.viewer.GestureShortcutAction;
-import io.github.yosk.mdlite.viewer.GestureShortcutActionLabels;
 import io.github.yosk.mdlite.viewer.GestureShortcutBinding;
 import io.github.yosk.mdlite.viewer.GestureShortcutTrigger;
 
 final class GestureShortcutDialogs {
     private final MainActivity activity;
+    private final GestureShortcutDialogContent content;
 
     GestureShortcutDialogs(MainActivity activity) {
         this.activity = activity;
+        this.content = new GestureShortcutDialogContent(activity);
     }
 
     boolean hasCustomGestureShortcut() {
         return activity.settingsStore.loadCustomGestureShortcut() != null;
     }
 
-    void showGestureShortcutsDialog() {
+    android.view.View gestureShortcutListView() {
         GestureShortcutListeners.RowClickListener listener = new GestureShortcutListeners.RowClickListener(this);
-        AlertDialog dialog = new AlertDialog.Builder(activity)
-                .setTitle(activity.viewerText.gestures())
-                // interaction-surface: gesture-shortcuts-dialog
-                .setView(gestureShortcutListView(listener))
-                .setNegativeButton("OK", null)
-                .create();
-        listener.attach(dialog);
-        dialog.show();
+        return gestureShortcutListView(listener);
     }
 
     void onCustomGestureDrawn(float[] xs, float[] ys) {
         try {
             // Same dp normalization as CircleGestureTrace: the registered shape
             // and later recognition input must share physical units (#147).
-            activity.pendingCustomGestureShape =
-                    CustomGestureShape.fromPoints(toDp(xs), toDp(ys));
+            activity.pendingCustomGestureShape = CustomGestureShape.fromPoints(toDp(xs), toDp(ys));
             finishCustomGestureDrawing();
             showCustomGestureActionDialog();
         } catch (IllegalArgumentException e) {
             finishCustomGestureDrawing();
-            activity.showInfoDialog(activity.viewerText.registerCustomGesture(),
-                    activity.viewerText.customGestureTooSmall());
+            activity.showInfoDialog(
+                    activity.viewerText.registerCustomGesture(), activity.viewerText.customGestureTooSmall());
         }
     }
 
@@ -63,97 +56,119 @@ final class GestureShortcutDialogs {
         LinearLayout list = new LinearLayout(activity);
         list.setOrientation(LinearLayout.VERTICAL);
         list.setPadding(activity.dp(8), activity.dp(6), activity.dp(8), activity.dp(6));
-        list.addView(gestureShortcutRow(0, GesturePreviewKind.DOUBLE_TAP, doubleTapShortcut(), listener));
-        list.addView(gestureShortcutRow(1, GesturePreviewKind.CIRCLE, circleGestureShortcut(), listener));
-        list.addView(gestureShortcutRow(2, GesturePreviewKind.CHEVRON_LEFT, gestureAction(GestureShortcutTrigger.swipeLeft()), listener));
-        list.addView(gestureShortcutRow(3, GesturePreviewKind.CHEVRON_RIGHT, gestureAction(GestureShortcutTrigger.swipeRight()), listener));
-        list.addView(gestureShortcutRow(4, GesturePreviewKind.CHEVRON_UP, gestureAction(GestureShortcutTrigger.swipeUp()), listener));
-        list.addView(gestureShortcutRow(5, GesturePreviewKind.CHEVRON_DOWN, gestureAction(GestureShortcutTrigger.swipeDown()), listener));
-        list.addView(gestureShortcutRow(6, GesturePreviewKind.CUSTOM, customGestureShortcut(), listener));
+        list.addView(gestureShortcutRow(
+                0, GesturePreviewKind.DOUBLE_TAP, content.action(GestureShortcutTrigger.doubleTap()), listener));
+        list.addView(gestureShortcutRow(
+                1, GesturePreviewKind.CIRCLE, content.action(GestureShortcutTrigger.circle()), listener));
+        list.addView(gestureShortcutRow(
+                2, GesturePreviewKind.CHEVRON_LEFT, content.action(GestureShortcutTrigger.swipeLeft()), listener));
+        list.addView(gestureShortcutRow(
+                3, GesturePreviewKind.CHEVRON_RIGHT, content.action(GestureShortcutTrigger.swipeRight()), listener));
+        list.addView(gestureShortcutRow(
+                4, GesturePreviewKind.CHEVRON_UP, content.action(GestureShortcutTrigger.swipeUp()), listener));
+        list.addView(gestureShortcutRow(
+                5, GesturePreviewKind.CHEVRON_DOWN, content.action(GestureShortcutTrigger.swipeDown()), listener));
+        list.addView(gestureShortcutRow(
+                6, GesturePreviewKind.CUSTOM, content.action(GestureShortcutTrigger.customShape()), listener));
         return list;
     }
 
-    private GestureShortcutRow gestureShortcutRow(int targetIndex, int previewKind,
-            GestureShortcutAction action, GestureShortcutListeners.RowClickListener listener) {
-        boolean available = gestureShortcutTargetAvailable(targetIndex);
+    private GestureShortcutRow gestureShortcutRow(int targetIndex, int previewKind, GestureShortcutAction action,
+            GestureShortcutListeners.RowClickListener listener) {
+        boolean available = content.targetAvailable(targetIndex);
         return new GestureShortcutRow(activity, targetIndex, previewKind,
-                shortcutActionLabel(targetIndex, action),
-                !action.isOff() && available,
-                action.isOff() ? activity.surfaceColor() : activity.surfaceAltColor(),
-                activity.borderColor(), activity.primaryStrongColor(),
-                activity.textColor(), activity.mutedColor(), listener);
+                content.shortcutActionLabel(targetIndex, action), !action.isOff() && available,
+                action.isOff() ? activity.surfaceColor() : activity.surfaceAltColor(), activity.borderColor(),
+                activity.primaryStrongColor(), activity.textColor(), activity.mutedColor(), listener);
     }
 
-    private boolean gestureShortcutTargetAvailable(int targetIndex) {
-        if (targetIndex == 0) {
-            return activity.featureEntitlement.allows(ViewerFeature.DOUBLE_TAP_SHORTCUTS);
+    void selectShortcutAction(int index) {
+        if (index == 0) {
+            showDoubleTapShortcutDialog();
+            return;
         }
-        return activity.featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS);
-    }
-
-    void selectGestureTarget(int index) {
-        if (index == 0) { showDoubleTapShortcutDialog(); return; }
         if (!activity.featureEntitlement.allows(ViewerFeature.CUSTOM_GESTURE_SHORTCUTS)) {
             activity.showProFeaturesDialog();
             return;
         }
-        if (index == 1) { showCircleGestureShortcutDialog(); return; }
-        if (index == 2) { showDirectionalGestureDialog("<", GestureShortcutTrigger.swipeLeft()); return; }
-        if (index == 3) { showDirectionalGestureDialog(">", GestureShortcutTrigger.swipeRight()); return; }
-        if (index == 4) { showDirectionalGestureDialog("^", GestureShortcutTrigger.swipeUp()); return; }
-        if (index == 5) { showDirectionalGestureDialog("v", GestureShortcutTrigger.swipeDown()); return; }
-        if (index == 6) { showCustomGestureDialog(); }
+        if (index == 1) {
+            showCircleGestureShortcutDialog();
+            return;
+        }
+        if (index == 2) {
+            showDirectionalGestureDialog("<", GestureShortcutTrigger.swipeLeft());
+            return;
+        }
+        if (index == 3) {
+            showDirectionalGestureDialog(">", GestureShortcutTrigger.swipeRight());
+            return;
+        }
+        if (index == 4) {
+            showDirectionalGestureDialog("^", GestureShortcutTrigger.swipeUp());
+            return;
+        }
+        if (index == 5) {
+            showDirectionalGestureDialog("v", GestureShortcutTrigger.swipeDown());
+            return;
+        }
+        if (index == 6) {
+            showCustomGestureDialog();
+        }
     }
 
     private void showDoubleTapShortcutDialog() {
-        GestureShortcutAction[] actions = availableGestureActions();
+        GestureShortcutAction[] actions = content.availableActions();
         new AlertDialog.Builder(activity)
                 .setTitle(activity.viewerText.doubleTapPrefix())
-                // interaction-surface: gesture-shortcuts-dialog
-                .setItems(gestureActionLabels(actions), new GestureShortcutListeners.DoubleTapClickListener(this, actions))
+                // interaction-surface: gesture-action-dialog
+                .setItems(content.actionLabels(actions),
+                        new GestureShortcutListeners.DoubleTapClickListener(this, actions))
                 .setNegativeButton("OK", null)
                 .show();
     }
 
     private void showCircleGestureShortcutDialog() {
-        GestureShortcutAction[] actions = availableGestureActions();
+        GestureShortcutAction[] actions = content.availableActions();
         new AlertDialog.Builder(activity)
                 .setTitle(activity.viewerText.circleGesturePrefix())
-                // interaction-surface: gesture-shortcuts-dialog
-                .setItems(gestureActionLabels(actions), new GestureShortcutListeners.CircleClickListener(this, actions))
+                // interaction-surface: gesture-action-dialog
+                .setItems(
+                        content.actionLabels(actions), new GestureShortcutListeners.CircleClickListener(this, actions))
                 .setNegativeButton("OK", null)
                 .show();
     }
 
     private void showCustomGestureDialog() {
-        CustomGestureMenu menu = customGestureMenu();
+        CustomGestureMenu menu = content.customGestureMenu(hasCustomGestureShortcut());
         CustomGestureMenu.Action[] actions = menu.actions();
         new AlertDialog.Builder(activity)
                 .setTitle(activity.viewerText.customGesturePrefix()
-                        + actionLabel(customGestureShortcut()))
-                // interaction-surface: gesture-shortcuts-dialog
-                .setItems(customGestureMenuLabels(actions),
+                        + content.actionLabel(content.action(GestureShortcutTrigger.customShape())))
+                // interaction-surface: gesture-action-dialog
+                .setItems(content.customGestureMenuLabels(actions),
                         new GestureShortcutListeners.CustomMenuClickListener(this, actions))
                 .setNegativeButton("OK", null)
                 .show();
     }
 
     private void showDirectionalGestureDialog(String title, GestureShortcutTrigger trigger) {
-        GestureShortcutAction[] actions = availableGestureActions();
+        GestureShortcutAction[] actions = content.availableActions();
         new AlertDialog.Builder(activity)
                 .setTitle(title)
-                // interaction-surface: gesture-shortcuts-dialog
-                .setItems(gestureActionLabels(actions), new GestureShortcutListeners.DirectionalClickListener(this, trigger, actions))
+                // interaction-surface: gesture-action-dialog
+                .setItems(content.actionLabels(actions),
+                        new GestureShortcutListeners.DirectionalClickListener(this, trigger, actions))
                 .setNegativeButton("OK", null)
                 .show();
     }
 
     private void showCustomGestureActionDialog() {
-        GestureShortcutAction[] actions = availableGestureActions();
+        GestureShortcutAction[] actions = content.availableActions();
         new AlertDialog.Builder(activity)
                 .setTitle(activity.viewerText.registerCustomGesture())
-                // interaction-surface: gesture-shortcuts-dialog
-                .setItems(gestureActionLabels(actions), new GestureShortcutListeners.CustomActionClickListener(this, actions))
+                // interaction-surface: gesture-action-dialog
+                .setItems(content.actionLabels(actions),
+                        new GestureShortcutListeners.CustomActionClickListener(this, actions))
                 .setNegativeButton("OK", null)
                 .show();
     }
@@ -164,11 +179,12 @@ final class GestureShortcutDialogs {
             return;
         }
         activity.pendingCustomGestureShape = shortcut.shape();
-        GestureShortcutAction[] actions = availableGestureActions();
+        GestureShortcutAction[] actions = content.availableActions();
         new AlertDialog.Builder(activity)
                 .setTitle(activity.viewerText.changeCustomGestureAction())
-                // interaction-surface: gesture-shortcuts-dialog
-                .setItems(gestureActionLabels(actions), new GestureShortcutListeners.CustomActionClickListener(this, actions))
+                // interaction-surface: gesture-action-dialog
+                .setItems(content.actionLabels(actions),
+                        new GestureShortcutListeners.CustomActionClickListener(this, actions))
                 .setNegativeButton("OK", null)
                 .show();
     }
@@ -176,19 +192,19 @@ final class GestureShortcutDialogs {
     void applyDoubleTapShortcut(GestureShortcutAction action) {
         applyGestureShortcut(GestureShortcutTrigger.doubleTap(), action);
         activity.updateLocalizedText();
-        showGestureShortcutsDialog();
+        activity.refreshGestureShortcutsPanel();
     }
 
     void applyCircleGestureShortcut(GestureShortcutAction action) {
         applyGestureShortcut(GestureShortcutTrigger.circle(), action);
         activity.updateLocalizedText();
-        showGestureShortcutsDialog();
+        activity.refreshGestureShortcutsPanel();
     }
 
     void applyDirectionalGestureShortcut(GestureShortcutTrigger trigger, GestureShortcutAction action) {
         applyGestureShortcut(trigger, action);
         activity.updateLocalizedText();
-        showGestureShortcutsDialog();
+        activity.refreshGestureShortcutsPanel();
     }
 
     private void applyGestureShortcut(GestureShortcutTrigger trigger, GestureShortcutAction action) {
@@ -199,13 +215,13 @@ final class GestureShortcutDialogs {
 
     void startCustomGestureRegistration() {
         activity.closeMenu();
-        activity.customGestureDrawingView = new CustomGestureDrawingView(activity,
-                activity.viewerText.drawCustomGestureInstruction(),
-                activity.viewerText.cancel(),
-                activity.systemTopInsetPx(),
-                activity.backgroundColor(), activity.primaryColor(), activity.textColor(), activity);
-        activity.appRoot.addView(activity.customGestureDrawingView, new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        activity.customGestureDrawingView =
+                new CustomGestureDrawingView(activity, activity.viewerText.drawCustomGestureInstruction(),
+                        activity.viewerText.cancel(), activity.systemTopInsetPx(), activity.backgroundColor(),
+                        activity.primaryColor(), activity.textColor(), activity);
+        activity.appRoot.addView(activity.customGestureDrawingView,
+                new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         activity.registerCustomGestureBackCallback();
     }
 
@@ -213,7 +229,7 @@ final class GestureShortcutDialogs {
         activity.settingsStore.clearCustomGestureShortcut();
         activity.gestureShortcutBindings = activity.settingsStore.loadGestureShortcutBindings();
         activity.updateLocalizedText();
-        showGestureShortcutsDialog();
+        activity.refreshGestureShortcutsPanel();
     }
 
     boolean cancelCustomGestureRegistration() {
@@ -241,7 +257,7 @@ final class GestureShortcutDialogs {
         activity.gestureShortcutBindings = activity.settingsStore.loadGestureShortcutBindings();
         activity.pendingCustomGestureShape = null;
         activity.updateLocalizedText();
-        showGestureShortcutsDialog();
+        activity.refreshGestureShortcutsPanel();
     }
 
     private void finishCustomGestureDrawing() {
@@ -251,71 +267,4 @@ final class GestureShortcutDialogs {
             activity.customGestureDrawingView = null;
         }
     }
-
-    private String shortcutActionLabel(int targetIndex, GestureShortcutAction action) {
-        if (!gestureShortcutTargetAvailable(targetIndex)) {
-            return activity.viewerText.proOnly();
-        }
-        return actionLabel(action);
-    }
-
-    String actionLabel(GestureShortcutAction action) {
-        if (action.isOpenFile()) return activity.viewerText.openFile();
-        if (action.isOpenMenu()) return activity.viewerText.openMenu();
-        if (action.isPreviousTab()) return activity.viewerText.previousTabAction();
-        if (action.isNextTab()) return activity.viewerText.nextTabAction();
-        if (action.isNextTheme()) return activity.viewerText.nextThemeAction();
-        if (action.isMoveControls()) return activity.viewerText.moveControlsAction();
-        if (action.isShowSearchBar()) return activity.viewerText.showSearchBarAction();
-        if (action.isNextHeading()) return activity.viewerText.nextHeadingAction();
-        if (action.isPreviousHeading()) return activity.viewerText.previousHeadingAction();
-        return activity.viewerText.off();
-    }
-
-    private CustomGestureMenu customGestureMenu() {
-        if (hasCustomGestureShortcut()) {
-            return CustomGestureMenu.registered();
-        }
-        return CustomGestureMenu.unregistered();
-    }
-
-    private String[] customGestureMenuLabels(CustomGestureMenu.Action[] actions) {
-        String[] labels = new String[actions.length];
-        for (int index = 0; index < actions.length; index++) {
-            if (actions[index] == CustomGestureMenu.Action.REGISTER) {
-                labels[index] = activity.viewerText.registerCustomGesture();
-            } else if (actions[index] == CustomGestureMenu.Action.CHANGE_ACTION) {
-                labels[index] = activity.viewerText.changeCustomGestureAction();
-            } else {
-                labels[index] = activity.viewerText.clearCustomGesture();
-            }
-        }
-        return labels;
-    }
-
-    private GestureShortcutAction[] availableGestureActions() {
-        return GestureShortcutAction.availableActions(activity.featureEntitlement);
-    }
-
-    private String[] gestureActionLabels(GestureShortcutAction[] actions) {
-        return GestureShortcutActionLabels.from(
-                actions, activity.gestureShortcutBindings, activity.viewerText);
-    }
-
-    private GestureShortcutAction doubleTapShortcut() {
-        return activity.gestureShortcutBindings.actionFor(GestureShortcutTrigger.doubleTap());
-    }
-
-    private GestureShortcutAction circleGestureShortcut() {
-        return activity.gestureShortcutBindings.actionFor(GestureShortcutTrigger.circle());
-    }
-
-    private GestureShortcutAction customGestureShortcut() {
-        return gestureAction(GestureShortcutTrigger.customShape());
-    }
-
-    private GestureShortcutAction gestureAction(GestureShortcutTrigger trigger) {
-        return activity.gestureShortcutBindings.actionFor(trigger);
-    }
-
 }

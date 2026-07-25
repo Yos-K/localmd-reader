@@ -40,3 +40,4 @@ Why Alternatives Were Rejected, and Reconsider When.
 | [0019](0019-pinned-document-bookmark-semantics.md) | Pinned documents independent from open tabs | Accepted |
 | [0020](0020-main-activity-composition-boundary.md) | MainActivity as Android composition boundary | Accepted |
 | [0021](0021-advisory-physical-device-exploration.md) | Advisory Pro exploration on cloud physical devices | Accepted |
+| [0022](0022-non-modal-browsing-and-settings.md) | Non-modal browsing, selection, and settings | Accepted |

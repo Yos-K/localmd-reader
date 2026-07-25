@@ -37,6 +37,8 @@ final class ReaderAppearance {
         }
         activity.markdownLibraryMenuTree.refreshStyle();
         activity.tableOfContentsPanel.refreshStyle();
+        activity.recentDocumentsPanel.refreshStyle();
+        activity.pinnedDocumentsPanel.refreshStyle();
         activity.documentSearchBar.refreshStyle();
         int sectionColor = activity.primaryStrongColor();
         activity.filesSection.setTextColor(sectionColor);
@@ -53,8 +55,9 @@ final class ReaderAppearance {
 
     void applyExpandChevron(TextView button, boolean expanded) {
         button.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null,
-                themedIcon(expanded ? R.drawable.ic_expand_less_18 : R.drawable.ic_expand_more_18,
-                        activity.textColor()), null);
+                themedIcon(
+                        expanded ? R.drawable.ic_expand_less_18 : R.drawable.ic_expand_more_18, activity.textColor()),
+                null);
         button.setCompoundDrawablePadding(activity.dp(6));
     }
 
@@ -97,8 +100,7 @@ final class ReaderAppearance {
         view.setTextSize(15);
         view.setTypeface(Typeface.DEFAULT);
         view.setPadding(activity.dp(16), activity.dp(9), activity.dp(16), activity.dp(9));
-        view.setBackground(roundedBackground(
-                activity.surfaceAltColor(), activity.borderColor(), 8));
+        view.setBackground(roundedBackground(activity.surfaceAltColor(), activity.borderColor(), 8));
         view.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 themedIcon(R.drawable.ic_menu_20, activity.primaryStrongColor()), null, null, null);
         view.setCompoundDrawablePadding(activity.dp(8));
@@ -113,8 +115,7 @@ final class ReaderAppearance {
         view.setMinimumWidth(0);
         view.setMinimumHeight(0);
         view.setPadding(activity.dp(8), activity.dp(4), activity.dp(8), activity.dp(4));
-        view.setBackground(roundedBackground(
-                activity.surfaceAltColor(), activity.borderColor(), 8));
+        view.setBackground(roundedBackground(activity.surfaceAltColor(), activity.borderColor(), 8));
     }
 
     void styleMenuButton(TextView view) {

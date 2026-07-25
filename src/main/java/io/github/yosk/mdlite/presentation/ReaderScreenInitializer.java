@@ -13,8 +13,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 final class ReaderScreenInitializer {
-    private ReaderScreenInitializer() {
-    }
+    private ReaderScreenInitializer() {}
 
     static void initialize(MainActivity activity) {
         activity.root = new LinearLayout(activity);
@@ -39,8 +38,9 @@ final class ReaderScreenInitializer {
         activity.menuButton.setAllCaps(false);
         activity.menuButton.setOnClickListener(activity);
         activity.styleToolbarButton(activity.menuButton);
-        activity.topBar.addView(activity.menuButton, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        activity.topBar.addView(activity.menuButton,
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         activity.appTitle = new TextView(activity);
         activity.appTitle.setText("LocalMD Reader");
@@ -51,8 +51,8 @@ final class ReaderScreenInitializer {
         activity.appTitle.setSingleLine(true);
         activity.appTitle.setEllipsize(TextUtils.TruncateAt.END);
         activity.appTitle.setPadding(activity.dp(14), 0, 0, 0);
-        activity.topBar.addView(activity.appTitle, new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+        activity.topBar.addView(
+                activity.appTitle, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
     }
 
     private static void initMenuButtons(MainActivity activity) {
@@ -76,15 +76,13 @@ final class ReaderScreenInitializer {
         activity.proFeaturesButton = activity.menuActionButton(MainMenuActions.proFeatures());
         activity.clipboardDiagnosticsButton = activity.menuActionButton(MainMenuActions.clipboardDiagnostics());
         activity.privacyButton = activity.menuActionButton(MainMenuActions.privacy());
-        activity.menuActionButtons = new MainMenuActionButton[] {
-            activity.openButton, activity.markdownLibraryButton, activity.createFromClipboardButton,
-            activity.saveAsButton, activity.exportAsHtmlButton, activity.printOrSavePdfButton,
-            activity.pinCurrentFileButton, activity.unpinCurrentFileButton, activity.pinnedFilesButton,
-            activity.recentButton, activity.tableOfContentsButton, activity.findInDocumentButton,
-            activity.settingsButton, activity.themeButton, activity.languageButton,
-            activity.controlsPlacementButton, activity.gestureShortcutsButton,
-            activity.proFeaturesButton, activity.clipboardDiagnosticsButton, activity.privacyButton
-        };
+        activity.menuActionButtons = new MainMenuActionButton[] {activity.openButton, activity.markdownLibraryButton,
+                activity.createFromClipboardButton, activity.saveAsButton, activity.exportAsHtmlButton,
+                activity.printOrSavePdfButton, activity.pinCurrentFileButton, activity.unpinCurrentFileButton,
+                activity.pinnedFilesButton, activity.recentButton, activity.tableOfContentsButton,
+                activity.findInDocumentButton, activity.settingsButton, activity.themeButton, activity.languageButton,
+                activity.controlsPlacementButton, activity.gestureShortcutsButton, activity.proFeaturesButton,
+                activity.clipboardDiagnosticsButton, activity.privacyButton};
     }
 
     private static void initMenuPanel(MainActivity activity) {
@@ -99,8 +97,9 @@ final class ReaderScreenInitializer {
         activity.menuPanel.setBackgroundColor(activity.backgroundColor());
         activity.menuPanel.setPadding(activity.dp(18), activity.dp(28), activity.dp(18), activity.dp(18));
         activity.menuPanel.setClickable(true);
-        activity.menuScrollContainer.addView(activity.menuPanel, new ScrollView.LayoutParams(
-                ScrollView.LayoutParams.MATCH_PARENT, ScrollView.LayoutParams.WRAP_CONTENT));
+        activity.menuScrollContainer.addView(activity.menuPanel,
+                new ScrollView.LayoutParams(
+                        ScrollView.LayoutParams.MATCH_PARENT, ScrollView.LayoutParams.WRAP_CONTENT));
 
         activity.menuTitle = new TextView(activity);
         activity.menuTitle.setTextColor(activity.textColor());
@@ -113,17 +112,25 @@ final class ReaderScreenInitializer {
         activity.markdownLibraryMenuTree = new MarkdownLibraryMenuTree(activity);
         addMenuCard(activity, activity.menuPanel, activity.filesSection, activity.openButton,
                 activity.markdownLibraryButton, activity.markdownLibraryMenuTree,
-                activity.createFromClipboardButton, activity.saveAsButton,
-                activity.exportAsHtmlButton, activity.printOrSavePdfButton,
-                activity.pinCurrentFileButton, activity.unpinCurrentFileButton,
-                activity.pinnedFilesButton, activity.recentButton);
+                activity.createFromClipboardButton,
+                activity.saveAsButton, activity.exportAsHtmlButton, activity.printOrSavePdfButton,
+                activity.pinCurrentFileButton, activity.unpinCurrentFileButton, activity.pinnedFilesButton,
+                activity.recentButton);
+        activity.pinnedDocumentsPanel = new DocumentListMenuPanel(activity, true);
+        activity.menuPanel.addView(activity.pinnedDocumentsPanel, MainActivity.wrapParams());
+        activity.pinnedDocumentsMenuSection =
+                new ExpandableMenuSection(activity.pinnedDocumentsPanel, activity.pinnedDocumentsPanel);
+        activity.recentDocumentsPanel = new DocumentListMenuPanel(activity, false);
+        activity.menuPanel.addView(activity.recentDocumentsPanel, MainActivity.wrapParams());
+        activity.recentDocumentsMenuSection =
+                new ExpandableMenuSection(activity.recentDocumentsPanel, activity.recentDocumentsPanel);
         activity.readingSection = activity.menuSection("");
-        addMenuCard(activity, activity.menuPanel, activity.readingSection,
-                activity.tableOfContentsButton, activity.findInDocumentButton);
+        addMenuCard(activity, activity.menuPanel, activity.readingSection, activity.tableOfContentsButton,
+                activity.findInDocumentButton);
         activity.tableOfContentsPanel = new TableOfContentsMenuPanel(activity);
         activity.menuPanel.addView(activity.tableOfContentsPanel, MainActivity.wrapParams());
-        activity.tableOfContentsMenuSection = new ExpandableMenuSection(
-                activity.tableOfContentsPanel, activity.tableOfContentsPanel);
+        activity.tableOfContentsMenuSection =
+                new ExpandableMenuSection(activity.tableOfContentsPanel, activity.tableOfContentsPanel);
         addMenuCard(activity, activity.menuPanel, null, activity.settingsButton);
 
         activity.settingsPanel = new LinearLayout(activity);
@@ -133,19 +140,18 @@ final class ReaderScreenInitializer {
         activity.menuPanel.addView(activity.settingsPanel, MainActivity.wrapParams());
         activity.settingsMenuSection = ExpandableMenuSection.staticContent(activity.settingsPanel);
         activity.layoutSection = activity.menuSection("");
-        addMenuCard(activity, activity.settingsPanel, activity.layoutSection,
-                activity.themeButton, activity.languageButton, activity.controlsPlacementButton,
-                activity.gestureShortcutsButton);
+        addMenuCard(activity, activity.settingsPanel, activity.layoutSection, activity.themeButton,
+                activity.languageButton, activity.controlsPlacementButton, activity.gestureShortcutsButton);
+        activity.gestureShortcutPanel = new GestureShortcutMenuPanel(activity);
+        activity.settingsPanel.addView(activity.gestureShortcutPanel, MainActivity.wrapParams());
+        activity.gestureShortcutMenuSection =
+                new ExpandableMenuSection(activity.gestureShortcutPanel, activity.gestureShortcutPanel);
         activity.infoSection = activity.menuSection("");
-        addMenuCard(activity, activity.settingsPanel, activity.infoSection,
-                activity.proFeaturesButton, activity.clipboardDiagnosticsButton, activity.privacyButton);
+        addMenuCard(activity, activity.settingsPanel, activity.infoSection, activity.proFeaturesButton,
+                activity.clipboardDiagnosticsButton, activity.privacyButton);
     }
 
-    private static void addMenuCard(
-            MainActivity activity,
-            LinearLayout parent,
-            TextView sectionLabel,
-            View... items) {
+    private static void addMenuCard(MainActivity activity, LinearLayout parent, TextView sectionLabel, View... items) {
         if (sectionLabel != null) {
             parent.addView(sectionLabel, MainActivity.wrapParams());
         }
@@ -173,9 +179,9 @@ final class ReaderScreenInitializer {
         activity.tabScroller = new HorizontalScrollView(activity);
         activity.tabScroller.setHorizontalScrollBarEnabled(true);
         activity.tabScroller.setBackgroundColor(activity.backgroundColor());
-        activity.tabScroller.addView(activity.tabRow, new HorizontalScrollView.LayoutParams(
-                HorizontalScrollView.LayoutParams.WRAP_CONTENT,
-                HorizontalScrollView.LayoutParams.WRAP_CONTENT));
+        activity.tabScroller.addView(activity.tabRow,
+                new HorizontalScrollView.LayoutParams(HorizontalScrollView.LayoutParams.WRAP_CONTENT,
+                        HorizontalScrollView.LayoutParams.WRAP_CONTENT));
 
         activity.controlsBar = new LinearLayout(activity);
         activity.controlsBar.setOrientation(LinearLayout.VERTICAL);
