@@ -28,6 +28,24 @@
 - **② glossary**: `domain-glossary-gestures.md` に GES6（線と点の同一軌跡）、GES7（状態ごとの有効操作）、GES8（システム領域回避）、GES9（描画中断）を追加。
 - **③ assert**: `CustomGesturePreviewPathTest` 4件、`CustomGestureMenuTest` 2件、`CustomGestureDrawingLayoutTest` 4件へ蒸留。
 
+## 回帰テストへの蒸留
+
+| finding | 回帰テスト | 確認する仕様 | 状態 |
+|---|---|---|---|
+| P1 | `CustomGesturePreviewPathTest.animationStartsAtTheRenderedCurveStart` | 点が描画線の始点にある | 追加済み |
+| P1 | `CustomGesturePreviewPathTest.animationMidpointUsesTheRenderedCubicCurveInsteadOfItsControlPolygon` | 点が制御点間の折れ線ではなくベジェ曲線を通る | 追加済み |
+| P1 | `CustomGesturePreviewPathTest.animationReachesTheCubicEndpointBeforeFollowingTheFinalLine` | ベジェ区間と終端直線が連続する | 追加済み |
+| P1 | `CustomGesturePreviewPathTest.animationEndsAtTheRenderedFinalLineEndpoint` | 点が描画線の終点に達する | 追加済み |
+| P2 | `CustomGestureMenuTest.unregisteredGestureOffersRegistrationWithoutAFalseDeleteAction` | 未登録時に無効な削除を提示しない | 追加済み |
+| P2 | `CustomGestureMenuTest.registeredGestureOffersEveryValidManagementAction` | 登録済みの有効操作を欠落させない | 追加済み |
+| P3 | `CustomGestureDrawingLayoutTest.instructionBaselineStartsBelowTheStatusBarInset` | 案内文が上端システム領域より下にある | 追加済み |
+| P3 | `CustomGestureDrawingLayoutTest.instructionBaselineKeepsItsTopSpacingWithoutAStatusBarInset` | インセットなしでも通常の上余白を維持する | 追加済み |
+| P6 | なし | 画面消灯はアプリ仕様ではなく物理探索ハーネスの実行条件 | テスト対象外。点灯維持を実機手順で扱う |
+| P7 | `CustomGestureDrawingLayoutTest.topRightPointInsideTheVisibleCancelLabelCancelsRegistration` | 表示されたキャンセル領域を操作できる | 追加済み |
+| P7 | `CustomGestureDrawingLayoutTest.drawingPointOutsideTheCancelLabelRemainsPartOfTheGesture` | 通常の描画をキャンセルと誤認しない | 追加済み |
+
+P8は未確認でありfindingではない。次回観測後に欠陥と判定した場合、この表へ回帰テストを追加する。
+
 ## 次のチャーター候補
 
 - 登録済みカスタムジェスチャーについて、再起動後の形状・動作・一覧表示を同時に確認する。

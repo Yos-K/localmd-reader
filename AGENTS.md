@@ -223,7 +223,8 @@ git switch -c <type>/<short-topic>   # 例: test/medium-intent-open, fix/97-...
 実機、エミュレータ、コードprobe、成果物目視のいずれであっても、探索を始める時点で
 `docs/harness/exploration-sessions/YYYY-MM-DD-<対象>.md` を作成する。各probeの観測をその都度追記し、
 未確認項目も未確認として残す。チャーター、probe表、振り分け、機械可読な価値評価が揃っていない探索は
-**未完了**であり、エージェントは完了報告してはならない。詳細と書式は
+**未完了**であり、エージェントは完了報告してはならない。各findingは追加した恒久テストの
+`テストクラス.テストメソッド`まで対応づける。テスト化しない場合は理由と代替の着地点を記録する。詳細と書式は
 [`docs/harness/exploratory-testing.md`](docs/harness/exploratory-testing.md) に従う。
 
 ### consumed_scripts を編集するとき（必須運用ルール）
