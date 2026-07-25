@@ -25,6 +25,7 @@ final class ActivityResultRouter {
                 && resultCode == MainActivity.RESULT_OK && data != null) {
             Uri uri = data.getData();
             if (uri != null) {
+                activity.persistSavedDocumentReadPermission(data, uri);
                 activity.writePendingMarkdown(uri);
             }
             return;

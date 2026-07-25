@@ -605,6 +605,10 @@ public final class MainActivity extends Activity implements View.OnClickListener
         documentSaver.writePendingMarkdown(uri);
     }
 
+    void persistSavedDocumentReadPermission(Intent data, Uri uri) {
+        documentSaver.persistSavedDocumentReadPermission(data, uri);
+    }
+
     void writePendingHtml(Uri uri) {
         htmlDocumentExporter.writePendingHtml(uri);
     }

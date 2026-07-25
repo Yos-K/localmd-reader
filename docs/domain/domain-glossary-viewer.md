@@ -132,6 +132,10 @@ flowchart TD
   操作 `localized(ViewerText)`。 規則なし（`OpenDocumentTab.statusMessage()` が返す表示用メッセージ。文言の言語化は `ViewerText`）。
 - **ClipboardMarkdownItem**（`viewer/ClipboardMarkdownItem.java`）: クリップボード由来の Markdown 素材。構成要素 `title: String`、`markdown: String`。
   規則なし（クリップボードから下書き（`DraftMarkdownDocument`）を作る素材）。
+- **PersistableReadPermission**（`file/PersistableReadPermission.java`）: Androidの文書選択・保存結果から、
+  再起動後の読み取りに保持できる権限だけを表す値。構成要素 `flags`。
+  - L1: 任意の結果フラグを対応するread flagとの積へ正規化し、未知のフラグやwrite権限を保持しない。
+    なぜ: 保存直後だけ読めるタブを復元対象として記録し、再起動時に黙って失う状態を作らない。
 - **PinnedDocumentMenuVisibility**（`viewer/PinnedDocumentMenuVisibility.java`）: ピン留めメニューの表示条件。
   構成要素 `pinnedDocumentsAvailable`、`activeTabIsFile`、`activeFileIsPinned`。
   - L1: `canPinCurrentFile` はピン留め機能が利用可能、かつアクティブタブが未ピンのファイルであるときだけ true。
@@ -158,6 +162,8 @@ flowchart TD
   なぜ: すべての入口で同じ所有規則を守り、存在しない非同期完了を全域的な変更なし結果として扱うため。
 - `DocumentTabSessionController.activate/close/activatePrevious/activateNext`: `OpenDocumentTabs`の遷移後に
   状態、表示、描画、永続化を一括して完了する。なぜ: clickとgestureのどちらから操作しても同じセッション結果にするため。
+- `名前を付けて保存`の完了: 文書プロバイダーから返されたread権限を永続化してから、下書きタブを保存済み
+  ファイルタブへ置換し、復元用タブを保存する。なぜ: 保存直後と再起動後で同じ文書を読めることが保存操作の完了条件だから。
 - タブ操作の実態（探索 2026-06-12 で観測。出典: `exploration-sessions/2026-06-12-viewer.md`）:
   - `close(activeIndex)` 後のアクティブは**次のタブ**（末尾を閉じたときは前）＝ activeIndex のクランプ。
   - `activatePrevious()`/`activateNext()` は端で**巡回**する（先頭→末尾・末尾→先頭。

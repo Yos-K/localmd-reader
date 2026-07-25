@@ -2,6 +2,7 @@ package io.github.yosk.mdlite.presentation;
 
 import android.content.Intent;
 import android.net.Uri;
+import io.github.yosk.mdlite.file.PersistableReadPermission;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
 import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
 import java.io.IOException;
@@ -30,9 +31,26 @@ final class DocumentSaver {
         activity.pendingSavePlacement = SavedDocumentPlacement.from(tab);
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         intent.setType("text/markdown");
         intent.putExtra(Intent.EXTRA_TITLE, tab.title());
         activity.startActivityForResult(intent, MainActivity.REQUEST_SAVE_DOCUMENT);
+    }
+
+    void persistSavedDocumentReadPermission(Intent data, Uri uri) {
+        PersistableReadPermission permission = PersistableReadPermission.fromResultFlags(
+                data.getFlags(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        if (!permission.isGranted()) {
+            return;
+        }
+        try {
+            activity.getContentResolver().takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (SecurityException ignored) {
+            // Some document providers return a usable URI without persistable access.
+        }
     }
 
     void writePendingMarkdown(Uri uri) {

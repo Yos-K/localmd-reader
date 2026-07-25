@@ -26,10 +26,30 @@ public final class ActivityResultRoutingStructureTest {
                 "export result routing must live in the lifecycle adapter");
     }
 
+    @Test
+    void savedDocumentPermissionIsRetainedBeforeTheSavedTabIsOpened() throws IOException {
+        String source = routerSourceFile();
+
+        int permission = source.indexOf("activity.persistSavedDocumentReadPermission(data, uri)");
+        int write = source.indexOf("activity.writePendingMarkdown(uri)");
+
+        TestAssertions.assertTrue(permission >= 0,
+                "save result routing must retain provider access for restored tabs");
+        TestAssertions.assertTrue(permission < write,
+                "provider access must be retained before the saved tab is opened and persisted");
+    }
+
     private static String sourceFile() throws IOException {
         String projectRoot = System.getProperty("user.dir").replaceFirst("/app$", "");
         return new String(Files.readAllBytes(Paths.get(projectRoot,
                 "src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java")),
+                StandardCharsets.UTF_8);
+    }
+
+    private static String routerSourceFile() throws IOException {
+        String projectRoot = System.getProperty("user.dir").replaceFirst("/app$", "");
+        return new String(Files.readAllBytes(Paths.get(projectRoot,
+                "src/main/java/io/github/yosk/mdlite/presentation/ActivityResultRouter.java")),
                 StandardCharsets.UTF_8);
     }
 }
