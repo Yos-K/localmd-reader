@@ -218,6 +218,14 @@ git switch -c <type>/<short-topic>   # 例: test/medium-intent-open, fix/97-...
 [`docs/harness/exploratory-testing.md`](docs/harness/exploratory-testing.md) の「継続ループ」節を参照。
 探索はマージゲートではない（提案ベース・flaky 厳禁の原則は同文書のとおり）。
 
+### 探索実施時（必須）: セッションログを同時更新する
+
+実機、エミュレータ、コードprobe、成果物目視のいずれであっても、探索を始める時点で
+`docs/harness/exploration-sessions/YYYY-MM-DD-<対象>.md` を作成する。各probeの観測をその都度追記し、
+未確認項目も未確認として残す。チャーター、probe表、振り分け、機械可読な価値評価が揃っていない探索は
+**未完了**であり、エージェントは完了報告してはならない。詳細と書式は
+[`docs/harness/exploratory-testing.md`](docs/harness/exploratory-testing.md) に従う。
+
 ### consumed_scripts を編集するとき（必須運用ルール）
 
 `sync-manifest.yaml` の `consumed_scripts` に列挙されたスクリプト（harness-kit から消費している

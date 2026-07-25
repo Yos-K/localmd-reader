@@ -126,6 +126,11 @@ flowchart TD
 - 分類: UX ／ 支える判断: 端末のステータスバー構成にかかわらず登録方法を読める判断。
 - なぜ: 全画面の描画面では固定座標が通知領域へ入り得る。破ると: 案内文が時計や通知アイコンと重なって読めない。
 
+**GES9: カスタムジェスチャの描画は登録せずに中断できる**
+- 関係する語: CustomGestureDrawingLayout × GestureShortcutDialogs ／ どこで: キャンセル領域 / 端末の戻る操作
+- 分類: UX ／ 支える判断: 登録開始後も既存設定を変えずに元の閲覧状態へ戻れる判断。
+- なぜ: 描画完了以外に画面を離れる遷移がないと、誤って開始した利用者がアプリ終了を強いられる。破ると: 登録を取り消す方法がなく、戻る操作でActivity自体が終了する。
+
 ---
 
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
@@ -137,6 +142,7 @@ flowchart TD
 - `CustomGesturePreviewPath.pointAt(w, h, progress)`: GES6 を実現。描画に使うベジェ曲線と終端直線上の位置を返す。なぜ: 線と点の軌跡計算を一か所に集約する。
 - `CustomGestureMenu.unregistered()` / `registered()`: GES7 を実現。登録状態ごとの有効操作だけを返す。
 - `CustomGestureDrawingLayout.instructionBaseline(inset)`: GES8 を実現。上端インセットの下へ一定の余白を加えた基準位置を返す。
+- `CustomGestureDrawingLayout.isCancelTarget(...)` と端末の戻る操作: GES9 を実現。同じ中断処理で描画面と保留中の図形を破棄する。
 
 ---
 

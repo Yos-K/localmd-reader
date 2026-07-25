@@ -382,6 +382,19 @@ public final class MainActivity extends Activity implements View.OnClickListener
     }
 
     @Override
+    public void onCustomGestureDrawingCancelled() {
+        gestureShortcutDialogs.cancelCustomGestureRegistration();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (gestureShortcutDialogs.cancelCustomGestureRegistration()) {
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
     public void onMermaidRendered(MermaidRenderJob job, SafeHtml svg) {
         documentRenderingCoordinator.complete(job, svg);
     }

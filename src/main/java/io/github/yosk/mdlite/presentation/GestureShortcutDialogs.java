@@ -201,6 +201,7 @@ final class GestureShortcutDialogs {
         activity.closeMenu();
         activity.customGestureDrawingView = new CustomGestureDrawingView(activity,
                 activity.viewerText.drawCustomGestureInstruction(),
+                activity.viewerText.cancel(),
                 activity.backgroundColor(), activity.primaryColor(), activity.textColor(), activity);
         activity.appRoot.addView(activity.customGestureDrawingView, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
@@ -211,6 +212,15 @@ final class GestureShortcutDialogs {
         activity.gestureShortcutBindings = activity.settingsStore.loadGestureShortcutBindings();
         activity.updateLocalizedText();
         showGestureShortcutsDialog();
+    }
+
+    boolean cancelCustomGestureRegistration() {
+        if (activity.customGestureDrawingView == null) {
+            return false;
+        }
+        finishCustomGestureDrawing();
+        activity.pendingCustomGestureShape = null;
+        return true;
     }
 
     void saveCustomGestureShortcut(GestureShortcutAction action) {

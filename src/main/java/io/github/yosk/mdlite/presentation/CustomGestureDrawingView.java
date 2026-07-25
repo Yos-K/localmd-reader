@@ -14,6 +14,7 @@ import java.util.List;
 final class CustomGestureDrawingView extends View {
     interface Listener {
         void onCustomGestureDrawn(float[] xs, float[] ys);
+        void onCustomGestureDrawingCancelled();
     }
 
     private final Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -23,17 +24,21 @@ final class CustomGestureDrawingView extends View {
     private final List<Float> ys = new ArrayList<Float>();
     private final Listener listener;
     private final String instruction;
+    private final String cancelLabel;
     private int systemTopInset;
+    private boolean cancelPressed;
 
     CustomGestureDrawingView(
             Context context,
             String instruction,
+            String cancelLabel,
             int backgroundColor,
             int strokeColor,
             int textColor,
             Listener listener) {
         super(context);
         this.instruction = instruction;
+        this.cancelLabel = cancelLabel;
         this.listener = listener;
         setBackgroundColor(backgroundColor);
         strokePaint.setColor(strokeColor);
@@ -61,6 +66,9 @@ final class CustomGestureDrawingView extends View {
         super.onDraw(canvas);
         canvas.drawText(instruction, 36f,
                 CustomGestureDrawingLayout.instructionBaseline(systemTopInset), textPaint);
+        canvas.drawText(cancelLabel,
+                getWidth() - 36f - textPaint.measureText(cancelLabel),
+                CustomGestureDrawingLayout.instructionBaseline(systemTopInset), textPaint);
         canvas.drawPath(path, strokePaint);
     }
 
@@ -71,6 +79,11 @@ final class CustomGestureDrawingView extends View {
             return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            cancelPressed = CustomGestureDrawingLayout.isCancelTarget(
+                    getWidth(), systemTopInset, event.getX(), event.getY());
+            if (cancelPressed) {
+                return true;
+            }
             reset();
             append(event);
             path.moveTo(event.getX(), event.getY());
@@ -84,6 +97,11 @@ final class CustomGestureDrawingView extends View {
             return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (cancelPressed) {
+                cancelPressed = false;
+                listener.onCustomGestureDrawingCancelled();
+                return true;
+            }
             append(event);
             path.lineTo(event.getX(), event.getY());
             invalidate();
@@ -91,6 +109,7 @@ final class CustomGestureDrawingView extends View {
             return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+            cancelPressed = false;
             reset();
         }
         return true;

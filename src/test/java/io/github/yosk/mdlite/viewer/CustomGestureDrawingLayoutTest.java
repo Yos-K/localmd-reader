@@ -15,4 +15,18 @@ public final class CustomGestureDrawingLayoutTest {
         TestAssertions.assertEquals(72, CustomGestureDrawingLayout.instructionBaseline(0),
                 "the drawing instruction must retain its normal top spacing without an inset");
     }
+
+    @Test
+    void topRightPointInsideTheVisibleCancelLabelCancelsRegistration() {
+        TestAssertions.assertTrue(
+                CustomGestureDrawingLayout.isCancelTarget(968, 95, 900f, 150f),
+                "a tap on the visible top-right cancel affordance must cancel registration");
+    }
+
+    @Test
+    void drawingPointOutsideTheCancelLabelRemainsPartOfTheGesture() {
+        TestAssertions.assertFalse(
+                CustomGestureDrawingLayout.isCancelTarget(968, 95, 500f, 500f),
+                "a point in the drawing surface must not be mistaken for cancellation");
+    }
 }
