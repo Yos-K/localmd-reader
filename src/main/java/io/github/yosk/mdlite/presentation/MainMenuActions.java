@@ -185,8 +185,7 @@ final class MainMenuActions {
 
         @Override
         void perform(MainActivity activity) {
-            activity.closeMenu();
-            activity.showThemeDialog();
+            activity.toggleThemePanel();
         }
     }
 

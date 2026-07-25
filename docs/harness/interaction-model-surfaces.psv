@@ -12,7 +12,7 @@ settings-collapsed-row|settings-section-collapsed|src/main/java/io/github/yosk/m
 settings-inline-section|settings-section-expanded|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java|toggleSettingsPanel
 table-of-contents-collapsed-row|table-of-contents-collapsed|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java|toggleTableOfContentsPanel
 table-of-contents-inline-section|table-of-contents-expanded|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java|toggleTableOfContentsPanel
-theme-dialog|theme-dialog|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java|showThemeDialog
+theme-inline-panel|theme-panel-expanded|src/main/java/io/github/yosk/mdlite/presentation/ThemeMenuPanel.java|ThemeMenuPanel
 gesture-shortcuts-inline-panel|gesture-shortcuts-panel-expanded|src/main/java/io/github/yosk/mdlite/presentation/GestureShortcutMenuPanel.java|GestureShortcutMenuPanel
 pro-features-dialog|pro-features-dialog|src/main/java/io/github/yosk/mdlite/presentation/ProFeaturesDialog.java|void show()
 clipboard-diagnostics-dialog|clipboard-diagnostics-dialog|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java|showClipboardDiagnosticsDialog

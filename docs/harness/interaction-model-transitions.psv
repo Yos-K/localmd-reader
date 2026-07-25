@@ -34,7 +34,7 @@ document-opened|expand_settings_section|settings-section-expanded|Inline setting
 settings-section-collapsed|expand_settings_section|settings-section-expanded|Inline settings reopened
 settings-section-collapsed|close_menu|document-opened|Menu dismissed
 settings-section-expanded|collapse_settings_section|settings-section-collapsed|Inline settings collapsed
-settings-section-expanded|open_theme_dialog|theme-dialog|Theme selection requested
+settings-section-expanded|open_theme_panel|theme-panel-expanded|Theme choices expanded inline
 settings-section-expanded|toggle_language|document-opened|Language toggled and menu dismissed
 settings-section-expanded|toggle_controls_placement|document-opened|Controls placement toggled and menu dismissed
 settings-section-expanded|open_gesture_shortcuts|gesture-shortcuts-panel-expanded|Gesture shortcuts expanded inline
@@ -48,8 +48,9 @@ table-of-contents-collapsed|close_menu|document-opened|Menu dismissed
 table-of-contents-expanded|collapse_table_of_contents|table-of-contents-collapsed|Table of contents collapsed
 table-of-contents-expanded|jump_to_heading|document-opened|Heading selected
 table-of-contents-expanded|close_menu|document-opened|Menu dismissed
-theme-dialog|select_theme|document-opened|Theme selected
-theme-dialog|close_dialog|document-opened|Theme selection dismissed
+theme-panel-expanded|select_theme|theme-panel-expanded|Theme selected while choices remain available
+theme-panel-expanded|collapse_theme_panel|settings-section-expanded|Theme choices collapsed
+theme-panel-expanded|close_menu|document-opened|Menu dismissed
 gesture-shortcuts-panel-expanded|select_shortcut_action|gesture-shortcuts-panel-expanded|Inline shortcut action choices displayed
 gesture-shortcuts-panel-expanded|collapse_gesture_shortcuts|settings-section-expanded|Gesture shortcuts collapsed
 gesture-shortcuts-panel-expanded|close_menu|document-opened|Menu dismissed

@@ -142,6 +142,9 @@ final class ReaderScreenInitializer {
         activity.layoutSection = activity.menuSection("");
         addMenuCard(activity, activity.settingsPanel, activity.layoutSection, activity.themeButton,
                 activity.languageButton, activity.controlsPlacementButton, activity.gestureShortcutsButton);
+        activity.themePanel = new ThemeMenuPanel(activity);
+        activity.settingsPanel.addView(activity.themePanel, MainActivity.wrapParams());
+        activity.themeMenuSection = new ExpandableMenuSection(activity.themePanel, activity.themePanel);
         activity.gestureShortcutPanel = new GestureShortcutMenuPanel(activity);
         activity.settingsPanel.addView(activity.gestureShortcutPanel, MainActivity.wrapParams());
         activity.gestureShortcutMenuSection =

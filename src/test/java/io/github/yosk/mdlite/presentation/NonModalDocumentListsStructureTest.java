@@ -66,6 +66,21 @@ public final class NonModalDocumentListsStructureTest {
                 dialogs, "new AlertDialog.Builder(activity)", "gesture configuration must not use modal choices");
     }
 
+    @Test
+    void themeChoicesStayInsideTheSettingsPanel() throws IOException {
+        String actions = source("MainMenuActions.java");
+        String initializer = source("ReaderScreenInitializer.java");
+        String panel = source("ThemeMenuPanel.java");
+
+        TestAssertions.assertContains(actions, "activity.toggleThemePanel();",
+                "the theme action must toggle inline choices without closing the menu");
+        TestAssertions.assertContains(
+                initializer, "new ThemeMenuPanel(activity)", "the settings panel must own theme choices");
+        TestAssertions.assertContains(panel, "void selectTheme(", "theme selection must be an explicit panel command");
+        TestAssertions.assertNotContains(
+                actions, "activity.showThemeDialog();", "theme selection must not open a modal dialog");
+    }
+
     private static String source(String fileName) throws IOException {
         String projectRoot = System.getProperty("user.dir").replaceFirst("/app$", "");
         return new String(Files.readAllBytes(

@@ -12,7 +12,7 @@ settings-section-collapsed|overlay|no|src/main/java/io/github/yosk/mdlite/model/
 settings-section-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/model/DisclosureState.java
 table-of-contents-collapsed|overlay|no|src/main/java/io/github/yosk/mdlite/model/DisclosureState.java
 table-of-contents-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/model/DisclosureState.java
-theme-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java
+theme-panel-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/ThemeMenuPanel.java
 gesture-shortcuts-panel-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/GestureShortcutMenuPanel.java
 pro-features-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/ProFeaturesDialog.java
 clipboard-diagnostics-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java

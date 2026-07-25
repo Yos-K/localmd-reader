@@ -190,6 +190,8 @@ public final class MainActivity
     ExpandableMenuSection pinnedDocumentsMenuSection;
     GestureShortcutMenuPanel gestureShortcutPanel;
     ExpandableMenuSection gestureShortcutMenuSection;
+    ThemeMenuPanel themePanel;
+    ExpandableMenuSection themeMenuSection;
     MarkdownLibraryMenuTree markdownLibraryMenuTree;
     SwipeMenuScrollView menuScrollContainer;
     SwipeMenuLayout menuPanel;
@@ -705,8 +707,9 @@ public final class MainActivity
         gestureShortcutMenuSection.refreshExpandedContent();
     }
 
-    void showThemeDialog() {
-        settingsDialogs.showThemeDialog();
+    void toggleThemePanel() {
+        themeMenuSection.toggle();
+        refreshMenuActionButtons();
     }
 
     void showPrivacyPolicyDialog() {
@@ -1028,6 +1031,7 @@ public final class MainActivity
         recentDocumentsMenuSection.refreshChevron(this, recentButton);
         pinnedDocumentsMenuSection.refreshChevron(this, pinnedFilesButton);
         gestureShortcutMenuSection.refreshChevron(this, gestureShortcutsButton);
+        themeMenuSection.refreshChevron(this, themeButton);
         refreshMarkdownLibraryChevron();
         documentSearchBar.refreshText();
     }
