@@ -361,3 +361,20 @@ service account JSON key は不要です。
 keystore/鍵/service-account ファイルや PEM 秘密鍵が追跡された場合はビルドを失敗
 させます。リリースワークフローはシークレットを環境変数経由でのみ渡し、値を echo
 することはありません。
+
+## 既存Bundleをオープンテストへ昇格する
+
+クローズドテスト後はAABを再ビルドせず、同じ検証済みBundleをGoogle Playのオープン
+テストトラックへ昇格します。`Play Open Test Promotion` workflowは既存の`versionCode`を
+受け取り、既定で`beta`トラックを使います。Workload Identity Federationで認証し、
+completed releaseを審査へ送信します。release keystoreの使用やAAB uploadは行いません。
+
+非公開リリースリポジトリからversionCode 33を昇格するコマンド:
+
+```sh
+sh scripts/play-promote-open-test-github-actions.sh \
+  Yos-K/localmd-reader-release main 33 beta
+```
+
+オープンテストトラックの国と地域は、Play Consoleで事前に有効化しておく必要があります。
+成果物を同一に保つ判断と見直し条件はADR-0023に記録します。

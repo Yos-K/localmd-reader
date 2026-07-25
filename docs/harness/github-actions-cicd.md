@@ -390,3 +390,22 @@ As a backstop, the `fitness` job runs `scripts/check-no-committed-secrets.sh`,
 which fails the build if a keystore/key/service-account file or PEM private key
 is ever tracked. Release workflows pass secrets only through environment
 variables and never echo their values.
+
+## Promote An Existing Bundle To Open Testing
+
+After closed testing, promote the same verified bundle to the Google Play open
+testing track instead of rebuilding it. The `Play Open Test Promotion` workflow
+accepts an existing `versionCode`, defaults to the `beta` track, authenticates
+through Workload Identity Federation, and submits the completed release for
+review. It does not use the release keystore or upload an AAB.
+
+Dispatch versionCode 33 from the private release repository:
+
+```sh
+sh scripts/play-promote-open-test-github-actions.sh \
+  Yos-K/localmd-reader-release main 33 beta
+```
+
+Countries and regions must already be enabled for the open testing track in Play
+Console. See ADR-0023 for the artifact-identity decision and reconsideration
+conditions.
