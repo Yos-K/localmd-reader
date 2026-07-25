@@ -97,6 +97,30 @@ public final class CustomGestureShapeTest {
         });
     }
 
+    @Test
+    void storedShapeRejectsNonFiniteCoordinatesBeforeCreatingADomainObject() {
+        final String corrupted = diagonalShape().storedValue().replaceFirst("-?[0-9]+\\.[0-9]+", "NaN");
+
+        TestAssertions.assertThrows(IllegalArgumentException.class, new TestAssertions.ThrowingRunnable() {
+            @Override
+            public void run() {
+                CustomGestureShape.fromStoredValue(corrupted);
+            }
+        });
+    }
+
+    @Test
+    void drawnShapeRejectsNonFiniteCoordinatesBeforeNormalization() {
+        TestAssertions.assertThrows(IllegalArgumentException.class, new TestAssertions.ThrowingRunnable() {
+            @Override
+            public void run() {
+                CustomGestureShape.fromPoints(
+                        new float[] { 0f, Float.NaN, 100f },
+                        new float[] { 0f, 50f, 100f });
+            }
+        });
+    }
+
     private static CustomGestureShape diagonalShape() {
         return CustomGestureShape.fromPoints(
                 new float[] { 10f, 40f, 80f, 120f },

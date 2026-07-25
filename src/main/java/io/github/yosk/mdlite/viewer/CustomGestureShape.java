@@ -15,6 +15,7 @@ public final class CustomGestureShape {
         if (xs == null || ys == null || xs.length != SAMPLE_COUNT || ys.length != SAMPLE_COUNT) {
             throw new IllegalArgumentException("custom gesture shape must be normalized");
         }
+        requireFinite(xs, ys);
         this.xs = copy(xs);
         this.ys = copy(ys);
     }
@@ -23,6 +24,7 @@ public final class CustomGestureShape {
         if (rawXs == null || rawYs == null || rawXs.length < 2 || rawXs.length != rawYs.length) {
             throw new IllegalArgumentException("custom gesture shape requires at least two matching point arrays");
         }
+        requireFinite(rawXs, rawYs);
         GestureBounds bounds = GestureBounds.from(rawXs, rawYs);
         if (bounds.size() < MIN_SIZE_DP) {
             throw new IllegalArgumentException("custom gesture shape is too small");
@@ -98,6 +100,18 @@ public final class CustomGestureShape {
         float[] result = new float[source.length];
         System.arraycopy(source, 0, result, 0, source.length);
         return result;
+    }
+
+    private static void requireFinite(float[] xs, float[] ys) {
+        for (int index = 0; index < xs.length; index++) {
+            if (!isFinite(xs[index]) || !isFinite(ys[index])) {
+                throw new IllegalArgumentException("custom gesture shape coordinates must be finite");
+            }
+        }
+    }
+
+    private static boolean isFinite(float value) {
+        return !Float.isNaN(value) && !Float.isInfinite(value);
     }
 
     private static float distance(float startX, float startY, float endX, float endY) {

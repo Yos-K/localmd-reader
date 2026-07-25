@@ -46,6 +46,7 @@ flowchart TD
   操作 `fromPoints(xs, ys)`/`trigger()`。 規則→GES1。
 - **CustomGestureShape**（`viewer/CustomGestureShape.java`）: 比較可能なカスタム図形。構成要素 `xs[]`・`ys[]`（正規化済み）。
   - L1: `fromPoints` は 2点以上・小さすぎない（9dp以上）・正規化を要求（違反で例外）。`fromStoredValue` は正規化済みの点を要求。
+    描画入力と保存値の全座標は有限値でなければならず、NaNと正負の無限大は構築前に拒否する。
     なぜ: 図形どうしを距離で比較できるよう、正規化された点列だけを構築する（AlwaysValid）。
   - 正規化の契約: 描いた経路を**弧長等間隔の32点**に再標本化し、**中心原点 `[-0.5, 0.5]`** へスケールする。
     `storedValue()` はこの座標を `%.4f` で永続化する（保存済み図形の互換性に関わる契約。
@@ -60,7 +61,7 @@ flowchart TD
   システム上端インセットより下に案内文を配置する。規則→GES8。
 - **CustomGestureShortcut**（`viewer/CustomGestureShortcut.java`）: カスタム図形と動作の割り当て。構成要素 `shape: CustomGestureShape`・`action: GestureShortcutAction`。
   - L1: `shape`・`action` ともに非null必須（違反で例外）。 なぜ: 図形か動作の欠けたショートカットを構築不能にする（AlwaysValid）。
-  - 操作 `of(shape, action)`/`shape()`/`action()`/`binding()`。 規則→GES4。
+  - 操作 `of(shape, action)`/`restore(shapeValue, actionValue)`/`shape()`/`action()`/`binding()`。 規則→GES4・GES10。
 - **GestureShortcutBindings**（`viewer/GestureShortcutBindings.java`）: トリガー→動作の割り当て集合（不変）。構成要素 `List<GestureShortcutBinding>`。
   操作 `empty()`/`put(binding)`/`actionFor(trigger)`/`items()`。 規則→GES2・GES3。
 
@@ -131,6 +132,11 @@ flowchart TD
 - 分類: UX ／ 支える判断: 登録開始後も既存設定を変えずに元の閲覧状態へ戻れる判断。
 - なぜ: 描画完了以外に画面を離れる遷移がないと、誤って開始した利用者がアプリ終了を強いられる。破ると: 登録を取り消す方法がなく、戻る操作でActivity自体が終了する。
 
+**GES10: 保存された形状と動作は完全な組の場合だけカスタムショートカットへ復元する**
+- 関係する語: 保存文字列 × CustomGestureShape × GestureShortcutAction → CustomGestureShortcut ／ どこで: `restore`
+- 分類: safety ／ 支える判断: SharedPreferencesの欠損・旧値・破損を部分的な登録状態にしない判断。
+- なぜ: 形状だけ、動作だけ、未知動作、破損座標からショートカットを作るとAlways-Validを破る。破ると: 一覧には登録済みと見えるが発火不能などの矛盾状態になる。
+
 ---
 
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
@@ -143,6 +149,7 @@ flowchart TD
 - `CustomGestureMenu.unregistered()` / `registered()`: GES7 を実現。登録状態ごとの有効操作だけを返す。
 - `CustomGestureDrawingLayout.instructionBaseline(inset)`: GES8 を実現。上端インセットの下へ一定の余白を加えた基準位置を返す。
 - `CustomGestureDrawingLayout.isCancelTarget(...)` と端末の戻る操作: GES9 を実現。同じ中断処理で描画面と保留中の図形を破棄する。
+- `CustomGestureShortcut.restore(shapeValue, actionValue)`: GES10 を実現。任意の保存文字列に対して例外を漏らさず、完全で妥当な組だけを返す全域関数。
 
 ---
 

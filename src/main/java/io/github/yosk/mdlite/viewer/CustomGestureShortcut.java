@@ -1,5 +1,7 @@
 package io.github.yosk.mdlite.viewer;
 
+import java.util.Optional;
+
 public final class CustomGestureShortcut {
     private final CustomGestureShape shape;
     private final GestureShortcutAction action;
@@ -17,6 +19,18 @@ public final class CustomGestureShortcut {
 
     public static CustomGestureShortcut of(CustomGestureShape shape, GestureShortcutAction action) {
         return new CustomGestureShortcut(shape, action);
+    }
+
+    public static Optional<CustomGestureShortcut> restore(String shapeValue, String actionValue) {
+        GestureShortcutAction action = GestureShortcutAction.fromStoredValue(actionValue);
+        if (action.isOff()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(of(CustomGestureShape.fromStoredValue(shapeValue), action));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
     public CustomGestureShape shape() {
