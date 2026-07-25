@@ -63,11 +63,12 @@ public class MainActivityRippleMediumTest {
 
         activity.applySelectedTheme(ViewerTheme.dark());
         int darkPrimary = activity.primaryColor();
+        ReaderAppearance appearance = new ReaderAppearance(activity);
 
         assertEquals("dark theme ripple must derive from the dark primary at 20% alpha",
-                (darkPrimary & 0x00ffffff) | 0x33000000, activity.rippleColor());
+                (darkPrimary & 0x00ffffff) | 0x33000000, appearance.rippleColor());
         assertTrue("the ripple color must actually change with the theme",
-                ((lightPrimary & 0x00ffffff) | 0x33000000) != activity.rippleColor());
+                ((lightPrimary & 0x00ffffff) | 0x33000000) != appearance.rippleColor());
     }
 
     @Test

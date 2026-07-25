@@ -133,7 +133,7 @@ final class ReaderAppearance {
         return new RippleDrawable(ColorStateList.valueOf(rippleColor()), content, mask);
     }
 
-    private int rippleColor() {
+    int rippleColor() {
         return (activity.primaryColor() & 0x00ffffff) | 0x33000000;
     }
 }

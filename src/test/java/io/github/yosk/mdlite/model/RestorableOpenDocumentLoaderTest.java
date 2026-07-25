@@ -52,7 +52,7 @@ public final class RestorableOpenDocumentLoaderTest {
     @Test
     void unreadableStoredFileIsNotRestored() {
         RestorableOpenDocumentLoader loader = new RestorableOpenDocumentLoader(
-                new Source("broken.md", 12, "", true), new Renderer(), new FileSizePolicy(2L * 1024L * 1024L),
+                new UnreadableSource("broken.md", 12), new Renderer(), new FileSizePolicy(2L * 1024L * 1024L),
                 2L * 1024L * 1024L);
 
         RestoredOpenDocumentTab result = loader.load(RestorableOpenTab.of("broken.md", "content://broken"));
@@ -81,22 +81,16 @@ public final class RestorableOpenDocumentLoaderTest {
         }
     }
 
-    private static final class Source implements RestorableOpenDocumentLoader.Source {
+    private static class Source implements RestorableOpenDocumentLoader.Source {
         private final String displayName;
         private final long size;
         private final String markdown;
-        private final boolean fail;
         private boolean readCalled;
 
         Source(String displayName, long size, String markdown) {
-            this(displayName, size, markdown, false);
-        }
-
-        Source(String displayName, long size, String markdown, boolean fail) {
             this.displayName = displayName;
             this.size = size;
             this.markdown = markdown;
-            this.fail = fail;
         }
 
         @Override
@@ -112,10 +106,18 @@ public final class RestorableOpenDocumentLoaderTest {
         @Override
         public String readMarkdown(String uri, long maximumBytes) throws IOException {
             readCalled = true;
-            if (fail) {
-                throw new IOException("test failure");
-            }
             return markdown;
+        }
+    }
+
+    private static final class UnreadableSource extends Source {
+        UnreadableSource(String displayName, long size) {
+            super(displayName, size, "");
+        }
+
+        @Override
+        public String readMarkdown(String uri, long maximumBytes) throws IOException {
+            throw new IOException("test failure");
         }
     }
 }
