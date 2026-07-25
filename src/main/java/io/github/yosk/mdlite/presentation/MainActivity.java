@@ -469,7 +469,7 @@ public final class MainActivity
 
     void updateLocalizedText() {
         menuButton.setText(viewerText.menuButton());
-        menuButton.setContentDescription(viewerText.openMenuDescription());
+        menuButton.setContentDescription(menuAccessibilityDescription());
         appTitle.setText("LocalMD Reader");
         refreshMenuActionButtons();
         menuTitle.setText("LocalMD Reader");
@@ -478,6 +478,11 @@ public final class MainActivity
         layoutSection.setText(viewerText.appearanceSettings());
         infoSection.setText(viewerText.infoSection());
         updateLocalizedMessage();
+    }
+
+    private String menuAccessibilityDescription() {
+        return menuTransitions != null && menuTransitions.isOpenTargeted() ? viewerText.closeMenuDescription()
+                                                                          : viewerText.openMenuDescription();
     }
 
     void renderTabs() {

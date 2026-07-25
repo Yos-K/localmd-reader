@@ -81,6 +81,17 @@ public final class NonModalDocumentListsStructureTest {
                 actions, "activity.showThemeDialog();", "theme selection must not open a modal dialog");
     }
 
+    @Test
+    void appearanceChangesPreserveTheMenuAccessibilityAction() throws IOException {
+        String activity = source("MainActivity.java");
+
+        TestAssertions.assertContains(activity, "menuAccessibilityDescription()",
+                "localized updates must derive the menu action from its visible state");
+        TestAssertions.assertNotContains(activity,
+                "menuButton.setContentDescription(viewerText.openMenuDescription());\n        appTitle",
+                "localized updates must not reset an open menu to the open action");
+    }
+
     private static String source(String fileName) throws IOException {
         String projectRoot = System.getProperty("user.dir").replaceFirst("/app$", "");
         return new String(Files.readAllBytes(
