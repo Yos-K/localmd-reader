@@ -9,6 +9,7 @@ import io.github.yosk.mdlite.domain.ViewerFeature;
 import io.github.yosk.mdlite.viewer.CustomGestureShape;
 import io.github.yosk.mdlite.viewer.CustomGestureShortcut;
 import io.github.yosk.mdlite.viewer.GestureShortcutAction;
+import io.github.yosk.mdlite.viewer.GestureShortcutActionButtonState;
 import io.github.yosk.mdlite.viewer.GestureShortcutBinding;
 import io.github.yosk.mdlite.viewer.GestureShortcutTrigger;
 
@@ -114,7 +115,9 @@ final class GestureShortcutDialogs {
         String[] labels = content.actionLabels(actions);
         for (int index = 0; index < actions.length; index++) {
             final GestureShortcutAction action = actions[index];
-            list.addView(actionButton(labels[index], new View.OnClickListener() {
+            GestureShortcutActionButtonState state = GestureShortcutActionButtonState.forSelection(
+                    activity.gestureShortcutBindings, triggerAt(targetIndex), action);
+            list.addView(actionButton(labels[index], state, new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     applySelectedAction(targetIndex, action);
@@ -135,13 +138,20 @@ final class GestureShortcutDialogs {
     }
 
     private Button actionButton(String label, View.OnClickListener listener) {
+        return actionButton(label, GestureShortcutActionButtonState.forSelection(null, null, null), listener);
+    }
+
+    private Button actionButton(
+            String label, GestureShortcutActionButtonState state, View.OnClickListener listener) {
         Button button = new Button(activity);
         button.setText(label);
         button.setAllCaps(false);
-        button.setTextColor(activity.textColor());
+        button.setTextColor(state.isMuted() ? activity.mutedColor() : activity.textColor());
         button.setTextSize(14);
         button.setTypeface(Typeface.DEFAULT);
-        button.setBackground(activity.makeTonalBackground(activity.surfaceAltColor(), 8));
+        button.setBackground(activity.makeTonalBackground(
+                state.isMuted() ? activity.surfaceColor() : activity.surfaceAltColor(), 8));
+        button.setAlpha(state.isMuted() ? 0.62f : 1.0f);
         button.setOnClickListener(listener);
         return button;
     }
@@ -163,7 +173,8 @@ final class GestureShortcutDialogs {
     private GestureShortcutTrigger triggerAt(int targetIndex) {
         GestureShortcutTrigger[] triggers = new GestureShortcutTrigger[] {GestureShortcutTrigger.doubleTap(),
                 GestureShortcutTrigger.circle(), GestureShortcutTrigger.swipeLeft(), GestureShortcutTrigger.swipeRight(),
-                GestureShortcutTrigger.swipeUp(), GestureShortcutTrigger.swipeDown()};
+                GestureShortcutTrigger.swipeUp(), GestureShortcutTrigger.swipeDown(),
+                GestureShortcutTrigger.customShape()};
         return triggers[targetIndex];
     }
 

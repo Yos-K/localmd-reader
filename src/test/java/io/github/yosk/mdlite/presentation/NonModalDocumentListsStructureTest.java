@@ -110,6 +110,16 @@ public final class NonModalDocumentListsStructureTest {
                 "theme and gesture contents must remain attached to their own rows");
     }
 
+    @Test
+    void gestureActionButtonsRenderTheirAssignmentState() throws IOException {
+        String dialogs = source("GestureShortcutDialogs.java");
+
+        TestAssertions.assertContains(dialogs, "GestureShortcutActionButtonState.forSelection(",
+                "gesture action buttons must derive appearance from modeled assignment state");
+        TestAssertions.assertContains(dialogs, "state.isMuted()",
+                "actions assigned to another gesture must use the muted appearance");
+    }
+
     private static String source(String fileName) throws IOException {
         String projectRoot = System.getProperty("user.dir").replaceFirst("/app$", "");
         return new String(Files.readAllBytes(
