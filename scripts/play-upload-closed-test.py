@@ -56,10 +56,14 @@ def parse_args():
         default=DEFAULT_PACKAGE_NAME,
         help=f"Android package name. Default: {DEFAULT_PACKAGE_NAME}",
     )
-    parser.add_argument(
+    release_source = parser.add_mutually_exclusive_group(required=True)
+    release_source.add_argument(
         "--aab",
-        default=DEFAULT_AAB,
-        help=f"Signed AAB path. Default: {DEFAULT_AAB}",
+        help="Signed AAB path for a new bundle upload.",
+    )
+    release_source.add_argument(
+        "--version-code",
+        help="Existing Play bundle versionCode to promote without uploading it again.",
     )
     parser.add_argument(
         "--track",
@@ -115,10 +119,11 @@ def load_credentials(google_auth, service_account_path):
 
 def main():
     args = parse_args()
-    aab_path = pathlib.Path(args.aab).expanduser()
-
-    if not aab_path.is_file():
+    aab_path = pathlib.Path(args.aab).expanduser() if args.aab else None
+    if aab_path is not None and not aab_path.is_file():
         raise SystemExit(f"Missing AAB: {aab_path}")
+    if args.version_code is not None and not args.version_code.isdigit():
+        raise SystemExit("Version code must be a positive integer.")
 
     google_auth, build, MediaFileUpload = load_google_api()
     credentials = load_credentials(google_auth, args.service_account)
@@ -134,23 +139,27 @@ def main():
     edit_id = edit["id"]
     print(f"Created edit: {edit_id}")
 
-    media = MediaFileUpload(
-        str(aab_path),
-        mimetype="application/octet-stream",
-        resumable=True,
-    )
-    bundle = (
-        publisher.edits()
-        .bundles()
-        .upload(
-            packageName=package_name,
-            editId=edit_id,
-            media_body=media,
+    version_code = args.version_code
+    if aab_path is not None:
+        media = MediaFileUpload(
+            str(aab_path),
+            mimetype="application/octet-stream",
+            resumable=True,
         )
-        .execute()
-    )
-    version_code = str(bundle["versionCode"])
-    print(f"Uploaded bundle versionCode: {version_code}")
+        bundle = (
+            publisher.edits()
+            .bundles()
+            .upload(
+                packageName=package_name,
+                editId=edit_id,
+                media_body=media,
+            )
+            .execute()
+        )
+        version_code = str(bundle["versionCode"])
+        print(f"Uploaded bundle versionCode: {version_code}")
+    else:
+        print(f"Promoting existing bundle versionCode: {version_code}")
 
     track_body = {
         "track": args.track,
