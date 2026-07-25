@@ -16,5 +16,5 @@ Release date: 2026-07-25
 
 ## Verification
 
-- All 921 unit tests and the local Android build passed.
+- All 923 unit tests, the local Android build, and the required CI checks passed.
 - The updated menu, theme, gesture, recent-file, and pinned-file flows were verified on an Android device.
