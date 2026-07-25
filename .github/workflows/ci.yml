@@ -56,6 +56,9 @@ jobs:
       - name: Check unit test dependency download guard
         run: sh scripts/check-unit-test-dependency-downloads.sh
 
+      - name: Check local D8 selection
+        run: sh scripts/test-local-d8-selection.sh
+
       - name: Check artifact storage policy
         run: sh scripts/check-artifact-storage-policy.sh
 
