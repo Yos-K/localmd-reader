@@ -54,6 +54,10 @@ flowchart TD
   操作 `forShape(shape)`/`matches(inputShape)`。 規則→GES5。
 - **CustomGesturePreviewPath**（`viewer/CustomGesturePreviewPath.java`）: カスタムジェスチャの説明アニメーションで使う正規化済み軌跡。
   操作 `points(width, height)`/`pointAt(width, height, progress)`。 規則→GES6。
+- **CustomGestureMenu**（`viewer/CustomGestureMenu.java`）: カスタムジェスチャの登録状態に応じた有効操作の集合。
+  未登録は登録のみ、登録済みは再登録・動作変更・削除を持つ。規則→GES7。
+- **CustomGestureDrawingLayout**（`viewer/CustomGestureDrawingLayout.java`）: 登録画面の案内位置。
+  システム上端インセットより下に案内文を配置する。規則→GES8。
 - **CustomGestureShortcut**（`viewer/CustomGestureShortcut.java`）: カスタム図形と動作の割り当て。構成要素 `shape: CustomGestureShape`・`action: GestureShortcutAction`。
   - L1: `shape`・`action` ともに非null必須（違反で例外）。 なぜ: 図形か動作の欠けたショートカットを構築不能にする（AlwaysValid）。
   - 操作 `of(shape, action)`/`shape()`/`action()`/`binding()`。 規則→GES4。
@@ -112,6 +116,16 @@ flowchart TD
 - 分類: UX ／ 支える判断: アニメーションが描き方を視覚だけで正確に伝える判断。
 - なぜ: 線と点が異なる補間を使うと、点が線から外れて誤った描き方を伝える。破ると: 表示線がベジェ曲線でも点だけが制御点間の折れ線上を移動する。
 
+**GES7: カスタムジェスチャの詳細は現在状態で実行可能な操作だけを提示する**
+- 関係する語: CustomGestureMenu × CustomGestureShortcut ／ どこで: `unregistered` / `registered`
+- 分類: UX ／ 支える判断: 存在しない登録を削除するような偽の操作を提示しない判断。
+- なぜ: 操作後に何も変わらない選択肢は、現在状態と操作結果を誤認させる。破ると: 未登録時にも削除が表示される。
+
+**GES8: カスタムジェスチャ登録の案内はシステム領域と重ならない**
+- 関係する語: CustomGestureDrawingLayout × WindowInsets ／ どこで: `instructionBaseline`
+- 分類: UX ／ 支える判断: 端末のステータスバー構成にかかわらず登録方法を読める判断。
+- なぜ: 全画面の描画面では固定座標が通知領域へ入り得る。破ると: 案内文が時計や通知アイコンと重なって読めない。
+
 ---
 
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
@@ -121,6 +135,8 @@ flowchart TD
 - `CustomGestureShapeMatcher.matches(in)`: GES5 を実現。登録図形と入力の平均距離が閾値以下なら一致。 なぜ: 手描きのばらつきを吸収する。
 - `CircleGesturePath.isCircleLike()` / `DirectionalGesturePath.trigger()`: GES1 を実現。経路の幾何からトリガーを判定する。
 - `CustomGesturePreviewPath.pointAt(w, h, progress)`: GES6 を実現。描画に使うベジェ曲線と終端直線上の位置を返す。なぜ: 線と点の軌跡計算を一か所に集約する。
+- `CustomGestureMenu.unregistered()` / `registered()`: GES7 を実現。登録状態ごとの有効操作だけを返す。
+- `CustomGestureDrawingLayout.instructionBaseline(inset)`: GES8 を実現。上端インセットの下へ一定の余白を加えた基準位置を返す。
 
 ---
 

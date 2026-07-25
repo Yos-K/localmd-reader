@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.view.View;
 import io.github.yosk.mdlite.viewer.GestureShortcutAction;
+import io.github.yosk.mdlite.viewer.CustomGestureMenu;
 import io.github.yosk.mdlite.viewer.GestureShortcutTrigger;
 
 final class GestureShortcutListeners {
@@ -81,19 +82,25 @@ final class GestureShortcutListeners {
 
     static final class CustomMenuClickListener implements DialogInterface.OnClickListener {
         private final GestureShortcutDialogs dialogs;
+        private final CustomGestureMenu.Action[] actions;
 
-        CustomMenuClickListener(GestureShortcutDialogs dialogs) {
+        CustomMenuClickListener(GestureShortcutDialogs dialogs, CustomGestureMenu.Action[] actions) {
             this.dialogs = dialogs;
+            this.actions = actions;
         }
 
         @Override
         public void onClick(DialogInterface dialog, int which) {
-            if (which == 0) { dialogs.startCustomGestureRegistration(); return; }
-            if (which == 1 && dialogs.hasCustomGestureShortcut()) {
+            CustomGestureMenu.Action action = actions[which];
+            if (action == CustomGestureMenu.Action.REGISTER) {
+                dialogs.startCustomGestureRegistration();
+                return;
+            }
+            if (action == CustomGestureMenu.Action.CHANGE_ACTION) {
                 dialogs.showChangeCustomGestureActionDialog();
                 return;
             }
-            if (which == 1 || which == 2) { dialogs.clearCustomGestureShortcut(); }
+            dialogs.clearCustomGestureShortcut();
         }
     }
 

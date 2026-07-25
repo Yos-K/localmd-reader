@@ -6,6 +6,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowInsets;
+import io.github.yosk.mdlite.viewer.CustomGestureDrawingLayout;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +23,7 @@ final class CustomGestureDrawingView extends View {
     private final List<Float> ys = new ArrayList<Float>();
     private final Listener listener;
     private final String instruction;
+    private int systemTopInset;
 
     CustomGestureDrawingView(
             Context context,
@@ -41,12 +44,23 @@ final class CustomGestureDrawingView extends View {
         textPaint.setColor(textColor);
         textPaint.setTextSize(42f);
         setClickable(true);
+        setContentDescription(instruction);
+        setOnApplyWindowInsetsListener(new OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View view, WindowInsets insets) {
+                systemTopInset = insets.getSystemWindowInsetTop();
+                invalidate();
+                return insets;
+            }
+        });
+        requestApplyInsets();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas.drawText(instruction, 36f, 72f, textPaint);
+        canvas.drawText(instruction, 36f,
+                CustomGestureDrawingLayout.instructionBaseline(systemTopInset), textPaint);
         canvas.drawPath(path, strokePaint);
     }
 

@@ -6,6 +6,7 @@ import android.widget.LinearLayout;
 import io.github.yosk.mdlite.domain.ViewerFeature;
 import io.github.yosk.mdlite.viewer.CustomGestureShape;
 import io.github.yosk.mdlite.viewer.CustomGestureShortcut;
+import io.github.yosk.mdlite.viewer.CustomGestureMenu;
 import io.github.yosk.mdlite.viewer.GestureShortcutAction;
 import io.github.yosk.mdlite.viewer.GestureShortcutActionLabels;
 import io.github.yosk.mdlite.viewer.GestureShortcutBinding;
@@ -125,10 +126,14 @@ final class GestureShortcutDialogs {
     }
 
     private void showCustomGestureDialog() {
+        CustomGestureMenu menu = customGestureMenu();
+        CustomGestureMenu.Action[] actions = menu.actions();
         new AlertDialog.Builder(activity)
-                .setTitle(activity.viewerText.customGesturePrefix())
+                .setTitle(activity.viewerText.customGesturePrefix()
+                        + actionLabel(customGestureShortcut()))
                 // interaction-surface: gesture-shortcuts-dialog
-                .setItems(customGestureMenuLabels(), new GestureShortcutListeners.CustomMenuClickListener(this))
+                .setItems(customGestureMenuLabels(actions),
+                        new GestureShortcutListeners.CustomMenuClickListener(this, actions))
                 .setNegativeButton("OK", null)
                 .show();
     }
@@ -254,18 +259,25 @@ final class GestureShortcutDialogs {
         return activity.viewerText.off();
     }
 
-    private String[] customGestureMenuLabels() {
-        if (activity.settingsStore.loadCustomGestureShortcut() != null) {
-            return new String[] {
-                activity.viewerText.registerCustomGesture(),
-                activity.viewerText.changeCustomGestureAction(),
-                activity.viewerText.clearCustomGesture()
-            };
+    private CustomGestureMenu customGestureMenu() {
+        if (hasCustomGestureShortcut()) {
+            return CustomGestureMenu.registered();
         }
-        return new String[] {
-            activity.viewerText.registerCustomGesture(),
-            activity.viewerText.clearCustomGesture()
-        };
+        return CustomGestureMenu.unregistered();
+    }
+
+    private String[] customGestureMenuLabels(CustomGestureMenu.Action[] actions) {
+        String[] labels = new String[actions.length];
+        for (int index = 0; index < actions.length; index++) {
+            if (actions[index] == CustomGestureMenu.Action.REGISTER) {
+                labels[index] = activity.viewerText.registerCustomGesture();
+            } else if (actions[index] == CustomGestureMenu.Action.CHANGE_ACTION) {
+                labels[index] = activity.viewerText.changeCustomGestureAction();
+            } else {
+                labels[index] = activity.viewerText.clearCustomGesture();
+            }
+        }
+        return labels;
     }
 
     private GestureShortcutAction[] availableGestureActions() {
