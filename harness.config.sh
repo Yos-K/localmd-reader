@@ -20,7 +20,7 @@ TARGET_CLASSES="io.github.yosk.mdlite.domain.*,io.github.yosk.mdlite.viewer.*,io
 TARGET_TESTS="io.github.yosk.mdlite.*"
 # ViewerText* is the i18n string table (~180 NO_COVERAGE string returns); excluded so the
 # score reflects real logic (see docs/harness/mutation-analysis-rule.md).
-EXCLUDED_CLASSES="*Test,*Tests,*Property,*Properties,io.github.yosk.mdlite.viewer.ViewerText*"
+EXCLUDED_CLASSES="*Test*,*Tests*,*Property*,*Properties*,io.github.yosk.mdlite.viewer.ViewerText*"
 # architecture.* asserts structure (cannot kill mutants); *Property PBT explodes PITest runtime.
 EXCLUDED_TESTS="io.github.yosk.mdlite.architecture.*,*Property,*Properties"
 MUTATION_THRESHOLD=82  # ratchet floor — never lower (see mutation-analysis-rule.md)
