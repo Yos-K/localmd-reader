@@ -118,6 +118,8 @@ Implementation continues with TDD:
   applying the fix.
 - Avoid test smells documented by `kawasima/savanna-maven-plugin`.
 - Tests must describe the user-visible specification in their names.
+- Unit tests covering multiple specifications must use JUnit 5 `@Nested`
+  groups so the report reads from subject to specification to concrete check.
 - Boundary values must be covered where relevant.
 - Property-style or generated-input tests should be added for renderer safety
   when the behavior accepts arbitrary Markdown text.

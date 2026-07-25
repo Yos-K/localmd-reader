@@ -138,6 +138,13 @@ ADR-Review: none (no architectural decision is affected because the change only 
 - テストスメル無し（`scripts/check-test-smells.sh`）／third-party notices 整合（`scripts/check-third-party-notices.sh`）
 - Free / Pro Preview の debug ビルド・lint・Free release AAB ビルド
 
+### 単体テストの仕様ツリー
+
+- 1つのテストクラスが複数の仕様を扱う場合、JUnit 5の `@Nested` で仕様単位に分類する。
+- 外側のテストクラス名を対象、`@Nested` クラス名を仕様、`@Test` メソッド名を具体的な確認項目として読める構造にする。
+- `@Nested` は単なる件数分割には使わない。具体的なテスト項目が1つだけで階層が情報を増やさない場合は、平坦なテストを維持する。
+- テスト名は実装手順ではなく、対象仕様の条件と期待結果を表す。
+
 ### リリース時に追加で満たす基準（手動 Play Release）
 
 - 現バージョンの release notes（`docs/release/release-notes-v<ver>.md` と `.ja.md`）が存在し最新であること。Play Release ワークフローがビルド前に `scripts/check-release-notes.sh` で検証する
