@@ -52,6 +52,8 @@ flowchart TD
     テスト `resamplingDistributesPointsEvenlyAlongThePath` が固定）。
 - **CustomGestureShapeMatcher**（`viewer/CustomGestureShapeMatcher.java`）: 登録図形との一致判定。構成要素 `registeredShape: CustomGestureShape`（非null必須）。
   操作 `forShape(shape)`/`matches(inputShape)`。 規則→GES5。
+- **CustomGesturePreviewPath**（`viewer/CustomGesturePreviewPath.java`）: カスタムジェスチャの説明アニメーションで使う正規化済み軌跡。
+  操作 `points(width, height)`/`pointAt(width, height, progress)`。 規則→GES6。
 - **CustomGestureShortcut**（`viewer/CustomGestureShortcut.java`）: カスタム図形と動作の割り当て。構成要素 `shape: CustomGestureShape`・`action: GestureShortcutAction`。
   - L1: `shape`・`action` ともに非null必須（違反で例外）。 なぜ: 図形か動作の欠けたショートカットを構築不能にする（AlwaysValid）。
   - 操作 `of(shape, action)`/`shape()`/`action()`/`binding()`。 規則→GES4。
@@ -105,6 +107,11 @@ flowchart TD
 - 分類: UX ／ 支える判断: 手描きの揺れを許容する近似一致の判断。
 - なぜ: 手描きの揺れを許容する近似一致にする（厳密一致では実用にならない）。 破ると: わずかなズレで一致しない／別図形が誤一致する。水平線をジグザグと誤一致させる高すぎる閾値は「別図形が誤一致する」に該当するバグとなる。
 
+**GES6: カスタムジェスチャのプレビュー線と移動点は同じ軌跡を使う**
+- 関係する語: CustomGesturePreviewPath × GesturePreviewView ／ どこで: `points` / `pointAt`
+- 分類: UX ／ 支える判断: アニメーションが描き方を視覚だけで正確に伝える判断。
+- なぜ: 線と点が異なる補間を使うと、点が線から外れて誤った描き方を伝える。破ると: 表示線がベジェ曲線でも点だけが制御点間の折れ線上を移動する。
+
 ---
 
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
@@ -113,6 +120,7 @@ flowchart TD
 - `GestureShortcutBindings.actionFor(t)`: GES3 を実現。`t` が null・未登録なら `off()`。 なぜ: 未割当ジェスチャで誤動作させない。
 - `CustomGestureShapeMatcher.matches(in)`: GES5 を実現。登録図形と入力の平均距離が閾値以下なら一致。 なぜ: 手描きのばらつきを吸収する。
 - `CircleGesturePath.isCircleLike()` / `DirectionalGesturePath.trigger()`: GES1 を実現。経路の幾何からトリガーを判定する。
+- `CustomGesturePreviewPath.pointAt(w, h, progress)`: GES6 を実現。描画に使うベジェ曲線と終端直線上の位置を返す。なぜ: 線と点の軌跡計算を一か所に集約する。
 
 ---
 
