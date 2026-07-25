@@ -1,0 +1,22 @@
+{
+  "testMatrixId": "matrix-123",
+  "testExecutions": [
+    {
+      "toolExecution": {
+        "toolOutputs": [
+          {"output": {"fileUri": "gs://test-results/matrix/step-1.png"}},
+          {"output": {"fileUri": "gs://test-results/matrix/video.mp4"}},
+          {"output": {"fileUri": "gs://test-results/matrix/step-2.PNG"}}
+        ]
+      }
+    },
+    {
+      "toolExecution": {
+        "toolOutputs": [
+          {"output": {"fileUri": "gs://test-results/matrix/step-1.png"}},
+          {"output": {"fileUri": "https://example.invalid/not-cloud.png"}}
+        ]
+      }
+    }
+  ]
+}

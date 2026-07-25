@@ -1,11 +1,10 @@
 # state_id|kind|root|evidence
 welcome|stable|yes|src/main/java/io/github/yosk/mdlite/infrastructure/WelcomeDocumentBuilder.java
 document-opened|stable|no|src/main/java/io/github/yosk/mdlite/viewer/OpenDocumentTab.java
-recent-files-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/MainMenuActions.java
+recent-files-panel-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/DocumentListMenuPanel.java
 library-tree-visible|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/MainMenuActions.java
 library-tree-collapsed|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/MarkdownLibraryMenuTree.java
-pinned-file-list-visible|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/PinnedDocumentMenuActions.java
-pinned-file-actions-visible|overlay|no|src/main/java/io/github/yosk/mdlite/model/DocumentListDialogState.java
+pinned-files-panel-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/DocumentListMenuPanel.java
 temporary-document-tab-active|entry|yes|src/main/java/io/github/yosk/mdlite/viewer/OpenDocumentTab.java
 external-file-opened|entry|yes|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java
 unsupported-file-dialog|entry|yes|src/main/java/io/github/yosk/mdlite/presentation/MainActivity.java
@@ -13,8 +12,8 @@ settings-section-collapsed|overlay|no|src/main/java/io/github/yosk/mdlite/model/
 settings-section-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/model/DisclosureState.java
 table-of-contents-collapsed|overlay|no|src/main/java/io/github/yosk/mdlite/model/DisclosureState.java
 table-of-contents-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/model/DisclosureState.java
-theme-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java
-gesture-shortcuts-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/GestureShortcutDialogs.java
+theme-panel-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/ThemeMenuPanel.java
+gesture-shortcuts-panel-expanded|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/GestureShortcutMenuPanel.java
 pro-features-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/ProFeaturesDialog.java
 clipboard-diagnostics-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java
 privacy-policy-dialog|overlay|no|src/main/java/io/github/yosk/mdlite/presentation/SettingsDialogs.java

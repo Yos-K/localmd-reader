@@ -8,8 +8,10 @@ import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.file.FileInfo;
 import io.github.yosk.mdlite.file.MarkdownLibraryLocation;
 import io.github.yosk.mdlite.file.MarkdownFileOpenResult;
+import io.github.yosk.mdlite.file.PersistentMarkdownTextStore;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
 import io.github.yosk.mdlite.viewer.SavedDocumentPlacement;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -20,12 +22,15 @@ final class DocumentOpener {
     private final FolderDocumentReader folderDocumentReader;
     private final DocumentContentReader documentContentReader;
     private final ProjectLibraryOpener projectLibraryOpener;
+    private final PersistentMarkdownTextStore persistentMarkdownTextStore;
 
     DocumentOpener(MainActivity activity) {
         this.activity = activity;
         this.folderDocumentReader = new FolderDocumentReader(activity.getContentResolver());
         this.documentContentReader = new DocumentContentReader(activity.getContentResolver());
         this.projectLibraryOpener = new ProjectLibraryOpener(activity, folderDocumentReader);
+        this.persistentMarkdownTextStore = new PersistentMarkdownTextStore(
+                new File(activity.getFilesDir(), "opened-texts"));
     }
 
     void openMarkdownPicker() {
@@ -208,15 +213,20 @@ final class DocumentOpener {
 
         MarkdownFileOpenResult.ReadableMarkdownFile readableFile =
                 (MarkdownFileOpenResult.ReadableMarkdownFile) openResult;
-        String uri = "termux://open/" + Uri.encode(sourceId);
-        SafeHtml rendered = activity.renderMarkdownForUri(uri, text);
-        activity.documentTabSession.open(
-                OpenDocumentTab.fileDocument(readableFile.displayName(), uri, rendered));
-        activity.updateLocalizedText();
-        activity.renderTabs();
-        activity.renderCurrentDocument();
-        activity.saveOpenTabs();
-        activity.clearMessage();
+        try {
+            String uri = Uri.fromFile(persistentMarkdownTextStore.store(
+                    readableFile.displayName(), sourceId, text)).toString();
+            SafeHtml rendered = activity.renderMarkdownForUri(uri, text);
+            activity.documentTabSession.open(
+                    OpenDocumentTab.fileDocument(readableFile.displayName(), uri, rendered));
+            activity.updateLocalizedText();
+            activity.renderTabs();
+            activity.renderCurrentDocument();
+            activity.saveOpenTabs();
+            activity.clearMessage();
+        } catch (IOException e) {
+            activity.showFileOpenError(activity.viewerText.unreadableFile());
+        }
     }
 
     FileInfo readFileInfo(Uri uri) {

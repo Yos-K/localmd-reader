@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.View;
+import io.github.yosk.mdlite.viewer.CustomGesturePreviewPath;
 
 final class GesturePreviewView extends View {
     private final Paint linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -49,7 +50,7 @@ final class GesturePreviewView extends View {
             return;
         }
         if (kind == GesturePreviewKind.CUSTOM) {
-            float[][] points = customPoints(width, height);
+            float[][] points = CustomGesturePreviewPath.points(width, height);
             path.moveTo(points[0][0], points[0][1]);
             path.cubicTo(points[1][0], points[1][1], points[2][0], points[2][1], points[3][0], points[3][1]);
             path.lineTo(points[4][0], points[4][1]);
@@ -75,7 +76,7 @@ final class GesturePreviewView extends View {
             };
         }
         if (kind == GesturePreviewKind.CUSTOM) {
-            return pointOnPolyline(customPoints(width, height), progress);
+            return CustomGesturePreviewPath.pointAt(width, height, progress);
         }
         return pointOnPolyline(pointsFor(width, height), progress);
     }
@@ -133,16 +134,6 @@ final class GesturePreviewView extends View {
             { width * 0.24f, height * 0.65f },
             { width * 0.42f, height * 0.30f },
             { width * 0.76f, height * 0.58f }
-        };
-    }
-
-    private float[][] customPoints(float width, float height) {
-        return new float[][] {
-            { width * 0.22f, height * 0.62f },
-            { width * 0.36f, height * 0.18f },
-            { width * 0.54f, height * 0.82f },
-            { width * 0.72f, height * 0.34f },
-            { width * 0.82f, height * 0.68f }
         };
     }
 

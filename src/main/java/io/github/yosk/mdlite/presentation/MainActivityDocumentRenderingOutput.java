@@ -35,7 +35,7 @@ final class MainActivityDocumentRenderingOutput implements DocumentRenderingCoor
         for (int i = 0; i < jobs.length; i++) {
             activity.mermaidRenderEngine.enqueue(
                     jobs[i],
-                    MermaidDiagramTheme.from(activity.currentTheme));
+                    MermaidDiagramTheme.from(activity.currentTheme()));
         }
     }
 

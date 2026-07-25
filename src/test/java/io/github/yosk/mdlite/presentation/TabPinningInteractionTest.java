@@ -10,20 +10,22 @@ import org.junit.jupiter.api.Test;
 public final class TabPinningInteractionTest {
     @Test
     void everyTabRegistersTheLongPressPinningInteraction() throws IOException {
-        TestAssertions.assertContains(mainActivitySource(), "button.setOnLongClickListener(this)",
+        TestAssertions.assertContains(sourceFile("DocumentTabBar.java"),
+                "button.setOnLongClickListener(activity)",
                 "tab rendering must keep the discoverable long-press pinning interaction");
     }
 
     @Test
     void pinnedTabsRenderAVisiblePinMark() throws IOException {
-        TestAssertions.assertContains(mainActivitySource(), "R.drawable.ic_push_pin_18",
+        TestAssertions.assertContains(sourceFile("DocumentTabBar.java"), "R.drawable.ic_push_pin_18",
                 "pinned tabs must communicate bookmark state without opening the menu");
     }
 
     @Test
     void pinMutationsRefreshEveryVisibleRepresentation() throws IOException {
-        TestAssertions.assertContains(mainActivitySource(),
-                "renderTabs();\n        refreshMenuActionButtons();\n        showMessage(message);",
+        TestAssertions.assertContains(
+                sourceFile("../viewer/PinnedDocumentController.java"),
+                "host.refreshPinnedDocuments",
                 "pin mutations must refresh tab marks and menu actions together");
     }
 
@@ -32,10 +34,6 @@ public final class TabPinningInteractionTest {
         TestAssertions.assertNotContains(
                 sourceFile("DocumentTabSessionController.java"), "unpinDocument",
                 "closing an open tab must not silently remove its pinned-file bookmark");
-    }
-
-    private static String mainActivitySource() throws IOException {
-        return sourceFile("MainActivity.java");
     }
 
     private static String sourceFile(String fileName) throws IOException {

@@ -68,6 +68,25 @@ large smoke だけに頼っている → medium を増やして「下へ押し�
   再検証しない**（= small で済むことを large でやらない）。目的は「結合・起動・Intent オープンが破綻しないこと」の確認。
   描画の**表示アサート（L5）は PR #121 (b1f449f) でマージ済み・実装済み**（手動 dispatch のみ、下記参照）。
 
+## 単体テストを仕様ツリーとして表現する
+
+JUnitの表示を、そのまま仕様から具体例へたどれる索引として使う。
+
+```text
+CustomGestureShapeTest                 対象
+├── Normalization                     仕様
+│   ├── normalizesToStableSampleCount 具体的な確認項目
+│   └── ignoresPositionAndSize        具体的な確認項目
+├── Persistence
+└── ConstructionValidity
+```
+
+- 1つの対象に複数の仕様がある場合はJUnit 5の `@Nested` で仕様を分類する。
+- 外側のクラス名は対象、nestedクラス名は仕様、テストメソッド名は条件と期待結果を表す。
+- テスト名は性質、本体は具体例とする。実装メソッド名を並べただけの分類にはしない。
+- 具体的な確認項目が1つしかなく、階層が新しい情報を加えない場合は無理にnestしない。
+- parameterized testとproperty testは、1つの性質を複数入力で確認するものなので、その性質が属する仕様のnestに置く。
+
 ## CI/CD での順序と頻度（fail-fast）
 
 | 段 | 確認内容 | ジョブ | トリガ | 頻度 | 失敗時 |

@@ -11,11 +11,12 @@ import io.github.yosk.mdlite.file.RestorableOpenTab;
 import io.github.yosk.mdlite.file.RestorableOpenTabs;
 import io.github.yosk.mdlite.viewer.OpenDocumentTab;
 import io.github.yosk.mdlite.viewer.OpenDocumentTabs;
+import io.github.yosk.mdlite.viewer.PinnedDocumentRepository;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-final class TabPersistence {
+final class TabPersistence implements PinnedDocumentRepository {
     static final int MAX_PINNED_DOCUMENTS = 20;
     private static final String RECENT_PREFS = "recent_documents";
     private static final String PINNED_PREFS = "pinned_documents";
@@ -110,18 +111,21 @@ final class TabPersistence {
                 .apply();
     }
 
-    void pinDocument(String displayName, String uriString) {
+    @Override
+    public void pinDocument(String displayName, String uriString) {
         PinnedDocuments documents = loadPinnedDocuments()
                 .pin(RecentDocument.of(displayName, uriString));
         saveDocuments(PINNED_PREFS, documents.items());
     }
 
-    void unpinDocument(String uriString) {
+    @Override
+    public void unpinDocument(String uriString) {
         PinnedDocuments documents = loadPinnedDocuments().unpin(uriString);
         saveDocuments(PINNED_PREFS, documents.items());
     }
 
-    boolean isPinnedDocument(String uriString) {
+    @Override
+    public boolean isPinnedDocument(String uriString) {
         return loadPinnedDocuments().containsUri(uriString);
     }
 
@@ -129,7 +133,8 @@ final class TabPersistence {
         return PinnedDocuments.from(MAX_PINNED_DOCUMENTS, loadDocumentList(PINNED_PREFS));
     }
 
-    void clearPinnedDocuments() {
+    @Override
+    public void clearPinnedDocuments() {
         context.getSharedPreferences(PINNED_PREFS, Context.MODE_PRIVATE)
                 .edit()
                 .clear()

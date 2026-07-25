@@ -33,7 +33,7 @@ mkdir -p "$ART_DIR"
 # contents, so logcat evidence is designed not to include user documents.
 capture_evidence() {
   adb logcat -d -v time > "$ART_DIR/logcat.txt" 2>/dev/null || true
-  adb exec-out screencap -p > "$ART_DIR/screen.png" 2>/dev/null || true
+  sh "$ROOT/scripts/adb-screencap.sh" > "$ART_DIR/screen.png" 2>/dev/null || true
 }
 
 fail() {

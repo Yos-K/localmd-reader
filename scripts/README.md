@@ -103,8 +103,11 @@ debug/release build または CI artifact 側で行い、small test の既定 fi
 | 署名付き release | `build-signed-release.sh [apk|aab|all]` | keystore で署名（要 `MDLITE_RELEASE_KEYSTORE` ・bundletool） |
 | Billing manifest 適用 | `apply-billing-manifest.sh` | Pro 課金用 manifest を反映 |
 
-手書きビルドは `javac -parameters` を使用する。現行JDKがprivate内部クラスへ生成する名前なしの
-合成パラメータを、Termux SDKの旧D8が処理できず内部エラーになることを防ぐためである。
+手書きビルドは `javac -parameters` を使用する。ローカルではTermux互換の
+`aapt2` / `zipalign` をbuild-tools 35.0.2から使用し、D8だけはbuild-tools 35.0.0の
+D8 8.6.2を使用する。35.0.2のD8はTermuxの旧D8 3.3.20へのリンクであり、
+AndroidX Core 1.15.0のdex変換中に内部エラーを起こすためである。
+選択規則は `env.project.sh`、退行検知は `test-local-d8-selection.sh` が担う。
 
 ---
 

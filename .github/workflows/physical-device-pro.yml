@@ -1,0 +1,131 @@
+name: Pro Physical Device Exploration
+
+on:
+  workflow_dispatch:
+    inputs:
+      device_model:
+        description: Firebase Test Lab physical device model ID
+        required: true
+        default: shiba
+      android_version:
+        description: Android version ID; empty selects the model default
+        required: false
+        default: ""
+      locale:
+        description: Device locale
+        required: true
+        default: ja
+      orientation:
+        description: Screen orientation
+        required: true
+        default: portrait
+        type: choice
+        options:
+          - portrait
+          - landscape
+      timeout_seconds:
+        description: Paid physical-device exploration limit
+        required: true
+        default: "600"
+        type: choice
+        options:
+          - "300"
+          - "600"
+          - "900"
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: pro-physical-device-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  physical-device-robo:
+    if: github.repository == 'Yos-K/localmd-reader'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: test-lab
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build Pro preview APK
+        run: ./gradlew --no-daemon :app:assembleProPreviewDebug
+
+      - name: Validate Test Lab configuration
+        env:
+          TEST_LAB_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.TEST_LAB_WORKLOAD_IDENTITY_PROVIDER }}
+          TEST_LAB_SERVICE_ACCOUNT: ${{ vars.TEST_LAB_SERVICE_ACCOUNT }}
+          TEST_LAB_PROJECT_ID: ${{ vars.TEST_LAB_PROJECT_ID }}
+          TEST_LAB_RESULTS_BUCKET: ${{ vars.TEST_LAB_RESULTS_BUCKET }}
+        run: |
+          test -n "$TEST_LAB_WORKLOAD_IDENTITY_PROVIDER"
+          test -n "$TEST_LAB_SERVICE_ACCOUNT"
+          test -n "$TEST_LAB_PROJECT_ID"
+          test -n "$TEST_LAB_RESULTS_BUCKET"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.TEST_LAB_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.TEST_LAB_SERVICE_ACCOUNT }}
+          project_id: ${{ vars.TEST_LAB_PROJECT_ID }}
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Run Pro Robo exploration on a physical device
+        env:
+          TEST_LAB_RESULTS_BUCKET: ${{ vars.TEST_LAB_RESULTS_BUCKET }}
+          TEST_LAB_LOCALE: ${{ inputs.locale }}
+          TEST_LAB_ORIENTATION: ${{ inputs.orientation }}
+          TEST_LAB_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+          TEST_LAB_ARTIFACT_DIR: test-lab-artifacts
+        run: |
+          bash scripts/run-test-lab-pro-robo.sh \
+            app/build/outputs/apk/proPreview/debug/app-proPreview-debug.apk \
+            "${{ inputs.device_model }}" \
+            "${{ inputs.android_version }}"
+
+      - name: Upload short-lived agent review evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: pro-physical-device-${{ github.run_id }}
+          path: test-lab-artifacts/
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Physical device summary
+        if: always()
+        run: |
+          {
+            echo "## Pro physical-device exploration"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Device model | ${{ inputs.device_model }} |"
+            echo "| Android version | ${{ inputs.android_version || 'model default' }} |"
+            echo "| Locale | ${{ inputs.locale }} |"
+            echo "| Orientation | ${{ inputs.orientation }} |"
+            echo "| Timeout | ${{ inputs.timeout_seconds }} seconds |"
+            echo "| Variant | ProPreview debug |"
+            echo "| Result | ${{ job.status }} |"
+            echo ""
+            echo "> Review the one-day artifact for matrix metadata, logs, and up to 12 screenshots."
+          } >> "$GITHUB_STEP_SUMMARY"

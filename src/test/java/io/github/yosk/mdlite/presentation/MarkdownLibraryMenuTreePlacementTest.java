@@ -10,10 +10,11 @@ import org.junit.jupiter.api.Test;
 public final class MarkdownLibraryMenuTreePlacementTest {
     @Test
     void markdownLibraryTreeAppearsImmediatelyAfterItsMenuAction() throws IOException {
-        String source = sourceFile("MainActivity.java");
+        String source = sourceFile("ReaderScreenInitializer.java");
 
         TestAssertions.assertContains(source,
-                "markdownLibraryButton, markdownLibraryMenuTree, createFromClipboardButton",
+                "activity.markdownLibraryButton, activity.markdownLibraryMenuTree,\n"
+                        + "                activity.createFromClipboardButton",
                 "The persistent tree must appear directly below the library action");
     }
 

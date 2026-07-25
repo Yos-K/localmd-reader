@@ -138,6 +138,13 @@ ADR-Review: none (no architectural decision is affected because the change only 
 - テストスメル無し（`scripts/check-test-smells.sh`）／third-party notices 整合（`scripts/check-third-party-notices.sh`）
 - Free / Pro Preview の debug ビルド・lint・Free release AAB ビルド
 
+### 単体テストの仕様ツリー
+
+- 1つのテストクラスが複数の仕様を扱う場合、JUnit 5の `@Nested` で仕様単位に分類する。
+- 外側のテストクラス名を対象、`@Nested` クラス名を仕様、`@Test` メソッド名を具体的な確認項目として読める構造にする。
+- `@Nested` は単なる件数分割には使わない。具体的なテスト項目が1つだけで階層が情報を増やさない場合は、平坦なテストを維持する。
+- テスト名は実装手順ではなく、対象仕様の条件と期待結果を表す。
+
 ### リリース時に追加で満たす基準（手動 Play Release）
 
 - 現バージョンの release notes（`docs/release/release-notes-v<ver>.md` と `.ja.md`）が存在し最新であること。Play Release ワークフローがビルド前に `scripts/check-release-notes.sh` で検証する
@@ -217,6 +224,15 @@ git switch -c <type>/<short-topic>   # 例: test/medium-intent-open, fix/97-...
 オーナーに提案する。運用ルール・トリガー・自己評価の様式は
 [`docs/harness/exploratory-testing.md`](docs/harness/exploratory-testing.md) の「継続ループ」節を参照。
 探索はマージゲートではない（提案ベース・flaky 厳禁の原則は同文書のとおり）。
+
+### 探索実施時（必須）: セッションログを同時更新する
+
+実機、エミュレータ、コードprobe、成果物目視のいずれであっても、探索を始める時点で
+`docs/harness/exploration-sessions/YYYY-MM-DD-<対象>.md` を作成する。各probeの観測をその都度追記し、
+未確認項目も未確認として残す。チャーター、probe表、振り分け、機械可読な価値評価が揃っていない探索は
+**未完了**であり、エージェントは完了報告してはならない。各findingは追加した恒久テストの
+`テストクラス.テストメソッド`まで対応づける。テスト化しない場合は理由と代替の着地点を記録する。詳細と書式は
+[`docs/harness/exploratory-testing.md`](docs/harness/exploratory-testing.md) に従う。
 
 ### consumed_scripts を編集するとき（必須運用ルール）
 

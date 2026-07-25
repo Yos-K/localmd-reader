@@ -66,12 +66,9 @@ public final class HtmlPageBuilder {
                 + ".code-variable{color:" + style.link + ";}"
                 + ".code-preview-toggle{background:" + style.surface + ";border:1px solid " + style.border + ";border-radius:8px;padding:10px;margin:0 0 16px;}"
                 + ".code-preview-toggle pre{margin:0;}"
-                + ".code-preview-radio{position:absolute;opacity:0;pointer-events:none;}"
-                + ".code-preview-label{display:inline-block;font-size:var(--localmd-small-font-size);font-weight:700;border:1px solid " + style.border + ";border-radius:8px;padding:6px 10px;margin:0 6px 10px 0;color:" + style.text + ";background:" + style.background + ";}"
-                + ".code-preview-radio:checked+.code-preview-label{color:" + style.onPrimary + ";background:" + style.primary + ";border-color:" + style.primary + ";}"
+                + ".code-preview-button{font-family:inherit;font-size:var(--localmd-small-font-size);font-weight:700;border:1px solid " + style.border + ";border-radius:8px;padding:6px 10px;margin:0 6px 10px 0;color:" + style.text + ";background:" + style.background + ";}"
+                + ".code-preview-button-active{color:" + style.onPrimary + ";background:" + style.primary + ";border-color:" + style.primary + ";}"
                 + ".code-preview-pane{display:none;}"
-                + ".code-preview-raw-radio:checked~.code-preview-raw{display:block;}"
-                + ".code-preview-preview-radio:checked~.code-preview-rendered{display:block;}"
                 + ".code-preview-rendered{background:" + style.background + ";border:1px solid " + style.border + ";border-radius:8px;padding:14px;overflow:auto;}"
                 + ".code-preview-rendered>:last-child{margin-bottom:0;}"
                 + ".mermaid-placeholder{background:" + style.surface + ";border:1px solid " + style.border + ";border-radius:8px;padding:14px;margin:0 0 16px;}"
@@ -112,7 +109,7 @@ public final class HtmlPageBuilder {
                 + ".welcome-card strong{display:block;font-size:var(--localmd-body-font-size);margin:0 0 4px;color:" + style.text + ";}"
                 + ".welcome-card span{display:block;font-size:var(--localmd-small-font-size);color:" + style.muted + ";line-height:1.45;}"
                 + ".welcome-note{background:" + style.surfaceAlt + ";border-left:4px solid " + style.primary + ";padding:10px 12px;margin:0;color:" + style.muted + ";}"
-                + "</style></head><body>"
+                + "</style><script>function localmdCodePreview(button,pane){var root=button.parentNode;var buttons=root.querySelectorAll('.code-preview-button');for(var i=0;i<buttons.length;i++){buttons[i].classList.remove('code-preview-button-active');}button.classList.add('code-preview-button-active');var panes=root.querySelectorAll('.code-preview-pane');for(var j=0;j<panes.length;j++){panes[j].style.display='none';}root.querySelector('.code-preview-'+pane).style.display='block';}</script></head><body>"
                 + body.value().replace("class=\"table-scroll\"", "class=\"" + tableScrollClass + "\"")
                 + "</body></html>";
     }

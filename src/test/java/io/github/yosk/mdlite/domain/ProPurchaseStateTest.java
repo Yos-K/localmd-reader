@@ -1,98 +1,132 @@
 package io.github.yosk.mdlite.domain;
 
 import io.github.yosk.mdlite.testing.TestAssertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 public final class ProPurchaseStateTest {
 
-    @Test
-    void purchasedStateGrantsProEntitlement() {
-        FeatureEntitlement entitlement = ProPurchaseState.purchased().entitlement();
+    @Nested
+    final class Entitlement {
+        @Test
+        void purchasedStateGrantsProEntitlementAndConvenienceFeatures() {
+            FeatureEntitlement entitlement = ProPurchaseState.purchased().entitlement();
 
-        TestAssertions.assertTrue(entitlement.isPro(), "Purchased Pro state must grant Pro entitlement");
-        TestAssertions.assertTrue(entitlement.allows(ViewerFeature.EXTRA_THEMES), "Purchased Pro state must unlock convenience features");
+            TestAssertions.assertTrue(entitlement.isPro(),
+                    "purchased state must grant Pro entitlement");
+            TestAssertions.assertTrue(entitlement.allows(ViewerFeature.EXTRA_THEMES),
+                    "purchased state must unlock convenience features");
+        }
+
+        @Test
+        void notPurchasedStateKeepsFreeEntitlementAndFeaturesLocked() {
+            FeatureEntitlement entitlement = ProPurchaseState.notPurchased().entitlement();
+
+            TestAssertions.assertFalse(entitlement.isPro(),
+                    "not-purchased state must keep Free entitlement");
+            TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES),
+                    "not-purchased state must keep convenience features locked");
+        }
+
+        @Test
+        void pendingStateKeepsFreeEntitlementUntilPurchaseCompletes() {
+            FeatureEntitlement entitlement = ProPurchaseState.pending().entitlement();
+
+            TestAssertions.assertFalse(entitlement.isPro(),
+                    "pending state must keep Free entitlement");
+            TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES),
+                    "pending state must keep convenience features locked");
+        }
+
+        @Test
+        void unknownStateFailsSafeAsFree() {
+            FeatureEntitlement entitlement = ProPurchaseState.unknown().entitlement();
+
+            TestAssertions.assertFalse(entitlement.isPro(),
+                    "unknown state must keep Free entitlement");
+            TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES),
+                    "unknown state must keep convenience features locked");
+        }
+
+        @Test
+        void billingUnavailableStateFailsSafeAsFree() {
+            FeatureEntitlement entitlement = ProPurchaseState.billingUnavailable().entitlement();
+
+            TestAssertions.assertFalse(entitlement.isPro(),
+                    "billing-unavailable state must keep Free entitlement");
+            TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES),
+                    "billing-unavailable state must keep convenience features locked");
+        }
     }
 
-    @Test
-    void notPurchasedStateKeepsFreeEntitlement() {
-        FeatureEntitlement entitlement = ProPurchaseState.notPurchased().entitlement();
+    @Nested
+    final class PersistenceRoundTrip {
+        @Test
+        void purchasedCodeRestoresProEntitlement() {
+            ProPurchaseState restored = roundTrip(ProPurchaseState.purchased());
 
-        TestAssertions.assertFalse(entitlement.isPro(), "Not-purchased Pro state must keep Free entitlement");
-        TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES), "Not-purchased Pro state must keep convenience features locked");
+            TestAssertions.assertTrue(restored.entitlement().isPro(),
+                    "purchased persistence code must restore Pro entitlement");
+        }
+
+        @Test
+        void notPurchasedCodeRestoresFreeEntitlement() {
+            ProPurchaseState restored = roundTrip(ProPurchaseState.notPurchased());
+
+            TestAssertions.assertFalse(restored.entitlement().isPro(),
+                    "not-purchased persistence code must restore Free entitlement");
+        }
+
+        @Test
+        void pendingCodeRestoresFreeEntitlement() {
+            ProPurchaseState restored = roundTrip(ProPurchaseState.pending());
+
+            TestAssertions.assertFalse(restored.entitlement().isPro(),
+                    "pending persistence code must restore Free entitlement");
+        }
+
+        @Test
+        void unknownCodeRestoresFreeEntitlement() {
+            ProPurchaseState restored = roundTrip(ProPurchaseState.unknown());
+
+            TestAssertions.assertFalse(restored.entitlement().isPro(),
+                    "unknown persistence code must restore Free entitlement");
+        }
+
+        @Test
+        void billingUnavailableCodeRestoresFreeEntitlement() {
+            ProPurchaseState restored = roundTrip(ProPurchaseState.billingUnavailable());
+
+            TestAssertions.assertFalse(restored.entitlement().isPro(),
+                    "billing-unavailable persistence code must restore Free entitlement");
+        }
     }
 
-    @Test
-    void pendingStateKeepsFreeEntitlement() {
-        FeatureEntitlement entitlement = ProPurchaseState.pending().entitlement();
+    @Nested
+    final class InvalidPersistence {
+        @Test
+        void unrecognizedCodeBecomesUnknownAndFailsSafeAsFree() {
+            ProPurchaseState state = ProPurchaseState.fromPersistenceCode("purchase-token-like-value");
 
-        TestAssertions.assertFalse(entitlement.isPro(), "Pending Pro purchase must keep Free entitlement until purchase is complete");
-        TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES), "Pending Pro purchase must keep convenience features locked");
+            TestAssertions.assertEquals(ProPurchaseState.unknown().persistenceCode(), state.persistenceCode(),
+                    "unrecognized persistence code must become unknown");
+            TestAssertions.assertFalse(state.entitlement().isPro(),
+                    "unrecognized persistence code must fail safe as Free");
+        }
+
+        @Test
+        void emptyCodeBecomesUnknownAndFailsSafeAsFree() {
+            ProPurchaseState state = ProPurchaseState.fromPersistenceCode("");
+
+            TestAssertions.assertEquals(ProPurchaseState.unknown().persistenceCode(), state.persistenceCode(),
+                    "empty persistence code must become unknown");
+            TestAssertions.assertFalse(state.entitlement().isPro(),
+                    "empty persistence code must fail safe as Free");
+        }
     }
 
-    @Test
-    void unknownStateKeepsFreeEntitlement() {
-        FeatureEntitlement entitlement = ProPurchaseState.unknown().entitlement();
-
-        TestAssertions.assertFalse(entitlement.isPro(), "Unknown Pro purchase state must fail safe as Free");
-        TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES), "Unknown Pro purchase state must keep convenience features locked");
+    private static ProPurchaseState roundTrip(ProPurchaseState state) {
+        return ProPurchaseState.fromPersistenceCode(state.persistenceCode());
     }
 
-    @Test
-    void billingUnavailableStateKeepsFreeEntitlement() {
-        FeatureEntitlement entitlement = ProPurchaseState.billingUnavailable().entitlement();
-
-        TestAssertions.assertFalse(entitlement.isPro(), "Billing-unavailable Pro state must fail safe as Free");
-        TestAssertions.assertFalse(entitlement.allows(ViewerFeature.EXTRA_THEMES), "Billing-unavailable Pro state must keep convenience features locked");
-    }
-
-    @Test
-    void purchasedStateCanBeRestoredFromPersistenceCode() {
-        ProPurchaseState state = ProPurchaseState.fromPersistenceCode(ProPurchaseState.purchased().persistenceCode());
-
-        TestAssertions.assertTrue(state.entitlement().isPro(), "Purchased persistence code must restore purchased Pro state");
-    }
-
-    @Test
-    void notPurchasedStateCanBeRestoredFromPersistenceCode() {
-        ProPurchaseState state = ProPurchaseState.fromPersistenceCode(ProPurchaseState.notPurchased().persistenceCode());
-
-        TestAssertions.assertFalse(state.entitlement().isPro(), "Not-purchased persistence code must restore Free entitlement");
-    }
-
-    @Test
-    void pendingStateCanBeRestoredFromPersistenceCode() {
-        ProPurchaseState state = ProPurchaseState.fromPersistenceCode(ProPurchaseState.pending().persistenceCode());
-
-        TestAssertions.assertFalse(state.entitlement().isPro(), "Pending persistence code must restore Free entitlement");
-    }
-
-    @Test
-    void unknownStateCanBeRestoredFromPersistenceCode() {
-        ProPurchaseState state = ProPurchaseState.fromPersistenceCode(ProPurchaseState.unknown().persistenceCode());
-
-        TestAssertions.assertFalse(state.entitlement().isPro(), "Unknown persistence code must restore Free entitlement");
-    }
-
-    @Test
-    void billingUnavailableStateCanBeRestoredFromPersistenceCode() {
-        ProPurchaseState state = ProPurchaseState.fromPersistenceCode(ProPurchaseState.billingUnavailable().persistenceCode());
-
-        TestAssertions.assertFalse(state.entitlement().isPro(), "Billing-unavailable persistence code must restore Free entitlement");
-    }
-
-    @Test
-    void unknownPersistenceCodeFailsSafeAsUnknownState() {
-        ProPurchaseState state = ProPurchaseState.fromPersistenceCode("purchase-token-like-value");
-
-        TestAssertions.assertEquals(ProPurchaseState.unknown().persistenceCode(), state.persistenceCode(), "Unexpected persistence code must become unknown");
-        TestAssertions.assertFalse(state.entitlement().isPro(), "Unexpected persistence code must fail safe as Free");
-    }
-
-    @Test
-    void emptyPersistenceCodeFailsSafeAsUnknownState() {
-        ProPurchaseState state = ProPurchaseState.fromPersistenceCode("");
-
-        TestAssertions.assertEquals(ProPurchaseState.unknown().persistenceCode(), state.persistenceCode(), "Empty persistence code must become unknown");
-        TestAssertions.assertFalse(state.entitlement().isPro(), "Empty persistence code must fail safe as Free");
-    }
 }

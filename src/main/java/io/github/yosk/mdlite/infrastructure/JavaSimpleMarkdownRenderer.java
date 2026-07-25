@@ -7,9 +7,6 @@ import io.github.yosk.mdlite.domain.MermaidRendering;
 import io.github.yosk.mdlite.domain.RelativeImageRendering;
 import io.github.yosk.mdlite.domain.RelativeLinkRendering;
 import io.github.yosk.mdlite.domain.SafeHtml;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Locale;
 import java.util.Map;
 
 public final class JavaSimpleMarkdownRenderer {
@@ -78,7 +75,7 @@ public final class JavaSimpleMarkdownRenderer {
         StringBuilder html = new StringBuilder();
         String[] lines = source.split("\\r?\\n", -1);
         boolean inCodeBlock = false;
-        String codeBlockLanguage = "";
+        CodeFenceInfo codeFence = CodeFenceInfo.plain();
         StringBuilder codeBlock = new StringBuilder();
         StringBuilder paragraph = new StringBuilder();
         int openList = LIST_NONE;
@@ -88,29 +85,29 @@ public final class JavaSimpleMarkdownRenderer {
 
         for (int lineIndex = 0; lineIndex < lines.length; lineIndex++) {
             String line = lines[lineIndex];
-            if (isFenceLine(line)) {
+            if (MarkdownCodeBlockRenderer.isFenceLine(line)) {
                 if (inCodeBlock) {
-                    if (safeMermaidRendering.isEnabled() && "mermaid".equals(codeBlockLanguage)) {
-                        html.append(renderMermaidBlock(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
+                    if (safeMermaidRendering.isEnabled() && codeFence.isMermaid()) {
+                        html.append(MarkdownCodeBlockRenderer.renderMermaid(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
                         mermaidIndex++;
-                    } else if (isPreviewableCodeBlockLanguage(codeBlockLanguage)) {
-                        html.append(renderPreviewableCodeBlock(previewCodeBlockIndex, codeBlock.toString(),
-                                codeBlockLanguage, safeCodeHighlighting));
+                    } else if (codeFence.isPreviewable()) {
+                        html.append(MarkdownCodeBlockRenderer.renderPreviewable(previewCodeBlockIndex, codeBlock.toString(),
+                                codeFence, safeCodeHighlighting));
                         previewCodeBlockIndex++;
                     } else {
-                        html.append(renderCodeBlockLines(codeBlock.toString(), codeBlockLanguage, safeCodeHighlighting));
+                        html.append(MarkdownCodeBlockRenderer.renderLines(codeBlock.toString(), codeFence, safeCodeHighlighting));
                     }
                     inCodeBlock = false;
-                    codeBlockLanguage = "";
+                    codeFence = CodeFenceInfo.plain();
                     codeBlock.setLength(0);
                 } else {
                     flushParagraph(html, paragraph, safeRelativeLinkRendering, safeRelativeImageRendering);
                     openList = closeList(html, openList);
                     inCodeBlock = true;
-                    codeBlockLanguage = codeFenceLanguage(line);
-                    if (!(safeMermaidRendering.isEnabled() && "mermaid".equals(codeBlockLanguage))
-                            && !isPreviewableCodeBlockLanguage(codeBlockLanguage)) {
-                        html.append(openCodeBlockHtml(line));
+                    codeFence = CodeFenceInfo.fromFenceLine(line);
+                    if (!(safeMermaidRendering.isEnabled() && codeFence.isMermaid())
+                            && !codeFence.isPreviewable()) {
+                        html.append(MarkdownCodeBlockRenderer.openingHtml(codeFence));
                     }
                 }
                 continue;
@@ -127,17 +124,20 @@ public final class JavaSimpleMarkdownRenderer {
                 continue;
             }
 
-            if (lineIndex + 1 < lines.length && isTableHeaderLine(line) && isTableSeparatorLine(lines[lineIndex + 1])) {
+            if (lineIndex + 1 < lines.length
+                    && MarkdownTableRenderer.isRow(line)
+                    && MarkdownTableRenderer.isSeparator(lines[lineIndex + 1])) {
                 flushParagraph(html, paragraph, safeRelativeLinkRendering, safeRelativeImageRendering);
                 openList = closeList(html, openList);
-                String[] headerCells = splitTableCells(line);
                 html.append("<div class=\"table-scroll\"><table><thead><tr>");
-                appendTableCells(html, headerCells, "th", safeRelativeLinkRendering, safeRelativeImageRendering);
+                html.append(MarkdownTableRenderer.renderCells(
+                        line, "th", safeRelativeLinkRendering, safeRelativeImageRendering));
                 html.append("</tr></thead><tbody>");
                 lineIndex += 2;
-                while (lineIndex < lines.length && isTableHeaderLine(lines[lineIndex])) {
+                while (lineIndex < lines.length && MarkdownTableRenderer.isRow(lines[lineIndex])) {
                     html.append("<tr>");
-                    appendTableCells(html, splitTableCells(lines[lineIndex]), "td", safeRelativeLinkRendering, safeRelativeImageRendering);
+                    html.append(MarkdownTableRenderer.renderCells(
+                            lines[lineIndex], "td", safeRelativeLinkRendering, safeRelativeImageRendering));
                     html.append("</tr>");
                     lineIndex++;
                 }
@@ -153,7 +153,7 @@ public final class JavaSimpleMarkdownRenderer {
                 String headingText = line.substring(headingLevel + 1).trim();
                 html.append("<h").append(headingLevel)
                         .append(" id=\"").append(headingAnchors.nextAnchorId(headingText)).append("\">")
-                        .append(renderInline(headingText, safeRelativeLinkRendering, safeRelativeImageRendering))
+                        .append(MarkdownInlineRenderer.render(headingText, safeRelativeLinkRendering, safeRelativeImageRendering))
                         .append("</h").append(headingLevel).append(">");
                 continue;
             }
@@ -168,7 +168,7 @@ public final class JavaSimpleMarkdownRenderer {
             if (line.startsWith("> ")) {
                 flushParagraph(html, paragraph, safeRelativeLinkRendering, safeRelativeImageRendering);
                 openList = closeList(html, openList);
-                html.append("<blockquote>").append(renderInline(line.substring(2).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</blockquote>");
+                html.append("<blockquote>").append(MarkdownInlineRenderer.render(line.substring(2).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</blockquote>");
                 continue;
             }
 
@@ -182,7 +182,7 @@ public final class JavaSimpleMarkdownRenderer {
                         openList = LIST_CHECKLIST;
                     }
                     html.append("<li>").append(checkbox).append(' ')
-                            .append(renderInline(line.substring(6).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
+                            .append(MarkdownInlineRenderer.render(line.substring(6).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
                     continue;
                 }
                 if (openList != LIST_UNORDERED) {
@@ -190,7 +190,7 @@ public final class JavaSimpleMarkdownRenderer {
                     html.append("<ul>");
                     openList = LIST_UNORDERED;
                 }
-                html.append("<li>").append(renderInline(line.substring(2).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
+                html.append("<li>").append(MarkdownInlineRenderer.render(line.substring(2).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
                 continue;
             }
 
@@ -202,7 +202,7 @@ public final class JavaSimpleMarkdownRenderer {
                     html.append("<ol>");
                     openList = LIST_ORDERED;
                 }
-                html.append("<li>").append(renderInline(line.substring(orderedMarkerLength).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
+                html.append("<li>").append(MarkdownInlineRenderer.render(line.substring(orderedMarkerLength).trim(), safeRelativeLinkRendering, safeRelativeImageRendering)).append("</li>");
                 continue;
             }
 
@@ -214,240 +214,19 @@ public final class JavaSimpleMarkdownRenderer {
         }
 
         if (inCodeBlock) {
-            if (safeMermaidRendering.isEnabled() && "mermaid".equals(codeBlockLanguage)) {
-                html.append(renderMermaidBlock(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
-            } else if (isPreviewableCodeBlockLanguage(codeBlockLanguage)) {
-                html.append(renderPreviewableCodeBlock(previewCodeBlockIndex, codeBlock.toString(),
-                        codeBlockLanguage, safeCodeHighlighting));
+            if (safeMermaidRendering.isEnabled() && codeFence.isMermaid()) {
+                html.append(MarkdownCodeBlockRenderer.renderMermaid(mermaidIndex, codeBlock.toString(), renderedMermaidDiagrams));
+            } else if (codeFence.isPreviewable()) {
+                html.append(MarkdownCodeBlockRenderer.renderPreviewable(previewCodeBlockIndex, codeBlock.toString(),
+                        codeFence, safeCodeHighlighting));
             } else {
-                html.append(renderCodeBlockLines(codeBlock.toString(), codeBlockLanguage, safeCodeHighlighting));
+                html.append(MarkdownCodeBlockRenderer.renderLines(codeBlock.toString(), codeFence, safeCodeHighlighting));
             }
         }
         closeList(html, openList);
         flushParagraph(html, paragraph, safeRelativeLinkRendering, safeRelativeImageRendering);
 
         return SafeHtml.fromTrustedRendererOutput(html.toString());
-    }
-
-    private static String renderPreviewableCodeBlock(
-            int index,
-            String codeBlock,
-            String language,
-            CodeHighlighting codeHighlighting) {
-        String rawId = "code-preview-" + index + "-raw";
-        String previewId = "code-preview-" + index + "-preview";
-        return "<div class=\"code-preview-toggle\">"
-                + "<input class=\"code-preview-radio code-preview-raw-radio\" type=\"radio\" name=\"code-preview-"
-                + index + "\" id=\"" + rawId + "\" checked>"
-                + "<label class=\"code-preview-label\" for=\"" + rawId + "\">Raw</label>"
-                + "<input class=\"code-preview-radio code-preview-preview-radio\" type=\"radio\" name=\"code-preview-"
-                + index + "\" id=\"" + previewId + "\">"
-                + "<label class=\"code-preview-label\" for=\"" + previewId + "\">Preview</label>"
-                + "<div class=\"code-preview-pane code-preview-raw\">"
-                + openCodeBlockHtml("```" + language)
-                + renderCodeBlockLines(codeBlock, language, codeHighlighting)
-                + "</div><div class=\"code-preview-pane code-preview-rendered\">"
-                + renderCodeBlockPreview(codeBlock, language)
-                + "</div></div>";
-    }
-
-    private static String renderCodeBlockPreview(String codeBlock, String language) {
-        String source = trimTrailingCodeBlockNewline(codeBlock);
-        if (isMarkdownPreviewLanguage(language)) {
-            return new JavaSimpleMarkdownRenderer()
-                    .render(source, CodeHighlighting.plain(), MermaidRendering.plainCode(),
-                            RelativeLinkRendering.disabled(), RelativeImageRendering.disabled(), null)
-                    .value();
-        }
-        return renderSafeHtmlPreview(source);
-    }
-
-    private static String renderSafeHtmlPreview(String source) {
-        StringBuilder rendered = new StringBuilder();
-        int index = 0;
-        while (index < source.length()) {
-            char current = source.charAt(index);
-            if (current != '<') {
-                rendered.append(escapeHtmlChar(current));
-                index++;
-                continue;
-            }
-            int tagEnd = source.indexOf('>', index + 1);
-            if (tagEnd < 0) {
-                rendered.append("&lt;");
-                index++;
-                continue;
-            }
-            rendered.append(renderSafeHtmlPreviewTag(source.substring(index + 1, tagEnd)));
-            index = tagEnd + 1;
-        }
-        return rendered.toString();
-    }
-
-    private static String renderSafeHtmlPreviewTag(String tag) {
-        String trimmed = tag.trim();
-        boolean closing = trimmed.startsWith("/");
-        String name = safeHtmlPreviewTagName(trimmed, closing);
-        if (!isAllowedHtmlPreviewTag(name)) {
-            return escapeHtml("<" + tag + ">");
-        }
-        return closing ? "</" + name + ">" : "<" + name + ">";
-    }
-
-    private static String safeHtmlPreviewTagName(String tag, boolean closing) {
-        int index = closing ? 1 : 0;
-        while (index < tag.length() && Character.isWhitespace(tag.charAt(index))) { index++; }
-        int start = index;
-        while (index < tag.length() && Character.isLetterOrDigit(tag.charAt(index))) { index++; }
-        return tag.substring(start, index).toLowerCase(Locale.US);
-    }
-
-    private static boolean isAllowedHtmlPreviewTag(String name) {
-        return "p".equals(name) || "strong".equals(name) || "em".equals(name)
-                || "b".equals(name) || "i".equals(name) || "ul".equals(name)
-                || "ol".equals(name) || "li".equals(name) || "blockquote".equals(name)
-                || "code".equals(name) || "pre".equals(name) || "br".equals(name)
-                || "hr".equals(name) || "h1".equals(name) || "h2".equals(name)
-                || "h3".equals(name) || "h4".equals(name) || "h5".equals(name)
-                || "h6".equals(name);
-    }
-
-    private static String trimTrailingCodeBlockNewline(String codeBlock) {
-        return codeBlock.endsWith("\n")
-                ? codeBlock.substring(0, codeBlock.length() - 1) : codeBlock;
-    }
-
-    private static boolean isPreviewableCodeBlockLanguage(String language) {
-        return "html".equals(language) || isMarkdownPreviewLanguage(language);
-    }
-
-    private static boolean isMarkdownPreviewLanguage(String language) {
-        return "markdown".equals(language) || "md".equals(language);
-    }
-
-    private static String renderCodeBlockLines(String codeBlock, String language, CodeHighlighting codeHighlighting) {
-        String[] codeLines = codeBlock.split("\\n", -1);
-        StringBuilder rendered = new StringBuilder();
-        for (int i = 0; i < codeLines.length; i++) {
-            if (i == codeLines.length - 1 && codeLines[i].length() == 0) {
-                continue;
-            }
-            rendered.append(renderCodeBlockLine(codeLines[i], language, codeHighlighting)).append('\n');
-        }
-        rendered.append("</code></pre>");
-        return rendered.toString();
-    }
-
-    private static String renderMermaidBlock(int index, String source, Map<Integer, SafeHtml> renderedMermaidDiagrams) {
-        SafeHtml rendered = renderedMermaidDiagrams == null ? null : renderedMermaidDiagrams.get(Integer.valueOf(index));
-        if (rendered != null) {
-            return "<div class=\"mermaid-diagram\"><div class=\"mermaid-diagram-scale\">" + rendered.value() + "</div></div>";
-        }
-        return "<div class=\"mermaid-placeholder\" data-mermaid-index=\"" + index + "\">"
-                + "<strong>Mermaid diagram</strong>"
-                + "<span>Rendering in background...</span>"
-                + "<pre><code class=\"language-mermaid\">" + escapeHtml(source.trim()) + "</code></pre>"
-                + "</div>";
-    }
-
-    private static String renderCodeBlockLine(String line, String language, CodeHighlighting codeHighlighting) {
-        if (!codeHighlighting.isEnabled()) {
-            return escapeHtml(line);
-        }
-        if ("java".equals(language)) {
-            return JavaCodeHighlighter.highlightLine(line);
-        }
-        if ("kt".equals(language) || "kotlin".equals(language)) {
-            return KotlinCodeHighlighter.highlightLine(line);
-        }
-        if ("js".equals(language) || "jsx".equals(language) || "javascript".equals(language)
-                || "ts".equals(language) || "tsx".equals(language) || "typescript".equals(language)) {
-            return JavaScriptCodeHighlighter.highlightLine(line);
-        }
-        if ("py".equals(language) || "python".equals(language)) {
-            return PythonCodeHighlighter.highlightLine(line);
-        }
-        if ("html".equals(language) || "xml".equals(language)) {
-            return MarkupCodeHighlighter.highlightLine(line);
-        }
-        if ("css".equals(language)) {
-            return CssCodeHighlighter.highlightLine(line);
-        }
-        if ("yaml".equals(language) || "yml".equals(language)) {
-            return YamlCodeHighlighter.highlightLine(line);
-        }
-        if ("json".equals(language)) {
-            return JsonCodeHighlighter.highlightLine(line);
-        }
-        if ("sh".equals(language) || "bash".equals(language) || "shell".equals(language)) {
-            return ShellCodeHighlighter.highlightLine(line);
-        }
-        return escapeHtml(line);
-    }
-
-    private static boolean isFenceLine(String line) {
-        // Match the heading extractor (MarkdownHeadings.isFenceLine): up to 3 spaces of
-        // indentation then a run of 3+ backticks. Keeping the two in lockstep prevents a
-        // hash line inside an indented/trailing-space fence from rendering as a heading on
-        // the page while being absent from the TOC/jump list (or vice versa).
-        int indent = 0;
-        while (indent < line.length() && line.charAt(indent) == ' ') {
-            indent++;
-        }
-        if (indent > 3) {
-            return false;
-        }
-        int ticks = 0;
-        while (indent + ticks < line.length() && line.charAt(indent + ticks) == '`') {
-            ticks++;
-        }
-        return ticks >= 3;
-    }
-
-    private static String openCodeBlockHtml(String fenceLine) {
-        String language = codeFenceLanguage(fenceLine);
-        if (language.length() == 0) {
-            return "<pre><code>";
-        }
-        return "<pre><code class=\"language-" + language + "\">";
-    }
-
-    private static String codeFenceLanguage(String fenceLine) {
-        String trimmed = fenceLine.trim();
-        if (trimmed.length() <= 3) {
-            return "";
-        }
-        String language = firstInfoStringToken(trimmed.substring(3).trim());
-        if (!isSafeLanguageName(language)) {
-            return "";
-        }
-        return language.toLowerCase(Locale.US);
-    }
-
-    private static String firstInfoStringToken(String infoString) {
-        int end = 0;
-        while (end < infoString.length() && !Character.isWhitespace(infoString.charAt(end))) {
-            end++;
-        }
-        return infoString.substring(0, end);
-    }
-
-    private static boolean isSafeLanguageName(String language) {
-        if (language.length() == 0) {
-            return false;
-        }
-        for (int i = 0; i < language.length(); i++) {
-            char c = language.charAt(i);
-            boolean safe = (c >= 'a' && c <= 'z')
-                    || (c >= 'A' && c <= 'Z')
-                    || (c >= '0' && c <= '9')
-                    || c == '_'
-                    || c == '-';
-            if (!safe) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static int headingLevel(String line) {
@@ -476,71 +255,6 @@ public final class JavaSimpleMarkdownRenderer {
             return index + 2;
         }
         return 0;
-    }
-
-    private static boolean isTableHeaderLine(String line) {
-        String trimmed = line.trim();
-        return trimmed.indexOf('|') >= 0 && splitTableCells(trimmed).length > 1;
-    }
-
-    private static boolean isTableSeparatorLine(String line) {
-        String[] cells = splitTableCells(line);
-        if (cells.length < 2) {
-            return false;
-        }
-        for (int i = 0; i < cells.length; i++) {
-            if (!isTableSeparatorCell(cells[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isTableSeparatorCell(String cell) {
-        String trimmed = cell.trim();
-        if (trimmed.startsWith(":")) {
-            trimmed = trimmed.substring(1);
-        }
-        if (trimmed.endsWith(":")) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-        }
-        if (trimmed.length() < 3) {
-            return false;
-        }
-        for (int i = 0; i < trimmed.length(); i++) {
-            if (trimmed.charAt(i) != '-') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static String[] splitTableCells(String line) {
-        String trimmed = line.trim();
-        if (trimmed.startsWith("|")) {
-            trimmed = trimmed.substring(1);
-        }
-        if (trimmed.endsWith("|")) {
-            trimmed = trimmed.substring(0, trimmed.length() - 1);
-        }
-        String[] rawCells = trimmed.split("\\|", -1);
-        for (int i = 0; i < rawCells.length; i++) {
-            rawCells[i] = rawCells[i].trim();
-        }
-        return rawCells;
-    }
-
-    private static void appendTableCells(
-            StringBuilder html,
-            String[] cells,
-            String tag,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        for (int i = 0; i < cells.length; i++) {
-            html.append('<').append(tag).append('>')
-                    .append(renderInline(cells[i], relativeLinkRendering, relativeImageRendering))
-                    .append("</").append(tag).append('>');
-        }
     }
 
     private static int closeList(StringBuilder html, int openList) {
@@ -579,232 +293,8 @@ public final class JavaSimpleMarkdownRenderer {
         if (paragraph.length() == 0) {
             return;
         }
-        html.append("<p>").append(renderInline(paragraph.toString(), relativeLinkRendering, relativeImageRendering)).append("</p>");
+        html.append("<p>").append(MarkdownInlineRenderer.render(paragraph.toString(), relativeLinkRendering, relativeImageRendering)).append("</p>");
         paragraph.setLength(0);
-    }
-
-    private static String renderInline(
-            String text,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        StringBuilder out = new StringBuilder();
-        StringBuilder code = null;
-
-        for (int i = 0; i < text.length(); i++) {
-            char current = text.charAt(i);
-            if (current == '`') {
-                if (code == null) {
-                    code = new StringBuilder();
-                } else {
-                    out.append("<code>").append(escapeHtml(code.toString())).append("</code>");
-                    code = null;
-                }
-                continue;
-            }
-
-            if (code == null) {
-                int strongEnd = appendMarkdownStrongIfPresent(
-                        out, text, i, relativeLinkRendering, relativeImageRendering);
-                if (strongEnd >= i) {
-                    i = strongEnd;
-                    continue;
-                }
-                int imageEnd = appendMarkdownImageIfPresent(out, text, i, relativeLinkRendering, relativeImageRendering);
-                if (imageEnd >= i) {
-                    i = imageEnd;
-                    continue;
-                }
-                int linkEnd = appendMarkdownLinkIfPresent(out, text, i, relativeLinkRendering, relativeImageRendering);
-                if (linkEnd >= i) {
-                    i = linkEnd;
-                    continue;
-                }
-                out.append(escapeHtmlChar(current));
-            } else {
-                code.append(current);
-            }
-        }
-
-        if (code != null) {
-            out.append('`').append(escapeHtml(code.toString()));
-        }
-
-        return out.toString();
-    }
-
-    private static int appendMarkdownStrongIfPresent(
-            StringBuilder out,
-            String text,
-            int index,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        if (text.charAt(index) != '*'
-                || index + 1 >= text.length()
-                || text.charAt(index + 1) != '*'
-                || isEscaped(text, index)) {
-            return -1;
-        }
-        int end = closingStrongMarker(text, index + 2);
-        if (end < 0 || end == index + 2) {
-            return -1;
-        }
-        out.append("<strong>")
-                .append(renderInline(text.substring(index + 2, end),
-                        relativeLinkRendering, relativeImageRendering))
-                .append("</strong>");
-        return end + 1;
-    }
-
-    private static int closingStrongMarker(String text, int start) {
-        for (int i = start; i + 1 < text.length(); i++) {
-            if (text.charAt(i) == '*' && text.charAt(i + 1) == '*'
-                    && !isEscaped(text, i)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private static boolean isEscaped(String text, int index) {
-        int slashCount = 0;
-        for (int i = index - 1; i >= 0 && text.charAt(i) == '\\'; i--) {
-            slashCount++;
-        }
-        return slashCount % 2 == 1;
-    }
-
-    private static int appendMarkdownImageIfPresent(
-            StringBuilder out,
-            String text,
-            int index,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        if (text.charAt(index) != '!' || index + 1 >= text.length() || text.charAt(index + 1) != '[') {
-            return -1;
-        }
-        int labelEnd = text.indexOf(']', index + 2);
-        if (labelEnd < 0 || labelEnd + 1 >= text.length() || text.charAt(labelEnd + 1) != '(') {
-            return -1;
-        }
-        int urlEnd = text.indexOf(')', labelEnd + 2);
-        if (urlEnd < 0) {
-            return -1;
-        }
-
-        String alt = text.substring(index + 2, labelEnd);
-        String url = text.substring(labelEnd + 2, urlEnd).trim();
-        if (isSafeImageUrl(url, relativeImageRendering)) {
-            out.append("<img src=\"").append(escapeHtml(localRelativeImageRequestUrl(url))).append("\" alt=\"")
-                    .append(escapeHtml(renderInline(alt, relativeLinkRendering, RelativeImageRendering.disabled())))
-                    .append("\">");
-        } else {
-            out.append(renderInline(alt, relativeLinkRendering, RelativeImageRendering.disabled()));
-        }
-        return urlEnd;
-    }
-
-    private static int appendMarkdownLinkIfPresent(
-            StringBuilder out,
-            String text,
-            int index,
-            RelativeLinkRendering relativeLinkRendering,
-            RelativeImageRendering relativeImageRendering) {
-        if (text.charAt(index) != '[') {
-            return -1;
-        }
-        int labelEnd = text.indexOf(']', index + 1);
-        if (labelEnd < 0 || labelEnd + 1 >= text.length() || text.charAt(labelEnd + 1) != '(') {
-            return -1;
-        }
-        int urlEnd = text.indexOf(')', labelEnd + 2);
-        if (urlEnd < 0) {
-            return -1;
-        }
-
-        String label = text.substring(index + 1, labelEnd);
-        String url = text.substring(labelEnd + 2, urlEnd).trim();
-        if (isSafeLinkUrl(url, relativeLinkRendering)) {
-            out.append("<a href=\"").append(escapeHtml(linkHref(url, relativeLinkRendering))).append("\">")
-                    .append(renderInline(label, relativeLinkRendering, relativeImageRendering))
-                    .append("</a>");
-        } else {
-            out.append(renderInline(label, relativeLinkRendering, relativeImageRendering));
-        }
-        return urlEnd;
-    }
-
-    private static boolean isSafeImageUrl(String url, RelativeImageRendering relativeImageRendering) {
-        String lower = url.toLowerCase();
-        return relativeImageRendering != null
-                && relativeImageRendering.isEnabled()
-                && isSafeRelativeLinkUrl(url, lower);
-    }
-
-    private static String localRelativeImageRequestUrl(String url) {
-        try {
-            return "https://localmd.local/__relative_image__?path=" + URLEncoder.encode(url, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return "https://localmd.local/__relative_image__?path=";
-        }
-    }
-
-    private static boolean isSafeLinkUrl(String url, RelativeLinkRendering relativeLinkRendering) {
-        String lower = url.toLowerCase();
-        if (lower.startsWith("https://") || lower.startsWith("http://")) {
-            return true;
-        }
-        return relativeLinkRendering != null
-                && relativeLinkRendering.isEnabled()
-                && isSafeRelativeLinkUrl(url, lower);
-    }
-
-    private static String linkHref(String url, RelativeLinkRendering relativeLinkRendering) {
-        String lower = url.toLowerCase();
-        if (lower.startsWith("https://") || lower.startsWith("http://")) {
-            return url;
-        }
-        return localRelativeMarkdownRequestUrl(url);
-    }
-
-    private static String localRelativeMarkdownRequestUrl(String url) {
-        try {
-            return "https://localmd.local/__relative_markdown__?path=" + URLEncoder.encode(url, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return "https://localmd.local/__relative_markdown__?path=";
-        }
-    }
-
-    private static boolean isSafeRelativeLinkUrl(String url, String lower) {
-        return url.length() > 0
-                && !url.startsWith("/")
-                && !url.startsWith("\\")
-                && !url.startsWith("//")
-                && lower.indexOf(':') < 0;
-    }
-
-    private static String escapeHtml(String text) {
-        StringBuilder escaped = new StringBuilder();
-        for (int i = 0; i < text.length(); i++) {
-            escaped.append(escapeHtmlChar(text.charAt(i)));
-        }
-        return escaped.toString();
-    }
-
-    private static String escapeHtmlChar(char value) {
-        switch (value) {
-            case '&':
-                return "&amp;";
-            case '<':
-                return "&lt;";
-            case '>':
-                return "&gt;";
-            case '"':
-                return "&quot;";
-            case '\'':
-                return "&#39;";
-            default:
-                return String.valueOf(value);
-        }
     }
 
 }

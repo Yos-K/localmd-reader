@@ -46,15 +46,22 @@ flowchart TD
   操作 `fromPoints(xs, ys)`/`trigger()`。 規則→GES1。
 - **CustomGestureShape**（`viewer/CustomGestureShape.java`）: 比較可能なカスタム図形。構成要素 `xs[]`・`ys[]`（正規化済み）。
   - L1: `fromPoints` は 2点以上・小さすぎない（9dp以上）・正規化を要求（違反で例外）。`fromStoredValue` は正規化済みの点を要求。
+    描画入力と保存値の全座標は有限値でなければならず、NaNと正負の無限大は構築前に拒否する。
     なぜ: 図形どうしを距離で比較できるよう、正規化された点列だけを構築する（AlwaysValid）。
   - 正規化の契約: 描いた経路を**弧長等間隔の32点**に再標本化し、**中心原点 `[-0.5, 0.5]`** へスケールする。
     `storedValue()` はこの座標を `%.4f` で永続化する（保存済み図形の互換性に関わる契約。
     テスト `resamplingDistributesPointsEvenlyAlongThePath` が固定）。
 - **CustomGestureShapeMatcher**（`viewer/CustomGestureShapeMatcher.java`）: 登録図形との一致判定。構成要素 `registeredShape: CustomGestureShape`（非null必須）。
   操作 `forShape(shape)`/`matches(inputShape)`。 規則→GES5。
+- **CustomGesturePreviewPath**（`viewer/CustomGesturePreviewPath.java`）: カスタムジェスチャの説明アニメーションで使う正規化済み軌跡。
+  操作 `points(width, height)`/`pointAt(width, height, progress)`。 規則→GES6。
+- **CustomGestureMenu**（`viewer/CustomGestureMenu.java`）: カスタムジェスチャの登録状態に応じた有効操作の集合。
+  未登録は登録のみ、登録済みは再登録・動作変更・削除を持つ。規則→GES7。
+- **CustomGestureDrawingLayout**（`viewer/CustomGestureDrawingLayout.java`）: 登録画面の案内位置。
+  システム上端インセットより下に案内文を配置する。規則→GES8。
 - **CustomGestureShortcut**（`viewer/CustomGestureShortcut.java`）: カスタム図形と動作の割り当て。構成要素 `shape: CustomGestureShape`・`action: GestureShortcutAction`。
   - L1: `shape`・`action` ともに非null必須（違反で例外）。 なぜ: 図形か動作の欠けたショートカットを構築不能にする（AlwaysValid）。
-  - 操作 `of(shape, action)`/`shape()`/`action()`/`binding()`。 規則→GES4。
+  - 操作 `of(shape, action)`/`restore(shapeValue, actionValue)`/`shape()`/`action()`/`binding()`。 規則→GES4・GES10。
 - **GestureShortcutBindings**（`viewer/GestureShortcutBindings.java`）: トリガー→動作の割り当て集合（不変）。構成要素 `List<GestureShortcutBinding>`。
   操作 `empty()`/`put(binding)`/`actionFor(trigger)`/`items()`。 規則→GES2・GES3。
 
@@ -105,6 +112,31 @@ flowchart TD
 - 分類: UX ／ 支える判断: 手描きの揺れを許容する近似一致の判断。
 - なぜ: 手描きの揺れを許容する近似一致にする（厳密一致では実用にならない）。 破ると: わずかなズレで一致しない／別図形が誤一致する。水平線をジグザグと誤一致させる高すぎる閾値は「別図形が誤一致する」に該当するバグとなる。
 
+**GES6: カスタムジェスチャのプレビュー線と移動点は同じ軌跡を使う**
+- 関係する語: CustomGesturePreviewPath × GesturePreviewView ／ どこで: `points` / `pointAt`
+- 分類: UX ／ 支える判断: アニメーションが描き方を視覚だけで正確に伝える判断。
+- なぜ: 線と点が異なる補間を使うと、点が線から外れて誤った描き方を伝える。破ると: 表示線がベジェ曲線でも点だけが制御点間の折れ線上を移動する。
+
+**GES7: カスタムジェスチャの詳細は現在状態で実行可能な操作だけを提示する**
+- 関係する語: CustomGestureMenu × CustomGestureShortcut ／ どこで: `unregistered` / `registered`
+- 分類: UX ／ 支える判断: 存在しない登録を削除するような偽の操作を提示しない判断。
+- なぜ: 操作後に何も変わらない選択肢は、現在状態と操作結果を誤認させる。破ると: 未登録時にも削除が表示される。
+
+**GES8: カスタムジェスチャ登録の案内はシステム領域と重ならない**
+- 関係する語: CustomGestureDrawingLayout × WindowInsets ／ どこで: `instructionBaseline`
+- 分類: UX ／ 支える判断: 端末のステータスバー構成にかかわらず登録方法を読める判断。
+- なぜ: 全画面の描画面では固定座標が通知領域へ入り得る。破ると: 案内文が時計や通知アイコンと重なって読めない。
+
+**GES9: カスタムジェスチャの描画は登録せずに中断できる**
+- 関係する語: CustomGestureDrawingLayout × GestureShortcutDialogs ／ どこで: キャンセル領域 / 端末の戻る操作
+- 分類: UX ／ 支える判断: 登録開始後も既存設定を変えずに元の閲覧状態へ戻れる判断。
+- なぜ: 描画完了以外に画面を離れる遷移がないと、誤って開始した利用者がアプリ終了を強いられる。破ると: 登録を取り消す方法がなく、戻る操作でActivity自体が終了する。
+
+**GES10: 保存された形状と動作は完全な組の場合だけカスタムショートカットへ復元する**
+- 関係する語: 保存文字列 × CustomGestureShape × GestureShortcutAction → CustomGestureShortcut ／ どこで: `restore`
+- 分類: safety ／ 支える判断: SharedPreferencesの欠損・旧値・破損を部分的な登録状態にしない判断。
+- なぜ: 形状だけ、動作だけ、未知動作、破損座標からショートカットを作るとAlways-Validを破る。破ると: 一覧には登録済みと見えるが発火不能などの矛盾状態になる。
+
 ---
 
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
@@ -113,6 +145,11 @@ flowchart TD
 - `GestureShortcutBindings.actionFor(t)`: GES3 を実現。`t` が null・未登録なら `off()`。 なぜ: 未割当ジェスチャで誤動作させない。
 - `CustomGestureShapeMatcher.matches(in)`: GES5 を実現。登録図形と入力の平均距離が閾値以下なら一致。 なぜ: 手描きのばらつきを吸収する。
 - `CircleGesturePath.isCircleLike()` / `DirectionalGesturePath.trigger()`: GES1 を実現。経路の幾何からトリガーを判定する。
+- `CustomGesturePreviewPath.pointAt(w, h, progress)`: GES6 を実現。描画に使うベジェ曲線と終端直線上の位置を返す。なぜ: 線と点の軌跡計算を一か所に集約する。
+- `CustomGestureMenu.unregistered()` / `registered()`: GES7 を実現。登録状態ごとの有効操作だけを返す。
+- `CustomGestureDrawingLayout.instructionBaseline(inset)`: GES8 を実現。上端インセットの下へ一定の余白を加えた基準位置を返す。
+- `CustomGestureDrawingLayout.isCancelTarget(...)` と端末の戻る操作: GES9 を実現。同じ中断処理で描画面と保留中の図形を破棄する。
+- `CustomGestureShortcut.restore(shapeValue, actionValue)`: GES10 を実現。任意の保存文字列に対して例外を漏らさず、完全で妥当な組だけを返す全域関数。
 
 ---
 

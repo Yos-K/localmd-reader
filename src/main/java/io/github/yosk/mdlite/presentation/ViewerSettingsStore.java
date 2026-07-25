@@ -6,7 +6,6 @@ import android.content.res.Configuration;
 import io.github.yosk.mdlite.domain.FeatureEntitlement;
 import io.github.yosk.mdlite.domain.ViewerFeature;
 import io.github.yosk.mdlite.viewer.ControlsPlacement;
-import io.github.yosk.mdlite.viewer.CustomGestureShape;
 import io.github.yosk.mdlite.viewer.CustomGestureShortcut;
 import io.github.yosk.mdlite.viewer.GestureShortcutAction;
 import io.github.yosk.mdlite.viewer.GestureShortcutBinding;
@@ -144,15 +143,8 @@ final class ViewerSettingsStore {
             return null;
         }
         String shapeValue = prefs().getString(CUSTOM_GESTURE_SHAPE, "");
-        GestureShortcutAction action = GestureShortcutAction.fromStoredValue(prefs().getString(CUSTOM_GESTURE_ACTION, "off"));
-        if (action.isOff()) {
-            return null;
-        }
-        try {
-            return CustomGestureShortcut.of(CustomGestureShape.fromStoredValue(shapeValue), action);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+        String actionValue = prefs().getString(CUSTOM_GESTURE_ACTION, "off");
+        return CustomGestureShortcut.restore(shapeValue, actionValue).orElse(null);
     }
 
     void saveCustomGestureShortcut(CustomGestureShortcut shortcut) {

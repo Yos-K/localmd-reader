@@ -1,6 +1,8 @@
 build/
 ci-artifacts/
 smoke-artifacts/
+exploration-artifacts/
+test-lab-artifacts/
 .android-deps/
 app/build/
 .gradle/
