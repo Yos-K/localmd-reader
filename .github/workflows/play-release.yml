@@ -147,8 +147,8 @@ jobs:
           MDLITE_RELEASE_STORE_PASS: ${{ secrets.MDLITE_RELEASE_STORE_PASS }}
           MDLITE_RELEASE_KEY_PASS: ${{ secrets.MDLITE_RELEASE_KEY_PASS }}
           MDLITE_RELEASE_PRO_FEATURES: ${{ inputs.channel == 'pro-preview-artifact' }}
-          MDLITE_RELEASE_ENABLE_PLAY_BILLING: ${{ inputs.channel == 'pro-preview-artifact' }}
-          MDLITE_INCLUDE_ANDROID_DEPS: ${{ inputs.channel == 'pro-preview-artifact' }}
+          MDLITE_RELEASE_ENABLE_PLAY_BILLING: true
+          MDLITE_INCLUDE_ANDROID_DEPS: true
         run: sh scripts/build-release-aab.sh
 
       - name: Set up Gradle

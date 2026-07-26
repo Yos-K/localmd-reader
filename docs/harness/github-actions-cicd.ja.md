@@ -12,6 +12,9 @@
   Google Play にアップロードしません。
 
 Playアプリは無料のままにし、Proはアプリ内の権限解除として扱います。
+Play向けFreeリリースにはBilling clientと課金用manifest設定を含めますが、購入確認前の
+`PRO_FEATURES_ENABLED`はfalseのままです。検証済み購入が型付けされたPro entitlementを
+付与します。Pro preview artifactだけは開発確認用としてProを直接有効化します。
 
 ## CI
 

@@ -12,6 +12,10 @@ The release model is:
   uploaded to Google Play as a separate paid app.
 
 This keeps the Play app free while Pro is implemented as an in-app entitlement.
+The Play Free release includes the Billing client and billing manifest entry,
+while `PRO_FEATURES_ENABLED` remains false until a verified purchase grants the
+typed Pro entitlement. Pro preview artifacts enable Pro directly only for
+development verification.
 
 ## CI
 
