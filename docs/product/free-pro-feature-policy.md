@@ -223,9 +223,9 @@ HTML export:
 
 - The Free/Pro boundary must be represented by explicit domain objects, not by
   scattered booleans in UI code.
-- The current release entitlement must be defined in one place so that future
-  billing integration can replace it without changing the Markdown reading
-  path.
+- The Play Free build includes Google Play Billing but starts with Free
+  entitlement. A verified one-time purchase changes the typed entitlement to
+  Pro without changing the Markdown reading path.
 - Pro features must not require ads, tracking, login, or analytics.
 - Pro features must work offline unless the feature is explicitly documented as
   requiring external data.
@@ -240,9 +240,7 @@ HTML export:
 
 The following details should be decided before implementing Pro:
 
-- Whether Pro is 99 JPY or the lowest available Play Console price.
 - Whether support purchases are added at the same time as Pro.
-- How Pro entitlement is cached for offline use.
 - Whether Mermaid rendering can eventually move from Mermaid.js to a smaller
   renderer without losing needed compatibility.
 - Which gestures are customizable in the first Pro version.
