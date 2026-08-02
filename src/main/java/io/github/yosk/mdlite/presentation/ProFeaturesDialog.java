@@ -38,8 +38,7 @@ final class ProFeaturesDialog {
                 ProProduct.pro(),
                 new StartPurchaseCallback(activity, this));
         activity.proPurchaseUiState = ProPurchaseUiState.safe(result.uiState());
-        activity.showInfoDialog(activity.viewerText.proFeatures(),
-                activity.viewerText.purchaseMessage(currentProFeaturesPresentation().purchase().messageCode()));
+        showStartResultIfNeeded(result);
     }
 
     void restorePurchase() {
@@ -152,6 +151,14 @@ final class ProFeaturesDialog {
                 activity.viewerText.proFeatureCatalog());
     }
 
+    private void showStartResultIfNeeded(ProPurchaseStartResult result) {
+        if (!result.shouldShowMessageDialog()) {
+            return;
+        }
+        activity.showInfoDialog(activity.viewerText.proFeatures(),
+                activity.viewerText.purchaseMessage(currentProFeaturesPresentation().purchase().messageCode()));
+    }
+
     private static final class StartPurchaseCallback implements ProPurchaseFlowCallback {
         private final MainActivity activity;
         private final ProFeaturesDialog dialog;
@@ -184,9 +191,7 @@ final class ProFeaturesDialog {
         @Override
         public void run() {
             activity.proPurchaseUiState = ProPurchaseUiState.safe(result.uiState());
-            activity.showInfoDialog(
-                    activity.viewerText.proFeatures(),
-                    activity.viewerText.purchaseMessage(dialog.currentProFeaturesPresentation().purchase().messageCode()));
+            dialog.showStartResultIfNeeded(result);
         }
     }
 

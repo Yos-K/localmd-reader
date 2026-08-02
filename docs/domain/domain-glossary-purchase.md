@@ -44,7 +44,7 @@ UI状態から `ProPurchasePresentation` が「購入アクションを出すか
 - **UnavailableProPurchaseFlow**（`domain/UnavailableProPurchaseFlow.java`）: 課金不可環境用の no-op 実装（null-object）。
   - L1: `start(product, callback)` は `product`・`callback` 非null必須、結果は常に `unavailable`。遅延結果は通知しない。 なぜ: 課金不可は即時に確定しており、UI の二重更新を避ける（null-object）。
 - **ProPurchaseStartResult**（`domain/ProPurchaseStartResult.java`）: 購入開始の結果。構成要素 `value: {started, unavailable, pending}`。
-  操作 `uiState()`。 規則→PUR3。
+  操作 `uiState()` / `shouldShowMessageDialog()`。 規則→PUR3/PUR8。
 - **ProPurchaseUiState**（`domain/ProPurchaseUiState.java`）: 購入UIの状態。構成要素 `value: {ready, unavailable, pending, inProgress}`。
   - L1: `safe(state)` で null を安全な既定に正規化。 なぜ: null でも壊さない（fail-closed）。
   - 操作 `fromPurchaseState(state)` は `pending` を `pending`、`unknown` / `billingUnavailable` を `unavailable`、
@@ -129,6 +129,13 @@ UI状態から `ProPurchasePresentation` が「購入アクションを出すか
   遅延失敗も `ProPurchaseStartResult.unavailable` という同じドメイン語彙に戻し、`PUR3` に従って UI を `unavailable` へ復帰させる。
 - 破ると: 課金画面を開けなかったときに購入UIが処理中表示のまま残る。
 
+**PUR8: `started` はアプリ側メッセージダイアログを開かない**
+- 関係する語: ProPurchaseStartResult → 購入フィードバック表示 ／ どこで: `ProPurchaseStartResult.shouldShowMessageDialog`
+- 分類: UX ／ 支える判断: 購入中のモーダル所有者をGoogle Playシート一つに限定する判断。
+- なぜ: Play購入シートが進行状態を表示するため、背後にアプリ側ダイアログを置く必要がない。`unavailable` / `pending`は
+  利用者へ説明が必要なのでメッセージを表示する。
+- 破ると: Playシートでキャンセルしたあとも「購入画面を開いています」ダイアログが残る。
+
 ---
 
 ## L3: 動作が守るルール（L1 を保ち L2 を実現する）
@@ -144,6 +151,8 @@ UI状態から `ProPurchasePresentation` が「購入アクションを出すか
 - `ProPurchaseFlow.start(product, callback)`: 即時に分かる開始結果を戻す。Billing 実装は接続・商品取得・購入画面起動の遅延失敗を
   `callback.onPurchaseStartResolved(ProPurchaseStartResult.unavailable())` で返す（PUR7）。
   なぜ: 非同期失敗も同じ購入開始結果モデルに畳み、UI の処理中表示を確実に解除する。
+- `ProPurchaseStartResult.shouldShowMessageDialog()`: `started` のときだけ false、それ以外は true。なぜ: Play購入シートを
+  購入中の唯一のモーダルにし、説明が必要な開始結果だけアプリ側で通知する（PUR8）。
 - `FeatureEntitlements.current(source)`: source から現在権限を取り、null 系は Free に倒す。 なぜ: 不明時は安全側 Free（fail-closed）。
 
 ---
