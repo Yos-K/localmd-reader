@@ -32,4 +32,8 @@ public final class ProPurchaseStartResult {
         }
         return ProPurchaseUiState.unavailable();
     }
+
+    public boolean shouldShowMessageDialog() {
+        return value != STARTED;
+    }
 }
