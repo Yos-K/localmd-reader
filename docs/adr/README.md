@@ -42,3 +42,5 @@ Why Alternatives Were Rejected, and Reconsider When.
 | [0020](0020-main-activity-composition-boundary.md) | MainActivity as Android composition boundary | Accepted |
 | [0021](0021-advisory-physical-device-exploration.md) | Advisory Pro exploration on cloud physical devices | Accepted |
 | [0022](0022-non-modal-browsing-and-settings.md) | Non-modal browsing, selection, and settings | Accepted |
+| [0024](0024-single-modal-play-purchase-flow.md) | Google Play purchase sheet as the only purchase modal | Accepted |
+| [0025](0025-termux-single-document-intent.md) | Termux-compatible single-document Base64 intents | Accepted |

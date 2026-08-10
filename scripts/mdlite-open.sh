@@ -1,15 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/sh
 set -eu
 
+package_name="${MDLITE_PACKAGE:-io.github.yosk.mdlite}"
+activity_name="io.github.yosk.mdlite.presentation.MainActivity"
+documents_base64=""
+
 if [ "$#" -eq 0 ]; then
   echo "Usage: mdlite-open.sh FILE.md [FILE2.md ...]" >&2
   exit 2
 fi
 
-paths=""
-titles=""
-sources=""
-texts=""
 for input_path in "$@"; do
   case "$input_path" in
     /*) absolute_path="$input_path" ;;
@@ -22,29 +22,20 @@ for input_path in "$@"; do
   fi
 
   title=$(basename "$absolute_path")
-  escaped_title=$(printf '%s' "$title" | sed 's/\\/\\\\/g; s/,/\\,/g')
-  escaped_source=$(printf '%s' "$absolute_path" | sed 's/\\/\\\\/g; s/,/\\,/g')
+  encoded_title=$(printf '%s' "$title" | base64 -w 0)
+  encoded_source=$(printf '%s' "$absolute_path" | base64 -w 0)
   encoded_text=$(base64 -w 0 "$absolute_path")
-
-  if [ -z "$paths" ]; then
-    paths="$absolute_path"
-    titles="$escaped_title"
-    sources="$escaped_source"
-    texts="$encoded_text"
+  encoded_document="$encoded_title:$encoded_source:$encoded_text"
+  if [ -z "$documents_base64" ]; then
+    documents_base64="$encoded_document"
   else
-    paths="$paths
-$absolute_path"
-    titles="$titles,$escaped_title"
-    sources="$sources,$escaped_source"
-    texts="$texts,$encoded_text"
+    documents_base64="$documents_base64,$encoded_document"
   fi
 done
 
 am start \
-  -n io.github.yosk.mdlite/.presentation.MainActivity \
-  -a io.github.yosk.mdlite.action.OPEN_TEXTS \
+  -n "$package_name/$activity_name" \
+  -a io.github.yosk.mdlite.action.OPEN_TEXTS_BASE64 \
   --activity-single-top \
-  --esa io.github.yosk.mdlite.extra.MARKDOWN_TITLES "$titles" \
-  --esa io.github.yosk.mdlite.extra.MARKDOWN_SOURCES "$sources" \
-  --esa io.github.yosk.mdlite.extra.MARKDOWN_TEXTS_BASE64 "$texts" \
+  --es io.github.yosk.mdlite.extra.MARKDOWN_DOCUMENTS_BASE64 "$documents_base64" \
   > /dev/null

@@ -141,6 +141,12 @@ flowchart TD
   - L1: `canPinCurrentFile` はピン留め機能が利用可能、かつアクティブタブが未ピンのファイルであるときだけ true。
     `canUnpinCurrentFile` はピン留め機能が利用可能、かつアクティブタブがピン済みファイルであるときだけ true。
     なぜ: ピン留め済みかどうかで利用できる操作を一意にし、逆操作や無効操作をメニューに出さない。
+- **EncodedMarkdownDocuments**（`file/EncodedMarkdownDocuments.java`）: Termuxから1件のIntentで渡される、
+  順序付きMarkdown文書レコードの集合。各レコードはBase64化済みの`title`、`source`、`text`を持つ。
+  - L1: `parse`はnullまたは空入力を空集合へ正規化し、3フィールドでない壊れたレコードを除外する。
+    結果は常に不変な集合で、妥当なレコードの入力順を維持する。
+    なぜ: `termux-am`が文字列配列extraを配送せず、複数回のActivity起動はバックグラウンド制限で後続を
+    失い得るため、単一文字列境界で検証済みのバッチへ畳む必要がある。
 
 ### L2: 語と語の間で守るルール
 

@@ -59,6 +59,9 @@ jobs:
       - name: Check local D8 selection
         run: sh scripts/test-local-d8-selection.sh
 
+      - name: Check Termux open-command compatibility
+        run: sh scripts/test-mdlite-open-termux-compatibility.sh
+
       - name: Check artifact storage policy
         run: sh scripts/check-artifact-storage-policy.sh
 

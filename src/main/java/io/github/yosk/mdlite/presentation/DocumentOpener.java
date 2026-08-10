@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.util.Base64;
 import io.github.yosk.mdlite.domain.SafeHtml;
 import io.github.yosk.mdlite.file.FileInfo;
+import io.github.yosk.mdlite.file.EncodedMarkdownDocuments;
 import io.github.yosk.mdlite.file.MarkdownLibraryLocation;
 import io.github.yosk.mdlite.file.MarkdownFileOpenResult;
 import io.github.yosk.mdlite.file.PersistentMarkdownTextStore;
@@ -136,6 +137,11 @@ final class DocumentOpener {
                     intent.getStringExtra(MainActivity.EXTRA_MARKDOWN_TEXT));
             return;
         }
+        if (MainActivity.ACTION_OPEN_TEXTS_BASE64.equals(action)) {
+            openEncodedMarkdownDocuments(
+                    intent.getStringExtra(MainActivity.EXTRA_MARKDOWN_DOCUMENTS_BASE64));
+            return;
+        }
         if (MainActivity.ACTION_OPEN_TEXTS.equals(action)) {
             openMarkdownTexts(
                     intent.getStringArrayExtra(MainActivity.EXTRA_MARKDOWN_TITLES),
@@ -253,6 +259,17 @@ final class DocumentOpener {
         int count = Math.min(titles.length, Math.min(sources.length, textsBase64.length));
         for (int i = 0; i < count; i++) {
             openMarkdownText(titles[i], sources[i], decodeBase64Text(textsBase64[i]));
+        }
+    }
+
+    private void openEncodedMarkdownDocuments(String payload) {
+        EncodedMarkdownDocuments documents = EncodedMarkdownDocuments.parse(payload);
+        for (int i = 0; i < documents.size(); i++) {
+            EncodedMarkdownDocuments.EncodedMarkdownDocument document = documents.get(i);
+            openMarkdownText(
+                    decodeBase64Text(document.encodedTitle()),
+                    decodeBase64Text(document.encodedSource()),
+                    decodeBase64Text(document.encodedText()));
         }
     }
 

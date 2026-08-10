@@ -89,12 +89,15 @@ public final class MainActivity
     static final int REQUEST_OPEN_FOLDER = 1003;
     static final int REQUEST_EXPORT_HTML = 1004;
     static final String ACTION_OPEN_TEXT = "io.github.yosk.mdlite.action.OPEN_TEXT";
+    static final String ACTION_OPEN_TEXTS_BASE64 = "io.github.yosk.mdlite.action.OPEN_TEXTS_BASE64";
     static final String ACTION_OPEN_TEXTS = "io.github.yosk.mdlite.action.OPEN_TEXTS";
     static final String EXTRA_MARKDOWN_TITLE = "io.github.yosk.mdlite.extra.MARKDOWN_TITLE";
     static final String EXTRA_MARKDOWN_TITLES = "io.github.yosk.mdlite.extra.MARKDOWN_TITLES";
     static final String EXTRA_MARKDOWN_SOURCE = "io.github.yosk.mdlite.extra.MARKDOWN_SOURCE";
     static final String EXTRA_MARKDOWN_SOURCES = "io.github.yosk.mdlite.extra.MARKDOWN_SOURCES";
     static final String EXTRA_MARKDOWN_TEXT = "io.github.yosk.mdlite.extra.MARKDOWN_TEXT";
+    static final String EXTRA_MARKDOWN_DOCUMENTS_BASE64 =
+            "io.github.yosk.mdlite.extra.MARKDOWN_DOCUMENTS_BASE64";
     static final String EXTRA_MARKDOWN_TEXTS_BASE64 = "io.github.yosk.mdlite.extra.MARKDOWN_TEXTS_BASE64";
     static final long MAX_FILE_SIZE_BYTES = 10L * 1024L * 1024L;
     static final String WELCOME_URI = "app://welcome";
