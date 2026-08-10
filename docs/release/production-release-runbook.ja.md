@@ -31,6 +31,12 @@ scripts/version-bump.sh patch
 scripts/version-bump.sh minor
 ```
 
+最初の安定版など、製品契約を更新するリリース:
+
+```sh
+scripts/version-bump.sh major
+```
+
 すでに審査済みの closed testing release を、追加アーティファクトなしで production
 へ昇格できる場合は、現在のバージョンを維持します。
 

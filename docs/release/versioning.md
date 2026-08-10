@@ -12,6 +12,7 @@ VERSION_CODE=13
 
 - `patch`: bug fixes, copy updates, small UX improvements
 - `minor`: user-visible feature additions
+- `major`: a release that declares a stable production contract
 
 `VERSION_CODE` is the Google Play version code. It must increase for every
 uploaded APK or AAB.
@@ -44,6 +45,12 @@ Bump a minor version, reset the patch number, and increment `VERSION_CODE`:
 
 ```sh
 scripts/version-bump.sh minor
+```
+
+Bump a major version, reset minor and patch, and increment `VERSION_CODE`:
+
+```sh
+scripts/version-bump.sh major
 ```
 
 Do not use `scripts/version-code-bump.sh` for normal Play submissions. It is

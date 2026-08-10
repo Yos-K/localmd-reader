@@ -11,6 +11,7 @@ VERSION_CODE=13
 
 - `patch`: バグ修正、文言修正、小さなUX改善
 - `minor`: ユーザーに見える機能追加
+- `major`: 製品版として安定した契約を示すリリース
 
 `VERSION_CODE` は Google Play 用のバージョンコードです。APK または AAB を
 アップロードするたびに必ず増やします。
@@ -44,6 +45,12 @@ minor バージョンを上げ、patch を0に戻し、`VERSION_CODE` を1増や
 
 ```sh
 scripts/version-bump.sh minor
+```
+
+major バージョンを上げ、minor と patch を0に戻し、`VERSION_CODE` を1増やす:
+
+```sh
+scripts/version-bump.sh major
 ```
 
 `scripts/version-code-bump.sh` は通常の Play 提出には使いません。署名や
