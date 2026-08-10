@@ -14,10 +14,10 @@ old final tree, current implementation, and tests by capability.
 | Vertical menu scrolling | Retained | `SwipeMenuScrollView` and `MenuPanelScrollabilityTest` remain |
 | Persistent Markdown library tree | Reimplemented | ADR-0017 and the current inline menu tree cover it |
 | Complete English/Japanese Pro copy | Reimplemented | ADR-0018 and `ProFeatureCatalogTest` cover it |
-| Long-press tab pinning | Missing, restoring | Added `TabPinningDecision` and interaction regression tests |
-| Pin mark on pinned tabs | Missing, restoring | Added theme-colored `ic_push_pin_18` |
-| Individual removal from pinned files | Missing, restoring | Added explicit open/unpin action state and commands |
-| Pin mutation UI synchronization | Missing, restoring | Routed all mutation paths through shared refresh behavior |
+| Long-press tab pinning | Restored, device-verified | Covered by `TabPinningDecision`, interaction regression tests, and the 2026-08-10 Pro device exploration |
+| Pin mark on pinned tabs | Restored, device-verified | Theme-colored `ic_push_pin_18` and immediate visual refresh were verified on device |
+| Individual removal from pinned files | Restored, device-verified | Explicit open/unpin state and removal of only the selected pin were verified on device |
+| Pin mutation UI synchronization | Restored, device-verified | Shared refresh behavior and immediate tab-marker removal were verified on device |
 | Unique gesture action assignments | Restored | Assigning an active action now moves it to the selected gesture |
 | Assigned gesture shown in action choices | Restored | Localized action labels identify the current gesture owner |
 | Replace a temporary tab after Save As | Restored | Typed placement replaces the source draft and reuses an open destination |
