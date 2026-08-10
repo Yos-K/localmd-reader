@@ -4,6 +4,7 @@ set -eu
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 
 sh "$ROOT/scripts/version-check.sh"
+sh "$ROOT/scripts/test-release-notes-version-guard.sh"
 sh "$ROOT/scripts/test-no-os-metadata.sh"
 sh "$ROOT/scripts/test-smoke-render-contract.sh"
 sh "$ROOT/scripts/test-interaction-storming-guard.sh"

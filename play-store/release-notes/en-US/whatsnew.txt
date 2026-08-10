@@ -1,1 +1,1 @@
-Enabled the Google Play purchase flow for optional Pro convenience features. The complete Free reader remains available without ads, tracking, login, or network permission.
+Fixed opening multiple Markdown files from Termux. Files now open as separate tabs in the order specified.

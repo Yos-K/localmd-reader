@@ -116,6 +116,7 @@ AndroidX Core 1.15.0のdex変換中に内部エラーを起こすためである
 | やりたいこと | スクリプト | 説明 |
 |------|------|------|
 | リリース前検証（1コマンド） | `release-preflight.sh` | version整合 / versionName再利用禁止 / release notes / hard constraints / secrets / notices / package ID / Play free限定ガード を集約しpass/fail要約。ソースレベルのみ |
+| Play更新文の版ずれ防止 | `check-release-notes.sh` | `play-store/release-notes/VERSION` が `VERSION_NAME` と一致し、日英の `whatsnew.txt` と版別リリースノートが存在して文字数制限内であることを検証 |
 | Play upload 前の環境変数検証 | `play-upload-preflight.sh` | アップロード必須の WIF variables ＋署名 secrets が env にあるか検証（値は出力しない）。不足名を挙げ即fail。Play Release が upload 時に実行 |
 | リリースnotes存在・最新確認 | `check-release-notes.sh` | 現バージョンの notes 存在と stale 検知 |
 | APKレベルの基本検証 | `check-release-basics.sh` | ビルド済みAPKの permission 等を検証 |

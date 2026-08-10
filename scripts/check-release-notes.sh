@@ -3,16 +3,18 @@
 #   - play-store locale-specific release notes (whatsnew.txt) are missing
 #   - any whatsnew.txt exceeds Play Store's 500-character limit
 #   - docs/release/ Markdown release notes are missing
+#   - the Play notes version marker does not match VERSION_NAME
 #
 # Uses sh+awk only — no python3 dependency (Termux compatible).
 # Checks:
 #   1. play-store/release-notes/en-US/whatsnew.txt exists and is ≤500 chars.
 #   2. play-store/release-notes/ja-JP/whatsnew.txt exists and is ≤500 chars.
-#   3. docs/release/release-notes-v<VERSION_NAME>.md exists (English).
-#   4. docs/release/release-notes-v<VERSION_NAME>.ja.md exists (Japanese).
+#   3. play-store/release-notes/VERSION matches VERSION_NAME.
+#   4. docs/release/release-notes-v<VERSION_NAME>.md exists (English).
+#   5. docs/release/release-notes-v<VERSION_NAME>.ja.md exists (Japanese).
 set -eu
 
-ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+ROOT="${ROOT:-$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)}"
 . "$ROOT/scripts/version-env.sh"
 
 CHAR_LIMIT=500
@@ -34,12 +36,21 @@ for locale in en-US ja-JP; do
   fi
 done
 
-# 3 & 4: docs/release/ Markdown release notes presence (English and Japanese)
+marker="$ROOT/play-store/release-notes/VERSION"
+if [ ! -f "$marker" ]; then
+  fail "missing $marker"
+fi
+notes_version=$(sed -n '1p' "$marker")
+if [ "$notes_version" != "$VERSION_NAME" ]; then
+  fail "Play notes are for v$notes_version, expected v$VERSION_NAME"
+fi
+
+# 4 & 5: docs/release/ Markdown release notes presence (English and Japanese)
 for f in \
   "docs/release/release-notes-v$VERSION_NAME.md" \
   "docs/release/release-notes-v$VERSION_NAME.ja.md"; do
   if [ ! -f "$ROOT/$f" ]; then
-    fail "missing $f (see docs/release/release-notes-v0.1.0.md for the format)"
+    fail "missing $f (see the latest docs/release/release-notes-v*.md for the format)"
   fi
 done
 

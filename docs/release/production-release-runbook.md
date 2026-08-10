@@ -82,12 +82,10 @@ Use one of these paths:
 
 Before submitting, confirm:
 
-- Release notes match `docs/release/release-notes-v0.1.0.md`.
+- Release notes match `docs/release/release-notes-v<VERSION_NAME>.md` and its Japanese counterpart.
 - **`play-store/release-notes/<locale>/whatsnew.txt` content is updated for this version (manual check required).**
-  `check-release-notes.sh` verifies file presence and the 500-character limit only; it does NOT check
-  whether the content refers to the current version. Without this check, stale notes from a previous
-  release can ship silently. (Risk accepted: the version-mention check was removed when the file-based
-  notes approach was adopted in PR #135.)
+  `check-release-notes.sh` verifies file presence, the 500-character limit, and that
+  `play-store/release-notes/VERSION` matches `VERSION_NAME`. Review the wording manually as well.
 - Store listing text, icon, feature graphic, and screenshots are current.
 - Data safety and privacy policy are complete.
 - Countries/regions are set intentionally.
@@ -113,7 +111,7 @@ git push origin main --tags
 ```
 
 If GitHub Releases are used, create a release using
-`docs/release/release-notes-v0.1.0.md` as the source text. Do not upload signing keys,
+`docs/release/release-notes-v<VERSION_NAME>.md` as the source text. Do not upload signing keys,
 service account JSON, APKs, AABs, or private tester data to the repository.
 
 ## 6. Post-Release Checks
