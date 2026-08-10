@@ -6,9 +6,9 @@ ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 
 PART="${1:-}"
 case "$PART" in
-  patch|minor) ;;
+  patch|minor|major) ;;
   *)
-    echo "Usage: scripts/version-bump.sh patch|minor" >&2
+    echo "Usage: scripts/version-bump.sh patch|minor|major" >&2
     exit 2
     ;;
 esac
@@ -19,6 +19,11 @@ minor=${rest%%.*}
 patch=${rest#*.}
 
 case "$PART" in
+  major)
+    major=$((major + 1))
+    minor=0
+    patch=0
+    ;;
   patch)
     patch=$((patch + 1))
     ;;

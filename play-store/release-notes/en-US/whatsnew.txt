@@ -1,1 +1,1 @@
-Fixed opening multiple Markdown files from Termux. Files now open as separate tabs in the order specified.
+First stable release. Read local Markdown offline with tabs, search, code highlighting, tables, Mermaid-compatible diagrams, and optional one-time Pro convenience features. No ads, tracking, login, analytics, or network permission.

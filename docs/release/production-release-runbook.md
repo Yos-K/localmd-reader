@@ -31,6 +31,12 @@ For a feature-level update:
 scripts/version-bump.sh minor
 ```
 
+For a stable-production or product-contract release:
+
+```sh
+scripts/version-bump.sh major
+```
+
 If Play Console can promote the already-reviewed closed testing release without
 uploading a new artifact, keep the current version.
 
