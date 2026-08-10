@@ -38,3 +38,5 @@ ADRは、複数の妥当な実装案があり、コードやPR履歴だけから
 | [0020](0020-main-activity-composition-boundary.ja.md) | MainActivityをAndroidの構成境界に保つ | 採用 |
 | [0021](0021-advisory-physical-device-exploration.ja.md) | クラウド実機でのPro版助言的探索 | 採用 |
 | [0022](0022-non-modal-browsing-and-settings.ja.md) | 閲覧・選択・設定を非モーダルにする | 採用 |
+| [0024](0024-single-modal-play-purchase-flow.ja.md) | Google Play購入シートを唯一の購入モーダルにする | 採用 |
+| [0025](0025-termux-single-document-intent.ja.md) | Termux互換の単一Base64バッチIntent | 採用 |
