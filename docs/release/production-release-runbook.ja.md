@@ -81,11 +81,10 @@ sha256sum "$HOME/AndroidDev/releases/mdlite-reader/v$(. ./VERSION; echo "$VERSIO
 
 送信前に確認します。
 
-- リリースノートが `docs/release/release-notes-v0.1.0.ja.md` と合っている。
+- リリースノートが `docs/release/release-notes-v<VERSION_NAME>.md` と日本語版に合っている。
 - **`play-store/release-notes/<locale>/whatsnew.txt` の内容が今回のバージョンに合っている（手動確認必須）。**
-  `check-release-notes.sh` はファイルの存在確認と500字制限チェックのみ行い、本文の版数言及は確認しない。
-  バージョン更新時にリリースノートを更新し忘れても自動検知されず、旧版の内容がPlay Storeに配信される
-  リスクがある。（リスク受容: 旧版数grepによるstale検知はPR #135でのファイル化移行に伴い廃止）
+  `check-release-notes.sh` はファイルの存在、500字制限、`play-store/release-notes/VERSION` と
+  `VERSION_NAME` の一致を検証する。本文の内容も手動で確認する。
 - ストア掲載文、アイコン、フィーチャーグラフィック、スクリーンショットが最新。
 - Data safety と privacy policy が完了している。
 - 国/地域の設定が意図通り。
@@ -110,7 +109,7 @@ git tag v$(. ./VERSION; echo "$VERSION_NAME")
 git push origin main --tags
 ```
 
-GitHub Releases を使う場合は、`docs/release/release-notes-v0.1.0.md` を元に作成します。
+GitHub Releases を使う場合は、`docs/release/release-notes-v<VERSION_NAME>.md` を元に作成します。
 署名鍵、service account JSON、APK、AAB、非公開のテスター情報はリポジトリに
 アップロードしません。
 
