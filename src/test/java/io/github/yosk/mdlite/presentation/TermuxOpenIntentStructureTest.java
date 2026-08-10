@@ -35,7 +35,9 @@ public final class TermuxOpenIntentStructureTest {
     }
 
     private static String source(String name) throws IOException {
+        String projectRoot = System.getProperty("user.dir").replaceFirst("/app$", "");
         return new String(Files.readAllBytes(Paths.get(
-                "src/main/java/io/github/yosk/mdlite/presentation/" + name)), StandardCharsets.UTF_8);
+                projectRoot, "src/main/java/io/github/yosk/mdlite/presentation", name)),
+                StandardCharsets.UTF_8);
     }
 }
