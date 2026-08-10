@@ -43,7 +43,7 @@ EOF
 
 tmp="$ROOT/build/AndroidManifest.version-bump.xml"
 mkdir -p "$ROOT/build"
-"$ROOT/scripts/version-apply-manifest.sh" "$ROOT/src/main/AndroidManifest.xml" "$tmp"
+sh "$ROOT/scripts/version-apply-manifest.sh" "$ROOT/src/main/AndroidManifest.xml" "$tmp"
 mv "$tmp" "$ROOT/src/main/AndroidManifest.xml"
 
 echo "Bumped version to $VERSION_NAME ($VERSION_CODE)"
