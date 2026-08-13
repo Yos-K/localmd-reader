@@ -80,6 +80,21 @@ dump_focus_diagnostics() {
   } > "$ART_DIR/focus-diagnostics.txt" || true
 }
 
+dismiss_system_anr_dialog() {
+  # The API 35 Pixel launcher can report an ANR after LocalMD Reader is
+  # already foreground (run 31754067638). hide_error_dialogs does not always
+  # suppress it. Recover by selecting android:id/aerr_wait on the pinned
+  # Pixel 6 profile before inspecting the app UI.
+  adb shell rm -f /sdcard/system-dialog.xml
+  adb shell uiautomator dump /sdcard/system-dialog.xml >/dev/null 2>&1 || true
+  dialog=$(adb shell cat /sdcard/system-dialog.xml 2>/dev/null || true)
+  if printf '%s' "$dialog" | grep -F "isn't responding" >/dev/null \
+      && printf '%s' "$dialog" | grep -F 'android:id/aerr_wait' >/dev/null; then
+    adb shell input tap "${ANR_WAIT_X:-300}" "${ANR_WAIT_Y:-1360}"
+    sleep 2
+  fi
+}
+
 assert_menu_open() {
   # MainActivity flips the toolbar button's contentDescription to "Close menu"
   # while the menu is open, so the UI dump proves the tap actually worked
@@ -135,6 +150,7 @@ assert_document_open() {
       launch_app
       sleep 8
     fi
+    dismiss_system_anr_dialog
     adb shell rm -f /sdcard/ui-dump.xml
     adb shell uiautomator dump /sdcard/ui-dump.xml >/dev/null 2>&1 || true
     if adb shell cat /sdcard/ui-dump.xml 2>/dev/null | grep -q "theme-showcase.md"; then
