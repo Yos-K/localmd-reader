@@ -23,7 +23,7 @@ EX_TITLES="io.github.yosk.mdlite.extra.MARKDOWN_TITLES"
 EX_SOURCES="io.github.yosk.mdlite.extra.MARKDOWN_SOURCES"
 EX_TEXTS="io.github.yosk.mdlite.extra.MARKDOWN_TEXTS_BASE64"
 
-FIXTURE="$ROOT/scripts/smoke-fixtures/theme-showcase.md"
+FIXTURE="${THEME_FIXTURE:-$ROOT/scripts/smoke-fixtures/theme-showcase.md}"
 ART_DIR="${THEME_SHOT_DIR:-$ROOT/theme-screenshots}"
 THEMES="light dark amoled gradient aurora mist dusk"
 

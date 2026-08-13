@@ -137,8 +137,15 @@ AndroidX Core 1.15.0のdex変換中に内部エラーを起こすためである
 | トラック一覧 | `play-list-tracks.py` |
 | API セットアップ確認 | `play-check-api-setup.py` |
 | ストア掲載文の更新 | `play-update-listing.py` / `play-update-listing-text.py` |
+| Workload Identity で掲載文・画像を検証／反映 | 非公開 release リポジトリの `Play Store Listing` Actions workflow |
 | スクリーンショット撮影/加工 | `capture-play-store-screenshot.sh` / `prepare-play-store-screenshot.sh` |
 | アイコン/Feature Graphic 書き出し | `export-play-store-icon.sh` / `export-play-store-feature-graphic.sh` |
+
+`Play Store Listing` workflow は `play-console` environment の Workload Identity
+設定を使用します。最初に `validate_only=true` で Play edit を検証し、成果物を確認後に
+`validate_only=false` で同じコミットの掲載文、アイコン、Feature Graphic、端末画像を
+反映します。公開リポジトリではジョブを実行せず、秘密情報を持つ非公開 release
+リポジトリだけで実行します。
 
 ---
 
