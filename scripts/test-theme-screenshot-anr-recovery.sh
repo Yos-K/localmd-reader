@@ -13,5 +13,9 @@ document_assertion=$(sed -n '/^assert_document_open()/,/^}/p' "$CAPTURE")
 printf '%s\n' "$document_assertion" | grep -F 'dismiss_system_anr_dialog' >/dev/null
 grep -F 'THEME_FIXTURE' "$CAPTURE" >/dev/null
 grep -F 'inputs.fixture' "$WORKFLOW" >/dev/null
+if grep -F 'THEME_FIXTURE=' "$WORKFLOW" | grep -F '\' >/dev/null; then
+  echo "Emulator runner script must not split environment assignments across commands" >&2
+  exit 1
+fi
 
 echo "Theme screenshot ANR recovery test passed"
