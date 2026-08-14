@@ -11,7 +11,7 @@ DEFAULT_SERVICE_ACCOUNT = "~/AndroidDev/secrets/google-play-service-account.json
 
 def load_google_api():
     try:
-        from google.oauth2 import service_account
+        import google.auth
         from googleapiclient.discovery import build
         from googleapiclient.http import MediaFileUpload
     except ImportError as exc:
@@ -19,7 +19,15 @@ def load_google_api():
             "Missing Google API dependencies. Run:\n"
             "  python3 -m pip install --user -r requirements-play-api.txt"
         ) from exc
-    return service_account, build, MediaFileUpload
+    return google.auth, build, MediaFileUpload
+
+
+def load_credentials(google_auth, account_path):
+    credentials, _ = google_auth.load_credentials_from_file(
+        str(account_path),
+        scopes=[ANDROID_PUBLISHER_SCOPE],
+    )
+    return credentials
 
 
 def read_text(path):
@@ -147,11 +155,8 @@ def main():
         if not screenshot_path.is_file():
             raise SystemExit(f"Missing screenshot: {screenshot_path}")
 
-    service_account, build, media_file_upload = load_google_api()
-    credentials = service_account.Credentials.from_service_account_file(
-        str(account_path),
-        scopes=[ANDROID_PUBLISHER_SCOPE],
-    )
+    google_auth, build, media_file_upload = load_google_api()
+    credentials = load_credentials(google_auth, account_path)
     publisher = build(
         "androidpublisher",
         "v3",

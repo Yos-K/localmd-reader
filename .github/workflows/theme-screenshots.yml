@@ -8,6 +8,11 @@ name: Theme Screenshots
 
 on:
   workflow_dispatch:
+    inputs:
+      fixture:
+        description: Repository-relative Markdown fixture to capture
+        required: true
+        default: scripts/smoke-fixtures/theme-showcase.md
   workflow_call:
 
 permissions:
@@ -55,7 +60,7 @@ jobs:
             # devices where flipping a global setting would be intrusive.
             adb shell settings put global hide_error_dialogs 1
             adb install -r app/build/outputs/apk/proPreview/debug/app-proPreview-debug.apk
-            THEME_SHOT_DIR="$GITHUB_WORKSPACE/theme-screenshots" sh scripts/capture-theme-screenshots.sh io.github.yosk.mdlite.pro.debug
+            THEME_FIXTURE="$GITHUB_WORKSPACE/${{ inputs.fixture || 'scripts/smoke-fixtures/theme-showcase.md' }}" THEME_SHOT_DIR="$GITHUB_WORKSPACE/theme-screenshots" sh scripts/capture-theme-screenshots.sh io.github.yosk.mdlite.pro.debug
 
       - name: Upload screenshots
         if: always()

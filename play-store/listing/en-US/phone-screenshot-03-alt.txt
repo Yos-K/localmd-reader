@@ -1,1 +1,1 @@
-Dark theme Markdown view showing a table with horizontal scrolling.
+Aurora Pro theme rendering lists and syntax-highlighted code.

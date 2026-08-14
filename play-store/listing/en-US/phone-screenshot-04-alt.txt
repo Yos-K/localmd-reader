@@ -1,1 +1,1 @@
-Tabs and menu controls for theme, language, placement, and recent files.
+Navigation menu with clipboard creation, Markdown library, pinned files, search, export, and print actions.

@@ -1,22 +1,37 @@
-LocalMD Reader is a lightweight Android Markdown viewer for local files.
+LocalMD Reader is a lightweight Android app for reading Markdown stored on your device. There are no ads or login, and selected documents are rendered locally.
 
-Open .md and .markdown documents from the app or from Android file managers, then read them on your device with a simple viewer focused on speed and clarity.
+Open files quickly
+- Open .md and .markdown files from Android's file picker or another app
+- Open multiple files from Termux
+- Switch between documents with tabs and restore your reading session after restart
+- Return to recently opened files
 
-Designed for everyday reading:
-- Local Markdown rendering
-- Multiple tabs
-- Tab restoration after restart
-- Light and dark themes
-- Pinch gesture for font size
-- Recent files, limited to 5 entries
-- Tables, code blocks, checklists, blockquotes, headings, and links
-- Code highlighting and basic local Mermaid diagram rendering
+Readable Markdown rendering
+- View headings, lists, checklists, blockquotes, links, and tables
+- Read syntax-highlighted code blocks
+- Render Mermaid-compatible diagrams locally
+- Search within a document and resize text with a pinch gesture
+- Switch between light and dark themes and English and Japanese UI
 
-Privacy-oriented by design:
-- No login
-- No sync
-- No analytics SDK
-- No network permission
-- Selected Markdown content stays on your device
+Create Markdown from the clipboard
+- Open copied text as a temporary document
+- Select multiple entries from clipboard history
+- Review the content, choose a file name, and save it as Markdown
 
-LocalMD Reader v0.1.0 focuses on viewing, not editing. Full CommonMark compatibility, advanced Mermaid controls, math, footnotes, remote image loading, relative image rendering, and cloud sync are not included in this version.
+Optional one-time Pro upgrade
+The core reading experience is free. Pro adds convenient tools for frequently used documents.
+- Markdown library with a folder tree
+- Pinned files
+- Additional themes
+- Customizable gesture shortcuts
+- Relative Markdown links and local images
+- HTML export and Android's standard print flow
+
+Privacy by design
+- No ads
+- No account or login
+- No tracking or analytics SDK
+- No app network permission
+- No cloud sync
+
+Use LocalMD Reader for local README files, AI-generated notes, technical documents, and checklists without sending their contents to an external service.
