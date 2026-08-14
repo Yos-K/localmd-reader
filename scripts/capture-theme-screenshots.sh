@@ -125,7 +125,7 @@ assert_menu_open() {
 
 launch_app() {
   adb shell am start -n "$ACTIVITY" -a "$ACTION" --activity-single-top \
-    --esa "$EX_TITLES" "theme-showcase.md" \
+    --esa "$EX_TITLES" "$fixture_title" \
     --esa "$EX_SOURCES" "$FIXTURE" \
     --esa "$EX_TEXTS" "$fixture_b64" >/dev/null
 }
@@ -153,7 +153,7 @@ assert_document_open() {
     dismiss_system_anr_dialog
     adb shell rm -f /sdcard/ui-dump.xml
     adb shell uiautomator dump /sdcard/ui-dump.xml >/dev/null 2>&1 || true
-    if adb shell cat /sdcard/ui-dump.xml 2>/dev/null | grep -q "theme-showcase.md"; then
+    if adb shell cat /sdcard/ui-dump.xml 2>/dev/null | grep -Fq "$fixture_title"; then
       return 0
     fi
     tries=$((tries + 1))
@@ -163,6 +163,7 @@ assert_document_open() {
   fail "fixture did not open for theme $1 (evidence: document-fail-ui-dump.xml / document-fail-screen.png)"
 }
 
+fixture_title=$(basename "$FIXTURE")
 fixture_b64="$(base64 < "$FIXTURE" | tr -d '\n')"
 
 for theme in $THEMES; do
